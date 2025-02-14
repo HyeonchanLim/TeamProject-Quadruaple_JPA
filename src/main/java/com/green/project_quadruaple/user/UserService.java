@@ -49,6 +49,7 @@ public class UserService {
     private final AuthenticationFacade authenticationFacade;
     private final JavaMailSender javaMailSender;
 
+
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
 
