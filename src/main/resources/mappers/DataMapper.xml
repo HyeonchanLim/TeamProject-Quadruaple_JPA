@@ -3,23 +3,12 @@
 
 <mapper namespace="com.green.project_quadruaple.datamanager.DataMapper">
 
-    <insert id="insStrfPic">
-        INSERT INTO strf_pic
-            (strf_id,pic_name)
-        VALUES
-        <foreach collection="picAndStrfIds" item="item" separator=",">
-            ( #{item.strfId}, #{item.picName} )
-        </foreach>
-    </insert>
     <select id="selectReviewStrfId">
         SELECT a.strf_id
         FROM stay_tour_restaur_fest a
         left JOIN review R
         ON R.strf_id=a.strf_id
-        LEFT JOIN review_pic RP
-        ON RP.review_id=R.review_id
         WHERE a.category =#{category}
-        and RP.review_id IS NULL
         <if test="startId != null and endId != null">
             AND a.strf_id BETWEEN #{startId} AND #{endId}
         </if>
@@ -27,6 +16,46 @@
             AND a.title LIKE '%${strfTitle}%'
         </if>
     </select>
+
+    <insert id="postReviewPicList">
+        INSERT INTO review_pic (review_id, title)
+        VALUES
+        <foreach collection="ReviewPics" item="pics" separator=",">
+            (#{pics.reviewId}, #{pics.pics})
+        </foreach>
+    </insert>
+
+    <insert id="postRating" useGeneratedKeys="true" keyProperty="item.reviewId">
+        INSERT INTO review (content, rating, strf_id, user_id)
+        VALUES (#{item.content}, #{item.rating}, #{item.strfId}, #{item.userId})
+    </insert>
+
+    <insert id="postReviewPic">
+        INSERT INTO review_pic (title , review_id)
+        VALUES
+        <foreach collection="pics" item="pics" open="(" close=")" separator="),(">
+            #{pics}, #{reviewId}
+        </foreach>
+    </insert>
+
+    <delete id="deleteReview">
+        DELETE FROM review
+        WHERE review_id = #{reviewId}
+        AND user_id = #{userId}
+    </delete>
+    <delete id="deleteReviewPic">
+        DELETE FROM review_pic
+        WHERE review_id = #{reviewId}
+    </delete>
+
+    <insert id="insStrfPic">
+        INSERT INTO strf_pic
+        (strf_id,pic_name)
+        VALUES
+        <foreach collection="picAndStrfIds" item="item" separator=",">
+            ( #{item.strfId}, #{item.picName} )
+        </foreach>
+    </insert>
     <select id="selectStrfId">
         SELECT a.strf_id
         FROM stay_tour_restaur_fest a
@@ -65,36 +94,16 @@
     </delete>
     <select id="getAllUsersProfilePics">
         SELECT user_id, profile_pic
-          FROM user
+        FROM user
     </select>
 
     <update id="updateProfilePicsToDefault">
         UPDATE user
-           SET profile_pic = #{defaultPic}
-         WHERE user_id IN
+        SET profile_pic = #{defaultPic}
+        WHERE user_id IN
         <foreach item="userId" collection="userIds" open="(" separator="," close=")">
             #{userId}
         </foreach>
     </update>
 
-    <insert id="postRating" useGeneratedKeys="true" keyProperty="req.reviewId">
-        INSERT INTO review (content, rating, strf_id, user_id)
-        VALUES (#{req.content}, #{req.rating}, #{req.strfId}, #{userId})
-    </insert>
-    <insert id="postReviewPic">
-        INSERT INTO review_pic (title , review_id)
-        VALUES
-        <foreach collection="pics" item="pics" open="(" close=")" separator="),(">
-            #{pics}, #{reviewId}
-        </foreach>
-    </insert>
-    <delete id="deleteReview">
-        DELETE FROM review
-        WHERE review_id = #{reviewId}
-        AND user_id = #{userId}
-    </delete>
-    <delete id="deleteReviewPic">
-        DELETE FROM review_pic
-        WHERE review_id = #{reviewId}
-    </delete>
 </mapper>

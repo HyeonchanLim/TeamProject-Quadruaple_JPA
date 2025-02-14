@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.datamanager;
 
+import com.green.project_quadruaple.datamanager.model.ReviewRandomReq;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
 import com.green.project_quadruaple.datamanager.model.StrfReviewGetReq;
 import com.green.project_quadruaple.datamanager.model.UserProfile;
@@ -9,10 +10,10 @@ import java.util.Map;
 
 @org.apache.ibatis.annotations.Mapper
 public interface DataMapper {
-
-    int insReviewAndPics();
-
-
+    //반복문 돌릴 리뷰 남기기
+    void postRating(ReviewRandomReq item);
+    //반복문 돌려 리뷰 사진 남기기
+    int postReviewPicList(List<Map<String,Object>> ReviewPics);
 
     List<Long> selectReviewStrfId(StrfReviewGetReq p);
     //strf_id 목록 찾기
