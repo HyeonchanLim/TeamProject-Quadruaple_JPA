@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.wishlist.WishListMapper">
+
+    <select id="isWishListExists" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM wishlist
+        WHERE user_id = #{userId} AND strf_id = #{strfId}
+    </select>
+
+    <insert id="insertWishList">
+        INSERT INTO wishlist (user_id, strf_id)
+        VALUES (#{userId}, #{strfId})
+    </insert>
+
+    <delete id="deleteWishList">
+        DELETE FROM wishlist
+        WHERE user_id = #{userId} AND strf_id = #{strfId}
+    </delete>
+
+    <!-- 위시리스트 조회 -->
+<!--    <select id="getWishList">-->
+<!--        SELECT-->
+<!--        a.title,-->
+<!--        d.title AS locationTitle,-->
+<!--        GROUP_CONCAT(DISTINCT f.pic_name) AS strfPic,-->
+<!--        AVG(e.rating) AS ratingAvg,-->
+<!--        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = a.strf_id), 0) AS wishCnt,-->
+<!--        COALESCE((SELECT COUNT(*) FROM review RV WHERE RV.strf_id = a.strf_id), 0) AS ratingCnt,-->
+<!--        a.strf_id,-->
+<!--        a.category-->
+<!--        FROM stay_tour_restaur_fest a-->
+<!--        LEFT JOIN location_detail c ON a.location_detail_id = c.location_detail_id-->
+<!--        LEFT JOIN location d ON c.location_id = d.location_id-->
+<!--        LEFT JOIN review e ON a.strf_id = e.strf_id-->
+<!--        LEFT JOIN strf_pic f ON f.strf_id = a.strf_id-->
+<!--        WHERE b.user_id = #{userId}-->
+<!--        GROUP BY a.strf_id, a.title, d.title, a.category-->
+<!--        LEFT JOIN wishlist b ON a.strf_id = b.strf_id-->
+<!--        ORDER BY b.created_at DESC-->
+<!--        LIMIT #{startIdx} , #{size}-->
+<!--    </select>-->
+
+    <select id="wishListGet">
+        SELECT a.strf_id AS strfId , a.user_id AS userId , d.title AS locationName ,
+        COALESCE((select AVG(RO.rating) FROM review RO WHERE RO.strf_id=b.strf_id),0) AS ratingAvg ,
+        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = b.strf_id), 0) AS wishCnt,
+        COALESCE((SELECT COUNT(*) FROM review RV WHERE RV.strf_id = b.strf_id), 0) AS ratingCnt,
+        if(EXISTS(SELECT 1 FROM wishlist WM WHERE WM.strf_id=b.strf_id AND WM.user_id=e.user_id),1,0) AS reviewed,
+        f.pic_name AS strfPic , b.category , b.title AS strfTitle
+        FROM wishlist a
+        JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        LEFT JOIN location_detail c ON b.location_detail_id = c.location_detail_id
+        LEFT JOIN location d ON c.location_id = d.location_id
+        LEFT JOIN review e ON a.strf_id = e.strf_id AND e.user_id =116
+        LEFT JOIN strf_pic f ON a.strf_id = f.strf_id
+        WHERE a.user_id = #{userId}
+        GROUP BY a.user_id , a.strf_id
+        ORDER BY a.created_at
+        LIMIT #{startIdx} , #{size}
+    </select>
+
+</mapper>

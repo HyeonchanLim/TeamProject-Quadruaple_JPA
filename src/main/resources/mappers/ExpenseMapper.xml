@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.expense.ExpenseMapper">
+    <select id="IsUserInTrip">
+        SELECT IF(EXISTS (
+        SELECT 1 FROM trip_user TU
+        WHERE TU.user_id = #{userId} AND TU.trip_id = #{tripId} AND TU.`disable`=0
+        ), 1, 0)
+    </select>
+
+    <insert id="insDe" useGeneratedKeys="true" keyProperty="deId">
+        INSERT INTO daily_expense
+        SET `for`=#{paidFor}
+    </insert>
+
+    <insert id="insPaid">
+        INSERT INTO paid_user (de_id, price, trip_user_id)
+        SELECT #{deId}, temp.price, tu.trip_user_id
+        FROM trip_user tu
+        JOIN
+        <foreach collection="userPaid" item="item" open="(" close=")" separator=" UNION ALL ">
+            SELECT #{item.price} AS price, #{item.userId} AS userId, #{tripId} AS tripId
+        </foreach> AS temp
+        ON tu.trip_id = temp.tripId AND tu.user_id = temp.userId
+    </insert>
+
+    <select id="selExpense">
+        SELECT U.user_id
+        FROM paid_user P
+        LEFT JOIN trip_user TU
+        ON TU.trip_user_id=P.trip_user_id
+        LEFT JOIN user U
+        ON U.user_id=TU.user_id
+        LEFT JOIN daily_expense D
+        ON D.de_id=P.de_id
+        where TU.trip_id = #{tripId}
+    </select>
+
+    <resultMap id="expenses" type="com.green.project_quadruaple.expense.model.res.ExpensesRes">
+        <id property="title" column="title" />
+        <result property="tripPeriod" column="tripPeriod" />
+        <result property="myTotalPrice" column="myTotalPrice" />
+        <result property="tripTotalPrice" column="tripTotalPrice" />
+        <collection property="expensedList" resultMap="expensedList" />
+    </resultMap>
+
+    <resultMap id="expensedList" type="com.green.project_quadruaple.expense.model.dto.ExpenseDto">
+        <id property="deId" column="deId" />
+        <result property="paidFor" column="paidFor" />
+        <result property="totalPrice" column="totalPrice" />
+        <result property="myPrice" column="myPrice" />
+        <collection property="paidUserList" resultMap="paidUserList" />
+    </resultMap>
+
+    <resultMap id="paidUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUser">
+        <id property="userId" column="userId" />
+        <result property="name" column="name" />
+        <result property="profilePic" column="profilePic" />
+    </resultMap>
+
+    <select id="getExpenses" resultMap="expenses">
+        WITH trip_summary AS (
+        SELECT
+        trip_id,
+        SUM(price) AS tripTotalPrice,
+        SUM(CASE WHEN user_id = #{userId} THEN price ELSE 0 END) AS myTotalPrice
+        FROM depay
+        WHERE trip_id = #{tripId}
+        GROUP BY trip_id
+        ),
+        expense_summary AS (
+        SELECT
+        de_id,
+        `for` AS paidFor,
+        SUM(price) AS totalPrice,
+        price AS myPrice
+        FROM depay
+        WHERE trip_id = #{tripId}
+        GROUP BY de_id, `for`
+        )
+        SELECT
+        TW.title,
+        CONCAT(DATE_FORMAT(TW.start_at, '%Y.%m.%d'), '~', DATE_FORMAT(TW.end_at, '%m.%d')) AS tripPeriod,
+        COALESCE(TS.tripTotalPrice,0) AS tripTotalPrice,
+        COALESCE(TS.myTotalPrice,0) AS myTotalPrice,
+        ES.paidFor,
+        ES.totalPrice,
+        ES.myPrice,
+        T.de_id AS deId,
+        T.user_id AS userId,
+        T.name,
+        T.profile_pic AS profilePic
+        FROM depay T
+        JOIN trip_summary TS ON TS.trip_id = T.trip_id
+        JOIN expense_summary ES ON ES.de_id = T.de_id
+        right JOIN trip TW ON TW.trip_id=T.trip_id
+        WHERE TW.trip_id =#{tripId}
+        ORDER BY T.de_id
+    </select>
+
+
+    <resultMap id="expenseOne" type="com.green.project_quadruaple.expense.model.res.ExpenseOneRes">
+        <id property="deId" column="deId" />
+        <result property="paidFor" column="paidFor" />
+        <result property="totalPrice" column="totalPrice" />
+        <collection property="payList" resultMap="payList" />
+    </resultMap>
+
+    <resultMap id="payList" type="com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto">
+        <id property="userId" column="userId" />
+        <result property="name" column="name" />
+        <result property="profilePic" column="profilePic" />
+        <result property="price" column="price" />
+    </resultMap>
+
+    <select id="selExpenseOne" resultMap="expenseOne">
+        SELECT
+        D.de_id AS deId,
+        COALESCE(SUM(P.price), 0) AS totalPrice,
+        D.`for` AS paidFor,
+        D.user_id AS userId,
+        D.name,
+        D.profile_pic AS profilePic,
+        D.price
+        FROM depay D
+        LEFT JOIN depay P ON D.de_id = P.de_id
+        WHERE D.de_id = #{deId}
+        GROUP BY D.user_id, D.`for`, D.name, D.profile_pic, D.price
+    </select>
+
+    <delete id="delExpenses">
+        DELETE FROM daily_expense WHERE de_id = #{deId}
+    </delete>
+
+    <select id="exceptedMember">
+        SELECT U.user_id, U.profile_pic, U.name
+        FROM user U
+        JOIN trip_user TU
+        ON U.user_id = TU.user_id
+        AND TU.trip_id=#{tripId}
+        LEFT JOIN paid_user P
+        ON TU.trip_user_id = P.trip_user_id
+        AND P.de_id = #{deId}
+        WHERE P.trip_user_id IS NULL
+    </select>
+
+    <delete id="delPaidUser">
+        DELETE FROM paid_user WHERE de_id = #{deId}
+    </delete>
+    
+    <select id="getTripUser">
+        SELECT U.user_id, U.profile_pic, U.name
+        <if test="deId !=null">
+        ,If(EXISTS(SELECT 1 FROM paid_user P WHERE P.de_id=#{deId} AND P.trip_user_id=TU.trip_user_id),1,0) AS isJoin
+        </if>
+        FROM user U
+        JOIN trip_user TU
+        ON U.user_id = TU.user_id
+        AND TU.trip_id=#{tripId}
+        WHERE TU.`disable`=0
+    </select>
+
+    <update id="udpFor">
+        UPDATE daily_expense
+        SET `for`=#{paidFor}
+        WHERE de_id=#{deId}
+    </update>
+</mapper>
