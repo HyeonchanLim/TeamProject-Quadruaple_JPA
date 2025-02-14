@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.memo.MemoMapper">
+
+    <!-- 메모 조회 -->
+    <select id="selectMemo">
+        SELECT
+            M.content, U.name
+        FROM memo M
+        JOIN trip_user TU
+        ON TU.trip_user_id=M.trip_user_id
+        JOIN user U
+        ON U.user_id=TU.user_id
+        WHERE M.memo_id = #{memoId}
+    </select>
+
+    <!-- 메모 추가 -->
+    <insert id="postScheMemo" useGeneratedKeys="true" keyProperty="scheMemoId">
+        INSERT INTO sche_memo
+        (trip_id, day, seq, category)
+        VALUES
+        (#{tripId}, #{day}, #{seq}, 'MEMO')
+    </insert>
+
+    <insert id="insMemo">
+        INSERT INTO memo
+        (memo_id, content, trip_user_id)
+        VALUES
+        (#{scheMemoId}, #{content}, #{tripUserId})
+    </insert>
+
+    <select id="selTripUserId">
+        SELECT
+            trip_user_id
+        FROM trip_user
+        WHERE trip_id = #{tripId}
+            AND user_id = #{userId}
+    </select>
+
+    <select id="selUserIdByMemoId">
+        SELECT
+        tu.user_id , tu.trip_user_id
+        FROM
+        memo m
+        JOIN
+        trip_user tu
+        ON
+        m.trip_user_id = tu.trip_user_id
+        WHERE memo_id = #{memoId};
+    </select>
+
+
+    <!-- 메모 수정 -->
+    <update id="patchMemo">
+        UPDATE memo
+        SET
+        content = #{content}
+        WHERE
+        memo_id = #{memoId} AND trip_user_id = #{tripUserId}
+    </update>
+
+    <!-- 메모 삭제 -->
+    <update id="deleteMemo">
+        delete from sche_memo
+        where
+        schedule_memo_id = #{memoId};
+    </update>
+
+    <delete id="deleteMemoTest" >
+        DELETE FROM memo
+        WHERE
+        memo_id = #{memoId};
+    </delete>
+
+    <!--<select id="findMemoOwnerId" parameterType="Long" resultType="Long">
+        SELECT trip_user_id
+        FROM memo
+        WHERE memo_id = #{memoId}
+        JOIN
+    </select>-->
+
+    <select id="findMemoOwnerId" parameterType="Long" resultType="Long">
+        SELECT user_id
+        FROM trip_user
+        WHERE trip_user_id = (
+        SELECT trip_user_id
+        FROM memo
+        WHERE memo_id = #{memoId}
+        )
+    </select>
+
+
+
+
+
+</mapper>

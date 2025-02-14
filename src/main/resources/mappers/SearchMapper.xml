@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.search.SearchMapper">
+
+    <!-- 여행 지역 검색 쿼리 -->
+    <select id="getTripLocation" resultType="com.green.project_quadruaple.search.model.LocationResponse">
+        SELECT
+        A.location_id AS locationId,
+        A.title AS locationTitle,
+        A.location_pic AS locationPic
+        FROM location A
+        LEFT JOIN location_detail B
+        ON A.location_id=B.location_id
+        WHERE A.title LIKE CONCAT('%', #{search_word}, '%')
+        OR B.detail_title LIKE CONCAT('%', #{search_word}, '%')
+    </select>
+
+    <resultMap id="LocationResponseMap" type="com.green.project_quadruaple.search.model.LocationResponse">
+        <result property="code" column="code" />
+        <result property="Title" column="title" />
+        <result property="locationPic" column="location_pic" />
+        <result property="locationId" column="location_id" />
+    </resultMap>
+
+    <select id="selStrfShortInfoBasic">
+        SELECT
+            s.strf_id
+            , s.category AS category
+            , s.title AS title
+            , s.lat AS lat
+            , s.lng AS lng
+            , s.address AS address
+            , s.`explain` AS `explain`
+            , sp.pic_name AS picTitle
+            , COALESCE(w.wishlist_count, 0) AS wishCnt
+            , COALESCE(r1.review_count, 0) AS ratingCnt
+            , COALESCE(r1.avgRating, 0) AS avgRating
+            , CASE
+            WHEN uw.user_id IS NOT NULL THEN 1
+            ELSE 0
+            END AS wishIn
+            , CASE
+            WHEN r2.user_id IS NOT NULL THEN 1
+            ELSE 0
+            END AS ratingIn
+            , s.start_at , s.end_at
+        FROM stay_tour_restaur_fest s
+        INNER JOIN location_detail ld
+            ON ld.location_detail_id = s.location_detail_id
+            AND ld.location_id IN
+            <foreach collection="locationIdList" item="id" open="(" separator="," close=")">
+                #{id.locationId}
+            </foreach>
+        LEFT JOIN (
+                SELECT
+                strf_id
+                , COUNT(*) AS wishlist_count
+                FROM wishlist
+                GROUP BY strf_id
+            ) w
+            ON s.strf_id = w.strf_id
+        LEFT JOIN strf_pic sp
+                ON sp.strf_id = s.strf_id
+                LEFT JOIN (
+                SELECT
+                    strf_id
+                    , COUNT(*) AS review_count
+                    , avg(rating) AS avgRating
+                FROM review
+                GROUP BY strf_id
+            ) r1
+            ON s.strf_id = r1.strf_id
+        LEFT JOIN (
+                SELECT strf_id, user_id
+                FROM wishlist
+                WHERE user_id = #{userId}
+            ) uw
+            ON s.strf_id = uw.strf_id
+        LEFT JOIN (
+                SELECT strf_id, user_id
+                FROM review
+                WHERE user_id = #{userId}
+            ) r2
+            ON s.strf_id = r2.strf_id
+        <where>
+            <if test="category != null">
+                s.category = #{category}
+            </if>
+            <if test="searchWord != null">
+                AND s.title LIKE '%${searchWord}%' OR s.address LIKE '%${searchWord}%'
+            </if>
+        </where>
+        GROUP BY s.strf_id
+        ORDER BY avgRating DESC, wishIn DESC
+        LIMIT #{startIdx}, #{size}
+    </select>
+
+    <select id="selLocationIdByTripId">
+        SELECT
+            l.location_id AS locationId
+            , l.title AS locationTitle
+        FROM trip t
+        INNER JOIN trip_location tl ON tl.trip_id = t.trip_id
+        INNER JOIN location l ON l.location_id = tl.location_id
+        WHERE t.trip_id = #{tripId}
+    </select>
+
+    <!-- 검색 테이블 구현 -->
+    <select id="searchGetList">
+        SELECT txt
+        FROM search_word
+        WHERE user_id = #{userId}
+        ORDER BY search_at DESC
+        LIMIT 5
+    </select>
+
+    <insert id="searchIns">
+        <if test="userId != null and userId > 0">
+            INSERT INTO search_word (txt, user_id) VALUES (#{search_word}, #{userId})
+            ON DUPLICATE KEY UPDATE search_at = NOW();
+        </if>
+    </insert>
+
+
+
+    <!-- 상품 검색 쿼리 -->
+
+
+    <select id="searchBasicRecent">
+        SELECT a.user_id AS userId , b.title AS strfName , a.inquired_at AS inquiredAt
+        , c.pic_name AS strfPic ,  b.category , e.title AS locationTitle , b.strf_id AS strfId
+        FROM recent a
+        LEFT JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        LEFT JOIN strf_pic c ON a.strf_id = c.strf_id
+        LEFT JOIN location_detail d ON b.location_detail_id = d.location_detail_id
+        LEFT JOIN location e ON d.location_id = e.location_id
+        WHERE a.user_id = #{userId} AND a.undo_recent = 0
+        GROUP BY a.user_id, b.title, a.inquired_at, b.category, e.title, b.strf_id
+        ORDER BY inquiredAt DESC
+        LIMIT 5
+    </select>
+    <select id="searchBasicPopular">
+        SELECT s.title AS strfName, COUNT(*) AS popularCount , s.strf_id AS strfId
+        FROM recent r
+        JOIN stay_tour_restaur_fest s ON r.strf_id = s.strf_id
+        WHERE r.inquired_at >=  DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+        GROUP BY s.title
+        ORDER BY popularCount DESC
+        LIMIT 10
+    </select>
+
+    <select id="searchAllList" resultMap="searchAllResultMap">
+        WITH ImageSelection AS (
+        SELECT
+        strf_id, MIN(pic_name) AS strfPic FROM strf_pic GROUP BY strf_id )
+
+        SELECT *
+        FROM (
+        SELECT
+        s.strf_id AS strfId, s.title AS strfTitle, s.created_at, l.title AS locationName,
+        a.title AS amenityTitle, COUNT(DISTINCT w.user_id) AS wishlistCount,
+        AVG(DISTINCT r.rating) AS averageRating, COUNT(DISTINCT r.review_id) AS reviewCount,
+        ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY s.created_at DESC) AS row_num,
+        i.strfPic, s.category, a.amenity_id AS amenityId,
+        MAX(CASE WHEN r.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview,
+        CASE
+        WHEN #{userId} != 0 AND EXISTS (
+        SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id
+        ) THEN 1
+        ELSE 0
+        END AS wishIn
+
+        FROM stay_tour_restaur_fest s
+        JOIN location_detail ld ON s.location_detail_id = ld.location_detail_id
+        JOIN location l ON ld.location_id = l.location_id
+        LEFT JOIN review r ON s.strf_id = r.strf_id
+        LEFT JOIN wishlist w ON s.strf_id = w.strf_id
+        LEFT JOIN amenipoint ap ON s.strf_id = ap.strf_id
+        LEFT JOIN amenity a ON ap.amenity_id = a.amenity_id
+        LEFT JOIN ImageSelection i ON s.strf_id = i.strf_id
+
+        WHERE
+        <if test="search_word != null">
+            (s.title LIKE CONCAT('%', #{search_word}, '%') OR
+            s.address LIKE CONCAT('%', #{search_word}, '%') OR
+            l.title LIKE CONCAT('%', #{search_word}, '%') OR
+            ld.detail_title LIKE CONCAT('%', #{search_word}, '%') OR
+            a.title LIKE CONCAT('%', #{search_word}, '%') OR
+            s.category LIKE CONCAT('%', #{search_word}, '%'))
+        </if>
+
+        GROUP BY
+        s.strf_id,
+        s.title,
+        s.created_at,
+        l.title,
+        s.category,
+        a.amenity_id,
+        a.title,
+        i.strfPic
+        ) AS categorized_results
+        WHERE row_num <![CDATA[ <= ]]> 3
+        ORDER BY category, created_at DESC
+
+    </select>
+    <resultMap id="searchAllResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
+        <id property="strfId" column="strfId" />
+        <result property="title" column="strfTitle" />
+        <result property="category" column="category" />
+        <result property="locationName" column="locationName" />
+        <result property="strfPic" column="strfPic" />
+        <result property="averageRating" column="averageRating" />
+        <result property="reviewCount" column="reviewCount" />
+        <result property="wishlistCount" column="wishlistCount" />
+        <result property="hasMyReview" column="hasMyReview" />
+        <result property="reviewWriterUserId" column="reviewWriterUserId" />
+        <result property="wishIn" column="wishIn" />
+    </resultMap>
+
+
+    <select id="searchCategory" resultMap="searchCategoryResultMap">
+        SELECT *
+        FROM (
+        SELECT
+        a.strf_id AS strfId,
+        a.title AS strfTitle,
+        a.category,
+        c.title AS locationName,
+        f.pic_name AS strfPic,
+        AVG(d.rating) AS ratingAvg,
+        COUNT(d.review_id) AS reviewCount,
+        COUNT(e.user_id) AS wishlistCount,
+        COUNT(d.rating) AS ratingCnt ,
+        COALESCE(a.created_at, NOW()) AS createdAt,
+        <if test="userId != null">
+            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
+        </if>
+        <if test="userId == null">
+            0 AS wishIn
+        </if>
+        FROM stay_tour_restaur_fest a
+        JOIN location_detail b ON a.location_detail_id = b.location_detail_id
+        JOIN location c ON b.location_id = c.location_id
+        LEFT JOIN review d ON a.strf_id = d.strf_id
+        LEFT JOIN wishlist e ON a.strf_id = e.strf_id
+        LEFT JOIN strf_pic f ON f.strf_id = a.strf_id
+        WHERE a.category = #{category}
+        <if test="searchWord != null and searchWord != ''">
+            AND ( a.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.address LIKE CONCAT('%', #{searchWord}, '%') OR
+            c.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.category LIKE CONCAT('%', #{searchWord}, '%') )
+        </if>
+        GROUP BY a.strf_id
+        ) AS subquery
+        ORDER BY
+        createdAt DESC,
+        CASE WHEN #{orderType} = 'likeCnt' THEN wishlistCount END DESC,
+        CASE WHEN #{orderType} = 'ratingAvg' THEN ratingAvg END DESC,
+        CASE WHEN #{orderType} = 'ratingCnt' THEN reviewCount END DESC
+        LIMIT #{startIdx}, #{size}
+    </select>
+
+    <resultMap id="searchCategoryResultMap" type="com.green.project_quadruaple.search.model.SearchCategoryRes">
+        <id property="strfId" column="strfId"/>
+        <result property="strfTitle" column="strfTitle"/>
+        <result property="category" column="category"/>
+        <result property="locationName" column="locationName"/>
+        <result property="strfPic" column="strfPic"/>
+        <result property="ratingAvg" column="ratingAvg"/>
+        <result property="reviewCount" column="reviewCount"/>
+        <result property="wishlistCount" column="wishlistCount"/>
+        <result property="wishIn" column="wishIn"/>
+    </resultMap>
+
+    <select id="searchStay" resultMap="searchStayResultMap">
+        SELECT a.strf_id AS strfId, a.title AS strfTitle, a.category,
+        b.detail_title AS locationName, h.pic_name AS strfPic, AVG(f.rating) AS averageRating,
+        COUNT(f.review_id) AS reviewCnt,
+        (SELECT COUNT(*) FROM wishlist w WHERE w.strf_id = a.strf_id) AS wishlistCnt,
+        <if test="userId != 0">
+            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
+        </if>
+        <if test="userId == 0">
+            0 AS wishIn
+        </if>, j.amenity_id AS amenityId,
+        MAX(a.created_at) AS createdAt
+        FROM stay_tour_restaur_fest a
+        LEFT JOIN location_detail b ON a.location_detail_id = b.location_detail_id
+        JOIN location e ON e.location_id = b.location_id
+        LEFT JOIN review f ON a.strf_id = f.strf_id
+        LEFT JOIN wishlist g ON a.strf_id = g.strf_id AND g.user_id = #{userId}
+        LEFT JOIN strf_pic h ON a.strf_id = h.strf_id
+        LEFT JOIN amenipoint i ON i.strf_id = a.strf_id
+        LEFT JOIN amenity j ON i.amenity_id = j.amenity_id
+        WHERE a.category = 'STAY'
+        <if test="searchWord != null and searchWord != ''">
+            AND (
+            a.title LIKE CONCAT('%', #{searchWord}, '%')
+            OR a.address LIKE CONCAT('%', #{searchWord}, '%')
+            OR b.detail_title LIKE CONCAT('%', #{searchWord}, '%')
+            )
+        </if>
+        <if test="amenityId != null">
+            AND (
+            j.amenity_id IN
+            <foreach item="id" collection="amenityId" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            )
+        </if>
+        GROUP BY a.strf_id
+        ORDER BY MAX(a.created_at) DESC
+        LIMIT #{startIdx}, #{size}
+    </select>
+    <resultMap id="searchStayResultMap" type="com.green.project_quadruaple.search.model.filter.SearchStay">
+        <id property="strfId" column="strfId"/>
+        <result property="strfTitle" column="strfTitle"/>
+        <result property="category" column="category"/>
+        <result property="locationName" column="locationName"/>
+        <result property="strfPic" column="strfPic"/>
+        <result property="averageRating" column="averageRating"/>
+        <result property="reviewCnt" column="reviewCnt"/>
+        <result property="wishIn" column="wishIn"/>
+        <result property="createdAt" column="createdAt"/>
+    </resultMap>
+
+    <select id="searchAmenity" resultMap="searchAmenityResultMap">
+        SELECT
+         d.amenity_id AS amenityId,
+         d.title AS amenityTitle
+        FROM stay_tour_restaur_fest a
+        JOIN amenipoint c ON a.strf_id = c.strf_id
+        JOIN amenity d ON c.amenity_id = d.amenity_id
+        WHERE d.amenity_id IN
+        <foreach item="id" collection="amenityIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        GROUP BY d.amenity_id
+
+    </select>
+
+    <resultMap id="searchAmenityResultMap" type="com.green.project_quadruaple.search.model.filter.SearchAmenity">
+        <id property="amenityId" column="amenityId"/>
+        <result property="amenityTitle" column="amenityTitle"/>
+    </resultMap>
+
+</mapper>

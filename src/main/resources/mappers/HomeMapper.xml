@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.home.HomeMapper">
+    <select id="isUserHaveTrip">
+        SELECT IF(EXISTS (
+        SELECT 1 FROM trip_user TU
+        WHERE TU.user_id = #{userId}
+        ), 1, 0) AS exist
+    </select>
+
+    <select id="getFestival">
+        SELECT DISTINCT
+            A.strf_id AS strfId,
+            SP.pic_name AS strfPic,
+            A.title AS festTitle,
+            IF(NOW() BETWEEN A.start_at AND A.end_at, 1, 0) AS isOpen,
+            A.start_at AS startAt,
+            A.end_at AS endAt,
+            LD.detail_title AS locationTitle,
+        CASE
+        WHEN TU.user_id = #{userId} THEN 1
+        ELSE 0
+        END AS priority
+        FROM stay_tour_restaur_fest A
+        LEFT JOIN strf_pic SP ON SP.strf_id = A.strf_id
+        INNER JOIN location_detail LD ON A.location_detail_id = LD.location_detail_id
+        LEFT JOIN location L ON LD.location_id = L.location_id
+        LEFT JOIN trip_location TL ON TL.location_id = L.location_id
+        LEFT JOIN trip T ON T.trip_id = TL.trip_id
+        LEFT JOIN trip_user TU ON TU.trip_id = T.trip_id AND TU.user_id = #{userId}
+        WHERE A.category = 'FEST' AND NOW() <![CDATA[ < ]]> A.end_at
+        ORDER BY priority DESC,
+        ABS(TIMESTAMPDIFF(SECOND, A.start_at, NOW())) ASC
+        LIMIT 10
+    </select>
+
+    <select id="getFestivalWithOutUserId">
+        SELECT DISTINCT
+        A.strf_id AS strfId,
+        SP.pic_name AS strfPic,
+        A.title AS festTitle,
+        IF(NOW() BETWEEN A.start_at AND A.end_at, 1, 0) AS isOpen,
+        A.start_at AS startAt,
+        A.end_at AS endAt,
+        LD.detail_title AS locationTitle
+        FROM stay_tour_restaur_fest A
+        LEFT JOIN strf_pic SP ON SP.strf_id = A.strf_id
+        INNER JOIN location_detail LD ON A.location_detail_id = LD.location_detail_id
+        LEFT JOIN location L ON LD.location_id = L.location_id
+        LEFT JOIN trip_location TL ON TL.location_id = L.location_id
+        LEFT JOIN trip T ON T.trip_id = TL.trip_id
+        LEFT JOIN trip_user TU ON TU.trip_id = T.trip_id
+        WHERE A.category = 'FEST' AND NOW() <![CDATA[ < ]]> A.end_at
+                                              ORDER BY
+                                              ABS(TIMESTAMPDIFF(SECOND, A.start_at, NOW())) ASC
+        LIMIT 10
+    </select>
+
+    <select id="getPopularLocation">
+        SELECT DISTINCT
+        L.location_id AS locationId,
+        L.title AS locationTitle,
+        L.location_pic AS locationPic,
+        COUNT(TL.location_id) AS tripedCnt
+        FROM location L
+        LEFT JOIN trip_location TL
+        ON TL.location_id = L.location_id
+        GROUP BY L.location_id, L.location_pic
+        ORDER BY tripedCnt DESC
+        LIMIT 10
+    </select>
+
+    <resultMap id="RecentStrf" type="com.green.project_quadruaple.home.res.RecentStrf">
+        <id property="category" column="category" />
+        <collection property="recent" resultMap="recent" />
+    </resultMap>
+
+    <resultMap id="recent" type="com.green.project_quadruaple.home.res.RecentDto">
+        <id property="strfId" column="strfId" />
+        <result property="strfTitle" column="strfTitle" />
+        <result property="strfPic" column="strfPic" />
+        <result property="locationName" column="locationName" />
+        <result property="wishIn" column="wishIn" />
+        <result property="averageRating" column="averageRating" />
+        <result property="wishCnt" column="wishCnt" />
+    </resultMap>
+
+    <select id="getRecent" resultMap="RecentStrf">
+        WITH CategoryData AS (
+        SELECT
+        A.category,
+        A.strf_id AS strfId,
+        A.title AS strfTitle,
+        SP.pic_name AS strfPic,
+        LD.detail_title AS locationName,
+        IF(EXISTS (SELECT 1 FROM wishlist W WHERE W.strf_id = A.strf_id AND W.user_id = #{userId}), 1, 0) AS wishIn,
+        COALESCE((SELECT AVG(RV.rating) FROM review RV WHERE RV.strf_id = A.strf_id), 0) AS averageRating,
+        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = A.strf_id), 0) AS wishCnt,
+        inquired_at
+        FROM
+        stay_tour_restaur_fest A
+        LEFT JOIN
+        location_detail LD ON LD.location_detail_id = A.location_detail_id
+        LEFT JOIN
+        recent R ON R.strf_id = A.strf_id
+        LEFT JOIN
+        strf_pic SP ON SP.strf_id = A.strf_id
+        WHERE
+        R.user_id = #{userId} AND
+        A.category IN ('STAY', 'RESTAUR', 'TOUR')
+        AND R.undo_recent = 0
+        )
+        SELECT *
+        FROM (
+        SELECT *
+        FROM CategoryData CD
+        WHERE category = 'STAY'
+        ORDER BY inquired_at DESC
+        LIMIT 6
+        ) AS StayData
+        UNION ALL
+        SELECT *
+        FROM (
+        SELECT *
+        FROM CategoryData
+        WHERE category = 'RESTAUR'
+        ORDER BY inquired_at DESC
+        LIMIT 6
+        ) AS RestaurData
+        UNION ALL
+        SELECT *
+        FROM (
+        SELECT *
+        FROM CategoryData
+        WHERE category = 'TOUR'
+        ORDER BY inquired_at DESC
+        LIMIT 6
+        ) AS TourData
+    </select>
+
+    <select id="getRecommendWithOutUserId">
+        SELECT DISTINCT
+        A.strf_id AS strfId,
+        A.title AS strfTitle,
+        CONCAT(L.title, ' ', LD.detail_title) AS locationTitle,
+        A.category,
+        SP.pic_name AS strfPic,
+        A.`explain`,
+        COUNT(W.strf_id) AS wishCnt,
+        COALESCE((SELECT AVG(RV.rating) FROM review RV WHERE RV.strf_id = A.strf_id), 0) AS averageRating,
+        COALESCE((SELECT COUNT(R.strf_id) FROM recent R WHERE R.strf_id = A.strf_id), 0) AS recentViews
+        FROM stay_tour_restaur_fest A
+        LEFT JOIN location_detail LD ON LD.location_detail_id = A.location_detail_id
+        LEFT JOIN location L ON L.location_id = LD.location_id
+        LEFT JOIN strf_pic SP ON SP.strf_id = A.strf_id
+        LEFT JOIN wishlist W ON W.strf_id=A.strf_id
+        WHERE A.category !='FEST'
+        GROUP BY A.strf_id, A.title
+        ORDER BY wishCnt DESC, averageRating DESC , recentViews DESC
+        LIMIT 10
+    </select>
+
+    <select id="getRecommend">
+        SELECT DISTINCT
+        A.strf_id AS strfId,
+        A.title AS strfTitle,
+        CONCAT(L.title, ' ', LD.detail_title) AS locationTitle,
+        A.category,
+        SP.pic_name AS strfPic,
+        A.`explain`,
+        COALESCE((SELECT AVG(RV.rating) FROM review RV WHERE RV.strf_id = A.strf_id), 0) AS averageRating,
+        COALESCE((SELECT COUNT(R.strf_id) FROM recent R WHERE R.strf_id = A.strf_id), 0) AS recentViews,
+        COUNT(W.strf_id) AS wishCnt
+        FROM stay_tour_restaur_fest A
+        LEFT JOIN location_detail LD ON LD.location_detail_id = A.location_detail_id
+        LEFT JOIN location L ON L.location_id = LD.location_id
+        LEFT JOIN strf_pic SP ON SP.strf_id = A.strf_id
+        LEFT JOIN wishlist W ON W.strf_id=A.strf_id
+        WHERE
+        L.location_id IN (
+        SELECT TL.location_id
+        FROM trip_location TL
+        JOIN trip T ON T.trip_id = TL.trip_id
+        JOIN trip_user TU ON TU.trip_id = T.trip_id
+        WHERE
+        TU.user_id = #{userId}
+        AND NOW() <![CDATA[ < ]]> T.end_at
+        )
+        AND NOT EXISTS (
+        SELECT 1
+        FROM `schedule` C
+        JOIN sche_memo D ON D.schedule_memo_id = C.schedule_id
+        JOIN trip_user E ON E.trip_id = D.trip_id
+        WHERE
+        C.strf_id = A.strf_id
+        AND E.user_id = #{userId}
+        )
+        AND NOT EXISTS (
+        SELECT 1
+        FROM wishlist W
+        WHERE W.strf_id = A.strf_id
+        AND W.user_id = #{userId}
+        )
+        AND A.category !='FEST'
+        GROUP BY A.strf_id, A.title
+        ORDER BY wishCnt DESC, averageRating DESC , recentViews DESC
+        LIMIT 10
+    </select>
+
+
+    <resultMap id="userInfo" type="com.green.project_quadruaple.home.res.MyPageRes">
+        <id property="name" column="name" />
+        <result property="profilePic" column="profilePic" />
+        <result property="couponCnt" column="couponCnt" />
+        <collection property="tripList" resultMap="tripList" />
+    </resultMap>
+
+    <resultMap id="tripList" type="com.green.project_quadruaple.home.res.UserTripDto">
+        <id property="tripId" column="tripId" />
+        <result property="locationPic" column="locationPic" />
+        <result property="title" column="title" />
+        <result property="dDay" column="dDay" />
+    </resultMap>
+
+    <select id="pushHamburger" resultMap="userInfo">
+        SELECT
+        T1.name,
+        T1.profile_pic AS profilePic,
+        T1.couponCnt,
+        T2.tripId,
+        T2.locationPic,
+        T2.title ,
+        T2.dDay
+        FROM
+        (
+        SELECT
+        U.user_id,
+        U.name,
+        U.profile_pic,
+        COUNT(C.coupon_id) AS couponCnt
+        FROM
+        `user` U
+        LEFT JOIN
+        receive_coupon RC ON RC.user_id = U.user_id
+        LEFT JOIN
+        coupon C ON C.coupon_id = RC.coupon_id
+        LEFT JOIN
+        used_coupon UC ON UC.receive_id = RC.receive_id
+        WHERE
+        U.user_id = #{userId}
+        AND UC.receive_id IS NULL
+        AND NOW() <![CDATA[ < ]]> C.expired_at
+        ) T1
+        LEFT JOIN
+        (
+        SELECT
+        TU.trip_id as tripId,
+        TU.user_id,
+        T.title,
+        L.location_pic AS locationPic,
+        CASE
+        WHEN T.start_at <![CDATA[ < ]]> NOW() THEN -1
+        ELSE DATEDIFF(DATE(T.start_at), NOW())
+        END AS dDay
+        FROM
+        trip_user TU
+        JOIN
+        trip T ON T.trip_id = TU.trip_id
+        JOIN
+        trip_location TL ON TL.trip_id = T.trip_id
+        JOIN
+        location L ON L.location_id = TL.location_id
+        WHERE
+        TU.user_id = #{userId}
+        AND T.end_at > NOW()
+        ORDER BY dDay
+        ) T2
+        ON T1.user_id = T2.user_id
+    </select>
+</mapper>

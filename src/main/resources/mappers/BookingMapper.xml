@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.booking.BookingMapper">
+    <select id="getBooking">
+
+    </select>
+
+    <select id="postBookingInfo">
+        SELECT c.title AS strfName , d.pic_name AS picName, b.price
+        FROM booking a
+        JOIN menu b
+            ON a.menu_id = b.menu_id
+        JOIN stay_tour_ restaur_fest c
+            ON b.strf_id = c.strf_id
+        JOIN strf_pic d
+            ON b.strf_id = d.strf_id
+        WHERE booking_id = #{bookingId}
+    </select>
+
+    <insert id="patchBooking">
+        INSERT INTO booking a
+        SET a.strf_id = #{strfId}
+        , a.check_in = #{checkIn}
+        , a.check_out = #{checkOut}
+        , a.final_payment = #{finalPayment}
+        , a.message = #{message}
+        , b.title = #{strfName}
+        JOIN stay_tour_restaur_fest b
+        ON a.strf_id = b.strf_id
+        WHERE a.booking_id = #{bookingId}
+    </insert>
+
+
+    <!-- 예약 등록 -->
+    <select id="selExistUserCoupon">
+
+        SELECT
+            rc.receive_id
+            , c.discountper AS discountRate
+            , uc.receive_id AS usedCouponId
+        FROM receive_coupon rc
+        JOIN coupon c
+            ON rc.coupon_id = c.coupon_id
+        LEFT JOIN used_coupon uc
+            ON uc.receive_id = rc.receive_id
+        WHERE rc.user_id = #{userId}
+            AND c.coupon_id = #{couponId}
+    </select>
+
+    <select id="selStrfOpenAndClose">
+        SELECT
+            open_check, close_check
+        FROM
+        stay_tour_restaur_fest strf
+        WHERE strf.category = 'STAY'
+            AND strf.strf_id = #{strfId}
+    </select>
+
+    <select id="selMenu">
+        SELECT
+            menu_id AS menuId
+            , strf_id AS strfId
+            , m.price AS price
+        FROM menu m
+        WHERE menu_id IN (
+        <foreach collection="menuIdList" item="menu" separator=",">
+            #{menu.menuId}
+        </foreach>
+        )
+    </select>
+
+    <insert id="insBooking" useGeneratedKeys="true" keyProperty="bookingId">
+        INSERT INTO booking
+        (final_payment, check_in, check_out, user_id, menu_id, tid)
+        VALUES
+        <foreach collection="orderList" item="menuId" separator=",">
+            (#{actualPaid}, #{checkIn}, #{checkOut}, #{userId}, #{menuId.menuId}, #{tid})
+        </foreach>
+    </insert>
+
+    <insert id="insUsedCoupon">
+        INSERT INTO used_coupon
+        (receive_id, booking_id)
+        VALUES
+        (#{receiveId}, #{bookingId})
+    </insert>
+
+    <select id="selApproveBookingInfo">
+        SELECT
+            b.check_in AS checkIn
+            , b.check_out AS checkOut
+            , m.title AS title
+            , u.name AS userName
+        FROM booking b
+        JOIN menu m
+            ON b.menu_id = m.menu_id
+        JOIN USER u
+            ON u.user_id = b.user_id
+        WHERE b.booking_id = #{bookingId}
+    </select>
+
+
+</mapper>

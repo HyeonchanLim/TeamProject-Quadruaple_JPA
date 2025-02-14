@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.trip.TripMapper">
+
+    <select id="selTripManagerId">
+        SELECT
+            manager_id
+        FROM trip
+        WHERE trip_id = #{tripId}
+    </select>
+
+    <select id="selExistsTripUser">
+        SELECT EXISTS (
+        SELECT
+            1
+        FROM trip_user
+        WHERE trip_id = #{tripId}
+        AND user_id = #{userId}
+        )
+    </select>
+
+    <select id="selTripPeriod">
+        SELECT
+            start_at
+            , end_at
+        FROM trip
+        WHERE trip_id = #{tripId}
+    </select>
+
+    <select id="getTripList">
+        SELECT
+            t.trip_id AS tripId
+            , t.title AS title
+            , t.start_at AS startAt
+            , t.end_at AS endAt
+            , tl.location_id
+            , l.location_pic AS locationPic
+            , count(sm.schedule_memo_id) AS scheduleCnt
+        FROM trip t
+        JOIN trip_user tu
+            ON tu.trip_id = t.trip_id
+            AND tu.user_id = #{userId}
+        JOIN trip_location tl
+            ON tl.trip_id = t.trip_id
+        LEFT JOIN location l
+            ON l.location_id = tl.location_id
+        LEFT JOIN sche_memo sm
+            ON sm.trip_id = t.trip_id
+            AND sm.category = 'SCHE'
+        GROUP BY t.trip_id
+    </select>
+
+    <select id="selLocationList">
+        SELECT
+            location_id
+            , location_pic
+            , title
+        FROM location
+    </select>
+
+    <insert id="insTrip" useGeneratedKeys="true" keyProperty="tripId">
+        INSERT INTO trip
+        SET title = #{title}
+            , manager_id = #{managerId}
+            , start_at = #{startAt}
+            , end_at = #{endAt}
+    </insert>
+    
+    <select id="selScheduleCntAndMemoCnt" resultMap="tripInfoResultMap">
+        SELECT
+            (SELECT count(1) FROM sche_memo WHERE trip_id = #{tripId} AND category = 'SCHE') AS scheduleCnt
+            , (SELECT count(1) FROM sche_memo WHERE trip_id = #{tripId} AND category = 'MEMO') AS memoCnt
+            , t.trip_id AS tripId
+            , t.title AS title
+            , t.start_at AS startAt
+            , t.end_at AS endAt
+            , tl.location_id AS tripLocationList
+        FROM trip t
+        JOIN trip_location tl
+        ON tl.trip_id = t.trip_id
+        WHERE t.trip_id = #{tripId}
+    </select>
+
+    <select id="selTripUserList">
+        SELECT
+            user_id
+        FROM trip_user
+        WHERE trip_id = #{tripId}
+    </select>
+
+    <resultMap id="tripInfoResultMap" type="com.green.project_quadruaple.trip.model.dto.ScheCntAndMemoCntDto">
+        <id column="tripId" property="tripId"/>
+        <result column="title" property="title"/>
+        <result column="startAt" property="startAt"/>
+        <result column="endAt" property="endAt"/>
+        <collection property="tripLocationList" ofType="java.lang.Long">
+            <result column="tripLocationList"/>
+        </collection>
+    </resultMap>
+
+    <select id="selScheduleDetail" resultMap="scheduleForDay">
+        SELECT
+            sm.schedule_memo_id AS scheduleMemoId
+            , sm.category AS scheOrMemo
+            , sm.`day` AS day
+            , sm.seq AS seq
+            , sm.trip_id AS tripId
+            , s.distance AS distance
+            , s.duration AS duration
+            , s.strf_id AS strfId
+            , s.pathtype AS pathType
+            , strf.title AS strfTitle
+            , strf.category AS category
+            , strf.address AS address
+            , strf.lat AS lat
+            , strf.lng as lng
+            , m.content AS content
+            <choose>
+                <when test="userId != null">
+                    , if(r.user_id = #{userId}, 1, 0) AS reviewed
+                </when>
+                <otherwise>
+                    , 0 AS reviewed
+                </otherwise>
+            </choose>
+            , sp.pic_name AS picName
+        FROM sche_memo sm
+        LEFT JOIN schedule s
+            ON sm.schedule_memo_id = s.schedule_id
+        LEFT JOIN stay_tour_restaur_fest strf
+            ON strf.strf_id = s.strf_id
+        LEFT JOIN review r
+            ON strf.strf_id = r.strf_id
+            <if test="userId != null">
+                AND r.user_id = #{userId}
+            </if>
+        LEFT JOIN memo m
+            ON m.memo_id = sm.schedule_memo_id
+        LEFT JOIN strf_pic sp
+            ON sp.strf_id = strf.strf_id
+        WHERE sm.trip_id = #{tripId}
+        ORDER BY seq ASC
+    </select>
+
+    <resultMap id="scheduleForDay" type="com.green.project_quadruaple.trip.model.dto.TripDetailDto">
+        <id column="day" property="day"/>
+        <collection property="schedules" ofType="com.green.project_quadruaple.trip.model.dto.ScheduleResDto">
+            <id column="seq" property="seq"/>
+            <result column="scheOrMemo" property="scheOrMemo"/>
+            <result column="scheduleMemoId" property="scheduleMemoId"/>
+            <result column="distance" property="distance"/>
+            <result column="duration" property="duration"/>
+            <result column="strfId" property="strfId"/>
+            <result column="strfTitle" property="strfTitle"/>
+            <result column="tripId" property="tripId"/>
+            <result column="category" property="category"/>
+            <result column="address" property="address"/>
+            <result column="lat" property="lat"/>
+            <result column="lng" property="lng"/>
+            <result column="pathType" property="pathType"/>
+            <result column="title" property="title"/>
+            <result column="content" property="content"/>
+            <result column="reviewed" property="reviewed"/>
+            <result column="picName" property="picName"/>
+        </collection>
+    </resultMap>
+
+    <update id="updateTrip">
+        UPDATE trip
+        SET title = #{title}
+            , start_at = #{startAt}
+            , end_at = #{endAt}
+        WHERE trip_id = #{tripId}
+    </update>
+
+    <insert id="insTripUser">
+        INSERT INTO trip_user
+        (trip_id, user_id)
+        VALUES
+        <foreach collection="userIdList" item="userId" separator=",">
+            (#{tripId}, #{userId})
+        </foreach>
+    </insert>
+
+    <select id="selScheduleUserId">
+        SELECT
+            sm.schedule_memo_id
+        FROM sche_memo sm
+        JOIN memo m
+            ON m.memo_id = sm.schedule_memo_id
+            AND sm.trip_id = #{tripId}
+        JOIN trip_user tu
+            ON tu.trip_user_id = m.trip_user_id
+        WHERE tu.user_id IN (
+        <foreach collection="userIdList" item="userId" separator=",">
+            #{userId}
+        </foreach>
+        )
+    </select>
+
+    <delete id="delTripMemo">
+        DELETE FROM memo
+        WHERE memo_id IN (
+        <foreach collection="scheduleIdList" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </delete>
+
+    <delete id="delTripUser">
+        DELETE FROM trip_user
+        WHERE user_id IN (
+        <foreach collection="userIdList" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+        AND trip_id = #{tripId}
+    </delete>
+
+    <delete id="delTripScheMemo">
+        DELETE FROM sche_memo
+        WHERE schedule_memo_id IN (
+        <foreach collection="scheduleIdList" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </delete>
+
+    <delete id="delTripLocation">
+        DELETE FROM trip_location
+        WHERE location_id IN (
+        <foreach collection="locationList" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+        AND trip_id = #{tripId}
+    </delete>
+
+    <select id="selIncompleteTripList" resultMap="mergeTripId">
+        SELECT
+            t.trip_id AS tripId
+            , t.title AS title
+            , t.start_at AS startAt
+            , t.end_at AS endAt
+            , l.location_pic AS locationPic
+            , tl.location_id AS locationId
+        FROM trip t
+        JOIN trip_user tu
+            ON tu.trip_id = t.trip_id
+            AND tu.user_id = #{userId}
+        JOIN trip_location tl
+            ON tl.trip_id = t.trip_id
+        LEFT JOIN location l
+            ON l.location_id = tl.location_id
+    </select>
+
+    <resultMap id="mergeTripId" type="com.green.project_quadruaple.trip.model.dto.TripIdMergeDto">
+        <id column="tripId" property="tripId"/>
+        <collection property="incompleteTripList" ofType="com.green.project_quadruaple.trip.model.dto.IncompleteTripDto">
+            <id column="locationId" property="locationId"/>
+            <result column="title" property="title"/>
+            <result column="startAt" property="startAt"/>
+            <result column="endAt" property="endAt"/>
+            <result column="locationPic" property="locationPic"/>
+            <result column="tripId" property="tripId"/>
+        </collection>
+    </resultMap>
+
+    <select id="selStrfLocationId">
+        SELECT
+            ld.location_id
+        FROM stay_tour_restaur_fest strf
+        JOIN location_detail ld
+            ON ld.location_detail_id = strf.location_detail_id
+        WHERE strf_id = #{strfId}
+    </select>
+
+    <select id="existLocation">
+        SELECT
+            tl.location_id AS locationId
+        FROM trip_location tl
+        WHERE tl.trip_id = #{tripId}
+            AND tl.location_id IN (
+                SELECT l.location_id
+                FROM stay_tour_restaur_fest strf
+                JOIN location_detail ld
+                    ON ld.location_detail_id = strf.location_detail_id
+                JOIN location l
+                    ON l.location_id = ld.location_id
+                WHERE strf.strf_id = #{strfId}
+            )
+    </select>
+    
+    <insert id="insTripLocation">
+
+        INSERT IGNORE INTO trip_location
+        (trip_id, location_id)
+        VALUES
+        <foreach collection="idList" item="id" separator=",">
+            (#{tripId}, #{id})
+        </foreach>
+    </insert>
+
+    <!-- 일정 등록 -->
+    <insert id="insScheMemo" useGeneratedKeys="true" keyProperty="scheMemoId">
+        INSERT INTO sche_memo
+        (trip_id, `day`, seq, category)
+        VALUES
+        (#{tripId}, #{day}, #{seq}, 'SCHE')
+    </insert>
+
+    <insert id="insSchedule">
+        INSERT INTO schedule
+        SET schedule_id = #{scheMemoId}
+        <if test="distance != null">
+            , distance = #{distance}
+        </if>
+        <if test="time != null">
+            , duration = #{time}
+        </if>
+        <if test="pathTypeValue != null">
+            , pathtype = #{pathTypeValue}
+        </if>
+            , strf_id = #{strfId}
+    </insert>
+
+    <!-- 다음 일정의 ScheduleId, StrfId, lat, lng-->
+    <select id="selNextScheduleInfoByTripIdAndSeq">
+        SELECT
+            s.schedule_id
+            , sm.seq
+            , strf.strf_id
+            , strf.lat
+            , strf.lng
+        FROM schedule s
+        JOIN sche_memo sm
+            ON sm.schedule_memo_id = s.schedule_id
+        JOIN stay_tour_restaur_fest strf
+            ON s.strf_id = strf.strf_id
+        WHERE sm.trip_id = #{tripId}
+            AND sm.seq > #{seq}
+            AND sm.category = 'SCHE'
+        ORDER BY seq ASC
+        LIMIT 1
+    </select>
+
+    <!--    일정 삭제 -->
+    <select id="selScheduleByScheduleId">
+        SELECT
+            sm.trip_id
+        FROM schedule s
+        JOIN sche_memo sm
+            ON s.schedule_id = sm.schedule_memo_id
+        WHERE s.schedule_id = #{scheduleId}
+    </select>
+
+    <select id="selScheduleAndScheMemoByScheduleId"> <!-- 삭제할 일정 정보가져오기 -->
+        SELECT
+            s.schedule_id AS scheduleId
+            , s.distance AS distance
+            , s.duration AS duration
+            , sm.category AS scheOrMemo
+            , s.pathtype AS pathType
+            , s.strf_id AS strfId
+            , sm.trip_id AS tripId
+            , sm.seq AS seq
+            , EXISTS (
+                SELECT 1
+                FROM sche_memo sm
+                WHERE sm.trip_id = #{tripId}
+                    AND sm.category = 'SCHE'
+                    AND sm.seq &lt; (
+                        SELECT smemo.seq
+                        FROM sche_memo smemo
+                        WHERE smemo.schedule_memo_id = #{scheduleId}
+                        )
+                    ) AS isNotFirst
+            , (
+                SELECT
+                    smemo.schedule_memo_id
+                FROM sche_memo smemo
+                WHERE smemo.category = 'SCHE'
+                    AND smemo.trip_id = #{tripId}
+                    AND smemo.seq &gt; (
+                        SELECT seq
+                        FROM sche_memo
+                        WHERE schedule_memo_id = #{scheduleId}
+                    )
+                ORDER BY smemo.seq ASC
+                LIMIT 1
+                ) AS nextScheduleId
+            , (
+                SELECT
+                    s.strf_id
+                FROM sche_memo smemo
+                JOIN schedule s
+                    ON s.schedule_id = smemo.schedule_memo_id
+                WHERE smemo.category = 'SCHE'
+                    AND smemo.trip_id = #{tripId}
+                    AND smemo.seq &lt; (
+                        SELECT seq
+                        FROM sche_memo
+                        WHERE schedule_memo_id = #{scheduleId}
+                        )
+                ORDER BY smemo.seq DESC
+                LIMIT 1
+            ) AS prevScheduleStrfId
+            , (
+                SELECT
+                    s.strf_id
+                FROM sche_memo smemo
+                JOIN schedule s
+                ON s.schedule_id = smemo.schedule_memo_id
+                WHERE smemo.category = 'SCHE'
+                AND smemo.trip_id = #{tripId}
+                AND smemo.seq &gt; (
+                SELECT seq
+                FROM sche_memo
+                WHERE schedule_memo_id = #{scheduleId}
+                )
+                ORDER BY smemo.seq ASC
+                LIMIT 1
+            ) AS nextScheduleStrfId
+        FROM sche_memo sm
+        LEFT JOIN schedule s
+            ON s.schedule_id = sm.schedule_memo_id
+        WHERE sm.schedule_memo_id = #{scheduleId}
+    </select>
+
+    <update id="updateSeqScheMemo"> <!-- 다음 일정들의 seq 값 -1 -->
+        UPDATE sche_memo
+        SET seq = seq
+        <choose>
+            <when test="isDel">
+                -1
+            </when>
+            <otherwise>
+                +1
+            </otherwise>
+        </choose>
+        WHERE trip_id = #{tripId}
+        <choose>
+            <when test="isDel">
+                AND seq &gt; #{seq}
+            </when>
+            <otherwise>
+                AND seq &gt;= #{seq}
+            </otherwise>
+        </choose>
+
+    </update>
+
+    <update id="updateSchedule"> <!-- 다음 일정의 거리, 시간 수정 -->
+        <choose>
+            <when test="isNotFirst">
+                UPDATE schedule
+                SET distance = #{distance}
+                , duration = #{duration}
+                , pathtype = #{pathType}
+                WHERE schedule_id = #{nextScheduleId}
+            </when>
+            <otherwise>
+                UPDATE schedule
+                SET distance = NULL
+                , duration = NULL
+                , pathtype = NULL
+                WHERE schedule_id = #{nextScheduleId}
+            </otherwise>
+        </choose>
+    </update>
+
+    <delete id="deleteSchedule"> <!-- 일정 삭제 -->
+        DELETE FROM schedule
+        WHERE schedule_id = #{scheduleId}
+    </delete>
+
+    <delete id="deleteScheMemo"> <!-- 일정메모 삭제 -->
+        DELETE FROM sche_memo
+        WHERE schedule_memo_id = #{scheduleId}
+    </delete>
+
+    <!-- 구성원 삭제 -->
+
+    <update id="disableTripUser">
+
+    </update>
+
+    <select id="selStrfLatAndLng">
+        SELECT
+            strf_id,
+            lat,
+            lng
+        FROM stay_tour_restaur_fest
+        <where>
+            <if test="prevStrfId != null">
+                strf_id = #{prevStrfId}
+            </if>
+            <if test="nextStrfId != null">
+                <if test="prevStrfId != null">
+                    OR
+                </if>
+                strf_id = #{nextStrfId}
+            </if>
+        </where>
+    </select>
+
+    <!-- patchSeq -->
+    <update id="updateSeq">
+        UPDATE sche_memo
+        SET seq = #{destSeq}
+        WHERE schedule_memo_id = #{scheduleMemoId}
+    </update>
+
+    <update id="updateBetweenSeq">
+        <choose>
+            <when test="ahead">
+                UPDATE sche_memo
+                SET seq = seq + 1
+                WHERE trip_id = #{tripId}
+                    AND seq BETWEEN #{destSeq} AND #{originSeq}
+            </when>
+            <otherwise>
+                UPDATE sche_memo
+                SET seq = seq - 1
+                WHERE trip_id = #{tripId}
+                    AND seq BETWEEN #{originSeq} AND #{destSeq}
+            </otherwise>
+        </choose>
+    </update>
+
+    <update id="updateDay">
+        UPDATE sche_memo
+        SET day = #{destDay}
+        WHERE schedule_memo_id = #{scheduleMemoId}
+    </update>
+
+    <select id="selScheMemoIdByTripIdAndSeq">
+        SELECT
+            (SELECT
+                schedule_memo_id
+            FROM sche_memo
+            WHERE trip_id = #{tripId}
+                AND seq &lt; #{seq}
+                AND category = 'SCHE'
+            ORDER BY seq DESC
+            LIMIT 1) AS lowSeqId
+            , (SELECT
+                schedule_memo_id
+            FROM sche_memo
+            WHERE trip_id = 1
+                AND seq &gt; #{seq}
+                AND category = 'SCHE'
+            ORDER BY seq ASC
+            LIMIT 1) AS highSeqId
+        FROM sche_memo
+        LIMIT 1
+    </select>
+</mapper>

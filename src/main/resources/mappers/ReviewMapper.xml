@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.review.ReviewMapper">
+    <select id="getReviewWithPics" resultMap="reviewPicResultMap">
+        SELECT T1.*, T2.title AS pic
+        FROM (
+        SELECT a.review_id AS reviewId, a.strf_id AS strfId, a.content,
+        a.user_id AS writerUserId, a.rating, c.name AS writerUserName,
+        c.profile_pic AS writerUserPic, b.title AS strfTitle,
+        (SELECT COUNT(*) FROM review WHERE user_id = a.user_id) AS userWriteReviewCnt,
+        COALESCE(a.updated_at, a.created_at) AS reviewWriteDate
+        FROM review a
+        LEFT JOIN user c ON a.user_id = c.user_id
+        LEFT JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        WHERE a.strf_id = #{strfId}
+        ORDER BY a.review_id DESC
+        LIMIT #{startIdx}, #{size}
+        ) T1
+        LEFT JOIN review_pic T2 ON T1.reviewId = T2.review_id -- 리뷰 사진을 LEFT JOIN으로 가져옴
+    </select>
+
+    <resultMap id="reviewPicResultMap" type="com.green.project_quadruaple.review.model.ReviewSelRes">
+        <id property="reviewId" column="reviewId"/>
+        <result property="strfId" column="strfId"/>
+        <result property="content" column="content"/>
+        <result property="rating" column="rating"/>
+        <result property="writerUserName" column="writerUserName"/>
+        <result property="userWriteReviewCnt" column="userWriteReviewCnt"/>
+        <result property="writerUserId" column="writerUserId"/>
+        <result property="writerUserPic" column="writerUserPic"/>
+        <result property="reviewWriteDate" column="reviewWriteDate"/>
+        <result property="strfTitle" column="strfTitle"/>
+        <collection property="reviewPic" resultMap="reviewPic"/>
+    </resultMap>
+    <resultMap id="reviewPic" type="com.green.project_quadruaple.review.model.ReviewPic">
+        <result property="pic" column="pic"/>
+    </resultMap>
+
+    <select id="getReviewPics">
+        SELECT review_id AS reviewId , title
+        FROM review_pic
+        WHERE review_id IN
+        <foreach collection="reviewIds" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY review_id DESC
+    </select>
+
+    <insert id="postRating" useGeneratedKeys="true" keyProperty="req.reviewId">
+        INSERT INTO review (content, rating, strf_id, user_id)
+        VALUES (#{req.content}, #{req.rating}, #{req.strfId}, #{userId})
+    </insert>
+
+    <insert id="postReviewPic">
+        INSERT INTO review_pic (title , review_id)
+        VALUES
+        <foreach collection="pics" item="pics" open="(" close=")" separator="),(">
+            #{pics}, #{reviewId}
+        </foreach>
+    </insert>
+
+    <update id="patchReview">
+        UPDATE review
+        SET content = #{content},
+        rating = #{rating},
+        updated_at = NOW()
+        WHERE review_id = #{reviewId}
+        AND user_id = #{userId}
+    </update>
+    <insert id="patchReviewPic">
+        <foreach collection="pics" item="pic" open="(" close=")" separator="),(">
+            INSERT INTO review_pic (title , review_id) VALUES (#{pic}, #{reviewId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteReview">
+        DELETE FROM review
+        WHERE review_id = #{reviewId}
+        AND user_id = #{userId}
+    </delete>
+    <delete id="deleteReviewPic">
+        DELETE FROM review_pic
+        WHERE review_id = #{reviewId}
+    </delete>
+
+
+    <select id="getMyReviews" resultMap="myReviewResultMap">
+        SELECT T1.*, T2.title AS pic
+        FROM (
+        SELECT a.review_id AS reviewId, a.strf_id AS strfId, a.content,
+        a.user_id AS writerUserId,
+        a.rating, c.name AS writerUserName,
+        c.profile_pic AS writerUserPic, b.title AS strfTitle,
+        (SELECT COUNT(*) FROM review WHERE user_id = a.user_id) AS userWriteReviewCnt,
+        COALESCE(a.updated_at, a.created_at) AS reviewWriteDate
+        FROM review a
+        LEFT JOIN user c ON a.user_id = c.user_id
+        LEFT JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        WHERE a.user_id = #{userId}
+        ORDER BY a.review_id DESC , a.created_at DESC
+        LIMIT #{startIdx}, #{size}
+        ) T1
+        LEFT JOIN review_pic T2 ON T1.reviewId = T2.review_id
+    </select>
+    <resultMap id="myReviewResultMap" type="com.green.project_quadruaple.review.model.MyReviewSelRes">
+        <id property="reviewId" column="reviewId"/>
+        <result property="strfId" column="strfId"/>
+        <result property="content" column="content"/>
+        <result property="writerUserId" column="writerUserId"/>
+        <result property="rating" column="rating"/>
+        <result property="writerUserName" column="writerUserName"/>
+        <result property="strfTitle" column="strfTitle"/>
+        <result property="writerUserPic" column="writerUserPic"/>
+        <result property="userWriteReviewCnt" column="userWriteReviewCnt"/>
+        <result property="reviewWriteDate" column="reviewWriteDate"/>
+        <collection property="myReviewPic" resultMap="myReviewPic"/>
+    </resultMap>
+    <resultMap id="myReviewPic" type="com.green.project_quadruaple.review.model.ReviewPic">
+        <result property="pic" column="pic"/>
+    </resultMap>
+
+</mapper>

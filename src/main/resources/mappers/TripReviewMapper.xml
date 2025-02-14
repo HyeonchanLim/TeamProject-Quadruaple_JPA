@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.green.project_quadruaple.tripreview.TripReviewMapper">
+    <!-- 여행기 등록 -->
+    <insert id="insTripReview" useGeneratedKeys="true" keyProperty="tripReviewId">
+        INSERT INTO trip_review
+           SET trip_review_id = #{tripReviewId}
+             , trip_id = #{tripId}
+             , user_id = #{userId}
+             , title = #{title}
+             , content = #{content}
+    </insert>
+
+    <insert id="insTripReviewPic">
+        INSERT INTO trip_review_pic
+        (trip_review_pic, trip_review_id)
+        VALUES
+        <foreach collection="tripReviewPic" item="pic" separator=",">
+            (#{pic}, #{tripReviewId})
+        </foreach>
+    </insert>
+
+    <!-- 여행기 조회 -->
+    <select id="getMyTripReviewsCount">
+        SELECT COUNT(*)
+          FROM trip_review
+         WHERE user_id = #{userId}
+    </select>
+
+    <select id="getMyTripReviews" resultMap="tripReviewResultMap">
+        SELECT A.trip_id, A.user_id, A.title, A.content,
+        GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
+        (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count
+        ,(SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count
+        , (SELECT COUNT(scrap_id) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count
+        , A.trip_review_id, C.name, C.profile_pic
+          FROM trip_review A
+          LEFT JOIN trip_review_pic B
+            ON A.trip_review_id = B.trip_review_id
+          LEFT JOIN user C
+            ON A.user_id = C.user_id
+          LEFT JOIN recent_tr E
+            ON A.trip_review_id = E.trip_review_id
+         WHERE A.user_id = #{userId}
+         GROUP BY A.trip_review_id, A.trip_id, A.user_id, A.title, A.content, C.name, C.profile_pic
+         ORDER BY
+          CASE WHEN #{orderType} = 'latest' THEN A.created_at END DESC,
+          CASE WHEN #{orderType} = 'popular' THEN like_count END DESC,
+          A.trip_review_id DESC
+    </select>
+
+    <select id="getTotalTripReviewsCount">
+        SELECT COUNT(*)
+        FROM trip_review
+    </select>
+
+    <select id="getAllTripReviews" resultMap="tripReviewResultMap">
+        SELECT A.trip_id, A.user_id, A.title, A.content,
+        GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
+        (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count,
+        (SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count,
+        (SELECT COUNT(scrap_id) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count,
+        A.trip_review_id, C.name, C.profile_pic
+         FROM trip_review A
+         LEFT JOIN trip_review_pic B
+           ON A.trip_review_id = B.trip_review_id
+         LEFT JOIN user C
+           ON A.user_id = C.user_id
+        GROUP BY A.trip_review_id, A.trip_id, A.title, A.content, C.name, C.profile_pic
+        ORDER BY
+        CASE WHEN #{orderType} = 'latest' THEN A.created_at END DESC,
+        CASE WHEN #{orderType} = 'popular' THEN like_count END DESC,
+        A.trip_review_id DESC
+        LIMIT #{startIdx}, #{size}
+    </select>
+
+    <select id="getOtherTripReviewById" resultMap="tripReviewResultMap">
+        SELECT A.trip_id, A.user_id, A.title, A.content,
+        GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
+        (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count
+        ,(SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count
+        , (SELECT COUNT(scrap_id) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count
+        , A.trip_review_id, C.name, C.profile_pic
+         FROM trip_review A
+         LEFT JOIN trip_review_pic B
+           ON A.trip_review_id = B.trip_review_id
+         LEFT JOIN user C
+           ON A.user_id = C.user_id
+        WHERE A.trip_review_id = #{tripReviewId}
+        GROUP BY A.trip_review_id, A.trip_id, A.title, A.content, C.name, C.profile_pic
+    </select>
+
+    <resultMap id="tripReviewResultMap" type="com.green.project_quadruaple.tripreview.model.TripReviewGetDto">
+        <id property="tripId" column="trip_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="recentCount" column="recent_count"/>
+        <result property="scrapCount" column="scrap_count"/>
+        <result property="tripReviewId" column="trip_review_id"/>
+        <result property="name" column="name"/>
+        <result property="profilePic" column="profile_pic"/>
+        <result property="tripReviewPics" column="trip_review_pics" typeHandler="com.green.project_quadruaple.tripreview.model.StringArrayTypeHandler"/>
+    </resultMap>
+
+    <!-- 여행기 수정 -->
+    <update id="updTripReview">
+        UPDATE trip_review
+        <set>
+            <if test=" title != null and title != '' " >
+                title = #{title}
+            </if>
+            <if test=" content != null and content != '' ">
+                , content = #{content}
+            </if>
+        </set>
+        WHERE trip_review_id = #{tripReviewId}
+    </update>
+
+    <delete id="delTripReviewPic">
+        DELETE FROM trip_review_pic
+         WHERE trip_review_id = #{tripReviewId}
+    </delete>
+
+    <!-- 여행기 삭제 -->
+    <select id="selTripReviewByUserId">
+        SELECT *
+          FROM trip_review
+         WHERE trip_review_id = #{tripReviewId}
+    </select>
+
+    <delete id="delTripReviewRecentTr">
+        DELETE FROM recent_tr
+         WHERE trip_review_id = #{tripReviewId}
+    </delete>
+
+    <delete id="delTripReviewScrap">
+        DELETE FROM scrap
+         WHERE trip_review_id = #{tripReviewId}
+    </delete>
+
+    <delete id="delTripReviewLikeByTripReviewId">
+        DELETE FROM trip_like
+         WHERE trip_review_id = #{tripReviewId}
+    </delete>
+
+    <delete id="delTripReview">
+        DELETE FROM trip_review
+         WHERE trip_review_id = #{tripReviewId}
+    </delete>
+
+    <!-- 여행기 추천 -->
+    <insert id="insTripLike">
+        INSERT INTO trip_like
+           SET user_id = #{userId}
+             , trip_review_id = #{tripReviewId}
+    </insert>
+
+    <delete id="delTripLike">
+        DELETE FROM trip_like
+         WHERE user_id = #{userId}
+           AND trip_review_id = #{tripReviewId}
+    </delete>
+
+    <select id="tripLikeCount">
+        SELECT COUNT(user_id)
+          FROM trip_like
+         WHERE trip_review_id = #{tripReviewId}
+    </select>
+
+    <!-- 여행기 조회수 -->
+    <insert id="insTripReviewRecent">
+        INSERT INTO recent_tr (user_id, trip_review_id, inquired_at)
+        VALUES
+        (#{userId}, #{tripReviewId}, NOW())
+           ON DUPLICATE KEY UPDATE
+        inquired_at = NOW()
+    </insert>
+
+    <!-- 여행기 스크랩 -->
+    <!-- 여행기 스크랩 등록-->
+    <insert id="insTripReviewScrap" useGeneratedKeys="true" keyProperty="tripId">
+        INSERT INTO scrap
+           SET trip_review_id = #{tripReviewId}
+             , trip_id = #{tripId}
+    </insert>
+
+    <select id="countTripReview">
+        SELECT COUNT(*)
+          FROM trip_review
+         WHERE trip_review_id = #{tripReviewId}
+           AND trip_id = #{tripId}
+    </select>
+
+    <insert id="copyInsTrip" useGeneratedKeys="true" keyProperty="tripId">
+        INSERT INTO trip (title, manager_id, start_at, end_at)
+        SELECT title, #{userId}, #{newStartAt}, #{newEndAt}
+          FROM trip
+         WHERE trip_id = #{copyTripId}
+    </insert>
+
+    <insert id="copyInsScheMemo" useGeneratedKeys="true" keyProperty="scheduleMemoId">
+        INSERT INTO sche_memo (trip_id, `day`, seq, category)
+        SELECT #{tripId}, `day`, (@rownum := @rownum + 1) AS seq, category
+          FROM sche_memo, (SELECT @rownum := 0) AS r
+         WHERE trip_id = #{copyTripId} AND category = 'SCHE'
+    </insert>
+
+    <select id="getOriginalScheMemoIds">
+        SELECT schedule_memo_id
+          FROM sche_memo
+         WHERE trip_id = #{tripId}
+    </select>
+
+    <select id="getNewScheMemoIds">
+        SELECT schedule_memo_id
+          FROM sche_memo
+         WHERE trip_id = #{copyTripId}
+           AND created_at >= (SELECT MAX(created_at) FROM sche_memo WHERE trip_id = #{copyTripId})
+    </select>
+
+    <insert id="copyInsSchedule">
+        INSERT INTO schedule
+        (schedule_id, distance, duration, pathtype, strf_id)
+        SELECT #{scheduleMemoId}, distance, duration, pathtype, strf_id
+          FROM schedule
+         WHERE schedule_id = #{originalScheduleId}
+    </insert>
+
+    <select id="getOriginalScheduleIds">
+        SELECT schedule_id
+          FROM schedule
+         WHERE schedule_id IN
+        <foreach item="scheduleMemoId" collection="scheduleMemoIds" open="(" separator="," close=")">
+            #{scheduleMemoId}
+        </foreach>
+    </select>
+
+    <select id="getOriginalLocationIds">
+        SELECT location_id
+          FROM trip_location
+         WHERE trip_id = #{tripId}
+    </select>
+
+    <insert id="copyInsTripLocation">
+        INSERT IGNORE INTO trip_location (trip_id, location_id)
+        SELECT #{tripId}, location_id
+          FROM trip_location
+         WHERE trip_id = #{copyTripId}
+    </insert>
+
+    <!-- 여행기 스크랩 조회수-->
+    <select id="selTripReviewScrapCount">
+        SELECT COUNT(scrap_id)
+          FROM scrap
+         WHERE trip_review_id = #{tripReviewId}
+    </select>
+</mapper>

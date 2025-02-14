@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.recent.RecentMapper">
+    <select id="recentList">
+        SELECT a.strf_id , a.user_id , b.title AS strfTitle , c.pic_name AS strfPic ,
+        b.category , g.detail_title AS locationName , d.price ,
+        COUNT(e.review_id) AS reviewCnt , AVG(e.rating) AS ratingAvg ,
+        COUNT(DISTINCT f.user_id) AS wishCnt ,
+        IF(EXISTS(SELECT 1 FROM wishlist
+        WHERE strf_id = a.strf_id AND (#{userId} IS NULL OR user_id = #{userId})
+        ), 1, 0) AS wishIn , a.inquired_at AS inquiredAt
+        FROM recent a
+        LEFT JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        LEFT JOIN strf_pic c ON a.strf_id = c.strf_id
+        LEFT JOIN menu d ON a.strf_id = d.strf_id
+        LEFT JOIN review e ON a.strf_id = e.strf_id
+        LEFT JOIN wishlist f ON a.strf_id = f.strf_id
+        LEFT JOIN location_detail g ON b.location_detail_id = g.location_detail_id
+        WHERE a.user_id = #{userId} AND a.undo_recent = 0
+        GROUP BY strf_id,b.title
+        ORDER BY a.inquired_at DESC
+        LIMIT 10
+    </select>
+
+    <update id="recentHide">
+    UPDATE recent
+    SET undo_recent = 1
+    WHERE user_id = #{userId} AND strf_id = #{strf_id};
+    </update>
+
+    <update id="recentAllHide">
+        UPDATE recent
+        SET undo_recent = 1
+        WHERE user_id = #{userId}
+    </update>
+
+</mapper>

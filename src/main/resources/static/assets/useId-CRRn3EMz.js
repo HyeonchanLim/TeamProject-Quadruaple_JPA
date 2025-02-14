@@ -1,0 +1,1 @@
+import{p as i,q as I,r as a,_ as f}from"./index-vPyaWLeP.js";function _(){var r=i({},I);return r.useId}var n=0,s=_();const v=s?function(e){var t=s();return e||t}:function(e){var t=a.useState("ssr-id"),u=f(t,2),c=u[0],o=u[1];return a.useEffect(function(){var d=n;n+=1,o("rc_unique_".concat(d))},[]),e||c};export{v as u};
