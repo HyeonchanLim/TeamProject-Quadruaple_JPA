@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,12 @@ public class UserSignUpReq {
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*[\\d~!@#$%^&*()_+=])[A-Za-z\\d~!@#$%^&*()_+=]{8,20}$",
             message = "비밀번호는 특수문자, 숫자, 영문자 중 두 가지 이상을 포함한 8자 이상 20자 이하여야 합니다.")
     private String pw;
+    @Schema(title="이름(닉네임)", description = "중복 불가", example = "홍길동", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
+    @Schema(title="핸드폰 번호", example = "010-0000-0000", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String phone;
+    @Schema(title="생년월일", example = "2000-01-01", requiredMode = Schema.RequiredMode.REQUIRED)
+    private LocalDate birth;
     @JsonIgnore
     private String profilePic;
     @JsonIgnore

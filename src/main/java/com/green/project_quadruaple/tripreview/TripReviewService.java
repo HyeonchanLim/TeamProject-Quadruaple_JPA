@@ -128,7 +128,7 @@ public class TripReviewService {
             tripReviewMapper.insTripReviewRecent(userId, tripReviewId);
         }
 
-        List<TripReviewGetDto> tripReviewGetDto = tripReviewMapper.getOtherTripReviewById(tripReviewId);
+        List<TripReviewGetDto> tripReviewGetDto = tripReviewMapper.getOtherTripReviewById(tripReviewId, userId);
         if (tripReviewGetDto == null || tripReviewGetDto.isEmpty()) {
             throw new RuntimeException("해당 여행기를 찾을 수 없습니다.");
         }
