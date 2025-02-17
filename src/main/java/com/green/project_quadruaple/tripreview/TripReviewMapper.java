@@ -49,6 +49,6 @@ public interface TripReviewMapper {
     List<Long> getOriginalScheMemoIds(long tripId);
     List<Long> getOriginalScheduleIds(List<Long> scheduleMemoIds);
     List<Long> getNewScheMemoIds(long copyTripId);
-    int getOriginalLocationIds(long tripId);
+    List<Long> getOriginalLocationIds(long tripId);
     void copyInsTripLocation(long copyTripId, long tripId);
 }
