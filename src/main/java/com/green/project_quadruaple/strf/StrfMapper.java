@@ -8,9 +8,9 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface StrfMapper {
 
-    StrfSelRes getMemberDetail(Long userId, @Param("strfId") Long strfId);
-    void strfUpsert(Long userId, @Param("strfId") Long strfId);
+    StrfSelRes getMemberDetail(Long userId, Long strfId);
+    void strfUpsert(Long userId, Long strfId);
 
-    GetNonDetail getNonMemberDetail (@Param("strfId") Long strfId);
+    GetNonDetail getNonMemberDetail (Long strfId);
 }
 

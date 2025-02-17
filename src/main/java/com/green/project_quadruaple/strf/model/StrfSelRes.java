@@ -44,8 +44,6 @@ public class StrfSelRes {
     private String inquiredAt;
     private String reviewCnt;
 
-
-
     private List<StrfAmenity> amenities;
     private List<StrfPicSel> strfPics;
     private List<Menu> menu;
