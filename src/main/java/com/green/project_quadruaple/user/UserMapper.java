@@ -12,6 +12,9 @@ public interface UserMapper {
     boolean isEmailDuplicated(String email);
     DuplicateEmailResult getEmailDuplicateInfo(UserSignUpReq req);
 
+    // 닉네임 체크
+    int getNickNameDuplicateInfo(String name);
+
     // 회원가입
     int insUser(UserSignUpReq req);
     int insUserRole(UserSignUpReq req);

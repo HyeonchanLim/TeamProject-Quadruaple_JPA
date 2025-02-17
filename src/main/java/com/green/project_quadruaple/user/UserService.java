@@ -72,6 +72,12 @@ public class UserService {
             return 0;
         }
 
+        //닉네임 중복 체크
+        String nickname = p.getName();
+        if (userMapper.getNickNameDuplicateInfo(nickname) > 0) {
+            return 0;
+        }
+
         // 비밀번호 해싱
         String hashedPassword = passwordEncoder.encode(p.getPw());
         p.setPw(hashedPassword);

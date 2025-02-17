@@ -80,12 +80,15 @@
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count
         ,(SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count
         , (SELECT COUNT(scrap_id) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count
+        , (SELECT COUNT(*) FROM trip_like WHERE trip_review_id = A.trip_review_id AND user_id = #{signedUserId}) AS like_user
         , A.trip_review_id, C.name, C.profile_pic
-         FROM trip_review A
-         LEFT JOIN trip_review_pic B
-           ON A.trip_review_id = B.trip_review_id
-         LEFT JOIN user C
-           ON A.user_id = C.user_id
+        FROM trip_review A
+        LEFT JOIN trip_review_pic B
+        ON A.trip_review_id = B.trip_review_id
+        LEFT JOIN user C
+        ON A.user_id = C.user_id
+        LEFT JOIN trip_like D
+        ON A.user_id = D.user_id
         WHERE A.trip_review_id = #{tripReviewId}
         GROUP BY A.trip_review_id, A.trip_id, A.title, A.content, C.name, C.profile_pic
     </select>
@@ -97,6 +100,7 @@
         <result property="likeCount" column="like_count"/>
         <result property="recentCount" column="recent_count"/>
         <result property="scrapCount" column="scrap_count"/>
+        <result property="likeUser" column="like_user"/>
         <result property="tripReviewId" column="trip_review_id"/>
         <result property="name" column="name"/>
         <result property="profilePic" column="profile_pic"/>
