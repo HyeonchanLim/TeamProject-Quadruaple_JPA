@@ -6,10 +6,15 @@ import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.ResultResponse;
+import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.user.model.*;
 import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -31,11 +36,13 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
     private final AuthenticationFacade authenticationFacade;
+    private final UserRepository userRepository;
 
     // 회원가입 요청
     @PostMapping("sign-up")
     @Operation(summary = "회원가입", description = "사진 파일 때문에 postman 사용")
     public ResponseEntity<?> signUpUser(@RequestPart(required = false) MultipartFile profilePic, @Valid @RequestPart UserSignUpReq p) {
+
         int result = userService.signUp(profilePic, p);
 
         if (result < 0) {

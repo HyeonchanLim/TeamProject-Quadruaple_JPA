@@ -4,11 +4,21 @@ package com.green.project_quadruaple.datamanager;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.datamanager.model.*;
+import com.green.project_quadruaple.entity.base.Period;
+import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.review.ReviewMapper;
 import com.green.project_quadruaple.review.ReviewService;
 import com.green.project_quadruaple.review.model.ReviewPicDto;
 import com.green.project_quadruaple.review.model.ReviewPostReq;
+import com.green.project_quadruaple.strf.StrfRepository;
+import com.green.project_quadruaple.trip.ScheMemoRepository;
+import com.green.project_quadruaple.trip.ScheduleRepository;
+import com.green.project_quadruaple.trip.TripRepository;
+import com.green.project_quadruaple.trip.TripUserRepository;
+import com.green.project_quadruaple.trip.model.Category;
+import com.green.project_quadruaple.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -22,6 +32,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Log4j2
@@ -31,6 +43,12 @@ public class DataService {
     private final DataMapper dataMapper;
     private final MyFileUtils myFileUtils;
     private final ReviewMapper reviewMapper;
+    private final UserRepository userRepository;
+    private final StrfRepository strfRepository;
+    private final TripRepository tripRepository;
+    private final ScheMemoRepository scheMemoRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final TripUserRepository tripUserRepository;
 
 
     //카테고리별로 리뷰 더미데이터 넣기
@@ -504,5 +522,59 @@ public class DataService {
         }
 
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 0));
+    }
+
+    @Transactional
+    public ResultResponse createJpaData() {
+        try {
+            User user = User.builder()
+                    .name("wook")
+                    .pw("1234qwer!")
+                    .email("email@mail.com")
+                    .phone("010-1234-1234")
+                    .birth(LocalDate.now())
+                    .build();
+
+            userRepository.save(user);
+
+            Trip trip = Trip.builder()
+                    .title("여행1")
+                    .manager(user)
+                    .period(new Period(LocalDate.of(2025,1,2), LocalDate.of(2025,2,2)))
+                    .build();
+
+            tripRepository.save(trip);
+
+            TripUser tripUser = TripUser.builder()
+                    .user(user)
+                    .trip(trip)
+                    .build();
+            tripUserRepository.save(tripUser);
+
+            ScheMemo scheMemo = ScheMemo.builder()
+                    .category(Category.STAY)
+                    .day(1)
+                    .seq(1)
+                    .trip(trip)
+                    .build();
+            ScheMemo saveScheMemo = scheMemoRepository.save(scheMemo);
+            log.info("saveScheMeme PK : {}", saveScheMemo.getScheMemoId());
+
+            Strf strf = Strf.builder().build();
+            strfRepository.save(strf);
+
+            Schedule schedule = Schedule.builder()
+                    .ScheMemo(saveScheMemo)
+                    .distance(120000)
+                    .duration(180)
+                    .pathType(12)
+                    .strf(strf)
+                    .build();
+            scheduleRepository.save(schedule);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultResponse.severError();
+        }
+        return ResultResponse.success();
     }
 }
