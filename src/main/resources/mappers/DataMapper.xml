@@ -25,9 +25,9 @@
         </foreach>
     </insert>
 
-    <insert id="postRating" useGeneratedKeys="true" keyProperty="item.reviewId">
+    <insert id="postRating" useGeneratedKeys="true" keyProperty="reviewId">
         INSERT INTO review (content, rating, strf_id, user_id)
-        VALUES (#{item.content}, #{item.rating}, #{item.strfId}, #{item.userId})
+        VALUES (#{content}, #{rating}, #{strfId}, #{userId})
     </insert>
 
     <insert id="postReviewPic">

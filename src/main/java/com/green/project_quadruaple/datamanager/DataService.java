@@ -35,13 +35,17 @@ public class DataService {
 
     //카테고리별로 리뷰 더미데이터 넣기
     public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPicsFromCategory(String category){
+        //카테고리별 넣어야할 strfId들 가져오기
         List<Long> strfIds= dataMapper.selectReviewStrfId(
                 new StrfReviewGetReq(category,null,null,null,0,0,null,null));
-        List<Long> reviewIds=new ArrayList<>(strfIds.size());
+        List<Long> reviewIds=new ArrayList<>(strfIds.size()); //리뷰id 저장
+        //상품id마다 랜덤 리뷰 넣기
         for(long strfId:strfIds){
-            ReviewRandomReq req=randomReview(category,strfId);
-            dataMapper.postRating(randomReview(category,strfId));
-            reviewIds.add(req.getReviewId());
+            for(int i=0; i<randomNum(50,20); i++){
+                ReviewRandomReq req=randomReview(category,strfId);
+                dataMapper.postRating(req);
+                reviewIds.add(req.getReviewId());
+            }
         }
         /*
         ${file:directory}/reviewsample/${category}/${filename} 의 사진들을
@@ -50,44 +54,54 @@ public class DataService {
 
         String filePath=String.format("%s/reviewsample/%s",myFileUtils.getUploadPath(),category);
 
-        int fileCnt = 0;
-        int reviewPicCnt=0;
+        int fileCnt = 0; //reviewsample에 카테고리별 파일 갯수 확인
+        int reviewPicCnt=0; //리뷰 하나당 들어가 사진 갯수
         try{
             fileCnt=(int) myFileUtils.countFiles(filePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        List<Map<String,Object>> reviewPics=new ArrayList<>(reviewIds.size());
+        List<Map<String,Object>> reviewPics=new ArrayList<>(reviewIds.size()); //어느리뷰에 어느사진들이 들어가는지, review_pic에 insert할 내용
         for(long reviewId:reviewIds){
+            //category 내부의 랜덤 숫자 파일
             String sourcePath=String.format("%s/%d",filePath,randomNum(fileCnt));
+            //review id별로 저장될 사진 경로
             String destinationPath=String.format("%s/reviewId/%d",myFileUtils.getUploadPath(),reviewId);
             try {
-                reviewPicCnt=(int) myFileUtils.countFiles(filePath);
+                //저장될 사진 갯수
+                reviewPicCnt=(int) myFileUtils.countFiles(sourcePath);
+                //source에서 destination으로 파일 복사
                 myFileUtils.copyFolder(Path.of(sourcePath),Path.of(destinationPath));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            Map<String, Object> pics=new HashMap<>();
-            pics.put("reviewId",reviewId);
             for(int i=1; i<=reviewPicCnt; i++){
+                Map<String, Object> pics=new HashMap<>();  //reviewPics에 넣을 객체
+                pics.put("reviewId",reviewId);
                 pics.put("pics", String.format("%d.png",i));
+                reviewPics.add(pics);
             }
-            reviewPics.add(pics);
         }
         int reviewInsCnt=dataMapper.postReviewPicList(reviewPics);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), reviewInsCnt));
     }
 
+    //max까지의 랜덤숫자
     private int randomNum(int max){
+        return randomNum(max,1);
+    }
+    //min부터 max까지 랜덤숫자
+    private int randomNum(int max, int min){
         Random random = new Random();
-        return random.nextInt(max)+1;
+        return random.nextInt(max)+min;
     }
 
+    // review 테이블에 insert될 랜덤객체
     private ReviewRandomReq randomReview (String category, long strfId){
         ReviewRandomReq req = new ReviewRandomReq();
-        req.setUserId(randomNum(138));
+        req.setUserId(randomNum(138)); //랜덤 유저
         req.setStrfId(strfId);
-        int random=randomNum(5);
+        int random=randomNum(5); //랜덤점수
         req.setRating(random);
         switch (category){
             case "STAY":
