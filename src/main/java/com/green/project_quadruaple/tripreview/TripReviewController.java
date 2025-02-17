@@ -75,16 +75,16 @@ public class TripReviewController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
-    @GetMapping("otherTripReview")
-    @Operation(summary = "다른 사용자의 여행기 조회", description = "likeCount(추천수), recentCount(조회수), scrapCount(스크랩수)")
-    public ResponseEntity<?> getOtherTripReview(@RequestParam long tripReviewId) {
-        List<TripReviewGetDto> tripReviewGetDto = tripReviewService.getOtherTripReviews(tripReviewId);
+        @GetMapping("otherTripReview")
+        @Operation(summary = "다른 사용자의 여행기 조회", description = "likeCount(추천수), recentCount(조회수), scrapCount(스크랩수), likeUser(로그인한 유저의 해당 여행기 추천 여부/1이면 추천,0이면 비추천)")
+        public ResponseEntity<?> getOtherTripReview(@RequestParam long tripReviewId) {
+            List<TripReviewGetDto> tripReviewGetDto = tripReviewService.getOtherTripReviews(tripReviewId);
 
-        if (tripReviewGetDto == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+            if (tripReviewGetDto.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+            }
+            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), tripReviewGetDto));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), tripReviewGetDto));
-    }
 
     //여행기 수정
     @PatchMapping

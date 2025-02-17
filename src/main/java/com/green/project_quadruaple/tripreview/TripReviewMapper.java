@@ -19,7 +19,7 @@ public interface TripReviewMapper {
     int getTotalTripReviewsCount();
     List<TripReviewGetDto> getAllTripReviews(String orderType, int startIdx, int size);
     // 다른 사용자의 여행기 조회
-    List<TripReviewGetDto> getOtherTripReviewById(long tripReviewId);
+    List<TripReviewGetDto> getOtherTripReviewById(long tripReviewId, long signedUserId);
 
     //여행기 update
     int updTripReview(TripReviewPatchDto dto);

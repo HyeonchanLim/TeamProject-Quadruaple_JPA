@@ -5,6 +5,7 @@ import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.expense.model.dto.DeDto;
+import com.green.project_quadruaple.expense.model.dto.ExpenseDto;
 import com.green.project_quadruaple.expense.model.dto.PaidUser;
 import com.green.project_quadruaple.expense.model.req.*;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
@@ -35,7 +36,7 @@ public class ExpenseService {
 
     //추가하기
     @Transactional
-    public ResponseEntity<ResponseWrapper<Long>> insSamePrice(ExpenseInsReq p){
+    public ResponseEntity<ResponseWrapper<ExpenseDto>> insSamePrice(ExpenseInsReq p){
         if(isUserJoinTrip(p.getTripId())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
@@ -51,7 +52,8 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),deId));
+        ExpenseDto res=expenseMapper.selInsedExpense(authenticationFacade.getSignedUserId(),deId);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),res));
     }
     //paidUsers에 입력하기
     int insPaidUsers(List<Long> userList, long deId, long tripId, int totalPrice){

@@ -32,8 +32,157 @@ public class DataService {
     private final MyFileUtils myFileUtils;
     private final ReviewMapper reviewMapper;
 
+
+    //카테고리별로 리뷰 더미데이터 넣기
+    public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPicsFromCategory(String category){
+        //카테고리별 넣어야할 strfId들 가져오기
+        List<Long> strfIds= dataMapper.selectReviewStrfId(
+                new StrfReviewGetReq(category,null,null,null,0,0,null,null));
+        List<Long> reviewIds=new ArrayList<>(strfIds.size()); //리뷰id 저장
+        //상품id마다 랜덤 리뷰 넣기
+        for(long strfId:strfIds){
+            for(int i=0; i<randomNum(50,20); i++){
+                ReviewRandomReq req=randomReview(category,strfId);
+                dataMapper.postRating(req);
+                reviewIds.add(req.getReviewId());
+            }
+        }
+        /*
+        ${file:directory}/reviewsample/${category}/${filename} 의 사진들을
+        ${file:directory}/reviewId/${reviewId} 아래로 옮기기
+         */
+
+        String filePath=String.format("%s/reviewsample/%s",myFileUtils.getUploadPath(),category);
+
+        int fileCnt = 0; //reviewsample에 카테고리별 파일 갯수 확인
+        int reviewPicCnt=0; //리뷰 하나당 들어가 사진 갯수
+        try{
+            fileCnt=(int) myFileUtils.countFiles(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        List<Map<String,Object>> reviewPics=new ArrayList<>(reviewIds.size()); //어느리뷰에 어느사진들이 들어가는지, review_pic에 insert할 내용
+        for(long reviewId:reviewIds){
+            //category 내부의 랜덤 숫자 파일
+            String sourcePath=String.format("%s/%d",filePath,randomNum(fileCnt));
+            //review id별로 저장될 사진 경로
+            String destinationPath=String.format("%s/reviewId/%d",myFileUtils.getUploadPath(),reviewId);
+            try {
+                //저장될 사진 갯수
+                reviewPicCnt=(int) myFileUtils.countFiles(sourcePath);
+                //source에서 destination으로 파일 복사
+                myFileUtils.copyFolder(Path.of(sourcePath),Path.of(destinationPath));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            for(int i=1; i<=reviewPicCnt; i++){
+                Map<String, Object> pics=new HashMap<>();  //reviewPics에 넣을 객체
+                pics.put("reviewId",reviewId);
+                pics.put("pics", String.format("%d.png",i));
+                reviewPics.add(pics);
+            }
+        }
+        int reviewInsCnt=dataMapper.postReviewPicList(reviewPics);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), reviewInsCnt));
+    }
+
+    //max까지의 랜덤숫자
+    private int randomNum(int max){
+        return randomNum(max,1);
+    }
+    //min부터 max까지 랜덤숫자
+    private int randomNum(int max, int min){
+        Random random = new Random();
+        return random.nextInt(max)+min;
+    }
+
+    // review 테이블에 insert될 랜덤객체
+    private ReviewRandomReq randomReview (String category, long strfId){
+        ReviewRandomReq req = new ReviewRandomReq();
+        req.setUserId(randomNum(138)); //랜덤 유저
+        req.setStrfId(strfId);
+        int random=randomNum(5); //랜덤점수
+        req.setRating(random);
+        switch (category){
+            case "STAY":
+                switch (random){
+                    case 1:
+                        req.setContent("침구가 눅눅하고 소음이 심했어요. 직원 응대도 불친절했습니다.");
+                        return req;
+                    case 2:
+                        req.setContent("직원 서비스는 좋았지만 청결 상태가 아쉬웠어요.");
+                        return req;
+                    case 3:
+                        req.setContent("위치가 좋아서 이동하기 편리했어요. 근데 와이파이가 제대로 안되네요.");
+                        return req;
+                    case 4:
+                        req.setContent("객실이 넓고 깔끔했어요! 가성비 좋은 숙소였습니다.");
+                        return req;
+                    case 5:
+                        req.setContent("완벽한 숙소였어요! 방도 깨끗하고 직원 서비스도 짱ㅠㅠ 최고의 숙소 경험이었어요!");
+                        return req;
+                }
+            case "TOUR":
+                switch (random){
+                    case 1:
+                        req.setContent("너무 붐비고 기대했던 것보다 별로였어요.");
+                        return req;
+                    case 2:
+                        req.setContent("한 번쯤은 가볼 만하지만 다시 방문하고 싶지는 않아요.");
+                        return req;
+                    case 3:
+                        req.setContent("특별한 감동은 없었지만 괜찮은 여행지였어요.");
+                        return req;
+                    case 4:
+                        req.setContent("사람이 많긴 했지만 방문할 만한 가치가 있었어요.");
+                        return req;
+                    case 5:
+                        req.setContent("풍경이 너무 아름답고 사진이 잘 나와요! 필수 방문 코스!");
+                        return req;
+                }
+            case "RESTAUR":
+                switch (random){
+                    case 1:
+                        req.setContent("위생 상태가 너무 안 좋았어요.");
+                        return req;
+                    case 2:
+                        req.setContent("분위기는 좋았지만 맛은 별로였어요.");
+                        return req;
+                    case 3:
+                        req.setContent("가격 대비 나쁘지 않은 선택이었어요.");
+                        return req;
+                    case 4:
+                        req.setContent("분위기가 좋아서 데이트하기 딱이에요.");
+                        return req;
+                    case 5:
+                        req.setContent("인생 맛집 발견! 너무 맛있었어요. 재방문 의사 100%!");
+                        return req;
+                }
+            case "FEST":
+                switch (random){
+                    case 1:
+                        req.setContent("기대했던 것보다 실망스러웠어요.");
+                        return req;
+                    case 2:
+                        req.setContent("주차가 너무 어려워서 불편했어요.");
+                        return req;
+                    case 3:
+                        req.setContent("그냥 시간 보내기 좋은 정도였어요.");
+                        return req;
+                    case 4:
+                        req.setContent("축제 분위기가 살아 있어서 즐거운 시간이었어요.");
+                        return req;
+                    case 5:
+                        req.setContent("잊지 못할 경험이었어요. 강추합니다!");
+                        return req;
+                }
+        }
+        return null;
+    }
+
+    //제목에 따른 리뷰 더미데이터 넣기
     @Transactional
-    public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPics(StrfReviewGetReq p) {
+    public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPicsFromTitle(StrfReviewGetReq p) {
         // 리뷰 넣을 strfId list 가져오기
         List<Long> strfIds = dataMapper.selectReviewStrfId(p);
         if (strfIds==null || strfIds.isEmpty()) {
@@ -121,8 +270,8 @@ public class DataService {
         try {
             // 경로에 존재하는 디렉토리와 파일의 갯수를 확인하는 메서드.
             // sourceFile은 menu 디렉토리를 포함하므로 -1하여 실제 사진 파일 갯수를 count
-             strfCnt=(int) myFileUtils.countFiles(sourcePath) - 1;
-             menuCnt=(int) myFileUtils.countFiles(menuPath);
+            strfCnt=(int) myFileUtils.countFiles(sourcePath) - 1;
+            menuCnt=(int) myFileUtils.countFiles(menuPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
