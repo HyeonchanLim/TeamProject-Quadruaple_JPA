@@ -63,7 +63,7 @@
         LEFT JOIN recent n ON n.strf_id = a.strf_id
 
         WHERE a.strf_id = #{strfId}
-        GROUP BY a.strf_id,b.menu_id,d.amenity_id,b.title,e.pic_name;
+        GROUP BY a.strf_id,b.menu_id,d.amenity_id,b.title,e.pic_name
     </select>
     <resultMap id="memberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelRes">
         <id property="strfId" column="strfId" />
@@ -143,7 +143,7 @@
         LEFT JOIN user l ON l.user_id = k.user_id
 
         WHERE a.strf_id = #{strfId}
-        GROUP BY a.strf_id, f.detail_title, b.menu_id, e.pic_name, d.amenity_id;
+        GROUP BY a.strf_id, f.detail_title, b.menu_id, e.pic_name, d.amenity_id
     </select>
     <resultMap id="nonMemberResultMap" type="com.green.project_quadruaple.strf.model.GetNonDetail">
         <id property="strfId" column="strfId" />
