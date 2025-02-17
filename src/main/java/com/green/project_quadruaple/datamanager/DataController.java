@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,9 +26,9 @@ public class DataController {
     private final DataService dataService;
 
     @PostMapping("review")
-    @Operation(summary = "review & pics insert" )
-    public ResponseEntity<?> insReviewAndPics(@Valid @RequestPart StrfReviewGetReq p){
-        return dataService.insReviewAndPics(p);
+    @Operation(summary = "랜덤 리뷰 채우기" )
+    public ResponseEntity<?> insReviewAndPicsRandom(@ParameterObject String category){
+        return dataService.insReviewAndPicsFromCategory(category);
     }
 
 
@@ -59,7 +60,7 @@ public class DataController {
     @PostMapping("review/dummy")
     @Operation(summary = "review 채우기", description = "카테고리, 원한다면 제목과 범위도")
     public ResponseEntity<ResponseWrapper<Integer>> postreviewdummy(@RequestBody StrfReviewGetReq p){
-        return dataService.insReviewAndPics(p);
+        return dataService.insReviewAndPicsFromTitle(p);
     }
 
     @PostMapping("default-profile-pic")
