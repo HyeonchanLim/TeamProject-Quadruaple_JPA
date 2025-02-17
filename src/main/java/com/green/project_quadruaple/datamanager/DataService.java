@@ -41,7 +41,7 @@ public class DataService {
         List<Long> reviewIds=new ArrayList<>(strfIds.size()); //리뷰id 저장
         //상품id마다 랜덤 리뷰 넣기
         for(long strfId:strfIds){
-            for(int i=0; i<randomNum(50,20); i++){
+            for(int i=0; i<randomNum(5,2); i++){
                 ReviewRandomReq req=randomReview(category,strfId);
                 dataMapper.postRating(req);
                 reviewIds.add(req.getReviewId());
