@@ -52,7 +52,7 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
-        ExpenseDto res=new ExpenseDto();
+        ExpenseDto res=expenseMapper.selInsedExpense(authenticationFacade.getSignedUserId(),deId);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),res));
     }
     //paidUsers에 입력하기

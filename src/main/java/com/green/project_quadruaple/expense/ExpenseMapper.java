@@ -2,6 +2,7 @@ package com.green.project_quadruaple.expense;
 
 import com.green.project_quadruaple.expense.model.dto.DeDto;
 import com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto;
+import com.green.project_quadruaple.expense.model.dto.ExpenseDto;
 import com.green.project_quadruaple.expense.model.dto.PaidUser;
 import com.green.project_quadruaple.expense.model.req.DutchReq;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
@@ -18,6 +19,9 @@ public interface ExpenseMapper {
     void insDe(DeDto d);
     //가계부 insert
     int insPaid (Map<String, Object> paramMap);
+
+    //insert된 내용 추가
+    ExpenseDto selInsedExpense(long userId, long deId);
 
     //가계부 보기
     ExpensesRes getExpenses(long tripId, long userId);

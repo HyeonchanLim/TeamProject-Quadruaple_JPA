@@ -99,6 +99,32 @@
         ORDER BY T.de_id
     </select>
 
+    <resultMap id="expenseInsOne" type="com.green.project_quadruaple.expense.model.dto.ExpenseDto">
+        <id property="deId" column="deId"/>
+        <result property="paidFor" column="paidFor" />
+        <result property="totalPrice" column="totalPrice" />
+        <result property="myPrice" column="myPrice" />
+        <collection property="paidUserList" resultMap="paidUserList" />
+    </resultMap>
+    <resultMap id="payList" type="com.green.project_quadruaple.expense.model.dto.PaidUser">
+        <id property="userId" column="userId" />
+        <result property="name" column="name" />
+        <result property="profilePic" column="profilePic"/>
+    </resultMap>
+
+
+    <select id="selInsedExpense" resultMap="expenseInsOne">
+        SELECT p.de_id AS deId,
+        p.`for` AS paidFor,
+        SUM(p.price) OVER(PARTITION BY p.de_id) AS totalPrice,
+        CASE WHEN p.user_id = #{userId} THEN p.price ELSE 0 END AS myPrice,
+        p.user_id AS userId,
+        p.name,
+        p.profile_pic AS profilePic
+        FROM depay p
+        WHERE p.de_id = #{deId}
+    </select>
+
 
     <resultMap id="expenseOne" type="com.green.project_quadruaple.expense.model.res.ExpenseOneRes">
         <id property="deId" column="deId" />
