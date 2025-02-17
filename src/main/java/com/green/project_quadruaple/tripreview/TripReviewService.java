@@ -274,7 +274,7 @@ public class TripReviewService {
         }
 
         // 9. 여행 위치 복사
-        int originalLocationIds = tripReviewMapper.getOriginalLocationIds(trip.getCopyTripId());
+        List<Long> originalLocationIds = tripReviewMapper.getOriginalLocationIds(trip.getCopyTripId());
         if (!originalScheduleIds.isEmpty()) {
             tripReviewMapper.copyInsTripLocation(trip.getCopyTripId(), trip.getTripId());
         }
