@@ -128,6 +128,7 @@
         <if test="rating != null">
             AVG(h.rating) AS ratingAvg
         </if>
+
         FROM
         stay_tour_restaur_fest a
         LEFT JOIN menu b ON a.strf_id = b.strf_id
