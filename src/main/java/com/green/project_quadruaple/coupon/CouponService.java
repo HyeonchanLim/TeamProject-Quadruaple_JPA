@@ -8,9 +8,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,12 +41,13 @@ public class CouponService {
         List<CouponDto> allCoupons = couponMapper.findCouponsByUserId(signedUserId);
 
         // 현재 날짜와 시간 가져오기
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate now = LocalDate.now();
 
         // 만료되지 않았고 사용되지 않은 쿠폰만 필터링
         List<CouponDto> validCoupons = allCoupons.stream()
-                .filter(coupon -> coupon.getExpiredAt().isAfter(now))  // 만료되지 않은 쿠폰
-                .filter(coupon -> !usedCouponsSet.contains(coupon.getCouponId() + coupon.getTitle() + coupon.getExpiredAt().toString() + coupon.getDistributeAt().toString())) // 사용된 쿠폰 제외
+                .filter(coupon -> coupon.getExpiredAt().isAfter(LocalDateTime.now()))
+                .filter(coupon -> !usedCouponsSet.contains(coupon.getCouponId() + coupon.getTitle() + coupon.getExpiredAt().toString() + coupon.getDistributeAt().toString()))
+                .peek(coupon -> coupon.setDaysLeft(ChronoUnit.DAYS.between(now, coupon.getExpiredAt().toLocalDate()))) // D-Day 설정
                 .collect(Collectors.toList());
 
         // CouponResponse 생성 및 값 설정

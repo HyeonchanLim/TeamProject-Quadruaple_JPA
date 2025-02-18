@@ -15,4 +15,5 @@ public class CouponDto {
     private LocalDateTime expiredAt;
     private int discountPer;
     private LocalDateTime distributeAt;
+    private long daysLeft;
 }
