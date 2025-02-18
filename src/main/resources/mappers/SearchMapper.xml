@@ -303,16 +303,21 @@
             OR b.detail_title LIKE CONCAT('%', #{searchWord}, '%')
             )
         </if>
-        <if test="amenityId != null">
-            AND (
-            j.amenity_id IN
+        <if test="amenityId != null and amenityId.size() > 0">
+            AND a.strf_id IN (
+            SELECT i.strf_id
+            FROM amenipoint i
+            WHERE i.amenity_id IN
             <foreach item="id" collection="amenityId" open="(" separator="," close=")">
                 #{id}
             </foreach>
+            GROUP BY i.strf_id
+            HAVING COUNT(DISTINCT i.amenity_id) = #{amenityId.size()}
             )
         </if>
+
         GROUP BY a.strf_id
-        ORDER BY MAX(a.created_at) DESC
+        ORDER BY a.created_at DESC
         LIMIT #{startIdx}, #{size}
     </select>
     <resultMap id="searchStayResultMap" type="com.green.project_quadruaple.search.model.filter.SearchStay">
@@ -334,10 +339,14 @@
         FROM stay_tour_restaur_fest a
         JOIN amenipoint c ON a.strf_id = c.strf_id
         JOIN amenity d ON c.amenity_id = d.amenity_id
-        WHERE d.amenity_id IN
-        <foreach item="id" collection="amenityIds" open="(" separator="," close=")">
-            #{id}
-        </foreach>
+        <where>
+            <if test="amenityId != null and amenityId.size() > 0">
+                d.amenity_id IN
+                <foreach item="id" collection="amenityId" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
         GROUP BY d.amenity_id
 
     </select>

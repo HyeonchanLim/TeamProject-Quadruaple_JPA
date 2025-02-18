@@ -39,7 +39,7 @@ public interface SearchMapper {
     // 전체 상품에서 숙소 카테고리 전환
     List<SearchStay> searchStay(String category, String searchWord, int startIdx, int size, Long userId, List<Long> amenityId);
 
-    List<SearchAmenity> searchAmenity(List<Long> amenityIds);
+    List<SearchAmenity> searchAmenity(List<Long> amenityId);
 
 
 }

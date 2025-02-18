@@ -88,21 +88,21 @@ public class SearchController {
     }
 
     @GetMapping("/category")
-    public ResponseEntity<?> searchCategory(@RequestParam("last_index") int lastIdx,
+    public ResponseEntity<?> searchCategory(@RequestParam("start_idx") int startIdx,
                                             @RequestParam String category,
                                             @RequestParam(value = "search_word", required = false) String searchWord,
                                             @RequestParam(value = "order_type",required = false) String orderType) {
 
-        ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(lastIdx,category,searchWord, orderType);
+        ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(startIdx,category,searchWord, orderType);
         return ResponseEntity.ok(list);
     }
     @GetMapping("/filter")
-    public ResponseWrapper<?> searchStayFilter(@RequestParam("last_index") int lastIdx,
+    public ResponseWrapper<?> searchStayFilter(@RequestParam("start_idx") int startIdx,
                                               @RequestParam String category,
                                               @RequestParam(value = "search_word") String searchWord,
-                                              @RequestParam(value = "amenity_id") List<Long> amenityId){
+                                              @RequestParam(value = "amenity_id",required = false) List<Long> amenityId){
 
-        return searchService.searchStayFilter(lastIdx,category,searchWord,amenityId);
+        return searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
     }
 
 }

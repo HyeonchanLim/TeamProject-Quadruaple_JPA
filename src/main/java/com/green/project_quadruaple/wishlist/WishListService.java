@@ -3,6 +3,8 @@ package com.green.project_quadruaple.wishlist;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.trip.model.Category;
+import com.green.project_quadruaple.wishlist.model.WishlistFestRes;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +55,7 @@ public class WishListService {
 //
 //    }
 
-    public ResponseWrapper<List<WishListRes>> getWishList(int startIdx, String orderType) {
+    public ResponseWrapper<List<WishListRes>> getWishList(int startIdx, String orderType,String category) {
         Long userId = authenticationFacade.getSignedUserId();
 
         int more = 1;
@@ -60,9 +63,47 @@ public class WishListService {
             startAt = null;
             endAt = null;
         }
+        String categoryValue = null;
+        if(category != null && Category.getKeyByName(category) != null) {
+            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
+        }
 
-        List<WishListRes> list = wishlistMapper.wishListGet(userId, startIdx, size + more, orderType, category, startAt, endAt);
+        List<WishListRes> list = wishlistMapper.wishListGet(userId, startIdx, size + more, orderType, categoryValue);
+        list.forEach(stay -> {
+            if (stay.getRatingAvg() != null) {
+                double roundedRating = Math.round(stay.getRatingAvg() * 10) / 10.0;
+                stay.setRatingAvg(roundedRating);
+            }
+        });
 
+        boolean hasMore = list.size() > size;
+
+        if (hasMore) {
+            list.get(list.size() - 1).setMore(true);
+            list.remove(list.size() - 1);
+        }
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), list);
+    }
+
+    public ResponseWrapper<List<WishlistFestRes>> wishlistFestGet (int startIdx , String orderType , String category , String startAt){
+        Long userId = authenticationFacade.getSignedUserId();
+
+        int more = 1;
+        if (startAt == null) {
+            startAt = null;
+        }
+        String categoryValue = null;
+        if(category != null && Category.getKeyByName(category) != null) {
+            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
+        }
+
+        List<WishlistFestRes> list = wishlistMapper.wishlistFestGet(userId, startIdx, size + more, orderType, categoryValue ,startAt);
+        list.forEach(stay -> {
+            if (stay.getRatingAVG() != null) {
+                double roundedRating = Math.round(stay.getRatingAVG() * 10) / 10.0;
+                stay.setRatingAVG(roundedRating);
+            }
+        });
         boolean hasMore = list.size() > size;
 
         if (hasMore) {

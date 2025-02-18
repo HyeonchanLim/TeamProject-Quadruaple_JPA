@@ -119,4 +119,38 @@
         LIMIT #{startIdx}, #{size}
     </select>
 
+    <select id="wishlistFestGet">
+        SELECT
+        a.strf_id AS strfId, a.user_id AS userId, d.title AS locationName, b.end_at AS endAt,
+        f.pic_name AS strfPic, b.category, b.title AS strfTitle, b.start_at AS startAt,
+        COALESCE((SELECT AVG(RO.rating) FROM review RO WHERE RO.strf_id = b.strf_id), 0) AS ratingAvg,
+        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = b.strf_id), 0) AS wishCnt,
+        COALESCE((SELECT COUNT(*) FROM review RV WHERE RV.strf_id = b.strf_id), 0) AS ratingCnt,
+        CASE
+        WHEN EXISTS (
+        SELECT 1 FROM wishlist WM
+        WHERE WM.strf_id = b.strf_id
+        AND WM.user_id = #{userId}
+        ) THEN 1 ELSE 0
+        END AS reviewed
+        FROM wishlist a
+        JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        LEFT JOIN location_detail c ON b.location_detail_id = c.location_detail_id
+        LEFT JOIN location d ON c.location_id = d.location_id
+        LEFT JOIN review e ON a.strf_id = e.strf_id AND e.user_id = #{userId}
+        LEFT JOIN strf_pic f ON a.strf_id = f.strf_id
+        WHERE a.user_id = #{userId}
+        AND (
+        b.category != 'FEST'
+        OR (b.category = 'FEST' AND b.start_at >= #{startAt})
+        )
+        GROUP BY a.user_id, a.strf_id
+        ORDER BY
+        CASE WHEN #{orderType} = 'likeCnt' THEN wishCnt END DESC,
+        CASE WHEN #{orderType} = 'ratingAvg' THEN ratingAvg END DESC,
+        CASE WHEN #{orderType} = 'ratingCnt' THEN ratingCnt END DESC,
+        a.created_at DESC
+        LIMIT #{startIdx}, #{size}
+    </select>
+
 </mapper>
