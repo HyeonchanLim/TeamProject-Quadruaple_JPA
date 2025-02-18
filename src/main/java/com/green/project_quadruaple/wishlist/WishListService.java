@@ -18,8 +18,12 @@ public class WishListService {
     private final AuthenticationFacade authenticationFacade;
     private final WishListMapper wishlistMapper;
 
+
     @Value("${const.default-review-size}")
     private int size;
+    private String category;
+    private String startAt;
+    private String endAt;
 
     public ResponseEntity<ResponseWrapper<String>> toggleWishList(long strfId) {
         Long userId = authenticationFacade.getSignedUserId();
@@ -48,20 +52,23 @@ public class WishListService {
 //
 //    }
 
-    public ResponseWrapper<List<WishListRes>> getWishList(int startIdx) {
+    public ResponseWrapper<List<WishListRes>> getWishList(int startIdx, String orderType) {
         Long userId = authenticationFacade.getSignedUserId();
 
         int more = 1;
+        if (category == null || !category.equals("FEST")) {
+            startAt = null;
+            endAt = null;
+        }
 
-        List<WishListRes> list = wishlistMapper.wishListGet(userId,startIdx,size+more);
+        List<WishListRes> list = wishlistMapper.wishListGet(userId, startIdx, size + more, orderType, category, startAt, endAt);
 
         boolean hasMore = list.size() > size;
 
         if (hasMore) {
-            list.get(list.size()-1).setMore(true);
-            list.remove(list.size()-1);
+            list.get(list.size() - 1).setMore(true);
+            list.remove(list.size() - 1);
         }
-
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), list);
     }
 }

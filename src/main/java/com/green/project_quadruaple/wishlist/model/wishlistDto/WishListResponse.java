@@ -16,4 +16,6 @@ public class WishListResponse {
     private int ratingCnt;
     private long strfId;
     private String category;
+    private String startAt;
+    private String endAt;
 }
