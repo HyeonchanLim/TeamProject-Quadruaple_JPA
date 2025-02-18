@@ -199,7 +199,6 @@ public class SearchService {
     public ResponseWrapper<StaySearchRes> searchStayFilter(int startIdx, String category, String searchWord, List<Long> amenityId) {
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
             userId = authenticationFacade.getSignedUserId();
         }
