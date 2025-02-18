@@ -22,8 +22,6 @@ public class StrfService {
         if (signedUserId == null || strfId == null){
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
-
-
         StrfSelRes res = strfMapper.getMemberDetail(signedUserId,strfId);
 
         if (res == null) {

@@ -1,1 +1,0 @@
-import{_ as i,n as I,r as u,o as f}from"./index-C6bOqW8w.js";function _(){var r=i({},I);return r.useId}var a=0,s=_();const p=s?function(e){var t=s();return e||t}:function(e){var t=u.useState("ssr-id"),n=f(t,2),c=n[0],o=n[1];return u.useEffect(function(){var d=a;a+=1,o("rc_unique_".concat(d))},[]),e||c};export{p as u};
