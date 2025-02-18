@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.datamanager;
 
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.datamanager.model.ReviewDummyReq;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
 import com.green.project_quadruaple.datamanager.model.StrfReviewGetReq;
@@ -68,6 +69,13 @@ public class DataController {
             description = "profilePic이 null이거나 확장자가 없는 경우, 기본 이미지(user.png)로 변경")
     public ResponseEntity<?> updateProfilePicsToDefault() {
         return dataService.updateInvalidProfilePics();
+    }
+
+    @PostMapping("create-jpa-data")
+    @Operation(summary = "JPA 엔티티를 이용한 더미 데이터 생성",
+            description = "존재하는 엔티티의 1개의 더미데이터가 만들어짐")
+    public ResultResponse createJpaData() {
+        return dataService.createJpaData();
     }
 
 }
