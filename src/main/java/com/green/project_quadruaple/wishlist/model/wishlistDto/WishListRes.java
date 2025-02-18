@@ -17,6 +17,9 @@ public class WishListRes {
     private String strfPic;
     private String category;
     private boolean reviewed;
+    private String startAt;
+    private String endAt;
+
 
     private boolean isMore;
 

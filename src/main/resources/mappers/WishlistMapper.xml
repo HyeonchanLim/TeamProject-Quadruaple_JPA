@@ -20,29 +20,29 @@
     </delete>
 
     <!-- 위시리스트 조회 -->
-<!--    <select id="getWishList">-->
-<!--        SELECT-->
-<!--        a.title,-->
-<!--        d.title AS locationTitle,-->
-<!--        GROUP_CONCAT(DISTINCT f.pic_name) AS strfPic,-->
-<!--        AVG(e.rating) AS ratingAvg,-->
-<!--        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = a.strf_id), 0) AS wishCnt,-->
-<!--        COALESCE((SELECT COUNT(*) FROM review RV WHERE RV.strf_id = a.strf_id), 0) AS ratingCnt,-->
-<!--        a.strf_id,-->
-<!--        a.category-->
-<!--        FROM stay_tour_restaur_fest a-->
-<!--        LEFT JOIN location_detail c ON a.location_detail_id = c.location_detail_id-->
-<!--        LEFT JOIN location d ON c.location_id = d.location_id-->
-<!--        LEFT JOIN review e ON a.strf_id = e.strf_id-->
-<!--        LEFT JOIN strf_pic f ON f.strf_id = a.strf_id-->
-<!--        WHERE b.user_id = #{userId}-->
-<!--        GROUP BY a.strf_id, a.title, d.title, a.category-->
-<!--        LEFT JOIN wishlist b ON a.strf_id = b.strf_id-->
-<!--        ORDER BY b.created_at DESC-->
-<!--        LIMIT #{startIdx} , #{size}-->
-<!--    </select>-->
+    <!--    <select id="getWishList">-->
+    <!--        SELECT-->
+    <!--        a.title,-->
+    <!--        d.title AS locationTitle,-->
+    <!--        GROUP_CONCAT(DISTINCT f.pic_name) AS strfPic,-->
+    <!--        AVG(e.rating) AS ratingAvg,-->
+    <!--        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = a.strf_id), 0) AS wishCnt,-->
+    <!--        COALESCE((SELECT COUNT(*) FROM review RV WHERE RV.strf_id = a.strf_id), 0) AS ratingCnt,-->
+    <!--        a.strf_id,-->
+    <!--        a.category-->
+    <!--        FROM stay_tour_restaur_fest a-->
+    <!--        LEFT JOIN location_detail c ON a.location_detail_id = c.location_detail_id-->
+    <!--        LEFT JOIN location d ON c.location_id = d.location_id-->
+    <!--        LEFT JOIN review e ON a.strf_id = e.strf_id-->
+    <!--        LEFT JOIN strf_pic f ON f.strf_id = a.strf_id-->
+    <!--        WHERE b.user_id = #{userId}-->
+    <!--        GROUP BY a.strf_id, a.title, d.title, a.category-->
+    <!--        LEFT JOIN wishlist b ON a.strf_id = b.strf_id-->
+    <!--        ORDER BY b.created_at DESC-->
+    <!--        LIMIT #{startIdx} , #{size}-->
+    <!--    </select>-->
 
-    <select id="wishListGet">
+    <!--<select id="wishListGet">
         SELECT a.strf_id AS strfId , a.user_id AS userId , d.title AS locationName ,
         COALESCE((select AVG(RO.rating) FROM review RO WHERE RO.strf_id=b.strf_id),0) AS ratingAvg ,
         COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = b.strf_id), 0) AS wishCnt,
@@ -59,6 +59,68 @@
         GROUP BY a.user_id , a.strf_id
         ORDER BY a.created_at
         LIMIT #{startIdx} , #{size}
+    </select>-->
+
+    <!--<select id="wishListGet">
+        SELECT a.strf_id AS strfId , a.user_id AS userId , d.title AS locationName ,
+        COALESCE((select AVG(RO.rating) FROM review RO WHERE RO.strf_id=b.strf_id),0) AS ratingAvg ,
+        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = b.strf_id), 0) AS wishCnt,
+        COALESCE((SELECT COUNT(*) FROM review RV WHERE RV.strf_id = b.strf_id), 0) AS ratingCnt,
+        if(EXISTS(SELECT 1 FROM wishlist WM WHERE WM.strf_id=b.strf_id AND WM.user_id=e.user_id),1,0) AS reviewed,
+        f.pic_name AS strfPic , b.category , b.title AS strfTitle
+        FROM wishlist a
+        JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        LEFT JOIN location_detail c ON b.location_detail_id = c.location_detail_id
+        LEFT JOIN location d ON c.location_id = d.location_id
+        LEFT JOIN review e ON a.strf_id = e.strf_id AND e.user_id =116
+        LEFT JOIN strf_pic f ON a.strf_id = f.strf_id
+        WHERE a.user_id = #{userId}
+        GROUP BY a.user_id , a.strf_id
+        ORDER BY
+        CASE WHEN #{orderType} = 'likeCnt' THEN wishCnt END DESC,
+        CASE WHEN #{orderType} = 'ratingAvg' THEN ratingAvg END DESC,
+        CASE WHEN #{orderType} = 'ratingCnt' THEN ratingCnt END DESC,
+        a.created_at DESC
+        LIMIT #{startIdx} , #{size}
+    </select>-->
+    <select id="wishListGet">
+        SELECT
+        a.strf_id AS strfId,
+        a.user_id AS userId,
+        d.title AS locationName,
+        COALESCE((SELECT AVG(RO.rating) FROM review RO WHERE RO.strf_id = b.strf_id), 0) AS ratingAvg,
+        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = b.strf_id), 0) AS wishCnt,
+        COALESCE((SELECT COUNT(*) FROM review RV WHERE RV.strf_id = b.strf_id), 0) AS ratingCnt,
+        CASE
+        WHEN EXISTS (
+        SELECT 1 FROM wishlist WM
+        WHERE WM.strf_id = b.strf_id
+        AND WM.user_id = #{userId}
+        ) THEN 1 ELSE 0
+        END AS reviewed,
+        f.pic_name AS strfPic,
+        b.category,
+        b.title AS strfTitle,
+        b.start_at,
+        b.end_at
+        FROM wishlist a
+        JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        LEFT JOIN location_detail c ON b.location_detail_id = c.location_detail_id
+        LEFT JOIN location d ON c.location_id = d.location_id
+        LEFT JOIN review e ON a.strf_id = e.strf_id AND e.user_id = #{userId}
+        LEFT JOIN strf_pic f ON a.strf_id = f.strf_id
+        WHERE a.user_id = #{userId}
+        AND a.category = #{category}
+        <if test="category == 'FEST'">
+            AND b.start_at &gt;= #{startAt} AND b.end_at &lt;= #{endAt}
+        </if>
+        GROUP BY a.user_id, a.strf_id
+        ORDER BY
+        CASE WHEN #{orderType} = 'likeCnt' THEN wishCnt END DESC,
+        CASE WHEN #{orderType} = 'ratingAvg' THEN ratingAvg END DESC,
+        CASE WHEN #{orderType} = 'ratingCnt' THEN ratingCnt END DESC,
+        a.created_at DESC
+        LIMIT #{startIdx}, #{size}
     </select>
 
 </mapper>
