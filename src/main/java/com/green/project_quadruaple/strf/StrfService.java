@@ -41,6 +41,8 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
         GetNonDetail detail = strfMapper.getNonMemberDetail(strfId);
+        double roundedRating = Math.round(detail.getRatingAvg() * 10) / 10.0;
+        detail.setRatingAvg(roundedRating);
         if (detail == null){
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
