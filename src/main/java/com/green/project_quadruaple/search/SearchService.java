@@ -183,6 +183,12 @@ public class SearchService {
 
         int more = 1;
         List<SearchCategoryRes> res = searchMapper.searchCategory(lastIdx,size+more,categoryValue,searchWord,userId, orderType);
+        res.forEach(stay -> {
+            if (stay.getRatingAvg() != null) {
+                double roundedRating = Math.round(stay.getRatingAvg() * 10) / 10.0;
+                stay.setRatingAvg(roundedRating);
+            }
+        });
 
         boolean hasMore = res.size() > size;
         if (hasMore) {
