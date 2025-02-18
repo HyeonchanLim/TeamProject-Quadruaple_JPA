@@ -9,7 +9,7 @@
         a.lat AS latit, a.lng AS longitude, a.address, b.menu_id AS menuId,
         a.post, a.tell, a.start_at AS startAt, a.end_at AS endAt,
         a.open_check as openCheck, a.close_check as closeCheck , a.rest_date AS restDate,
-        a.`explain`, a.detail, a.busi_num AS busiNum, b.menu_pic AS menuPic,
+        a.detail, a.busi_num AS busiNum, b.menu_pic AS menuPic,
         f.detail_title AS locationName, e.pic_name AS strfPic , d.amenity_id AS amenityId,
         b.title AS menuTitle, d.title AS amenityTitle,
         j.name AS reviewWriterName , j.profile_pic AS reviewWriterUserPic ,
@@ -79,7 +79,6 @@
         <result property="openCheck" column="openCheck" />
         <result property="closeCheck" column="closeCheck" />
         <result property="restDate" column="restDate" />
-        <result property="explain" column="explain" />
         <result property="detail" column="detail" />
         <result property="busiNum" column="busiNum" />
         <result property="locationName" column="locationName" />

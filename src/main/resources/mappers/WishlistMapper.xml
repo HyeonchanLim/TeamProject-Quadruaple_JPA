@@ -110,10 +110,6 @@
         LEFT JOIN review e ON a.strf_id = e.strf_id AND e.user_id = #{userId}
         LEFT JOIN strf_pic f ON a.strf_id = f.strf_id
         WHERE a.user_id = #{userId}
-        AND a.category = #{category}
-        <if test="category == 'FEST'">
-            AND b.start_at &gt;= #{startAt} AND b.end_at &lt;= #{endAt}
-        </if>
         GROUP BY a.user_id, a.strf_id
         ORDER BY
         CASE WHEN #{orderType} = 'likeCnt' THEN wishCnt END DESC,

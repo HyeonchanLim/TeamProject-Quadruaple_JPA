@@ -15,7 +15,7 @@ public class SearchStay {
     private String category;
     private String locationName;
     private String strfPic;
-    private double averageRating;
+    private Double averageRating;
     private int reviewCnt;
     private int wishIn;
     private String createdAt;
