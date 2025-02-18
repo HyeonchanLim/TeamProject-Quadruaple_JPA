@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.wishlist;
 
+import com.green.project_quadruaple.wishlist.model.WishlistFestRes;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -15,9 +16,7 @@ public interface WishListMapper {
 
     void insertWishList(Long userId, long strfId);
 
-    List<WishListRes> wishListGet(Long userId, int startIdx , int size, String orderType,String category, String startAt, String endAt);
+    List<WishListRes> wishListGet(Long userId, int startIdx , int size, String orderType,String category);
 
-
-
-
+    List<WishlistFestRes> wishlistFestGet(Long userId , int startIdx , int size , String orderType , String category , String startAt);
 }
