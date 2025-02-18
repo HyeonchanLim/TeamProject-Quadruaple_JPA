@@ -31,7 +31,6 @@
             , s.lat AS lat
             , s.lng AS lng
             , s.address AS address
-            , s.`explain` AS `explain`
             , sp.pic_name AS picTitle
             , COALESCE(w.wishlist_count, 0) AS wishCnt
             , COALESCE(r1.review_count, 0) AS ratingCnt
