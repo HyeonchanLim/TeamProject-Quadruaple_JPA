@@ -263,6 +263,7 @@
         LIMIT #{startIdx}, #{size}
     </select>
 
+
     <resultMap id="searchCategoryResultMap" type="com.green.project_quadruaple.search.model.SearchCategoryRes">
         <id property="strfId" column="strfId"/>
         <result property="strfTitle" column="strfTitle"/>
