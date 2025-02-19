@@ -81,28 +81,28 @@ public class SearchController {
         return searchService.searchBasicPopular();
     }
 
-    @PostMapping("/all")
+    @GetMapping("/all")
     @Operation(summary = "검색 - 전체 페이지 리스트", description = "최대 3개 출력 - 나머지는 더 보기 누르면 category 로 이전")
     public ResponseWrapper<?> searchAll(@RequestParam("search_word") String searchWord) {
         return searchService.searchAll(searchWord);
     }
 
     @GetMapping("/category")
-    public ResponseEntity<?> searchCategory(@RequestParam("last_index") int lastIdx,
+    public ResponseEntity<?> searchCategory(@RequestParam("start_idx") int startIdx,
                                             @RequestParam String category,
                                             @RequestParam(value = "search_word", required = false) String searchWord,
                                             @RequestParam(value = "order_type",required = false) String orderType) {
 
-        ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(lastIdx,category,searchWord, orderType);
+        ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(startIdx,category,searchWord, orderType);
         return ResponseEntity.ok(list);
     }
     @GetMapping("/filter")
-    public ResponseWrapper<?> searchStayFilter(@RequestParam("last_index") int lastIdx,
+    public ResponseWrapper<?> searchStayFilter(@RequestParam("start_idx") int startIdx,
                                               @RequestParam String category,
                                               @RequestParam(value = "search_word") String searchWord,
-                                              @RequestParam(value = "amenity_id") List<Long> amenityId){
+                                              @RequestParam(value = "amenity_id",required = false) List<Long> amenityId){
 
-        return searchService.searchStayFilter(lastIdx,category,searchWord,amenityId);
+        return searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
     }
 
 }

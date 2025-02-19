@@ -8,22 +8,16 @@ import lombok.*;
 @Setter
 @EqualsAndHashCode
 public class WishListRes {
-    private long strfId;// 찜 항목 ID
+    private Long strfId;// 찜 항목 ID
     private String strfTitle;
     private String locationName;
-    private double ratingAvg;
+    private Double ratingAvg;
     private int wishCnt;
-    private double ratingCnt;
+    private int ratingCnt;
     private String strfPic;
     private String category;
     private boolean reviewed;
     private String startAt;
     private String endAt;
-
-
     private boolean isMore;
-
-
-
-
 }

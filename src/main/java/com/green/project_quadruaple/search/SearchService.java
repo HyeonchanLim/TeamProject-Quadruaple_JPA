@@ -164,40 +164,41 @@ public class SearchService {
         }
     }
 
-    public ResponseWrapper<List<SearchCategoryRes>> searchCategory(int lastIdx , String category , String searchWord, String orderType) {
-
+    public ResponseWrapper<List<SearchCategoryRes>> searchCategory(int startIdx , String category , String searchWord, String orderType) {
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
             userId = authenticationFacade.getSignedUserId();
         }
         if (userId>0){
             searchMapper.searchIns(searchWord, userId);
         }
-
         String categoryValue = null;
         if(category != null && Category.getKeyByName(category) != null) {
             categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
         }
 
         int more = 1;
-        List<SearchCategoryRes> res = searchMapper.searchCategory(lastIdx,size+more,categoryValue,searchWord,userId, orderType);
-
+        List<SearchCategoryRes> res = searchMapper.searchCategory(startIdx,size+more,categoryValue,searchWord,userId, orderType);
+        res.forEach(stay -> {
+            if (stay.getRatingAvg() != null) {
+                double roundedRating = Math.round(stay.getRatingAvg() * 10) / 10.0;
+                stay.setRatingAvg(roundedRating);
+            }
+        });
         boolean hasMore = res.size() > size;
+
         if (hasMore) {
-            res.get(res.size()-1).setMore(true);
+
             res.remove(res.size()-1);
         }
-
+        res.forEach(stay -> stay.setMore(hasMore));
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
-
     }
 
-    public ResponseWrapper<StaySearchRes> searchStayFilter(int lastIdx, String category, String searchWord, List<Long> amenityIds) {
+    public ResponseWrapper<StaySearchRes> searchStayFilter(int startIdx, String category, String searchWord, List<Long> amenityId) {
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
             userId = authenticationFacade.getSignedUserId();
         }
@@ -207,11 +208,25 @@ public class SearchService {
         }
         int more = 1;
 
+        if (amenityId == null) {
+            amenityId = new ArrayList<>();
+        }
+
+        List<SearchAmenity> amenities = new ArrayList<>();
+        if (!amenityId.isEmpty()) {
+            amenities = searchMapper.searchAmenity(amenityId);
+        }
         try {
-            List<SearchAmenity> amenities = searchMapper.searchAmenity(amenityIds);
-            List<SearchStay> stays = searchMapper.searchStay(categoryValue, searchWord, lastIdx, size + more, userId,amenityIds);
+            List<SearchStay> stays = searchMapper.searchStay(categoryValue, searchWord, startIdx, size + more, userId,amenityId);
+            stays.forEach(stay -> {
+                if (stay.getAverageRating() != null) {
+                    double roundedRating = Math.round(stay.getAverageRating() * 10) / 10.0;
+                    stay.setAverageRating(roundedRating);
+                }
+            });
             StaySearchRes res = new StaySearchRes();
             if (stays.size() >= size) {
+
                 res.setMore(true);
             }
             res.setStays(stays);
@@ -222,5 +237,4 @@ public class SearchService {
             throw new RuntimeException();
         }
     }
-
 }

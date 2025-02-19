@@ -28,11 +28,10 @@ public class StrfSelRes {
     private String openCheck;
     private String closeCheck;
     private String restDate;
-    private String explain;
     private String detail;
     private String busiNum;
     private String locationName;
-    private double ratingAvg;
+    private Double ratingAvg;
     private String reviewWriterName;
     private String hostProfilePic;
     private String reviewWriterUserPic;
