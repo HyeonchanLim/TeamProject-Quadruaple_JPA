@@ -13,7 +13,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class StaySearchRes {
     private boolean isMore;
-    private List<SearchAmenity> amenities;
+    private Double averageRating;
     private List<SearchStay> stays;
 
 }

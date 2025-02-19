@@ -5,6 +5,7 @@ import com.green.project_quadruaple.search.model.filter.SearchAmenity;
 import com.green.project_quadruaple.search.model.filter.SearchStay;
 import com.green.project_quadruaple.search.model.filter.Stay;
 import com.green.project_quadruaple.search.model.SearchCategoryRes;
+import com.green.project_quadruaple.search.model.filter.StaySearchRes;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
 import org.apache.ibatis.annotations.Mapper;
@@ -37,9 +38,9 @@ public interface SearchMapper {
     List<SearchCategoryRes> searchCategory(int startIdx, int size, String category, String searchWord, Long userId, String orderType);
 
     // 전체 상품에서 숙소 카테고리 전환
-    List<SearchStay> searchStay(String category, String searchWord, int startIdx, int size, Long userId, List<Long> amenityId);
+    List<SearchStay> searchStay(int startIdx ,int size, String category, String searchWord,  Long userId, List<Long> amenityId);
 
-    List<SearchAmenity> searchAmenity(List<Long> amenityId);
+//    List<SearchAmenity> searchAmenity(List<Long> amenityId);
 
 
 }

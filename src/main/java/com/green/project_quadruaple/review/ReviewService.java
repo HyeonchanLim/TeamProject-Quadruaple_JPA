@@ -29,9 +29,9 @@ public class ReviewService {
     @Value("${const.default-review-size}")
     private int size;
 
-    public List<ReviewSelRes> getReviewWithPics(Long strfId,int lastIdx ) {
+    public List<ReviewSelRes> getReviewWithPics(Long strfId,int startIdx ) {
         int more = 1;
-        List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(strfId,lastIdx,size+more);
+        List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(strfId,startIdx,size+more);
         if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }
@@ -46,10 +46,10 @@ public class ReviewService {
         }
         return dtoList;
     }
-    public List<MyReviewSelRes> getMyReviews(int lastIdx) {
+    public List<MyReviewSelRes> getMyReviews(int startIdx) {
         Long userId = authenticationFacade.getSignedUserId();
         int more = 1;
-        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(userId,lastIdx,size+more);
+        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(userId,startIdx,size+more);
         if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }

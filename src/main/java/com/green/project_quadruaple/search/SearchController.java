@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/search") // 겹치지 않도록 설정
 @Tag(name = "검색")
@@ -41,19 +40,19 @@ public class SearchController {
     @GetMapping("/strf-list-basic")
     @Operation(summary = "일정 추가 검색 기본", description = "일정 추가 검색 화면 처음 접근시 불러올 해당지역 추천 장소들 요청 API")
     public ResponseWrapper<GetSearchStrfListBasicRes> getStrfListBasic(@RequestParam("trip_id") Long tripId,
-                                                                       @RequestParam("last_index") int lastIdx)
+                                                                       @RequestParam("start_idx") int startIdx)
     {
-        return searchService.getStrfListBasic(tripId, lastIdx);
+        return searchService.getStrfListBasic(tripId, startIdx);
     }
 
     @GetMapping("/strf-list-word")
     @Operation(summary = "일정 추가 검색", description = "일정 추가 검색, 검색어 입력 시 요청 API, 현재 필터는 카테고리와 검색어 뿐")
     public ResponseWrapper<GetSearchStrfListBasicRes> getStrfListWithSearchWord(@RequestParam("trip_id") Long tripId,
-                                                                       @RequestParam("last_index") int lastIdx,
+                                                                       @RequestParam("start_idx") int startIdx,
                                                                        @RequestParam(required = false) String category,
                                                                        @RequestParam(value = "search_word", required = false) String searchWord)
     {
-        return searchService.getStrfListWithSearchWord(tripId, lastIdx, category, searchWord);
+        return searchService.getStrfListWithSearchWord(tripId, startIdx, category, searchWord);
     }
 
 
@@ -98,11 +97,11 @@ public class SearchController {
     }
     @GetMapping("/filter")
     public ResponseWrapper<?> searchStayFilter(@RequestParam("start_idx") int startIdx,
-                                              @RequestParam String category,
-                                              @RequestParam(value = "search_word") String searchWord,
-                                              @RequestParam(value = "amenity_id",required = false) List<Long> amenityId){
+                                               @RequestParam String category,
+                                               @RequestParam(value = "search_word", required = false) String searchWord,
+                                               @RequestParam(value = "amenity_id",required = false) List<Long> amenityId){
 
+//        ResponseWrapper<List<SearchStay>> list = searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
         return searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
     }
-
 }
