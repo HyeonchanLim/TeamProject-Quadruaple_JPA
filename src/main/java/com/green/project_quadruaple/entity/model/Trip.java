@@ -10,10 +10,8 @@ import java.util.List;
 
 @Entity
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Setter
+@NoArgsConstructor
 public class Trip {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,11 +26,16 @@ public class Trip {
     private User manager;
 
     @Embedded
-    @Setter(AccessLevel.NONE)
     private Period period;
 
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     @Setter(AccessLevel.NONE)
     private LocalDateTime createdAt;
+
+    public Trip(String title, User manager, Period period) {
+        this.title = title;
+        this.manager = manager;
+        this.period = period;
+    }
 }

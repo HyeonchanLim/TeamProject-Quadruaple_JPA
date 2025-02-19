@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Schedule {
 
     @Id
@@ -33,4 +31,12 @@ public class Schedule {
     private Strf strf;
 
     private LocalDateTime updatedAt;
+
+    public Schedule(ScheMemo scheMemo, Integer distance, Integer duration, Integer pathType, Strf strf) {
+        ScheMemo = scheMemo;
+        this.distance = distance;
+        this.duration = duration;
+        this.pathType = pathType;
+        this.strf = strf;
+    }
 }

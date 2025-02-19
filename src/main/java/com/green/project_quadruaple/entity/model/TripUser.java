@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class TripUser {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,4 +30,9 @@ public class TripUser {
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public TripUser(User user, Trip trip) {
+        this.user = user;
+        this.trip = trip;
+    }
 }

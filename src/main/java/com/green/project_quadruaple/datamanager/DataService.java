@@ -524,57 +524,42 @@ public class DataService {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 0));
     }
 
-    @Transactional
-    public ResultResponse createJpaData() {
-        try {
-            User user = User.builder()
-                    .name("wook")
-                    .pw("1234qwer!")
-                    .email("email@mail.com")
-                    .phone("010-1234-1234")
-                    .birth(LocalDate.now())
-                    .build();
-
-            userRepository.save(user);
-
-            Trip trip = Trip.builder()
-                    .title("여행1")
-                    .manager(user)
-                    .period(new Period(LocalDate.of(2025,1,2), LocalDate.of(2025,2,2)))
-                    .build();
-
-            tripRepository.save(trip);
-
-            TripUser tripUser = TripUser.builder()
-                    .user(user)
-                    .trip(trip)
-                    .build();
-            tripUserRepository.save(tripUser);
-
-            ScheMemo scheMemo = ScheMemo.builder()
-                    .category(Category.STAY)
-                    .day(1)
-                    .seq(1)
-                    .trip(trip)
-                    .build();
-            ScheMemo saveScheMemo = scheMemoRepository.save(scheMemo);
-            log.info("saveScheMeme PK : {}", saveScheMemo.getScheMemoId());
-
-            Strf strf = Strf.builder().build();
-            strfRepository.save(strf);
-
-            Schedule schedule = Schedule.builder()
-                    .ScheMemo(saveScheMemo)
-                    .distance(120000)
-                    .duration(180)
-                    .pathType(12)
-                    .strf(strf)
-                    .build();
-            scheduleRepository.save(schedule);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResultResponse.severError();
-        }
-        return ResultResponse.success();
-    }
+//    @Transactional
+//    public ResultResponse createJpaData() {
+//        try {
+//            User user = User.builder()
+//                    .name("wook")
+//                    .pw("1234qwer!")
+//                    .email("email@mail.com")
+//                    .phone("010-1234-1234")
+//                    .birth(LocalDate.now())
+//                    .build();
+//
+//            userRepository.save(user);
+//
+//            Trip trip = new Trip("여행A",
+//                    user,
+//                    new Period(LocalDate.of(2025,1,5), LocalDate.of(2025,1,11))
+//            );
+//
+//            tripRepository.save(trip);
+//
+//            TripUser tripUser = new TripUser(user, trip);
+//            tripUserRepository.save(tripUser);
+//
+//            ScheMemo scheMemo = new ScheMemo(trip, 1, 1, Category.STAY);
+//            ScheMemo saveScheMemo = scheMemoRepository.save(scheMemo);
+//            log.info("saveScheMeme PK : {}", saveScheMemo.getScheMemoId());
+//
+//            Strf strf = new Strf();
+//            strfRepository.save(strf);
+//
+//            Schedule schedule = new Schedule(scheMemo, 12000, 180, 12, strf);
+//            scheduleRepository.save(schedule);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResultResponse.severError();
+//        }
+//        return ResultResponse.success();
+//    }
 }
