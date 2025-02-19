@@ -282,14 +282,14 @@
         b.detail_title AS locationName, h.pic_name AS strfPic, AVG(f.rating) AS ratingAvg,
         COUNT(f.review_id) AS reviewCnt,
         (SELECT COUNT(*) FROM wishlist w WHERE w.strf_id = a.strf_id) AS wishlistCnt,
-        MAX(a.created_at) AS createdAt,
+        MAX(a.created_at) AS createdAt,j.amenity_id AS amenityId ,
         MAX(CASE WHEN f.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview,
         <if test="userId != 0">
-            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
+           , IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
         </if>
         <if test="userId == 0">
             0 AS wishIn
-        </if>, j.amenity_id AS amenityId , j.title AS amenityTitle
+        </if>
         FROM stay_tour_restaur_fest a
         LEFT JOIN location_detail b ON a.location_detail_id = b.location_detail_id
         JOIN location e ON e.location_id = b.location_id
@@ -298,7 +298,7 @@
         LEFT JOIN strf_pic h ON a.strf_id = h.strf_id
         LEFT JOIN amenipoint i ON i.strf_id = a.strf_id
         LEFT JOIN amenity j ON i.amenity_id = j.amenity_id
-        WHERE a.category = 'STAY'
+        WHERE a.category = #{category}
         <if test="searchWord != null and searchWord != ''">
             AND (
             a.title LIKE CONCAT('%', #{searchWord}, '%')
@@ -332,6 +332,7 @@
         <result property="strfPic" column="strfPic"/>
         <result property="ratingAvg" column="ratingAvg"/>
         <result property="reviewCnt" column="reviewCnt"/>
+        <result property="wishlistCnt" column="wishlistCnt"/>
         <result property="wishIn" column="wishIn"/>
         <result property="createdAt" column="createdAt"/>
     </resultMap>
