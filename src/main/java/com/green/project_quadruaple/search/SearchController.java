@@ -107,5 +107,4 @@ public class SearchController {
         ResponseWrapper<List<SearchStay>> list = searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
         return ResponseEntity.ok(list);
     }
-
 }

@@ -288,8 +288,8 @@
             IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
         </if>
         <if test="userId == 0">
-            0 AS wishIn
-        </if>, j.amenity_id AS amenityId , j.title AS amenityTitle
+            0 AS wishIn,
+        </if> j.amenity_id AS amenityId , j.title AS amenityTitle
         FROM stay_tour_restaur_fest a
         LEFT JOIN location_detail b ON a.location_detail_id = b.location_detail_id
         JOIN location e ON e.location_id = b.location_id
