@@ -9,6 +9,7 @@ import com.green.project_quadruaple.search.model.filter.StaySearchRes;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.ServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -99,12 +100,12 @@ public class SearchController {
         return ResponseEntity.ok(list);
     }
     @GetMapping("/filter")
-    public ResponseEntity<?> searchStayFilter(@RequestParam("start_idx") int startIdx,
-                                              @RequestParam String category,
-                                              @RequestParam(value = "search_word", required = false) String searchWord,
-                                              @RequestParam(value = "amenity_id",required = false) List<Long> amenityId){
+    public ResponseWrapper<?> searchStayFilter(@RequestParam("start_idx") int startIdx,
+                                               @RequestParam String category,
+                                               @RequestParam(value = "search_word", required = false) String searchWord,
+                                               @RequestParam(value = "amenity_id",required = false) List<Long> amenityId, ServletRequest servletRequest){
 
-        ResponseWrapper<List<SearchStay>> list = searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
-        return ResponseEntity.ok(list);
+//        ResponseWrapper<List<SearchStay>> list = searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
+        return searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
     }
 }
