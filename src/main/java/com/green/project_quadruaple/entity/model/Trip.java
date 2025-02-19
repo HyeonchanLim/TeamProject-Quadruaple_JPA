@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.green.project_quadruaple.entity.base.CreatedAt;
 import com.green.project_quadruaple.entity.base.Period;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,11 +11,9 @@ import java.util.List;
 
 @Entity
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Setter
-public class Trip {
+@NoArgsConstructor
+public class Trip extends CreatedAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "trip_id")
@@ -28,11 +27,11 @@ public class Trip {
     private User manager;
 
     @Embedded
-    @Setter(AccessLevel.NONE)
     private Period period;
 
-    @Column(name = "created_at", nullable = false)
-    @CreationTimestamp
-    @Setter(AccessLevel.NONE)
-    private LocalDateTime createdAt;
+    public Trip(String title, User manager, Period period) {
+        this.title = title;
+        this.manager = manager;
+        this.period = period;
+    }
 }

@@ -235,11 +235,6 @@ public class TripService {
         }
         tripMapper.updateTrip(req);
 
-        // 참여 유저 수정
-        if(req.getInsUserList() != null && !req.getInsUserList().isEmpty()) {
-            tripMapper.insTripUser(tripId, req.getInsUserList());
-        }
-
         if(req.getDelUserList() != null && !req.getDelUserList().isEmpty()) {
             List<Long> scheduleUserIdList = tripMapper.selScheduleUserId(tripId, req.getDelUserList());
             if(scheduleUserIdList != null && !scheduleUserIdList.isEmpty()) {

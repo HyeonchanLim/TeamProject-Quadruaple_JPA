@@ -175,7 +175,7 @@
     </update>
 
     <insert id="insTripUser">
-        INSERT INTO trip_user
+        INSERT IGNORE INTO trip_user
         (trip_id, user_id)
         VALUES
         <foreach collection="userIdList" item="userId" separator=",">

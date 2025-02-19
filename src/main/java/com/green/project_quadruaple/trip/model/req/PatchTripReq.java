@@ -33,10 +33,6 @@ public class PatchTripReq {
     @Schema(title = "수정 여행 완료 일자", type = "string", example = "2025-02-07", requiredMode = Schema.RequiredMode.REQUIRED)
     private String endAt;
 
-    @JsonProperty("ins_user_list")
-    @Schema(title = "여행 구성원 추가", type = "list", example = "[1,2,3]", requiredMode = Schema.RequiredMode.REQUIRED)
-    private List<Long> insUserList;
-
     @JsonProperty("del_user_list")
     @Schema(title = "여행 구성원 삭제", type = "list", example = "[4,5,6]", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<Long> delUserList;
