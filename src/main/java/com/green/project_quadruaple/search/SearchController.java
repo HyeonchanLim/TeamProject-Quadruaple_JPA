@@ -4,18 +4,14 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
 
 import com.green.project_quadruaple.search.model.SearchCategoryRes;
-import com.green.project_quadruaple.search.model.filter.SearchStay;
-import com.green.project_quadruaple.search.model.filter.StaySearchRes;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.ServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/search") // 겹치지 않도록 설정
@@ -103,7 +99,7 @@ public class SearchController {
     public ResponseWrapper<?> searchStayFilter(@RequestParam("start_idx") int startIdx,
                                                @RequestParam String category,
                                                @RequestParam(value = "search_word", required = false) String searchWord,
-                                               @RequestParam(value = "amenity_id",required = false) List<Long> amenityId, ServletRequest servletRequest){
+                                               @RequestParam(value = "amenity_id",required = false) List<Long> amenityId){
 
 //        ResponseWrapper<List<SearchStay>> list = searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
         return searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
