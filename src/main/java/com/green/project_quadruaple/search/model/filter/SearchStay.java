@@ -17,6 +17,7 @@ public class SearchStay {
     private int hasMyReview;
     private String strfPic;
     private Double ratingAvg;
+    private int wishlistCnt;
     private int reviewCnt;
     private int wishIn;
     private String createdAt;
