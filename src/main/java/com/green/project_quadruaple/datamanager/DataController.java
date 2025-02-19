@@ -71,11 +71,11 @@ public class DataController {
         return dataService.updateInvalidProfilePics();
     }
 
-    @PostMapping("create-jpa-data")
-    @Operation(summary = "JPA 엔티티를 이용한 더미 데이터 생성",
-            description = "존재하는 엔티티의 1개의 더미데이터가 만들어짐")
-    public ResultResponse createJpaData() {
-        return dataService.createJpaData();
-    }
+//    @PostMapping("create-jpa-data")
+//    @Operation(summary = "JPA 엔티티를 이용한 더미 데이터 생성",
+//            description = "존재하는 엔티티의 1개의 더미데이터가 만들어짐")
+//    public ResultResponse createJpaData() {
+//        return dataService.createJpaData();
+//    }
 
 }

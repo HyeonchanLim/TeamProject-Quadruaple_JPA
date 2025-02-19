@@ -1,3 +1,4 @@
+et --hard HEAD~2
 HELP.md
 .gradle
 build/
