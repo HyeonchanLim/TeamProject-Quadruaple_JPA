@@ -537,39 +537,24 @@ public class DataService {
 //
 //            userRepository.save(user);
 //
-//            Trip trip = Trip.builder()
-//                    .title("여행1")
-//                    .manager(user)
-//                    .period(new Period(LocalDate.of(2025,1,2), LocalDate.of(2025,2,2)))
-//                    .build();
+//            Trip trip = new Trip("여행A",
+//                    user,
+//                    new Period(LocalDate.of(2025,1,5), LocalDate.of(2025,1,11))
+//            );
 //
 //            tripRepository.save(trip);
 //
-//            TripUser tripUser = TripUser.builder()
-//                    .user(user)
-//                    .trip(trip)
-//                    .build();
+//            TripUser tripUser = new TripUser(user, trip);
 //            tripUserRepository.save(tripUser);
 //
-//            ScheMemo scheMemo = ScheMemo.builder()
-//                    .category(Category.STAY)
-//                    .day(1)
-//                    .seq(1)
-//                    .trip(trip)
-//                    .build();
+//            ScheMemo scheMemo = new ScheMemo(trip, 1, 1, Category.STAY);
 //            ScheMemo saveScheMemo = scheMemoRepository.save(scheMemo);
 //            log.info("saveScheMeme PK : {}", saveScheMemo.getScheMemoId());
 //
-//            Strf strf = Strf.builder().build();
+//            Strf strf = new Strf();
 //            strfRepository.save(strf);
 //
-//            Schedule schedule = Schedule.builder()
-//                    .ScheMemo(saveScheMemo)
-//                    .distance(120000)
-//                    .duration(180)
-//                    .pathType(12)
-//                    .strf(strf)
-//                    .build();
+//            Schedule schedule = new Schedule(scheMemo, 12000, 180, 12, strf);
 //            scheduleRepository.save(schedule);
 //        } catch (Exception e) {
 //            e.printStackTrace();

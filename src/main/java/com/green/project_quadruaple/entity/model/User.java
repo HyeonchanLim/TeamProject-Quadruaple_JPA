@@ -12,13 +12,14 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class User {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long userId;
+
+    @Column(nullable = false)
+    private int providerType;
 
     @Column(name = "profile_pic", length = 500)
     private String profilePic;
@@ -44,4 +45,13 @@ public class User {
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public User(String profilePic, String name, String email, String phone, LocalDate birth, String pw) {
+        this.profilePic = profilePic;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.birth = birth;
+        this.pw = pw;
+    }
 }

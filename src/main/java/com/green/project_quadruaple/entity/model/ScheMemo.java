@@ -1,6 +1,8 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.green.project_quadruaple.entity.base.CreatedAt;
 import com.green.project_quadruaple.trip.model.Category;
+import com.green.project_quadruaple.trip.model.ScheMemoType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,14 +11,12 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class ScheMemo {
+public class ScheMemo extends CreatedAt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "schedule_memo_id")
-    private Long scheMemoId;
+    private Long scheduleMemoId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_id", nullable = false)
@@ -30,5 +30,12 @@ public class ScheMemo {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Category category;
+    private ScheMemoType scheMemoType;
+
+    public ScheMemo(Trip trip, int day, int seq, ScheMemoType scheMemoType) {
+        this.trip = trip;
+        this.day = day;
+        this.seq = seq;
+        this.scheMemoType = scheMemoType;
+    }
 }
