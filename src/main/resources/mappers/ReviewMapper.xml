@@ -17,7 +17,7 @@
         ORDER BY a.review_id DESC
         LIMIT #{startIdx}, #{size}
         ) T1
-        LEFT JOIN review_pic T2 ON T1.reviewId = T2.review_id -- 리뷰 사진을 LEFT JOIN으로 가져옴
+        LEFT JOIN review_pic T2 ON T1.reviewId = T2.review_id
     </select>
 
     <resultMap id="reviewPicResultMap" type="com.green.project_quadruaple.review.model.ReviewSelRes">

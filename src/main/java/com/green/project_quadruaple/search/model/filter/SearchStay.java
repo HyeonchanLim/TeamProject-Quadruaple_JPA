@@ -14,10 +14,10 @@ public class SearchStay {
     private String strfTitle;
     private String category;
     private String locationName;
+    private int hasMyReview;
     private String strfPic;
-    private Double averageRating;
+    private Double ratingAvg;
     private int reviewCnt;
     private int wishIn;
     private String createdAt;
-
 }

@@ -26,15 +26,15 @@ public class ReviewController {
     @GetMapping
     @Operation(summary = "리뷰 조회")
     public List<ReviewSelRes> getReview(@RequestParam("strf_id") Long strfId,
-                                        @RequestParam(value = "last_index",required = false) int lastIdx) {
+                                        @RequestParam(value = "start_idx",required = false) int startIdx) {
 
-        return reviewService.getReviewWithPics(strfId,lastIdx);
+        return reviewService.getReviewWithPics(strfId,startIdx);
     }
     @GetMapping("my")
     @Operation(summary = "나의 리뷰 조회")
-    public List<MyReviewSelRes> getMyReviews(@RequestParam("last_index") int lastIdx) {
+    public List<MyReviewSelRes> getMyReviews(@RequestParam("start_idx") int startIdx) {
 
-        return reviewService.getMyReviews(lastIdx);
+        return reviewService.getMyReviews(startIdx);
     }
 
     @PostMapping
