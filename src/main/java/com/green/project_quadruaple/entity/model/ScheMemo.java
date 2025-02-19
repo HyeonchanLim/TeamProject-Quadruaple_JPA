@@ -15,7 +15,7 @@ public class ScheMemo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "sche_memo_id")
+    @Column(name = "schedule_memo_id")
     private Long scheMemoId;
 
     @ManyToOne(fetch = FetchType.LAZY)
