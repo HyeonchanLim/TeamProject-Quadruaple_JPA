@@ -20,6 +20,7 @@ public class SearchCategoryRes {
     private Integer reviewCount;
     private Integer wishlistCount;
     private Integer wishIn;
+    private Integer hasMyReview;
 
     private boolean isMore;
 

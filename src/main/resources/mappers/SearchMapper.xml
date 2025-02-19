@@ -232,6 +232,7 @@
         COUNT(e.user_id) AS wishlistCount,
         COUNT(d.rating) AS ratingCnt ,
         COALESCE(a.created_at, NOW()) AS createdAt,
+        MAX(CASE WHEN d.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview,
         <if test="userId != null">
             IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
         </if>
@@ -270,6 +271,7 @@
         <result property="locationName" column="locationName"/>
         <result property="strfPic" column="strfPic"/>
         <result property="ratingAvg" column="ratingAvg"/>
+        <result property="hasMyReview" column="hasMyReview"/>
         <result property="reviewCount" column="reviewCount"/>
         <result property="wishlistCount" column="wishlistCount"/>
         <result property="wishIn" column="wishIn"/>
@@ -277,16 +279,17 @@
 
     <select id="searchStay" resultMap="searchStayResultMap">
         SELECT a.strf_id AS strfId, a.title AS strfTitle, a.category,
-        b.detail_title AS locationName, h.pic_name AS strfPic, AVG(f.rating) AS averageRating,
+        b.detail_title AS locationName, h.pic_name AS strfPic, AVG(f.rating) AS ratingAvg,
         COUNT(f.review_id) AS reviewCnt,
         (SELECT COUNT(*) FROM wishlist w WHERE w.strf_id = a.strf_id) AS wishlistCnt,
+        MAX(a.created_at) AS createdAt,
+        MAX(CASE WHEN f.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview,
         <if test="userId != 0">
             IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
         </if>
         <if test="userId == 0">
             0 AS wishIn
-        </if>, j.amenity_id AS amenityId,
-        MAX(a.created_at) AS createdAt
+        </if>, j.amenity_id AS amenityId , j.title AS amenityTitle
         FROM stay_tour_restaur_fest a
         LEFT JOIN location_detail b ON a.location_detail_id = b.location_detail_id
         JOIN location e ON e.location_id = b.location_id
@@ -325,35 +328,31 @@
         <result property="strfTitle" column="strfTitle"/>
         <result property="category" column="category"/>
         <result property="locationName" column="locationName"/>
+        <result property="hasMyReview" column="hasMyReview"/>
         <result property="strfPic" column="strfPic"/>
-        <result property="averageRating" column="averageRating"/>
+        <result property="ratingAvg" column="ratingAvg"/>
         <result property="reviewCnt" column="reviewCnt"/>
         <result property="wishIn" column="wishIn"/>
         <result property="createdAt" column="createdAt"/>
     </resultMap>
 
-    <select id="searchAmenity" resultMap="searchAmenityResultMap">
-        SELECT
-         d.amenity_id AS amenityId,
-         d.title AS amenityTitle
-        FROM stay_tour_restaur_fest a
-        JOIN amenipoint c ON a.strf_id = c.strf_id
-        JOIN amenity d ON c.amenity_id = d.amenity_id
-        <where>
-            <if test="amenityId != null and amenityId.size() > 0">
-                d.amenity_id IN
-                <foreach item="id" collection="amenityId" open="(" separator="," close=")">
-                    #{id}
-                </foreach>
-            </if>
-        </where>
-        GROUP BY d.amenity_id
 
-    </select>
-
-    <resultMap id="searchAmenityResultMap" type="com.green.project_quadruaple.search.model.filter.SearchAmenity">
-        <id property="amenityId" column="amenityId"/>
-        <result property="amenityTitle" column="amenityTitle"/>
-    </resultMap>
+<!--    <select id="searchAmenity" resultMap="searchAmenityResultMap">-->
+<!--        SELECT-->
+<!--         d.amenity_id AS amenityId,-->
+<!--         d.title AS amenityTitle-->
+<!--        FROM stay_tour_restaur_fest a-->
+<!--        JOIN amenipoint c ON a.strf_id = c.strf_id-->
+<!--        JOIN amenity d ON c.amenity_id = d.amenity_id-->
+<!--        <where>-->
+<!--            <if test="amenityId != null and amenityId.size() > 0">-->
+<!--                d.amenity_id IN-->
+<!--                <foreach item="id" collection="amenityId" open="(" separator="," close=")">-->
+<!--                    #{id}-->
+<!--                </foreach>-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        GROUP BY d.amenity_id-->
+<!--    </select>-->
 
 </mapper>
