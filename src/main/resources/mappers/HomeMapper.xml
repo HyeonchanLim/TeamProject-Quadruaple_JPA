@@ -146,7 +146,7 @@
         CONCAT(L.title, ' ', LD.detail_title) AS locationTitle,
         A.category,
         SP.pic_name AS strfPic,
-        CONCAT(LEFT(A.detail, 12), '...') AS `explain`,
+        IF(CHAR_LENGTH(A.detail) > 12, CONCAT(LEFT(A.detail, 12), '...'), A.detail) AS `explain`,
         COUNT(W.strf_id) AS wishCnt,
         COALESCE((SELECT AVG(RV.rating) FROM review RV WHERE RV.strf_id = A.strf_id), 0) AS averageRating,
         COALESCE((SELECT COUNT(R.strf_id) FROM recent R WHERE R.strf_id = A.strf_id), 0) AS recentViews
@@ -168,7 +168,7 @@
         CONCAT(L.title, ' ', LD.detail_title) AS locationTitle,
         A.category,
         SP.pic_name AS strfPic,
-        CONCAT(LEFT(A.detail, 12), '...') AS `explain` ,
+        IF(CHAR_LENGTH(A.detail) > 12, CONCAT(LEFT(A.detail, 12), '...'), A.detail) AS `explain` ,
         COALESCE((SELECT AVG(RV.rating) FROM review RV WHERE RV.strf_id = A.strf_id), 0) AS averageRating,
         COALESCE((SELECT COUNT(R.strf_id) FROM recent R WHERE R.strf_id = A.strf_id), 0) AS recentViews,
         COUNT(W.strf_id) AS wishCnt
