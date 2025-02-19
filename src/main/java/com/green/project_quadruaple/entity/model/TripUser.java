@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TripUser {
+public class TripUser extends CreatedAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "trip_user_id")
@@ -26,10 +27,6 @@ public class TripUser {
 
     @Column(nullable = false)
     private int disable;
-
-    @Column(name = "created_at", nullable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
 
     public TripUser(User user, Trip trip) {
         this.user = user;

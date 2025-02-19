@@ -40,6 +40,9 @@ dependencies {
     // templates - html 불러오는 gradle
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
+    // web socket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    compileOnly 'jakarta.websocket:jakarta.websocket-api:2.2.0'
 
     // Database
     runtimeOnly 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'

@@ -1,14 +1,18 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.green.project_quadruaple.entity.base.CreatedAt;
 import com.green.project_quadruaple.trip.model.Category;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-public class Strf {
+public class Strf extends CreatedAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "strf_id")
@@ -30,21 +34,41 @@ public class Strf {
     @Column(nullable = false, length = 100)
     private String address;
 
-    @JoinColumn(name = "location_detail_id")
-    private LocationDetail
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "location_detail_id", nullable = false)
+    private LocationDetail locationDetail;
+
+    @Column(length = 50)
+    private String post;
+
+    @Column(length = 50)
+    private String tell;
+
+    @Column(name = "start_at")
+    private LocalDate startAt;
+
+    @Column(name = "end_at")
+    private LocalDate endAt;
+
+    @Column(name = "open_check")
+    private LocalTime openCheck;
+
+    @Column(name = "close_check")
+    private LocalTime closeCheck;
+
+    @Column(name = "rest_date")
+    private String restDate;
+
+    @Column(columnDefinition = "TEXT")
+    private String detail;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "busi_num" ,nullable = false)
+    private BusinessNum busiNum;
 }
 
 /*
 *
-location_detail_id
-post
-tell
-start_at
-end_at
-open_check
-close_check
-rest_date
-detail
 created_at
 busi_num
 * */
