@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.green.project_quadruaple.common.config.security.SignInProviderType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,7 +20,7 @@ public class User {
     private Long userId;
 
     @Column(nullable = false)
-    private int providerType;
+    private SignInProviderType providerType;
 
     @Column(name = "profile_pic", length = 500)
     private String profilePic;
