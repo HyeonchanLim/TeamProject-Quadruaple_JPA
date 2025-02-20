@@ -16,9 +16,9 @@ public class ChatController {
 
     @MessageMapping("/hello")
     @SendTo("/topic/greetings")
-    public Greeting greeting(MessageReq req) {
+    public MessageRes greeting(MessageReq req) {
         log.info("req: {}", req);
 //        String send = chatService.message(req);
-        return new Greeting(HtmlUtils.htmlEscape(req.name()));
+        return new MessageRes(HtmlUtils.htmlEscape(req.message()));
     }
 }
