@@ -12,6 +12,7 @@ build/
 /src/main/resources/application-prod.yaml
 /src/main/resources/application-secret.yaml
 /src/main/resources/sql
+.env
 files
 
 ### STS ###
