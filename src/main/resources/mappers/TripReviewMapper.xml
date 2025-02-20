@@ -32,7 +32,7 @@
         GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count
         ,(SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count
-        , (SELECT COUNT(scrap_id) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count
+        , (SELECT COUNT(*) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count
         , A.trip_review_id, C.name, C.profile_pic
           FROM trip_review A
           LEFT JOIN trip_review_pic B
@@ -59,7 +59,7 @@
         GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count,
         (SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count,
-        (SELECT COUNT(scrap_id) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count,
+        (SELECT COUNT(*) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count,
         A.trip_review_id, C.name, C.profile_pic
          FROM trip_review A
          LEFT JOIN trip_review_pic B
@@ -79,7 +79,7 @@
         GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count
         ,(SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count
-        , (SELECT COUNT(scrap_id) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count
+        , (SELECT COUNT(*) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count
         , (SELECT COUNT(*) FROM trip_like WHERE trip_review_id = A.trip_review_id AND user_id = #{signedUserId}) AS like_user
         , A.trip_review_id, C.name, C.profile_pic
         FROM trip_review A
@@ -255,7 +255,7 @@
 
     <!-- 여행기 스크랩 조회수-->
     <select id="selTripReviewScrapCount">
-        SELECT COUNT(scrap_id)
+        SELECT COUNT(*)
           FROM scrap
          WHERE trip_review_id = #{tripReviewId}
     </select>

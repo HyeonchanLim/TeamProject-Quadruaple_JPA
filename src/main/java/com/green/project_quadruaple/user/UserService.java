@@ -179,7 +179,7 @@ public class UserService {
         // RT를 쿠키에 담는다.
         // refreshToken은 쿠키에 담는다.
         int maxAge = 1_296_000; // 15 * 24 * 60 * 60 > 15일의 초(second) 값
-        cookieUtils.setCookie(response, "refreshToken", refreshToken, maxAge);
+        cookieUtils.setCookie(response, "refreshToken", refreshToken, maxAge, "/api/user/access-token");
 
         return UserSignInRes.builder()
                 .accessToken(accessToken)
