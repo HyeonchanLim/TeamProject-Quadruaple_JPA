@@ -7,7 +7,9 @@ import com.green.project_quadruaple.common.config.jwt.TokenProvider;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.common.config.security.SignInProviderType;
 import com.green.project_quadruaple.common.model.ResultResponse;
+import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.user.exception.CustomException;
 import com.green.project_quadruaple.user.exception.UserErrorCode;
 import com.green.project_quadruaple.user.mail.MailService;
@@ -48,8 +50,7 @@ public class UserService {
     private final CookieUtils cookieUtils;
     private final AuthenticationFacade authenticationFacade;
     private final JavaMailSender javaMailSender;
-
-
+    private final UserRepository userRepository;
 
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
@@ -59,12 +60,6 @@ public class UserService {
 
     // 회원가입 및 이메일 인증 메일 발송
     public int signUp(MultipartFile pic, UserSignUpReq p) {
-        String email = p.getEmail();
-
-        // 이메일 인증 여부
-        if (!checkEmail(email)) {
-            return 0;
-        }
 
         // 이메일 중복 체크
         DuplicateEmailResult duplicateEmailResult = userMapper.getEmailDuplicateInfo(p);
@@ -92,12 +87,20 @@ public class UserService {
             savedPicName = "user_profile.png";
             isDefaultPic = true;
         }
-        p.setProfilePic(savedPicName); // DB 저장 전에 profilePic 설정
 
         try {
-            int result = userMapper.insUser(p);
-            if (result > 0) {
-                long userId = p.getUserId(); // DB에 삽입 후 userId 값 가져오기
+            User user = new User();
+            user.setName(nickname);
+            user.setEmail(p.getEmail());
+            user.setProfilePic(savedPicName);
+            user.setPw(hashedPassword);
+            user.setBirth(p.getBirth());
+            user.setProviderType(SignInProviderType.LOCAL);
+
+            userRepository.save(user);
+
+            if (user != null) {
+                long userId = user.getUserId(); // DB에 삽입 후 userId 값 가져오기
                 p.setUserId(userId);
                 userMapper.insUserRole(p);
 
@@ -179,7 +182,7 @@ public class UserService {
         // RT를 쿠키에 담는다.
         // refreshToken은 쿠키에 담는다.
         int maxAge = 1_296_000; // 15 * 24 * 60 * 60 > 15일의 초(second) 값
-        cookieUtils.setCookie(response, "refreshToken", refreshToken, maxAge);
+        cookieUtils.setCookie(response, "refreshToken", refreshToken, maxAge, "/api/user/access-token");
 
         return UserSignInRes.builder()
                 .accessToken(accessToken)

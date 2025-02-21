@@ -8,17 +8,23 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @EqualsAndHashCode //equals, hashCode 메소드 오버라이딩
 @RequiredArgsConstructor
-public class JwtUser  implements UserDetails {
+public class JwtUser  implements UserDetails, OAuth2User {
     private final long signedUserId;
     private final List<UserRole> roles; // 인가(권한)처리 때 사용, 여러 권한 부여를 위해 List, "ROLE_이름" > ROLE_USER, ROLE_ADMIN
 
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Map.of();
+    }
 
     // 리턴 타입이 collection인데 collection에 방 하나하나의 타입은 <> 지정을 한다.
     // <?> 로 하면 Object가 되기 때문에 모든 타입이 허용이 된다.
@@ -66,6 +72,12 @@ public class JwtUser  implements UserDetails {
     @JsonIgnore
     @Override
     public String getUsername() {
+        return "GUEST";
+    }
+
+    @JsonIgnore
+    @Override
+    public String getName() {
         return "";
     }
 

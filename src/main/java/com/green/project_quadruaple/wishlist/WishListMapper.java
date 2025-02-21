@@ -10,7 +10,6 @@ import java.util.List;
 
 @Mapper
 public interface WishListMapper {
-
     boolean isWishListExists(Long userId, @Param("strfId") long strfId);
     void deleteWishList(Long userId, @Param("strfId") long strfId);
 

@@ -5,7 +5,6 @@ import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
-import com.green.project_quadruaple.search.model.SearchFilter;
 import com.green.project_quadruaple.search.model.filter.*;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
