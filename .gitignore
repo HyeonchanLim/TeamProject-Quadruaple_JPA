@@ -12,6 +12,7 @@ build/
 /src/main/resources/sql
 .env
 files
+.env
 
 ### STS ###
 .apt_generated
