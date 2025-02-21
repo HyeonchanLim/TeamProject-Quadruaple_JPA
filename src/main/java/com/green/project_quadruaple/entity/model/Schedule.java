@@ -24,6 +24,7 @@ public class Schedule {
 
     private Integer duration;
 
+    @Column(name = "pathtype", columnDefinition = "TINYINT")
     private Integer pathType;
 
     @ManyToOne(fetch = FetchType.LAZY)
