@@ -62,9 +62,6 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
             user.setName(oauth2UserInfo.getName());
             user.setProfilePic(oauth2UserInfo.getProfileImageUrl());
 
-            // 생일과 전화번호 직접 입력 받는 부분 (예시)
-            user.setBirth(LocalDate.parse("2025-01-01"));  // 예시로 생일을 직접 설정
-
             userRepository.save(user);
         }
 
