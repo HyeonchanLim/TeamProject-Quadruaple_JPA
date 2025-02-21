@@ -64,7 +64,6 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
 
             // 생일과 전화번호 직접 입력 받는 부분 (예시)
             user.setBirth(LocalDate.parse("2025-01-01"));  // 예시로 생일을 직접 설정
-            user.setPhone("010-1234-5678"); // 예시로 전화번호를 직접 설정
 
             userRepository.save(user);
         }
