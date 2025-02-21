@@ -1,6 +1,10 @@
 package com.green.project_quadruaple.user.mail;
 
 import com.green.project_quadruaple.common.model.ResultResponse;
+import com.green.project_quadruaple.entity.model.AuthenticationCode;
+import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.user.AuthenticationCodeRepository;
+import com.green.project_quadruaple.user.UserRepository;
 import com.green.project_quadruaple.user.mail.thread.AuthCode;
 import com.green.project_quadruaple.user.mail.thread.MailCheck;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -25,8 +30,14 @@ public class MailService {
     @Autowired
     private final JavaMailSender mailSender;
 
+    private final UserRepository userRepository;
+    private final AuthenticationCodeRepository authenticationCodeRepository;
+
     public static Map<String, String> codes = new HashMap<>();
     public static Map<String, Boolean> mailChecked = new HashMap<>();
+    public static Map<String, Integer> emailAttempts = new HashMap<>(); // 요청 횟수 저장
+
+    private static final int MAX_ATTEMPTS = 5; // 최대 5회
 
     public ResultResponse send(String email) {
         // 인증코드 생성
@@ -104,13 +115,23 @@ public class MailService {
     public ResultResponse check(GetEmailAndCodeReq req) {
         String email = req.getEmail();
         String code = req.getCode();
-        String savedCode = codes.getOrDefault(email, "");
-        if (!savedCode.equals(code)) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+        Optional<AuthenticationCode> authCode = authenticationCodeRepository.findById_UserIdAndId_CodeNum(user.getUserId(), code);
+
+        if (authCode.isEmpty()) {
             return new ResultResponse("FAIL");
         }
-        codes.remove(email);
+        authenticationCodeRepository.delete(authCode.get());
+
+        user.setVerified(1);
+        userRepository.save(user);
+
         mailChecked.put(email, true);
-        new Thread(new MailCheck(email)).start(); // 3분간 인증 성공, 이후 만료
+        new Thread(new MailCheck(email)).start();
+
         return ResultResponse.success();
     }
 }

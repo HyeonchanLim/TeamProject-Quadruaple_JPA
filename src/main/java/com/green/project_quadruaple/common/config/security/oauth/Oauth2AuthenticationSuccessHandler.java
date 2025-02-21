@@ -75,7 +75,7 @@ public class Oauth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         nickName: 홍길동
         pic: abc.jpg
 
-        "fe/redirect?access_token=aaa&user_id=20&nick_name=홍길동&pic=abc.jpg"
+        "?access_token=aaa&user_id=20&nick_name=홍길동&pic=abc.jpg"
          */
         return redirectUrl == null ? "/" : UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("access_token", accessToken)

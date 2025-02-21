@@ -31,7 +31,7 @@ public class User {
     @Column(length = 50, unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate birth;
 
     @Column(length = 200, nullable = false)
@@ -47,11 +47,10 @@ public class User {
     @Column(nullable = false)
     private int verified = 0;
 
-    public User(String profilePic, String name, String email, LocalDate birth, String pw) {
+    public User(String profilePic, String name, String email, String pw) {
         this.profilePic = profilePic;
         this.name = name;
         this.email = email;
-        this.birth = birth;
         this.pw = pw;
     }
 }
