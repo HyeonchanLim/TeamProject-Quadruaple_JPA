@@ -68,4 +68,10 @@ public class ResultResponse {
         return new ResultResponse(ResponseCode.GATEWAY_TIMEOUT.getCode());
     }
 
+    // 요청 횟수 초과
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public static ResultResponse tooManyRequests() {
+        return new ResultResponse(ResponseCode.TOO_MANY_REQUESTS.getCode());
+    }
+
 }

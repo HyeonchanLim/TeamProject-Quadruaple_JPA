@@ -37,6 +37,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.SignatureException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -51,6 +52,7 @@ public class UserService {
     private final AuthenticationFacade authenticationFacade;
     private final JavaMailSender javaMailSender;
     private final UserRepository userRepository;
+    private final AuthenticationCodeRepository authenticationCodeRepository;
 
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
@@ -58,18 +60,16 @@ public class UserService {
     @Value("${file.directory}")
     private String fileDirectory;
 
-    // 회원가입 및 이메일 인증 메일 발송
+    // 회원가입
     public int signUp(MultipartFile pic, UserSignUpReq p) {
 
         // 이메일 중복 체크
-        DuplicateEmailResult duplicateEmailResult = userMapper.getEmailDuplicateInfo(p);
-        if (duplicateEmailResult.getEmailCount() > 0) {
+        if (userRepository.existsByEmail(p.getEmail())) {
             return 0;
         }
 
         //닉네임 중복 체크
-        String nickname = p.getName();
-        if (userMapper.getNickNameDuplicateInfo(nickname) > 0) {
+        if (userRepository.existsByName(p.getName())) {
             return 0;
         }
 
@@ -90,7 +90,7 @@ public class UserService {
 
         try {
             User user = new User();
-            user.setName(nickname);
+            user.setName(p.getName());
             user.setEmail(p.getEmail());
             user.setProfilePic(savedPicName);
             user.setPw(hashedPassword);
@@ -166,6 +166,22 @@ public class UserService {
 
         if(!passwordEncoder.matches(req.getPw(), userSelOne.getPw())) {
             throw new RuntimeException("비밀번호를 확인해 주세요.");
+        }
+
+        // 이메일 인증 여부 확인 (DB 기반)
+        if (userSelOne.getVerified() == 0) {
+            throw new RuntimeException("이메일 인증이 필요합니다.");
+        }
+
+        // 이메일 인증 횟수 제한 체크
+        LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
+
+        int authCodeCount = authenticationCodeRepository.countById_UserIdAndGrantedAtBetween(userSelOne.getUserId(), startOfDay, endOfDay);
+
+        if (authCodeCount >= 5) {
+            // 인증 코드 입력 횟수 초과시 해당 인증 코드 삭제
+            authenticationCodeRepository.deleteById_UserIdAndGrantedAtBetween(userSelOne.getUserId(), startOfDay, endOfDay);
         }
 
         List<UserRole> roles = new ArrayList<>(2);
