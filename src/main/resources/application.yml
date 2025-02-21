@@ -1,0 +1,147 @@
+global:
+  oauth2:
+    base-uri: /oauth2/authorization #FE 소셜 로그인 요청할 때 사용할 주소값
+    # 플랫폼과 통신을 3번 정도 하는데 각 통신들이 하나의 작업을 위한 트랜잭션이라는 것을
+    # 연결시키기 위해 쿠키를 사용한다.
+    authorization-request-cookie-name: oauth2_auth_request # key 값
+    redirect-uri-param-cookie-name: redirect_uri # key 값
+    cookie-expiry-seconds: 180
+    authorized-redirect-uris:
+      - http://localhost:8080/fe/redirect
+      - http://192.168.0.144:5231/fe/redirect
+      - http://112.222.157.157:5231/fe/redirect
+
+file:
+  directory: ${FILE_DIR}
+
+const:
+  default-review-size: 10
+
+spring:
+  profiles:
+    active: secret
+  application:
+    name: quadruaple
+  datasource:
+    #    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    #    url: jdbc:log4jdbc:mariadb://localhost/p2
+    #    username: root
+    #    password: green502
+    config:
+      import: "classpath:application-secret.yml"
+      activate:
+        on-profile: secret
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: a
+            client-secret: a
+            scope:
+              - email
+              - profile
+          kakao:
+            client-name: Kakao
+            client-id: ${SOCIAL.KAKAO.CLIENT_ID}
+            client-secret: ${SOCIAL.KAKAO.SECRET}
+            client-authentication-method: client_secret_post #client_id , client_secret 쿼리스트링으로 날아가야 한다.
+            authorization-grant-type: authorization_code #권한부여 유형 ( 인가코드 -> access-token 받는 방식 선택)
+            redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
+              #baseUrl : 서버가 돌아가고 있는 host
+            #action : login
+            #registrationId : kakao
+            #결과 : localhost:8080/login/oauth2/code/kakao
+            scope:
+              - profile_nickname
+              - profile_image
+              - account_email
+
+          naver:
+            client-name: Naver
+            client-id: a
+            client-secret: a
+            client-authentication-method: client_secret_post #client_id , client_secret 쿼리스트링으로 날아가야 한다.
+            authorization-grant-type: authorization_code #권한부여 유형 ( 인가코드 -> access-token 받는 방식 선택)
+            redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
+            scope:
+              - name
+              - email
+              - profile_image
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize # kakao 인증처리 URL
+            token-uri: http://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-info-authentication-method: header # access token 담을 위치 결정, default 값이 header 위치 , (header , form , query)
+            user-name-attribute: id #유일값 속성명
+          naver:
+            authorization-uri: https://nid.naver.com/oauth2.0/authorize # naver 인증처리 URL
+            token-uri: http://nid.naver.com/oauth2.0/token
+            user-info-uri: https://openapi.naver.com/v2/nid/me
+            #            user-info-authentication-method: header
+            user-name-attribute: response.id #유일값 속성명
+
+  jpa:
+    database: mysql
+    hibernate:
+      #ddl-auto: create #entity 를 서버 기동때마다 drop 후 create한다.
+      ddl-auto: none #entity 가 없으면 create , 기존 존재하는 entity는 컬럼을 새롭게 추가하는 것만 반영
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        format_sql: true #로그 찍을 때 보기 편하게 포맷팅
+        order_updates: true #JPA Batch 작업
+    show-sql: true #JPA 가 만든 쿼리문 로그에 출력 - format_sql 과 연동되면서 쿼리문 생성 -> 보기 좋도록 포맷팅 하는 방식
+  servlet:
+    multipart:
+      max-file-size: 50MB
+
+jwt:
+  issuer: green@green.kr
+  secret-key: ${JWT.SECRET.KEY}
+#Odsay Api
+odsay-api-const:
+  base-url: https://api.odsay.com/v1/api/
+  param-api-key-name: ${PARAM.API.KEY.NAME}
+  param-api-key-value: ${PARAM.API.KEY.VALUE}
+  param-start-lat-name: SY
+  param-start-lng-name: SX
+  param-end-lat-name: EY
+  param-end-lng-name: EX
+  search-pub-trans-path-url: searchPubTransPathT
+
+#kakao Api
+kakao-api-const:
+  AuthKey: ${AUTH_KEY}
+  secret-key : ${SECRET_KEY}
+  affiliate-code : TC0ONETIME
+  url: https://open-api.kakaopay.com
+add-user-link: "http://localhost:8080/api/trip/user"
+#MyBatis ??
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: mappers/**/*.xml
+#  type-aliases-package: com/green/project_quadruaple
+
+#Swagger
+springdoc:
+  swagger-ui:
+    default-models-expand-depth: 10
+    display-request-duration: true
+    groups-order: asc
+    operations-sorter: method
+    path: /swagger
+    tags-sorter: alpha
+  cache:
+    disabled: true
+
+
+
+weather-api-const:
+  api-key: ${WEATHER_API_KEY}
+  base-url: http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0

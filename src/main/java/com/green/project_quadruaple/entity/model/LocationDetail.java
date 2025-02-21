@@ -19,6 +19,11 @@ public class LocationDetail {
     @JoinColumn(name = "location_id")
     private Location location;
 
-    @Column(name = "location_detail", length = 50)
-    private String locationDetail;
+    @Column(name = "detail_title", length = 50)
+    private String detailTitle;
+
+    public LocationDetail(Location location, String detailTitle) {
+        this.location = location;
+        this.detailTitle = detailTitle;
+    }
 }
