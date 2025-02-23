@@ -19,7 +19,6 @@ public class WishListController {
 
     private final WishListService wishListService;
 
-
     @PostMapping
     @Operation(summary = "찜 추가, 삭제")
     public ResponseEntity<ResponseWrapper<String>> toggleWishList(@RequestBody WishListReq wishListReq) {
