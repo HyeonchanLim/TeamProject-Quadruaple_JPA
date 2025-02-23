@@ -13,6 +13,8 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Trip extends CreatedAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,10 +30,4 @@ public class Trip extends CreatedAt {
 
     @Embedded
     private Period period;
-
-    public Trip(String title, User manager, Period period) {
-        this.title = title;
-        this.manager = manager;
-        this.period = period;
-    }
 }

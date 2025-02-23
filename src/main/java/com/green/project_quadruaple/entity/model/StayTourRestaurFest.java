@@ -12,8 +12,10 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "stay_tour_restaur_fest")
-public class Strf extends CreatedAt {
+public class StayTourRestaurFest extends CreatedAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "strf_id")

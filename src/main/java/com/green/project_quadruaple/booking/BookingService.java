@@ -47,8 +47,9 @@ public class BookingService {
         this.payUrl = payUrl;
     }
 
-    public ResponseWrapper<BookingListResponse> getBooking(BookingListGetReq req) {
-        List<BookingListGetRes> bookingList = bookingMapper.getBooking(req);
+    public ResponseWrapper<BookingListResponse> getBooking() {
+        Long signedUserId = AuthenticationFacade.getSignedUserId();
+        List<BookingListGetRes> bookingList = bookingMapper.getBooking(signedUserId);
 
         List<BookingListGetRes> beforeList = new ArrayList<>();
         List<BookingListGetRes> afterList = new ArrayList<>();
