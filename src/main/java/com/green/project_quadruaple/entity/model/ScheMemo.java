@@ -28,7 +28,7 @@ public class ScheMemo extends CreatedAt {
     @Column(nullable = false)
     private int seq;
 
-    @Column(nullable = false)
+    @Column(name = "category", nullable = false)
     @Enumerated(EnumType.STRING)
     private ScheMemoType scheMemoType;
 

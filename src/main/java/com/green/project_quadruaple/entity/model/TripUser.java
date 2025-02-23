@@ -25,7 +25,7 @@ public class TripUser extends CreatedAt {
     @JoinColumn(name = "trip_id", nullable = false)
     private Trip trip;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int disable;
 
     public TripUser(User user, Trip trip) {

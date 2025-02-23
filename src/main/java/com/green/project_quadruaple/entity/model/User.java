@@ -37,14 +37,14 @@ public class User {
     @Column(length = 200, nullable = false)
     private String pw;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int state = 0;
 
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int verified = 0;
 
     public User(String profilePic, String name, String email, LocalDate birth, String pw) {

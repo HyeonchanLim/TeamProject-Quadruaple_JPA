@@ -12,6 +12,7 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "stay_tour_restaur_fest")
 public class Strf extends CreatedAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,14 +51,11 @@ public class Strf extends CreatedAt {
     @Column(name = "end_at")
     private LocalDate endAt;
 
-    @Column(name = "open_check")
-    private LocalTime openCheck;
+    @Column(name = "open_check_in")
+    private LocalTime openCheckIn;
 
-    @Column(name = "close_check")
-    private LocalTime closeCheck;
-
-    @Column(name = "rest_date")
-    private String restDate;
+    @Column(name = "close_check_out")
+    private LocalTime closeCheckOut;
 
     @Column(columnDefinition = "TEXT")
     private String detail;
@@ -65,10 +63,7 @@ public class Strf extends CreatedAt {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "busi_num" ,nullable = false)
     private BusinessNum busiNum;
-}
 
-/*
-*
-created_at
-busi_num
-* */
+    @Column(nullable = false, columnDefinition = "TINYINT")
+    private Integer state;
+}
