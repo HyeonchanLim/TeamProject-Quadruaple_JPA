@@ -95,6 +95,7 @@ public class UserService {
             user.setProfilePic(savedPicName);
             user.setPassword(hashedPassword);
             user.setBirth(p.getBirth());
+            user.setTell(p.getTell());
             user.setProviderType(SignInProviderType.LOCAL);
 
             userRepository.save(user);
@@ -171,17 +172,6 @@ public class UserService {
         // 이메일 인증 여부 확인 (DB 기반)
         if (userSelOne.getVerified() == 0) {
             throw new RuntimeException("이메일 인증이 필요합니다.");
-        }
-
-        // 이메일 인증 횟수 제한 체크
-        LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        LocalDateTime endOfDay = startOfDay.plusDays(1);
-
-        int authCodeCount = authenticationCodeRepository.countById_UserIdAndGrantedAtBetween(userSelOne.getUserId(), startOfDay, endOfDay);
-
-        if (authCodeCount >= 5) {
-            // 인증 코드 입력 횟수 초과시 해당 인증 코드 삭제
-            authenticationCodeRepository.deleteById_UserIdAndGrantedAtBetween(userSelOne.getUserId(), startOfDay, endOfDay);
         }
 
         List<UserRole> roles = new ArrayList<>(2);
