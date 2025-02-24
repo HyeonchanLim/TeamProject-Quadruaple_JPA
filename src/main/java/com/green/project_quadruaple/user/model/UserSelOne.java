@@ -17,4 +17,5 @@ public class UserSelOne {
     private String profilePic;
     @Setter
     private List<UserRole> roles;
+    private int verified;
 }

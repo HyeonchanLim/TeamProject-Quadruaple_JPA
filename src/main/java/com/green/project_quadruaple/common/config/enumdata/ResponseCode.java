@@ -28,7 +28,9 @@ public enum ResponseCode {
     //잘못된 응답
     BAD_GATEWAY("502 잘못된 응답"),
     //응답시간만료
-    GATEWAY_TIMEOUT("503 응답시간만료");
+    GATEWAY_TIMEOUT("503 응답시간만료"),
+    //요청 횟수 초과
+    TOO_MANY_REQUESTS("429 요청 횟수 초과");
 
 
     private final String code;

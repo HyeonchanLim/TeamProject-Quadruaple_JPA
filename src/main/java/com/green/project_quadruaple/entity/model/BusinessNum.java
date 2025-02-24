@@ -19,4 +19,9 @@ public class BusinessNum extends CreatedAt {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public BusinessNum(String busiNum, User user) {
+        this.busiNum = busiNum;
+        this.user = user;
+    }
 }
