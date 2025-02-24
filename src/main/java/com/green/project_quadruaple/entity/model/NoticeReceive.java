@@ -3,9 +3,6 @@ package com.green.project_quadruaple.entity.model;
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -13,20 +10,17 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TripUser extends CreatedAt {
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "trip_user_id")
-    private Long tripUserId;
-
+public class NoticeReceive extends CreatedAt {
+    @EmbeddedId
+    private NoticeReceiveId id;
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trip_id", nullable = false)
-    private Trip trip;
-
-    @Column(nullable = false, columnDefinition = "TINYINT")
+    @MapsId("noticeId")
+    @JoinColumn(name = "notice_id", nullable = false)
+    private Notice notice;
+    private int open;
     private int disable;
 }

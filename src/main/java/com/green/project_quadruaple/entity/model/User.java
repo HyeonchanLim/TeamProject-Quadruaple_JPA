@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,20 +39,13 @@ public class User {
     @Column(length = 200, nullable = false)
     private String pw;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int state = 0;
 
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private int verified = 0;
-
-    public User(String profilePic, String name, String email, String pw) {
-        this.profilePic = profilePic;
-        this.name = name;
-        this.email = email;
-        this.pw = pw;
-    }
 }

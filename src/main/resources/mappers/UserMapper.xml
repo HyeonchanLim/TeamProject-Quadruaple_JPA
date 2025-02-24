@@ -51,7 +51,7 @@
 
     <!-- 로그인 -->
     <select id="selUserByEmail">
-        SELECT user_id AS userId, email, pw, name, profile_pic AS profilePic
+        SELECT user_id AS userId, email, pw, name, profile_pic AS profilePic, verified
           FROM user
          WHERE email = #{email}
     </select>
