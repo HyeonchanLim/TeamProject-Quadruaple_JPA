@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Ticket {
 
     @Id
@@ -31,10 +33,4 @@ public class Ticket {
     @Column(nullable = false)
     private int sale;
 
-    public Ticket(int price, LocalDate expiration, Location location, int sale) {
-        this.price = price;
-        this.expiration = expiration;
-        this.location = location;
-        this.sale = sale;
-    }
 }

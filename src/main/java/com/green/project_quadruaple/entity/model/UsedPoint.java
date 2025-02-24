@@ -2,6 +2,7 @@ package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.Refund;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class UsedPoint extends Refund {
 
     @Id
@@ -33,10 +35,4 @@ public class UsedPoint extends Refund {
     @Column(nullable = false)
     private LocalDateTime usedAt;
 
-    public UsedPoint(PurchasedPoint purchasedPoint, Menu menu, int amount) {
-        this.purchasedPoint = purchasedPoint;
-        this.menu = menu;
-        this.amount = amount;
-        this.usedAt = LocalDateTime.now(); // 현재 시간으로 기본값 설정
-    }
 }

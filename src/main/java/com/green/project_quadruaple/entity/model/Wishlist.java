@@ -2,6 +2,7 @@ package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,19 +11,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Wishlist extends CreatedAt {
 
     @Id
-    @Column(name = "user_id")
+    @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private User userId;
 
-    @Column(name = "strf_id")
+    @JoinColumn(name = "strf_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private StayTourRestaurFest strfId;
 
-    public Wishlist(User userId, StayTourRestaurFest strfId) {
-        this.userId = userId;
-        this.strfId = strfId;
-    }
 }

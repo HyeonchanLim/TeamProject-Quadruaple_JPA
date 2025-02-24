@@ -2,6 +2,7 @@ package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class TemporaryPw extends CreatedAt {
 
     @Id
@@ -23,9 +25,4 @@ public class TemporaryPw extends CreatedAt {
     @Column(name = "tp_pw", nullable = false, length = 300)
     private String temporaryPassword;
 
-    public TemporaryPw(User user, String temporaryPassword) {
-        this.user = user;
-        this.userId = user.getUserId(); // User의 ID를 PK로 사용
-        this.temporaryPassword = temporaryPassword;
-    }
 }

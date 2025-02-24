@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.green.project_quadruaple.entity.base.UpdatedAt;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Schedule {
+public class Schedule extends UpdatedAt {
 
     @Id
     @Column(name = "schedule_id")
@@ -33,6 +34,4 @@ public class Schedule {
     @JoinColumn(name = "strf_id")
     private StayTourRestaurFest strf;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }

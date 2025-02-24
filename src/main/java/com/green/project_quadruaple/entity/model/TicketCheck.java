@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class TicketCheck {
 
     @Id
@@ -27,9 +29,4 @@ public class TicketCheck {
     @Column(nullable = false)
     private int salePrice;
 
-    public TicketCheck(User user, Ticket ticket, int salePrice) {
-        this.user = user;
-        this.ticket = ticket;
-        this.salePrice = salePrice;
-    }
 }

@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class StrfPic {
 
     @Id
@@ -19,8 +21,4 @@ public class StrfPic {
     @JoinColumn(name = "strf_id", nullable = false)
     private StayTourRestaurFest strfId;
 
-    public StrfPic(String picName, StayTourRestaurFest strfId) {
-        this.picName = picName;
-        this.strfId = strfId;
-    }
 }
