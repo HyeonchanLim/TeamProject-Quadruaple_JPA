@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 public class Role {
     @EmbeddedId
     private RoleId id;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
