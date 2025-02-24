@@ -21,7 +21,7 @@ public class BusinessService {
     public List<BusinessDto> getAllBusinessReviews(int startIdx) {
 
         // 1. 로그인 유저 정보 가져오기
-        Long signedUserId = authenticationFacade.getSignedUserId();
+        Long signedUserId = AuthenticationFacade.getSignedUserId();
 
         // 2. 사업자 권한 체크
         String userRole = businessMapper.findUserRoleByUserId(signedUserId);
