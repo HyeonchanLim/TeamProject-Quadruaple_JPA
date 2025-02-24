@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 public class SearchWord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
     @Column(nullable = false)
     private String txt;
     @ManyToOne(fetch = FetchType.LAZY)

@@ -21,8 +21,8 @@ public class Review extends UpdatedAt {
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
-    private int rating;
+    @Column(nullable = false, columnDefinition = "TINYINT(4) default 0")
+    private Integer rating;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "strf_id", nullable = false)

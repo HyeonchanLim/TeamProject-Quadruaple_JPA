@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
+import com.green.project_quadruaple.entity.base.ReportEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,10 +30,9 @@ public class Report extends CreatedAt {
     @JoinColumn(name = "manager_id", nullable = false)
     private User manager;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    @JoinColumn(nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
-    private StayTourRestaurFest category;
+    private ReportEnum category;
 
     @Column(name = "report_target", nullable = false)
     private Long reportTarget;
@@ -40,10 +40,10 @@ public class Report extends CreatedAt {
     @Column(nullable = false, length = 800)
     private String reason;
 
-    @Column(name = "processed", length = 800)
+    @Column(name = "processed", length = 800, nullable = false)
     private String processed;
 
-    @Column(name = "processed_at")
+    @Column(name = "processed_at" , nullable = false)
     private LocalDateTime processedAt;
 
 }

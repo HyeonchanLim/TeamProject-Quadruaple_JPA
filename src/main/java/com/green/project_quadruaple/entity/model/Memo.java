@@ -3,6 +3,9 @@ package com.green.project_quadruaple.entity.model;
 import com.green.project_quadruaple.entity.base.UpdatedAt;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -10,7 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Memo extends UpdatedAt {
+public class Memo  {
 
     @Id
     private Long memoId;
@@ -25,4 +28,9 @@ public class Memo extends UpdatedAt {
     private TripUser tripUser;
 
     private String content;
+
+    @Column(name = "updated_at")
+    @CreationTimestamp
+    @Setter
+    private LocalDateTime updatedAt;
 }

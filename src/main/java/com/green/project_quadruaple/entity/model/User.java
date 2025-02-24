@@ -30,19 +30,16 @@ public class User extends CreatedAt {
     @Column(length = 20, unique = true, nullable = false)
     private String name;
 
-    @Column(length = 50, unique = true, nullable = false)
-    private String email;
-
     @Column
     private LocalDate birth;
 
     @Column(name = "pw", nullable = false, length = 200)
     private String password;
 
-    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "TINYINT(4) DEFAULT 0")
     private int state;
 
-    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "TINYINT(4) DEFAULT 0")
     private int verified;
 
     @Column(name = "tell")

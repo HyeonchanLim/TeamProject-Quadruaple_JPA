@@ -23,7 +23,7 @@ public class Coupon {
     private LocalDateTime expiredAt;
 
     @Column(nullable = false)
-    private int discountPer;
+    private int discountper;
 
     private LocalDateTime distributeAt;
 }
