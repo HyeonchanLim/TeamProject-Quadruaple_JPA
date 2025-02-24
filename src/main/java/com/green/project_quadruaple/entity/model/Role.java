@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Role {
-
     @EmbeddedId
     private RoleId id;
     @ManyToOne(fetch = FetchType.LAZY)
