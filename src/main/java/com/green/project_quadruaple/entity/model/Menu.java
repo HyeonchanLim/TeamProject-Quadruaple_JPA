@@ -18,11 +18,12 @@ public class Menu {
     @JoinColumn(name = "strf_id", nullable = false)
     private StayTourRestaurFest stayTourRestaurFest;
 
-    @Column(nullable = false)
+    @Column(nullable = false,length = 50)
     private String title;
 
     @Column(nullable = false)
     private int price;
 
+    @Column(name = "menu_pic", length = 200)
     private String menuPic;
 }

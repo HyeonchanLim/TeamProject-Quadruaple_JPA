@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.expense;
 
+import com.green.project_quadruaple.entity.model.TripUser;
 import com.green.project_quadruaple.expense.model.dto.DeDto;
 import com.green.project_quadruaple.expense.model.dto.ExpenseDto;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
