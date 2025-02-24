@@ -21,7 +21,11 @@ public class User extends CreatedAt {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "authenticated_id", nullable = false)
+    private AuthenticationCode authenticationCode;
+
+    @Column(name = "provider_type", nullable = false)
     private SignInProviderType providerType;
 
     @Column(name = "profile_pic", length = 500)
@@ -42,7 +46,7 @@ public class User extends CreatedAt {
     @Column(nullable = false, columnDefinition = "TINYINT(4) DEFAULT 0")
     private int verified;
 
-    @Column(name = "tell")
+    @Column(length = 20, unique = true)
     private String tell;
 
 }
