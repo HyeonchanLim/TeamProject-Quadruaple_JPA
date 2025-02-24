@@ -15,7 +15,7 @@ public class Notice extends CreatedAt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long noticeId;
 
-    @Column(nullable = false)
+    @Column(nullable = false,length = 800)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)

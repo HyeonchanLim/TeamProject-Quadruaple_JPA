@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class Booking extends Refund {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "booking_id")
     private Long bookingId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,13 +31,13 @@ public class Booking extends Refund {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(name = "check_in", nullable = false)
     private LocalDateTime checkIn;
 
-    @Column(nullable = false)
+    @Column(name = "check_out", nullable = false)
     private LocalDateTime checkOut;
 
-    @Column(nullable = false)
+    @Column(name = "final_payment", nullable = false)
     private int finalPayment;
 
     @Column(nullable = false)

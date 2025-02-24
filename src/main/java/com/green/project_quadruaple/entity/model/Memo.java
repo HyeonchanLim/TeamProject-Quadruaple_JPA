@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class Memo  {
 
     @Id
+    @Column(name = "memo_id",nullable = false)
     private Long memoId;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -27,6 +28,7 @@ public class Memo  {
     @JoinColumn(name = "trip_user_id", nullable = false)
     private TripUser tripUser;
 
+    @Column(length = 1000,nullable = false)
     private String content;
 
     @Column(name = "updated_at")
