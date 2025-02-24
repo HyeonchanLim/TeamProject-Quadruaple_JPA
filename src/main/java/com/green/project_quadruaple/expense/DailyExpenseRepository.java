@@ -7,9 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface DailyExpenseRepository extends JpaRepository<Long, DailyExpense> {
-    int save(DailyExpense dailyExpense);
-
+public interface DailyExpenseRepository extends JpaRepository<DailyExpense, Long> {
     @Modifying
     @Transactional
     @Query("UPDATE DailyExpense d SET d.expenseFor = :paidFor WHERE d.deId = :deId")

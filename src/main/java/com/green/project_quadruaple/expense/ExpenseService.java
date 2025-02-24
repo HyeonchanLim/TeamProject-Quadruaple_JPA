@@ -4,6 +4,8 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.entity.model.Trip;
+import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.expense.entity.DailyExpense;
 import com.green.project_quadruaple.expense.entity.PaidUser;
 import com.green.project_quadruaple.expense.model.dto.DeDto;
@@ -37,8 +39,12 @@ public class ExpenseService {
     //trip 참여객 체크
     boolean isUserJoinTrip(long tripId){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user=new User();
+        user.setUserId(authenticationFacade.getSignedUserId());
+        Trip trip=new Trip();
+        trip.setTripId(tripId);
         return !(principal instanceof JwtUser
-                ||!tripUserRepository.existsByUserIdAndTripIdAndDisable(authenticationFacade.getSignedUserId(), tripId,false));
+                ||!tripUserRepository.existsByUserAndTripAndDisable(user, trip,0));
     }
 
     //추가하기
@@ -95,7 +101,8 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        List<PaidUser> delPaidUserInfo =paidUserRepository.findAllByDeId(p.getDeId())
+        DailyExpense de=new DailyExpense(null,p.getPaidFor());
+        List<PaidUser> delPaidUserInfo =paidUserRepository.findAllByDailyExpense(de)
                 .orElse(new ArrayList<>());
         if(delPaidUserInfo.size()==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)

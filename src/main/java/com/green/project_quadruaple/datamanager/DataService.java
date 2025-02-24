@@ -43,13 +43,6 @@ public class DataService {
     private final DataMapper dataMapper;
     private final MyFileUtils myFileUtils;
     private final ReviewMapper reviewMapper;
-    private final UserRepository userRepository;
-    private final StrfRepository strfRepository;
-    private final TripRepository tripRepository;
-    private final ScheMemoRepository scheMemoRepository;
-    private final ScheduleRepository scheduleRepository;
-    private final TripUserRepository tripUserRepository;
-
 
     //카테고리별로 리뷰 더미데이터 넣기
     public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPicsFromCategory(String category){

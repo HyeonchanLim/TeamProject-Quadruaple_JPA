@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "daily_expense")
 public class DailyExpense extends CreatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
