@@ -5,8 +5,11 @@ import com.green.project_quadruaple.common.config.security.SignInProviderType;
 import com.green.project_quadruaple.common.config.security.oauth.userinfo.Oauth2UserInfo;
 import com.green.project_quadruaple.common.config.security.oauth.userinfo.Oauth2UserInfoFactory;
 import com.green.project_quadruaple.entity.model.AuthenticationCode;
+import com.green.project_quadruaple.entity.model.Role;
+import com.green.project_quadruaple.entity.model.RoleId;
 import com.green.project_quadruaple.user.AuthenticationCodeRepository;
 import com.green.project_quadruaple.user.UserRepository;
+import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.green.project_quadruaple.entity.model.User;
@@ -27,6 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MyOauth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final Oauth2UserInfoFactory oauth2UserInfoFactory;
     private final AuthenticationCodeRepository authenticationCodeRepository;
 
@@ -81,6 +85,14 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
             user.setAuthenticationCode(authCode); // User와 연결
 
             userRepository.save(user);
+
+            Role role = Role.builder()
+                    .id(new RoleId(UserRole.USER.getValue(), user.getUserId()))
+                    .user(user)
+                    .role(UserRole.USER)
+                    .grantedAt(LocalDateTime.now())
+                    .build();
+            roleRepository.save(role);
         }
 
         List<UserRole> roles = Arrays.asList(UserRole.USER);

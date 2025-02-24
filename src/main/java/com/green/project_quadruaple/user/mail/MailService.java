@@ -36,9 +36,7 @@ public class MailService {
 
     public static Map<String, String> codes = new HashMap<>();
     public static Map<String, Boolean> mailChecked = new HashMap<>();
-    public static Map<String, Integer> emailAttempts = new HashMap<>(); // 요청 횟수 저장
 
-    private static final int MAX_ATTEMPTS = 5; // 최대 5회
 
     public ResultResponse send(String email) {
         // 인증코드 생성
