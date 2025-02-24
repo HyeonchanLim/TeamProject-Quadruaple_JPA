@@ -14,15 +14,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Memo  {
-
     @Id
     @Column(name = "memo_id",nullable = false)
     private Long memoId;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "schedule_memo_id")
-    private ScheduleMemo scheduleMemo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_user_id", nullable = false)
