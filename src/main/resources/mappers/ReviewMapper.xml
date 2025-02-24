@@ -120,4 +120,45 @@
         <result property="pic" column="pic"/>
     </resultMap>
 
+
+    <select id="selectBusinessReviews" parameterType="map" resultType="com.green.project_quadruaple.review.model.BusinessDto">
+        SELECT
+        s.strf_id AS strf_id,
+        s.title AS strf_title,
+        s.state AS state,
+        COUNT(DISTINCT r.review_id) AS reviewCnt,
+        ROUND(AVG(r.rating), 1) AS ratingAvg,
+        r.content AS content,
+        r.rating AS rating,
+        u.user_id AS user_id,
+        u.name AS userName,
+        u.profile_pic AS writerUserProfilePic,
+        u.provider_type AS providerType,
+        rr.content AS reviewReply,
+        GROUP_CONCAT(DISTINCT CONCAT('{"title":"', rp.title, '"}')) AS reviewPicList
+        FROM
+        stay_tour_restaur_fest s
+        LEFT JOIN
+        business_num bn ON s.busi_num = bn.busi_num
+        LEFT JOIN
+        user u ON bn.user_id = u.user_id
+        LEFT JOIN
+        review r ON s.strf_id = r.strf_id
+        LEFT JOIN
+        review_reply rr ON r.review_id = rr.review_id
+        LEFT JOIN
+        review_pic rp ON r.review_id = rp.review_id
+        WHERE
+        bn.user_id = #{userId}
+        GROUP BY
+        s.strf_id, s.title, s.state, r.content, r.rating, u.user_id, u.name, u.profile_pic, u.provider_type, rr.content
+        ORDER BY
+        s.strf_id ASC
+        LIMIT #{startIdx}, #{pageSize}
+    </select>
+
+
+
+
+
 </mapper>
