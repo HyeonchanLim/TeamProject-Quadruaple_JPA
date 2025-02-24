@@ -1,5 +1,6 @@
-package com.green.project_quadruaple.chat;
+package com.green.project_quadruaple.chat.controller;
 
+import com.green.project_quadruaple.chat.service.ChatService;
 import com.green.project_quadruaple.chat.model.ChatDto;
 import com.green.project_quadruaple.chat.model.JoinReq;
 import lombok.RequiredArgsConstructor;

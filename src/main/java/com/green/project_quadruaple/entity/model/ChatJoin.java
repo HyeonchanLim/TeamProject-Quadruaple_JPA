@@ -1,10 +1,8 @@
 package com.green.project_quadruaple.entity.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ChatJoin {
 
     @Id
@@ -28,6 +27,7 @@ public class ChatJoin {
     @JoinColumn(name = "chat_room_id", nullable = false)
     private ChatRoom chatRoom;
 
+    @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime joinedAt;
 
