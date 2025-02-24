@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
+import com.green.project_quadruaple.entity.base.EndAt;
 import com.green.project_quadruaple.trip.model.Category;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,7 +16,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "stay_tour_restaur_fest")
-public class StayTourRestaurFest extends CreatedAt {
+public class StayTourRestaurFest extends EndAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "strf_id")
@@ -46,12 +47,6 @@ public class StayTourRestaurFest extends CreatedAt {
 
     @Column(length = 50)
     private String tell;
-
-    @Column(name = "start_at")
-    private LocalDate startAt;
-
-    @Column(name = "end_at")
-    private LocalDate endAt;
 
     @Column(name = "open_check_in")
     private LocalTime openCheckIn;

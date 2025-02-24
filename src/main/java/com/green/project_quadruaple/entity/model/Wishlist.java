@@ -12,17 +12,15 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TemporaryPw extends CreatedAt {
+public class Wishlist extends CreatedAt {
 
     @Id
-    private Long userId; // PK이면서 FK
+    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User userId;
 
-    @OneToOne
-    @MapsId // userId를 User의 PK로 매핑
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @Column(name = "tp_pw", nullable = false, length = 300)
-    private String temporaryPassword;
+    @JoinColumn(name = "strf_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private StayTourRestaurFest strfId;
 
 }

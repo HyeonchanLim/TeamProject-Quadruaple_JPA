@@ -12,17 +12,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TemporaryPw extends CreatedAt {
+public class ChatRoom extends CreatedAt {
 
     @Id
-    private Long userId; // PK이면서 FK
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "chat_room_id")
+    private Long chatRoomId;
 
-    @OneToOne
-    @MapsId // userId를 User의 PK로 매핑
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @Column(name = "tp_pw", nullable = false, length = 300)
-    private String temporaryPassword;
+    @Column(nullable = false, length = 100)
+    private String title;
 
 }

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class User extends CreatedAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,13 +48,4 @@ public class User extends CreatedAt {
     @Column(name = "tell")
     private String tell;
 
-    public User(SignInProviderType providerType, String profilePic, String name, String email, LocalDate birth, String password, String tell) {
-        this.providerType = providerType;
-        this.profilePic = profilePic;
-        this.name = name;
-        this.email = email;
-        this.birth = birth;
-        this.password = password;
-        this.tell = tell;
-    }
 }

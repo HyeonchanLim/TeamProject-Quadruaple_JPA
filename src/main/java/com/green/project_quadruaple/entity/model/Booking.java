@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
+import com.green.project_quadruaple.entity.base.Refund;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Booking {
+public class Booking extends Refund {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookingId;
@@ -41,6 +42,4 @@ public class Booking {
     @Column(nullable = false)
     private String tid;
 
-    @Column(nullable = false, columnDefinition = "TINYINT")
-    private int refund;
 }
