@@ -2,18 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.green.project_quadruaple.expense.ExpenseMapper">
-    <select id="IsUserInTrip">
-        SELECT IF(EXISTS (
-        SELECT 1 FROM trip_user TU
-        WHERE TU.user_id = #{userId} AND TU.trip_id = #{tripId} AND TU.`disable`=0
-        ), 1, 0)
-    </select>
-
-    <insert id="insDe" useGeneratedKeys="true" keyProperty="deId">
-        INSERT INTO daily_expense
-        SET `for`=#{paidFor}
-    </insert>
-
     <insert id="insPaid">
         INSERT INTO paid_user (de_id, price, trip_user_id)
         SELECT #{deId}, temp.price, tu.trip_user_id
@@ -189,9 +177,4 @@
         WHERE TU.`disable`=0
     </select>
 
-    <update id="udpFor">
-        UPDATE daily_expense
-        SET `for`=#{paidFor}
-        WHERE de_id=#{deId}
-    </update>
 </mapper>

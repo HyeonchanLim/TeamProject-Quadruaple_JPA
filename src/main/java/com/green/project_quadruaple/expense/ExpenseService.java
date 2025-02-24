@@ -37,7 +37,8 @@ public class ExpenseService {
     //trip 참여객 체크
     boolean isUserJoinTrip(long tripId){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return !(principal instanceof JwtUser) ||!expenseMapper.IsUserInTrip(tripId,authenticationFacade.getSignedUserId());
+        return !(principal instanceof JwtUser
+                ||!tripUserRepository.existsByUserIdAndTripIdAndDisable(authenticationFacade.getSignedUserId(), tripId,false));
     }
 
     //추가하기
@@ -47,9 +48,9 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        DeDto d=new DeDto(null, p.getPaidFor());
-        expenseMapper.insDe(d);
-        Long deId=d.getDeId();
+        DailyExpense de=new DailyExpense(null,p.getPaidFor());
+        dailyExpenseRepository.save(de);
+        Long deId=de.getDeId();
         if(deId==null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
@@ -107,9 +108,7 @@ public class ExpenseService {
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         if(p.getPaidFor()!=null){
-            DailyExpense dailyExpense=new DailyExpense(p.getDeId(),p.getPaidFor());
-            
-            int updRes=expenseMapper.udpFor(p.getPaidFor(),p.getDeId());
+            int updRes=dailyExpenseRepository.updatePaidFor(p.getDeId(),p.getPaidFor());
             if(updRes==0){
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                         .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));

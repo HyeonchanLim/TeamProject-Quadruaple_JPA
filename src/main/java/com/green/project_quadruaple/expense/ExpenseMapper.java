@@ -12,8 +12,6 @@ import java.util.Map;
 
 @Mapper
 public interface ExpenseMapper {
-    //가계부 개설
-    void insDe(DeDto d);
     //가계부 insert
     int insPaid (Map<String, Object> paramMap);
 
@@ -26,9 +24,6 @@ public interface ExpenseMapper {
     //가계부 한줄 보기
     ExpenseOneRes selExpenseOne(long deId);
 
-    //참여유저인지 확인하기
-    boolean IsUserInTrip(long tripId, long userId);
-
     //결제인원 정보 가져오기
     List<TripInUserInfo> getTripUser(long tripId, Long deId);
 
@@ -36,7 +31,4 @@ public interface ExpenseMapper {
     int delExpenses(long deId);
     //paidUser 삭제
     int delPaidUser(long deId);
-
-    //사용목적 수정
-    int udpFor(String paidFor, long deId);
 }
