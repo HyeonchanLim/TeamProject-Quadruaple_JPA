@@ -9,6 +9,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoleId implements java.io.Serializable {
-    private UserRole role;
+    private String role;
     private Long userId;
 }
