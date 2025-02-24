@@ -6,21 +6,17 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "authentication_code")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthenticationCode {
+public class Role {
     @EmbeddedId
-    private AuthenticationCodeId id;
-
-    @ManyToOne
+    private RoleId id;
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @Column(name = "granted_at", nullable = false)
     private LocalDateTime grantedAt;
 }

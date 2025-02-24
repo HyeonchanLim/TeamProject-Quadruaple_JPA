@@ -1,14 +1,14 @@
 package com.green.project_quadruaple.entity.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class LocationDetail {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,9 +21,4 @@ public class LocationDetail {
 
     @Column(name = "detail_title", length = 50)
     private String detailTitle;
-
-    public LocationDetail(Location location, String detailTitle) {
-        this.location = location;
-        this.detailTitle = detailTitle;
-    }
 }

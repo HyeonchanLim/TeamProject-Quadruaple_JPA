@@ -25,7 +25,7 @@ public class ChatController {
     public void join(@Payload ChatDto req) {
         log.info("[{}] 채팅방 입장", req.getSender());
         chatService.save(req);
-        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), req);
+        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), req.getMessage());
     }
 
     @MessageMapping("/chat.sendMessage")
@@ -33,6 +33,6 @@ public class ChatController {
     public void sendMessage(@Payload ChatDto req) {
         log.info("[{}] message : [{}]", req.getSender(), req.getMessage());
 //        chatService.save(req);
-        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), req);
+        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), req.getMessage());
     }
 }

@@ -58,7 +58,7 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
             user = new User();
             user.setEmail(oauth2UserInfo.getEmail());
             user.setProviderType(signInProviderType);
-            user.setPw("");
+            user.setPassword("");
             user.setName(oauth2UserInfo.getName());
             user.setProfilePic(oauth2UserInfo.getProfileImageUrl());
 

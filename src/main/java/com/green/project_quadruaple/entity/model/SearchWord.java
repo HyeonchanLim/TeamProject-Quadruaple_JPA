@@ -6,21 +6,19 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "authentication_code")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthenticationCode {
-    @EmbeddedId
-    private AuthenticationCodeId id;
-
-    @ManyToOne
-    @MapsId("userId")
+public class SearchWord {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false)
+    private String txt;
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @Column(name = "granted_at", nullable = false)
-    private LocalDateTime grantedAt;
+    private LocalDateTime searchAt;
 }

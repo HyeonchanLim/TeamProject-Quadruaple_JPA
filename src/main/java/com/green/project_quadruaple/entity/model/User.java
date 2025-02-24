@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.common.config.security.SignInProviderType;
+import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class User {
+public class User extends CreatedAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -34,23 +35,25 @@ public class User {
     @Column
     private LocalDate birth;
 
-    @Column(length = 200, nullable = false)
-    private String pw;
+    @Column(name = "pw", nullable = false, length = 200)
+    private String password;
 
-    @Column(nullable = false)
-    private int state = 0;
+    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    private int state;
 
-    @Column(name = "created_at", nullable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    private int verified;
 
-    @Column(nullable = false)
-    private int verified = 0;
+    @Column(name = "tell")
+    private String tell;
 
-    public User(String profilePic, String name, String email, String pw) {
+    public User(SignInProviderType providerType, String profilePic, String name, String email, LocalDate birth, String password, String tell) {
+        this.providerType = providerType;
         this.profilePic = profilePic;
         this.name = name;
         this.email = email;
-        this.pw = pw;
+        this.birth = birth;
+        this.password = password;
+        this.tell = tell;
     }
 }

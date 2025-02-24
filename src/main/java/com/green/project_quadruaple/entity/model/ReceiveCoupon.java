@@ -10,13 +10,16 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BusinessNum extends CreatedAt {
-
+public class ReceiveCoupon extends CreatedAt {
     @Id
-    @Column(name = "busi_num", length = 20)
-    private String busiNum;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long receiveId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coupon_id", nullable = false)
+    private Coupon coupon;
 }
