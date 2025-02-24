@@ -2,13 +2,11 @@ package com.green.project_quadruaple.user;
 
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.CookieUtils;
-import com.green.project_quadruaple.common.config.constant.JwtConst;
 import com.green.project_quadruaple.common.config.jwt.TokenProvider;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.config.security.SignInProviderType;
-import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.user.exception.CustomException;
 import com.green.project_quadruaple.user.exception.UserErrorCode;
@@ -35,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.security.SignatureException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -98,6 +95,7 @@ public class UserService {
             user.setProfilePic(savedPicName);
             user.setPassword(hashedPassword);
             user.setBirth(p.getBirth());
+            user.setTell(p.getTell());
             user.setProviderType(SignInProviderType.LOCAL);
 
             userRepository.save(user);
@@ -176,21 +174,10 @@ public class UserService {
             throw new RuntimeException("이메일 인증이 필요합니다.");
         }
 
-        // 이메일 인증 횟수 제한 체크
-        LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        LocalDateTime endOfDay = startOfDay.plusDays(1);
-
-        int authCodeCount = authenticationCodeRepository.countById_UserIdAndGrantedAtBetween(userSelOne.getUserId(), startOfDay, endOfDay);
-
-        if (authCodeCount >= 5) {
-            // 인증 코드 입력 횟수 초과시 해당 인증 코드 삭제
-            authenticationCodeRepository.deleteById_UserIdAndGrantedAtBetween(userSelOne.getUserId(), startOfDay, endOfDay);
-        }
-
         List<UserRole> roles = new ArrayList<>(2);
         roles.add(UserRole.USER);
         roles.add(UserRole.ADMIN);
-        roles.add(UserRole.BUIS);
+        roles.add(UserRole.BUSI);
         userSelOne.setRoles(roles);
 
         // AT, RT

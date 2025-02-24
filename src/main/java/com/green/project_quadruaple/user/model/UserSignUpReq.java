@@ -29,6 +29,8 @@ public class UserSignUpReq {
     private String name;
     @Schema(title="생년월일", example = "2000-01-01", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDate birth;
+    @Schema(title="전화번호", example = "010-0000-0000")
+    private String tell;
     @JsonIgnore
     private String profilePic;
     @JsonIgnore

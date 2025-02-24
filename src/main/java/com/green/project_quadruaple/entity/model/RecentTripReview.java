@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecentTripReview {
-
     @Id
     @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,4 +26,6 @@ public class RecentTripReview {
     @Column(name = "inquired_at", nullable = false)
     private LocalDateTime inquiredAt;
 
+    @Column(name = "undo_recent", nullable = false,columnDefinition = "TINYINT(4) DEFAULT 0")
+    private int undoRecent;
 }

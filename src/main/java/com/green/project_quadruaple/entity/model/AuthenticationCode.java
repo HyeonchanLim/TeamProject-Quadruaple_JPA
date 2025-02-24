@@ -13,14 +13,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class AuthenticationCode {
-    @EmbeddedId
-    private AuthenticationCodeId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long authenticatedId;
 
-    @ManyToOne
-    @MapsId("userId")
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "code_num", length = 10, nullable = false)
+    private String codeNum;
+
+    @Column(length = 50, nullable = false)
+    private String email;
 
     @Column(name = "granted_at", nullable = false)
     private LocalDateTime grantedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.grantedAt = LocalDateTime.now();
+    }
 }
