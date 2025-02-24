@@ -1,14 +1,14 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.green.project_quadruaple.common.config.jwt.UserRole;
 import jakarta.persistence.Embeddable;
 import lombok.*;
 
+@Data
 @Embeddable
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoleId implements java.io.Serializable {
-    private String role;
+    private UserRole role;
     private Long userId;
 }

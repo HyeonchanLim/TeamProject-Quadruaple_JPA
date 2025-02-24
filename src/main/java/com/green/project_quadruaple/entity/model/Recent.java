@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -25,9 +26,10 @@ public class Recent {
     private StayTourRestaurFest strfId;
 
     @Column(name = "inquired_at", nullable = false)
+    @CreationTimestamp
     private LocalDateTime inquiredAt;
 
-    @Column(name = "undo_recent", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(name = "undo_recent", nullable = false, columnDefinition = "TINYINT(4) DEFAULT 0")
     private int undoRecent;
 
 }

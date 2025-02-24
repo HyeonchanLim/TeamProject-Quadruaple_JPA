@@ -13,6 +13,7 @@ import lombok.*;
 public class ReceiveCoupon extends CreatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "receive_id",nullable = false)
     private Long receiveId;
 
     @ManyToOne(fetch = FetchType.LAZY)
