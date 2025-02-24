@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Memo  {
-
     @Id
     @Column(name = "memo_id",nullable = false)
     private Long memoId;
