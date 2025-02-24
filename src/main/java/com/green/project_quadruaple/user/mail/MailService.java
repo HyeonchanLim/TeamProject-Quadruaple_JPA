@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -45,8 +46,17 @@ public class MailService {
         for (int i = 0; i < 4; i++) {
             code.append((int)(Math.random() * 10));
         }
-        MailService.codes.put(email, String.valueOf(code));
+        String codeStr = code.toString();
 
+        // 생성된 코드 DB에 저장
+        AuthenticationCode authCode = AuthenticationCode.builder()
+                .email(email)
+                .codeNum(codeStr)
+                .grantedAt(LocalDateTime.now())
+                .build();
+        authenticationCodeRepository.save(authCode);
+
+        MailService.codes.put(email, codeStr);
         // 인증코드 유지 시간 설정
         new Thread(new AuthCode(email)).start();
 
@@ -116,18 +126,17 @@ public class MailService {
         String email = req.getEmail();
         String code = req.getCode();
 
-//        User user = userRepository.findByEmail(email)
-//                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+        User user = userRepository.findByAuthenticationCode_Email(email)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
-//        Optional<AuthenticationCode> authCode = authenticationCodeRepository.findById_UserIdAndId_CodeNum(user.getUserId(), code);
+        Optional<AuthenticationCode> authCode = authenticationCodeRepository.findByEmailAndCodeNum(email, code);
 
-//        if (authCode.isEmpty()) {
-//            return new ResultResponse("FAIL");
-//        }
-//        authenticationCodeRepository.delete(authCode.get());
+        if (authCode.isEmpty()) {
+            return new ResultResponse("FAIL");
+        }
 
-//        user.setVerified(1);
-//        userRepository.save(user);
+        user.setVerified(1);
+        userRepository.save(user);
 
         mailChecked.put(email, true);
         new Thread(new MailCheck(email)).start();

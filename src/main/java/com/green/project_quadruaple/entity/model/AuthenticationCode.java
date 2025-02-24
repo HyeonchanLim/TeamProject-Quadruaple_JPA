@@ -2,6 +2,7 @@ package com.green.project_quadruaple.entity.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 public class AuthenticationCode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "authenticated_id")
     private Long authenticatedId;
 
     @Column(name = "code_num", length = 10, nullable = false)
@@ -24,6 +26,7 @@ public class AuthenticationCode {
     private String email;
 
     @Column(name = "granted_at", nullable = false)
+    @CreationTimestamp
     private LocalDateTime grantedAt;
 
     @PrePersist

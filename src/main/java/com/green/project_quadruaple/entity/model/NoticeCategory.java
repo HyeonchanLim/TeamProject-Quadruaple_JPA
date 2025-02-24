@@ -12,7 +12,8 @@ import lombok.*;
 public class NoticeCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "notice_category_id",nullable = false)
     private Long noticeCategoryId;
-    @Column(nullable = false)
+    @Column(nullable = false,length = 10)
     private String category;
 }

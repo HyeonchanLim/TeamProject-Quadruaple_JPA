@@ -13,14 +13,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Role {
-    @Id
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
 
+    @EmbeddedId
+    private RoleId id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "user_id", nullable = false)
+    @MapsId("userId")
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", insertable = false, updatable = false)
+    private UserRole role;
 
     private LocalDateTime grantedAt;
 }

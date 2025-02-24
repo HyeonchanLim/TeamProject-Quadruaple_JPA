@@ -18,7 +18,7 @@ public class PurchasedPoint extends Refund {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "purchased_point_id")
+    @Column(name = "purchased_point_id",nullable = false)
     private Long purchasedPointId;
 
     @ManyToOne(fetch = FetchType.LAZY)

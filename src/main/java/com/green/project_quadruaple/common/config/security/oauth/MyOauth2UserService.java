@@ -53,22 +53,21 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
         Oauth2UserInfo oauth2UserInfo = oauth2UserInfoFactory.getOauth2UserInfo(signInProviderType, oAuth2User.getAttributes());
 
         //기존에 회원가입이 되어있는 지를 체크
-//        User user = userRepository.findByEmailAndProviderType(oauth2UserInfo.getEmail(), signInProviderType);
-//        if (user == null) {
-//            user = new User();
-//            user.setProviderType(signInProviderType);
-//            user.setPassword("");
-//            user.setName(oauth2UserInfo.getName());
-//            user.setProfilePic(oauth2UserInfo.getProfileImageUrl());
-//
-//            userRepository.save(user);
-//        }
+        User user = userRepository.findByAuthenticationCode_EmailAndProviderType(oauth2UserInfo.getEmail(), signInProviderType);
+        if (user == null) {
+            user = new User();
+            user.setProviderType(signInProviderType);
+            user.setPassword("");
+            user.setName(oauth2UserInfo.getName());
+            user.setProfilePic(oauth2UserInfo.getProfileImageUrl());
+
+            userRepository.save(user);
+        }
 
         List<UserRole> roles = Arrays.asList(UserRole.USER);
 
-//        OAuth2JwtUser oAuth2JwtUser = new OAuth2JwtUser(user.getName(), user.getProfilePic(), user.getUserId(), roles);
+        OAuth2JwtUser oAuth2JwtUser = new OAuth2JwtUser(user.getName(), user.getProfilePic(), user.getUserId(), roles);
 
-//        return oAuth2JwtUser;
-        return null;
+        return oAuth2JwtUser;
     }
 }

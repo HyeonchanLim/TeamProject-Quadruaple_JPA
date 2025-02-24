@@ -61,9 +61,9 @@ public class UserService {
     public int signUp(MultipartFile pic, UserSignUpReq p) {
 
         // 이메일 중복 체크
-//        if (userRepository.existsByEmail(p.getEmail())) {
-//            return 0;
-//        }
+        if (userRepository.existsByAuthenticationCode_Email(p.getEmail())) {
+            return 0;
+        }
 
         // 닉네임 중복 체크 및 유니크한 닉네임 생성
         String uniqueName = p.getName();
