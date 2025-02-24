@@ -61,7 +61,7 @@ public class UserService {
     public int signUp(MultipartFile pic, UserSignUpReq p) {
 
         // 이메일 중복 체크
-        if (userRepository.existsByEmail(p.getEmail())) {
+        if (userRepository.existsByAuthenticationCode_Email(p.getEmail())) {
             return 0;
         }
 
@@ -91,7 +91,6 @@ public class UserService {
         try {
             User user = new User();
             user.setName(uniqueName);
-            user.setEmail(p.getEmail());
             user.setProfilePic(savedPicName);
             user.setPassword(hashedPassword);
             user.setBirth(p.getBirth());
