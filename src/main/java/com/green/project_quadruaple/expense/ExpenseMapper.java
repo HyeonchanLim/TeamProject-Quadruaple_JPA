@@ -1,13 +1,9 @@
 package com.green.project_quadruaple.expense;
 
 import com.green.project_quadruaple.expense.model.dto.DeDto;
-import com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto;
 import com.green.project_quadruaple.expense.model.dto.ExpenseDto;
-import com.green.project_quadruaple.expense.model.dto.PaidUser;
-import com.green.project_quadruaple.expense.model.req.DutchReq;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
 import com.green.project_quadruaple.expense.model.res.ExpensesRes;
-import com.green.project_quadruaple.expense.model.res.TripUser;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
