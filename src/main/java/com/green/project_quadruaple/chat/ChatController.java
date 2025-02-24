@@ -1,16 +1,13 @@
 package com.green.project_quadruaple.chat;
 
 import com.green.project_quadruaple.chat.model.ChatDto;
-import com.green.project_quadruaple.chat.model.MessageReq;
-import com.green.project_quadruaple.chat.model.MessageRes;
+import com.green.project_quadruaple.chat.model.JoinReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.util.HtmlUtils;
 
 @Slf4j
 @Controller
@@ -22,10 +19,9 @@ public class ChatController {
 
     @MessageMapping("/chat.join")
 //    @SendTo("/topic/greetings")
-    public void join(@Payload ChatDto req) {
-        log.info("[{}] 채팅방 입장", req.getSender());
-        chatService.save(req);
-        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), req.getMessage());
+    public void join(@Payload JoinReq req) {
+        chatService.save();
+        messagingTemplate.convertAndSend("/sub/chat/" + req.roomId(), String.format( "[%s]채팅방 입장", "user1"));
     }
 
     @MessageMapping("/chat.sendMessage")

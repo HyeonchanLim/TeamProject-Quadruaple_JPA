@@ -116,18 +116,18 @@ public class MailService {
         String email = req.getEmail();
         String code = req.getCode();
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+//        User user = userRepository.findByEmail(email)
+//                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
-        Optional<AuthenticationCode> authCode = authenticationCodeRepository.findById_UserIdAndId_CodeNum(user.getUserId(), code);
+//        Optional<AuthenticationCode> authCode = authenticationCodeRepository.findById_UserIdAndId_CodeNum(user.getUserId(), code);
 
-        if (authCode.isEmpty()) {
-            return new ResultResponse("FAIL");
-        }
-        authenticationCodeRepository.delete(authCode.get());
+//        if (authCode.isEmpty()) {
+//            return new ResultResponse("FAIL");
+//        }
+//        authenticationCodeRepository.delete(authCode.get());
 
-        user.setVerified(1);
-        userRepository.save(user);
+//        user.setVerified(1);
+//        userRepository.save(user);
 
         mailChecked.put(email, true);
         new Thread(new MailCheck(email)).start();

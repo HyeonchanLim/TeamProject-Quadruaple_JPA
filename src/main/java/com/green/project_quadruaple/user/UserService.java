@@ -61,9 +61,9 @@ public class UserService {
     public int signUp(MultipartFile pic, UserSignUpReq p) {
 
         // 이메일 중복 체크
-        if (userRepository.existsByEmail(p.getEmail())) {
-            return 0;
-        }
+//        if (userRepository.existsByEmail(p.getEmail())) {
+//            return 0;
+//        }
 
         // 닉네임 중복 체크 및 유니크한 닉네임 생성
         String uniqueName = p.getName();
@@ -91,7 +91,6 @@ public class UserService {
         try {
             User user = new User();
             user.setName(uniqueName);
-            user.setEmail(p.getEmail());
             user.setProfilePic(savedPicName);
             user.setPassword(hashedPassword);
             user.setBirth(p.getBirth());

@@ -18,7 +18,7 @@ public class Role {
     private UserRole role;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId")
+    @MapsId
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
