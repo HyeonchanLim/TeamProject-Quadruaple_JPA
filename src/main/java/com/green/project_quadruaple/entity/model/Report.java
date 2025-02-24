@@ -2,6 +2,7 @@ package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Report extends CreatedAt {
 
     @Id
@@ -28,7 +30,7 @@ public class Report extends CreatedAt {
     private User manager;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @JoinColumn(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private StayTourRestaurFest category;
 
@@ -44,11 +46,4 @@ public class Report extends CreatedAt {
     @Column(name = "processed_at")
     private LocalDateTime processedAt;
 
-    public Report(User reportUser, User manager, StayTourRestaurFest category, Long reportTarget, String reason) {
-        this.reportUser = reportUser;
-        this.manager = manager;
-        this.category = category;
-        this.reportTarget = reportTarget;
-        this.reason = reason;
-    }
 }

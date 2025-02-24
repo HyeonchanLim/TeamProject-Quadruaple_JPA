@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,19 +10,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class TripLike {
 
     @Id
-    @Column(name = "user_id")
+    @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private User userId;
 
-    @Column(name = "trip_review_id")
+    @JoinColumn(name = "trip_review_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private TripReview tripReviewId;
 
-    public TripLike(User userId, TripReview tripReviewId) {
-        this.userId = userId;
-        this.tripReviewId = tripReviewId;
-    }
 }

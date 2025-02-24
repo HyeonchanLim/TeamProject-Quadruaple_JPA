@@ -2,6 +2,7 @@ package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class TripReview extends CreatedAt {
 
     @Id
@@ -31,10 +33,4 @@ public class TripReview extends CreatedAt {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    public TripReview(Trip trip, User user, String title, String content) {
-        this.trip = trip;
-        this.user = user;
-        this.title = title;
-        this.content = content;
-    }
 }

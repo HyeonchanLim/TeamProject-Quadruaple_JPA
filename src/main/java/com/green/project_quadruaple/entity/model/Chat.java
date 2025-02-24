@@ -2,6 +2,7 @@ package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Chat extends CreatedAt {
 
     @Id
@@ -24,8 +26,4 @@ public class Chat extends CreatedAt {
     @Column(nullable = false, length = 1000)
     private String content;
 
-    public Chat(ChatJoin chatJoin, String content) {
-        this.chatJoin = chatJoin;
-        this.content = content;
-    }
 }

@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class PointCard {
 
     @Id
@@ -25,9 +27,4 @@ public class PointCard {
     @Column(nullable = false)
     private int finalPayment;
 
-    public PointCard(int available, int discountPer, int finalPayment) {
-        this.available = available;
-        this.discountPer = discountPer;
-        this.finalPayment = finalPayment;
-    }
 }
