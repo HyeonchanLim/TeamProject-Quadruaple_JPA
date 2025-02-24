@@ -1,0 +1,1 @@
+const e=[{type:null,name:"전체"},{type:"TOUR",name:"관광지"},{type:"STAY",name:"숙소"},{type:"RESTAUR",name:"맛집"},{type:"FEST",name:"축제"}],t=[{type:"ratingAvg",name:"• 평점순"},{type:"ratingCnt",name:"• 리뷰순"},{type:"likeCnt",name:"• 좋아요순"}];export{e as c,t as o};
