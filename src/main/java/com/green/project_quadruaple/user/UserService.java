@@ -68,9 +68,12 @@ public class UserService {
             return 0;
         }
 
-        //닉네임 중복 체크
-        if (userRepository.existsByName(p.getName())) {
-            return 0;
+        // 닉네임 중복 체크 및 유니크한 닉네임 생성
+        String uniqueName = p.getName();
+        int count = 1;
+        while (userRepository.existsByName(uniqueName)) {
+            uniqueName = p.getName() + count;
+            count++;
         }
 
         // 비밀번호 해싱
@@ -90,10 +93,10 @@ public class UserService {
 
         try {
             User user = new User();
-            user.setName(p.getName());
+            user.setName(uniqueName);
             user.setEmail(p.getEmail());
             user.setProfilePic(savedPicName);
-            user.setPw(hashedPassword);
+            user.setPassword(hashedPassword);
             user.setBirth(p.getBirth());
             user.setProviderType(SignInProviderType.LOCAL);
 
