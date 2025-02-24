@@ -4,11 +4,16 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.expense.entity.DailyExpense;
+import com.green.project_quadruaple.expense.entity.PaidUser;
 import com.green.project_quadruaple.expense.model.dto.DeDto;
 import com.green.project_quadruaple.expense.model.dto.ExpenseDto;
+import com.green.project_quadruaple.expense.model.dto.PaidUserInfo;
 import com.green.project_quadruaple.expense.model.req.*;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
 import com.green.project_quadruaple.expense.model.res.ExpensesRes;
+import com.green.project_quadruaple.expense.model.res.TripInUserInfo;
+import com.green.project_quadruaple.trip.TripUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,6 +30,9 @@ import java.util.*;
 public class ExpenseService {
     private final ExpenseMapper expenseMapper;
     private final AuthenticationFacade authenticationFacade;
+    private final DailyExpenseRepository dailyExpenseRepository;
+    private final PaidUserRepository paidUserRepository;
+    private final TripUserRepository tripUserRepository;
 
     //trip 참여객 체크
     boolean isUserJoinTrip(long tripId){
@@ -86,17 +94,21 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        int delRes= expenseMapper.delPaidUser(p.getDeId());
-        if(delRes==0){
+        List<PaidUser> delPaidUserInfo =paidUserRepository.findAllByDeId(p.getDeId())
+                .orElse(new ArrayList<>());
+        if(delPaidUserInfo.size()==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
+        paidUserRepository.deleteAll(delPaidUserInfo);
         int result=insPaidUsers(p.getPaidUserList(),p.getDeId(),p.getTripId(),p.getTotalPrice());
         if(result==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         if(p.getPaidFor()!=null){
+            DailyExpense dailyExpense=new DailyExpense(p.getDeId(),p.getPaidFor());
+            
             int updRes=expenseMapper.udpFor(p.getPaidFor(),p.getDeId());
             if(updRes==0){
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
@@ -107,12 +119,12 @@ public class ExpenseService {
     }
 
     //이 결제에서 제외된 인원보기
-    public ResponseEntity<ResponseWrapper<List<TripUser>>> getTripUser(Long deId, long tripId){
+    public ResponseEntity<ResponseWrapper<List<TripInUserInfo>>> getTripUser(Long deId, long tripId){
         if(isUserJoinTrip(tripId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        List<TripUser> tripUser=expenseMapper.getTripUser(tripId, deId);
+        List<TripInUserInfo> tripUser=expenseMapper.getTripUser(tripId, deId);
         if(tripUser==null){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));

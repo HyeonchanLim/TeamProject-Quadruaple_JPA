@@ -53,7 +53,7 @@
         <collection property="paidUserList" resultMap="paidUserList" />
     </resultMap>
 
-    <resultMap id="paidUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUser">
+    <resultMap id="paidUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUserInfo">
         <id property="userId" column="userId" />
         <result property="name" column="name" />
         <result property="profilePic" column="profilePic" />
@@ -106,7 +106,7 @@
         <result property="myPrice" column="myPrice" />
         <collection property="paidUserList" resultMap="InsedUserList" />
     </resultMap>
-    <resultMap id="InsedUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUser">
+    <resultMap id="InsedUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUserInfo">
         <id property="userId" column="userId" />
         <result property="name" column="name" />
         <result property="profilePic" column="profilePic"/>
@@ -173,7 +173,7 @@
         WHERE P.trip_user_id IS NULL
     </select>
 
-    <delete id="delPaidUser">
+    <delete id="delPaidUserInfo">
         DELETE FROM paid_user WHERE de_id = #{deId}
     </delete>
     
