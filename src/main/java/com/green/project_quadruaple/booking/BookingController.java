@@ -1,6 +1,5 @@
 package com.green.project_quadruaple.booking;
 
-import com.green.project_quadruaple.booking.model.BookingListGetReq;
 import com.green.project_quadruaple.booking.model.BookingListResponse;
 import com.green.project_quadruaple.booking.model.BookingPostReq;
 import com.green.project_quadruaple.booking.model.BookingPostRes;
@@ -30,8 +29,8 @@ public class BookingController {
     @GetMapping
     @ResponseBody
     @Operation(summary = "예약 목록 불러오기")
-    public ResponseWrapper<BookingListResponse> getBooking(BookingListGetReq req) {
-        return bookingService.getBooking(req);
+    public ResponseWrapper<BookingListResponse> getBooking() {
+        return bookingService.getBooking();
     }
 
     @PostMapping

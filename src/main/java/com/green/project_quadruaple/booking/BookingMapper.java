@@ -8,7 +8,7 @@ import java.util.List;
 
 @Mapper
 public interface BookingMapper {
-    List<BookingListGetRes> getBooking(BookingListGetReq req);
+    List<BookingListGetRes> getBooking(Long signedUserId);
 
     BookingPostRes postBooking(BookingPostReq req);
 

@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Schedule {
 
     @Id
@@ -18,7 +20,7 @@ public class Schedule {
     @MapsId
     @JoinColumn(name = "schedule_id")
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private ScheMemo ScheMemo;
+    private ScheduleMemo ScheMemo;
 
     private Double distance;
 
@@ -29,16 +31,8 @@ public class Schedule {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "strf_id")
-    private Strf strf;
+    private StayTourRestaurFest strf;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public Schedule(ScheMemo scheMemo, Double distance, Integer duration, Integer pathType, Strf strf) {
-        ScheMemo = scheMemo;
-        this.distance = distance;
-        this.duration = duration;
-        this.pathType = pathType;
-        this.strf = strf;
-    }
 }
