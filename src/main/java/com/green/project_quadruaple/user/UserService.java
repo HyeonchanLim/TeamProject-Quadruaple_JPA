@@ -71,11 +71,8 @@ public class UserService {
         }
 
         // 닉네임 중복 체크 및 유니크한 닉네임 생성
-        String uniqueName = p.getName();
-        int count = 1;
-        while (userRepository.existsByName(uniqueName)) {
-            uniqueName = p.getName() + count;
-            count++;
+        if (userRepository.existsByName(p.getName())) {
+            return 0;
         }
 
         // 비밀번호 해싱
@@ -95,7 +92,7 @@ public class UserService {
 
         try {
             // 인증 코드가 존재하는지 확인
-            AuthenticationCode authCode = authenticationCodeRepository.findByEmail(p.getEmail())
+            AuthenticationCode authCode = authenticationCodeRepository.findFirstByEmailOrderByGrantedAtDesc(p.getEmail())
                     .orElseThrow(() -> new RuntimeException("이메일 인증이 완료되지 않았습니다."));
 
             //이메일을 authCode에서 가져오도록 수정
@@ -103,7 +100,7 @@ public class UserService {
 
             User user = new User();
             user.setAuthenticationCode(authCode);
-            user.setName(uniqueName);
+            user.setName(p.getName());
             user.setProfilePic(savedPicName);
             user.setPassword(hashedPassword);
             user.setBirth(p.getBirth());
@@ -168,6 +165,13 @@ public class UserService {
         return 1;
     }
 
+    public boolean checkDuplicatedName(String name) {
+        boolean isDuplicated = userRepository.existsByName(name);
+        if (isDuplicated) {
+            return false;
+        }
+        return true;
+    }
 
 
     public boolean checkDuplicatedEmail(String email) {
@@ -192,7 +196,7 @@ public class UserService {
         }
 
         // 이메일 인증 여부 확인
-        Optional<AuthenticationCode> authCode = authenticationCodeRepository.findByEmail(user.getAuthenticationCode().getEmail());
+        Optional<AuthenticationCode> authCode = authenticationCodeRepository.findFirstByEmailOrderByGrantedAtDesc(user.getAuthenticationCode().getEmail());
         if (authCode.isEmpty() || user.getVerified() == 0) {
             throw new RuntimeException("이메일 인증이 필요합니다.");
         }
@@ -246,13 +250,21 @@ public class UserService {
             // 토큰에서 사용자 ID 가져오기
             long signedUserId = authenticationFacade.getSignedUserId();
 
-            // 사용자 정보 조회
-            UserInfo userInfo = userMapper.selUserInfo(signedUserId);
+            // JPA로 사용자 정보 조회
+            User user = userRepository.findById(signedUserId)
+                    .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND)); // 사용자 없을 경우 예외 처리
+
+            // authenticatedId를 이용해 AuthenticationCode에서 이메일 조회
+            AuthenticationCode authenticationCode = authenticationCodeRepository
+                    .findByAuthenticatedId(user.getAuthenticationCode().getAuthenticatedId()) // authenticatedId로 이메일 조회
+                    .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND)); // 인증 코드가 없으면 예외 처리
+
+            // DTO로 변환하여 반환
             return UserInfoDto.builder()
                     .signedUserId(signedUserId)
-                    .name(userInfo.getName())
-                    .email(userInfo.getEmail())
-                    .profilePic(userInfo.getProfilePic())
+                    .name(user.getName())
+                    .email(authenticationCode.getEmail())
+                    .profilePic(user.getProfilePic())
                     .build();
         } catch (ExpiredJwtException e) {
             // 토큰 만료 에러 처리
