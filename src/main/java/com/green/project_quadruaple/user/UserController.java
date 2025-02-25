@@ -75,6 +75,7 @@ public class UserController {
         responseBody.put("data", 200);  // 혹은 적절한 성공 데이터를 설정
         responseBody.put("userId", res.getUserId());
         responseBody.put("accessToken", res.getAccessToken());
+        responseBody.put("role", res.getRoles());
 
         return ResponseEntity.ok(responseBody);
     }

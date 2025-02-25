@@ -22,20 +22,27 @@ public class ChatRoomService {
     private final ChatJoinRepository chatJoinRepository;
 
     @Transactional
-    public ResponseWrapper<Long> postChatRoom(ChatRoomReq req) {
+    public ResponseWrapper<Long> createChatRoom(ChatRoomReq req) {
 
-        User user = userRepository.findById(124L).isPresent() ? userRepository.findById(124L).get() : null;
+        User hostUser = userRepository.findById(124L).isPresent() ? userRepository.findById(124L).get() : null;
+        User inviteUser = userRepository.findById(131L).isPresent() ? userRepository.findById(131L).get() : null;
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .title(req.getTitle())
                 .build();
         chatRoomRepository.save(chatRoom);
 
-        ChatJoin chatJoin = ChatJoin.builder()
-                .user(user)
+        ChatJoin hostUserJoin = ChatJoin.builder()
+                .user(hostUser)
                 .chatRoom(chatRoom)
                 .build();
-        chatJoinRepository.save(chatJoin);
+        chatJoinRepository.save(hostUserJoin);
+
+        ChatJoin inviteUserJoin = ChatJoin.builder()
+                .user(inviteUser)
+                .chatRoom(chatRoom)
+                .build();
+        chatJoinRepository.save(inviteUserJoin);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoom.getChatRoomId());
     }

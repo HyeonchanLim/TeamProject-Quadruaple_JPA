@@ -109,6 +109,7 @@ public class UserService {
             user.setBirth(p.getBirth());
             user.setTell(p.getTell());
             user.setProviderType(SignInProviderType.LOCAL);
+            user.setVerified(1);
 
             userRepository.save(user);
 
@@ -199,7 +200,7 @@ public class UserService {
         // 사용자의 역할(Role) 조회
         List<Role> roleEntities = roleRepository.findByUserUserId(user.getUserId());
         List<UserRole> roles = roleEntities.stream()
-                .map(Role::getRole)
+                .map(role -> UserRole.getKeyByName(role.getRole().getName()))
                 .collect(Collectors.toList());
 
 
@@ -217,6 +218,7 @@ public class UserService {
                 .accessToken(accessToken)
                 .userId(user.getUserId())
                 .name(user.getName())
+                .roles(roles)
                 .build();
     }
 

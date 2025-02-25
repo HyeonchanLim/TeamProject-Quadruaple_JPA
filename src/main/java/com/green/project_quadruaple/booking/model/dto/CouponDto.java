@@ -8,7 +8,7 @@ import lombok.Setter;
 public class CouponDto {
 
     private Long receiveId;
-    private Long discountRate;
+    private Integer discountRate;
     private Long usedCouponId;
 
 }
