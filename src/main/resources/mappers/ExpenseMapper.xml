@@ -13,18 +13,6 @@
         ON tu.trip_id = temp.tripId AND tu.user_id = temp.userId
     </insert>
 
-    <select id="selExpense">
-        SELECT U.user_id
-        FROM paid_user P
-        LEFT JOIN trip_user TU
-        ON TU.trip_user_id=P.trip_user_id
-        LEFT JOIN user U
-        ON U.user_id=TU.user_id
-        LEFT JOIN daily_expense D
-        ON D.de_id=P.de_id
-        where TU.trip_id = #{tripId}
-    </select>
-
     <resultMap id="expenses" type="com.green.project_quadruaple.expense.model.res.ExpensesRes">
         <id property="title" column="title" />
         <result property="tripPeriod" column="tripPeriod" />
@@ -144,26 +132,6 @@
         WHERE D.de_id = #{deId}
         GROUP BY D.user_id, D.`for`, D.name, D.profile_pic, D.price
     </select>
-
-    <delete id="delExpenses">
-        DELETE FROM daily_expense WHERE de_id = #{deId}
-    </delete>
-
-    <select id="exceptedMember">
-        SELECT U.user_id, U.profile_pic, U.name
-        FROM user U
-        JOIN trip_user TU
-        ON U.user_id = TU.user_id
-        AND TU.trip_id=#{tripId}
-        LEFT JOIN paid_user P
-        ON TU.trip_user_id = P.trip_user_id
-        AND P.de_id = #{deId}
-        WHERE P.trip_user_id IS NULL
-    </select>
-
-    <delete id="delPaidUserInfo">
-        DELETE FROM paid_user WHERE de_id = #{deId}
-    </delete>
     
     <select id="getTripUser">
         SELECT U.user_id, U.profile_pic, U.name
