@@ -43,4 +43,7 @@ public class Booking extends Refund {
     @Column(nullable = false)
     private String tid;
 
+    @Column(nullable = false, columnDefinition = "TINYINT(4) default 0")
+    private Integer state;
+
 }

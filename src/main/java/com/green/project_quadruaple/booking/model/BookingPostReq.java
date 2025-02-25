@@ -46,8 +46,8 @@ public class BookingPostReq {
     private int actualPaid;
 
     @NotNull
-    @JsonProperty("order_list")
-    private List<MenuIdAndQuantityDto> orderList;
+    @JsonProperty("menu_id")
+    private Long menuId;
 
     @JsonIgnore
     private Long userId;
