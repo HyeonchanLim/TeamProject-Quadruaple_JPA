@@ -7,8 +7,10 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ChatRoom extends CreatedAt {
 
     @Id

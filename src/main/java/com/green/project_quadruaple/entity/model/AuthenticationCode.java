@@ -9,9 +9,11 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "authentication_code")
 @Getter
+@Builder
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AuthenticationCode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,8 +9,10 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ChatJoin {
 
     @Id

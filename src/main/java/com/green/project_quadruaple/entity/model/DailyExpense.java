@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.expense.entity;
+package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;

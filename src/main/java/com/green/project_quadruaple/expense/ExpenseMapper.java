@@ -27,9 +27,4 @@ public interface ExpenseMapper {
 
     //결제인원 정보 가져오기
     List<TripInUserInfo> getTripUser(long tripId, Long deId);
-
-    //가계부 삭제
-    int delExpenses(long deId);
-    //paidUser 삭제
-    int delPaidUser(long deId);
 }
