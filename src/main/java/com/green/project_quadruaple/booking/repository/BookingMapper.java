@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.booking;
+package com.green.project_quadruaple.booking.repository;
 
 import com.green.project_quadruaple.booking.model.*;
 import com.green.project_quadruaple.booking.model.dto.*;

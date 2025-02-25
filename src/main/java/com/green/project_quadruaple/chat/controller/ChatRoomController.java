@@ -20,6 +20,6 @@ public class ChatRoomController {
 
     @PostMapping
     public ResponseWrapper<Long> postChatRoom(@RequestBody ChatRoomReq req) {
-        return chatRoomService.postChatRoom(req);
+        return chatRoomService.createChatRoom(req);
     }
 }

@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Booking  {
+@Builder
+public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_id")
@@ -39,10 +40,10 @@ public class Booking  {
     @Column(name = "final_payment", nullable = false)
     private int finalPayment;
 
-    @Column(nullable = false,length = 30)
+    @Column(nullable = false)
     private String tid;
 
-    @Column(nullable = false, columnDefinition = "TINYINT(4) DEFAULT 0")
-    private int state;
+    @Column(nullable = false, columnDefinition = "TINYINT(4) default 0")
+    private Integer state;
 
 }
