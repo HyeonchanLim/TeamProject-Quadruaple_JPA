@@ -3,6 +3,7 @@ package com.green.project_quadruaple.chat.service;
 import com.green.project_quadruaple.chat.model.ChatDto;
 import com.green.project_quadruaple.chat.model.JoinReq;
 import com.green.project_quadruaple.chat.model.JoinRes;
+import com.green.project_quadruaple.chat.model.MessageRes;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.entity.model.User;
@@ -25,23 +26,22 @@ public class ChatService {
     private final UserRepository userRepository;
 
     @Transactional
-    public JoinRes joinChat(JoinReq req, Principal principal) {
+    public MessageRes joinChat(JoinReq req, Principal principal) {
 
         Long signedUserId = getSignedUserId(principal);
         if(signedUserId == null) { // 인증 정보 없으면 return
-            return JoinRes.builder()
-                    .userName(null)
+            return MessageRes.builder()
                     .error("유저 정보 없음")
                     .build();
         }
         User user = userRepository.findById(signedUserId).get();
-        return JoinRes.builder()
-                .userName(user.getName())
-                .error(null)
+        return MessageRes.builder()
+                .sender(user.getName())
+                .message(String.format("[%s] 채팅방 입장"))
                 .build();
     }
 
-    public String insChat(ChatDto req) {
+    public MessageRes insChat(ChatDto req) {
         return null;
     }
 

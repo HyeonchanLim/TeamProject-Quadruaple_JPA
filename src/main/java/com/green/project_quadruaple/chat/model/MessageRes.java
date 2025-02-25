@@ -1,14 +1,13 @@
 package com.green.project_quadruaple.chat.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
+@Setter
+@Builder
 public class MessageRes {
 
     private String sender;
     private String message;
+    private String error;
 }
