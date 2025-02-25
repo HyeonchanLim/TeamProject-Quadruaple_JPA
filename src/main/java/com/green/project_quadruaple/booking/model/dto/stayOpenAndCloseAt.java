@@ -8,6 +8,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class stayOpenAndCloseAt {
-    private String openCheck;
-    private String closeCheck;
+    private String openCheckIn;
+    private String closeCheckOut;
 }

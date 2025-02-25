@@ -33,7 +33,7 @@ public class BookingPostReq {
 
     @NotBlank
     @JsonProperty("check_out")
-    @Schema(title = "체크아웃 시각", type= "string", example = "2025-02-15 22:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "체크아웃 시각", type= "string", example = "2025-02-15 21:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     private String checkOut;
 
     @JsonProperty("coupon_id")
@@ -42,12 +42,18 @@ public class BookingPostReq {
 
     @NotNull
     @JsonProperty("actual_paid")
-    @Schema(title = "쿠폰 적용한 최종 결제 금액", type= "int", example = "225000", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "쿠폰 적용한 최종 결제 금액", type= "int", example = "60000", requiredMode = Schema.RequiredMode.REQUIRED)
     private int actualPaid;
 
     @NotNull
     @JsonProperty("menu_id")
+    @Schema(title = "메뉴 PK", type= "long", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     private Long menuId;
+
+    @NotNull
+    @JsonProperty("room_id")
+    @Schema(title = "호실 PK", type= "long", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long roomId;
 
     @JsonIgnore
     private Long userId;
