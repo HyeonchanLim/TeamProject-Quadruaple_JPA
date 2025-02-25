@@ -22,8 +22,6 @@ public interface SearchMapper {
     List<LocationIdAndTitleDto> selLocationIdByTripId(long tripId);
 
 
-
-
     // 검색창 출력 + 검색어 저장
     List<SearchGetRes> searchGetList (Long userId);
     void searchIns (@Param("search_word")String searchWord ,Long userId);

@@ -1,16 +1,13 @@
-package com.green.project_quadruaple.recent;
+package com.green.project_quadruaple.recent.controller;
 
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.recent.model.RecentGetListRes;
+import com.green.project_quadruaple.recent.service.RecentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.ServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -29,14 +26,14 @@ public class RecentController {
 
     @PatchMapping("hide")
     @Operation(description = "최근 본 목록 개별 비활성화")
-    public ResponseEntity<?> hideRecentItem(@RequestParam("strf_id") Long strfId) {
-        int updatedCount = recentService.recentHide(strfId);
-        return ResponseEntity.ok(strfId);
+    public ResponseWrapper<?> hideRecentItem(@RequestParam("strf_id") Long strfId) {
+
+        return recentService.recentHide(strfId);
     }
     @PatchMapping("hide/all")
     @Operation(description = "최근 본 목록 일괄 비활성화")
-    public ResponseEntity<?> recentAllHide() {
-        int updatedCount = recentService.recentAllHide();
-        return ResponseEntity.ok(updatedCount);
+    public ResponseWrapper<?> recentAllHide() {
+
+        return recentService.recentAllHide();
     }
 }
