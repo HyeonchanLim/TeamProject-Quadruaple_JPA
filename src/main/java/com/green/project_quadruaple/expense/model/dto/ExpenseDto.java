@@ -16,5 +16,5 @@ public class ExpenseDto {
     private String paidFor;
     private int totalPrice;
     private int myPrice;
-    private List<PaidUser> paidUserList;
+    private List<PaidUserInfo> paidUserInfoList;
 }

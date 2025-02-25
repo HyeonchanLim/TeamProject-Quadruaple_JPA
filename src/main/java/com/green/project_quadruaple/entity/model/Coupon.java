@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Coupon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

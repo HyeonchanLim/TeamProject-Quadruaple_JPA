@@ -1,6 +1,5 @@
-package com.green.project_quadruaple.expense.entity;
+package com.green.project_quadruaple.entity.model;
 
-import com.green.project_quadruaple.entity.model.TripUser;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

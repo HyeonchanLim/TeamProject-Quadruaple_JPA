@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,12 +9,15 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReviewPic {
-    @EmbeddedId
-    private ReviewPicId id;
+public class ReviewReply extends CreatedAt {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long replyId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("reviewId")
     @JoinColumn(name = "review_id", nullable = false)
     private Review review;
+
+    @Column(nullable = false)
+    private String content;
 }

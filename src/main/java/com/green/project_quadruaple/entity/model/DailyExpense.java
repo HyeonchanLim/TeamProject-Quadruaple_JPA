@@ -1,9 +1,7 @@
-package com.green.project_quadruaple.expense.entity;
+package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,8 +12,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "daily_expense")
 public class DailyExpense extends CreatedAt {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "de_id")
     private Long deId;
 

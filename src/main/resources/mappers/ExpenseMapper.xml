@@ -2,18 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.green.project_quadruaple.expense.ExpenseMapper">
-    <select id="IsUserInTrip">
-        SELECT IF(EXISTS (
-        SELECT 1 FROM trip_user TU
-        WHERE TU.user_id = #{userId} AND TU.trip_id = #{tripId} AND TU.`disable`=0
-        ), 1, 0)
-    </select>
-
-    <insert id="insDe" useGeneratedKeys="true" keyProperty="deId">
-        INSERT INTO daily_expense
-        SET `for`=#{paidFor}
-    </insert>
-
     <insert id="insPaid">
         INSERT INTO paid_user (de_id, price, trip_user_id)
         SELECT #{deId}, temp.price, tu.trip_user_id
@@ -24,18 +12,6 @@
         </foreach> AS temp
         ON tu.trip_id = temp.tripId AND tu.user_id = temp.userId
     </insert>
-
-    <select id="selExpense">
-        SELECT U.user_id
-        FROM paid_user P
-        LEFT JOIN trip_user TU
-        ON TU.trip_user_id=P.trip_user_id
-        LEFT JOIN user U
-        ON U.user_id=TU.user_id
-        LEFT JOIN daily_expense D
-        ON D.de_id=P.de_id
-        where TU.trip_id = #{tripId}
-    </select>
 
     <resultMap id="expenses" type="com.green.project_quadruaple.expense.model.res.ExpensesRes">
         <id property="title" column="title" />
@@ -53,7 +29,7 @@
         <collection property="paidUserList" resultMap="paidUserList" />
     </resultMap>
 
-    <resultMap id="paidUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUser">
+    <resultMap id="paidUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUserInfo">
         <id property="userId" column="userId" />
         <result property="name" column="name" />
         <result property="profilePic" column="profilePic" />
@@ -106,7 +82,7 @@
         <result property="myPrice" column="myPrice" />
         <collection property="paidUserList" resultMap="InsedUserList" />
     </resultMap>
-    <resultMap id="InsedUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUser">
+    <resultMap id="InsedUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUserInfo">
         <id property="userId" column="userId" />
         <result property="name" column="name" />
         <result property="profilePic" column="profilePic"/>
@@ -156,26 +132,6 @@
         WHERE D.de_id = #{deId}
         GROUP BY D.user_id, D.`for`, D.name, D.profile_pic, D.price
     </select>
-
-    <delete id="delExpenses">
-        DELETE FROM daily_expense WHERE de_id = #{deId}
-    </delete>
-
-    <select id="exceptedMember">
-        SELECT U.user_id, U.profile_pic, U.name
-        FROM user U
-        JOIN trip_user TU
-        ON U.user_id = TU.user_id
-        AND TU.trip_id=#{tripId}
-        LEFT JOIN paid_user P
-        ON TU.trip_user_id = P.trip_user_id
-        AND P.de_id = #{deId}
-        WHERE P.trip_user_id IS NULL
-    </select>
-
-    <delete id="delPaidUser">
-        DELETE FROM paid_user WHERE de_id = #{deId}
-    </delete>
     
     <select id="getTripUser">
         SELECT U.user_id, U.profile_pic, U.name
@@ -189,9 +145,4 @@
         WHERE TU.`disable`=0
     </select>
 
-    <update id="udpFor">
-        UPDATE daily_expense
-        SET `for`=#{paidFor}
-        WHERE de_id=#{deId}
-    </update>
 </mapper>
