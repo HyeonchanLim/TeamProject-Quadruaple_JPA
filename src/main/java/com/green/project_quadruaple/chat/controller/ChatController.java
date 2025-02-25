@@ -29,8 +29,8 @@ public class ChatController {
     @MessageMapping("/chat.join")
 //    @SendTo("/topic/greetings")
     public void join(@Payload JoinReq req, Principal principal) {
-        JoinRes res = chatService.joinChat(req, principal);
-        messagingTemplate.convertAndSend("/sub/chat/" + req.roomId(), String.format( "[%s]채팅방 입장", res.getUserName()));
+        MessageRes res = chatService.joinChat(req, principal);
+        messagingTemplate.convertAndSend("/sub/chat/" + req.roomId(), res);
     }
 
     @MessageMapping("/chat.sendMessage")
@@ -39,8 +39,7 @@ public class ChatController {
                             @Header("Authorization") String token) {
         log.info("[{}] message : [{}]", req.getSender(), req.getMessage());
         log.info("token : {}", token);
-        MessageRes res = new MessageRes(req.getSender(), req.getMessage());
-        chatService.insChat(req);
-        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), res);
+        MessageRes res = chatService.insChat(req);
+        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), req);
     }
 }
