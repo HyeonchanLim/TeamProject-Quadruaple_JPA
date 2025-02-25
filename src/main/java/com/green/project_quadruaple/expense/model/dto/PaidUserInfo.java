@@ -12,7 +12,7 @@ import lombok.ToString;
 @Setter
 @EqualsAndHashCode
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class PaidUser {
+public class PaidUserInfo {
     private long userId;
     private String name;
     private String profilePic;

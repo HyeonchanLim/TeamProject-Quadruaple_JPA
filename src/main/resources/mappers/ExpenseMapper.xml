@@ -2,18 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.green.project_quadruaple.expense.ExpenseMapper">
-    <select id="IsUserInTrip">
-        SELECT IF(EXISTS (
-        SELECT 1 FROM trip_user TU
-        WHERE TU.user_id = #{userId} AND TU.trip_id = #{tripId} AND TU.`disable`=0
-        ), 1, 0)
-    </select>
-
-    <insert id="insDe" useGeneratedKeys="true" keyProperty="deId">
-        INSERT INTO daily_expense
-        SET `for`=#{paidFor}
-    </insert>
-
     <insert id="insPaid">
         INSERT INTO paid_user (de_id, price, trip_user_id)
         SELECT #{deId}, temp.price, tu.trip_user_id
@@ -53,7 +41,7 @@
         <collection property="paidUserList" resultMap="paidUserList" />
     </resultMap>
 
-    <resultMap id="paidUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUser">
+    <resultMap id="paidUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUserInfo">
         <id property="userId" column="userId" />
         <result property="name" column="name" />
         <result property="profilePic" column="profilePic" />
@@ -106,7 +94,7 @@
         <result property="myPrice" column="myPrice" />
         <collection property="paidUserList" resultMap="InsedUserList" />
     </resultMap>
-    <resultMap id="InsedUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUser">
+    <resultMap id="InsedUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUserInfo">
         <id property="userId" column="userId" />
         <result property="name" column="name" />
         <result property="profilePic" column="profilePic"/>
@@ -173,7 +161,7 @@
         WHERE P.trip_user_id IS NULL
     </select>
 
-    <delete id="delPaidUser">
+    <delete id="delPaidUserInfo">
         DELETE FROM paid_user WHERE de_id = #{deId}
     </delete>
     
@@ -189,9 +177,4 @@
         WHERE TU.`disable`=0
     </select>
 
-    <update id="udpFor">
-        UPDATE daily_expense
-        SET `for`=#{paidFor}
-        WHERE de_id=#{deId}
-    </update>
 </mapper>
