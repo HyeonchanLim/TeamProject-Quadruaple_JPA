@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("mail")
 @RequiredArgsConstructor
-@Tag(name = "메일 인증 코드 발송, 확인")
+@Tag(name = "인증 코드")
 public class MailController {
 
     private final MailService mailService;

@@ -12,10 +12,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthenticationCodeService {
     private final AuthenticationCodeRepository authenticationCodeRepository;
+    private final UserRepository userRepository;
 
     //인증 코드 조회
     public Optional<AuthenticationCode> getAuthenticationCodeByEmail(String email) {
-        return authenticationCodeRepository.findByEmail(email);
+        return authenticationCodeRepository.findFirstByEmailOrderByGrantedAtDesc(email);
     }
 
     //인증 횟수 조회
@@ -23,8 +24,17 @@ public class AuthenticationCodeService {
         return authenticationCodeRepository.countByEmail(email);
     }
 
+    //인증 횟수 초과로 삭제
     public boolean isEmailExceeded(String email) {
         int count = authenticationCodeRepository.countByEmail(email);
-        return count > 5;
+        return count >= 5;
+    }
+
+    public int deleteAuthenticationCode(String email) {
+        if (isEmailExceeded(email)) {
+            int result = authenticationCodeRepository.deleteByEmail(email);
+            return result;
+        }
+        return 0;
     }
 }

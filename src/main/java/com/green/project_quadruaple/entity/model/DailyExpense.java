@@ -19,7 +19,7 @@ public class DailyExpense extends CreatedAt {
     @Column(name = "de_id")
     private Long deId;
 
-    @Column(name = "for", nullable = false, length = 100)
+    @Column(name = "expense_for", nullable = false, length = 100)
     private String expenseFor;
 
 
