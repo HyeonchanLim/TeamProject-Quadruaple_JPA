@@ -8,7 +8,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Location {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Booking extends Refund {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
