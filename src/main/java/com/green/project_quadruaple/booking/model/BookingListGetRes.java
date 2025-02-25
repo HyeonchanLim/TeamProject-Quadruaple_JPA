@@ -12,30 +12,14 @@ import lombok.ToString;
 @EqualsAndHashCode
 @Schema
 public class BookingListGetRes {
-    private long bookingId;
-    private String checkIn;
-    private String checkOut;
-    private String checkInDayOfWeek;
-    private String checkOutDayOfWeek;
-    private long menuId;
-    private int menuPrice;
-    private int finalPayment;
-    private String strfTitle;
-    private String strfPic;
-    private int reviewStatus;
-    private String bookingStatus; // "progress" 또는 "completed"
-
+    private Long bookingId;
+    private Long strfId;
+    private String startPic;
+    private String createdAt;
+    private String checkInDate;
+    private String checkOutDate;
+    private String checkInTime;
+    private String checkOutTime;
+    private Integer price;
+    private Integer refund;
 }
-
-/*
-*         "bookingId": 1,
-        "checkIn": "2025-01-02 (목) 14:00",
-        "checkOut": "2025-01-03 (금) 22:00",
-        "menuId": 0,
-        "menuPrice": 0,
-        "finalPayment": 225000,
-        "strfTitle": "맹종죽테마공원",
-        "strfPic": null,
-        "reviewStatus": 0,
-        "bookingStatus": "completed"
-* */

@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.booking;
 
-import com.green.project_quadruaple.booking.model.BookingListResponse;
+import com.green.project_quadruaple.booking.model.BookingListGetRes;
 import com.green.project_quadruaple.booking.model.BookingPostReq;
 import com.green.project_quadruaple.booking.model.BookingPostRes;
 import com.green.project_quadruaple.booking.model.dto.ApproveData;
@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 //@RestController
@@ -29,7 +30,7 @@ public class BookingController {
     @GetMapping
     @ResponseBody
     @Operation(summary = "예약 목록 불러오기")
-    public ResponseWrapper<BookingListResponse> getBooking() {
+    public ResponseWrapper<List<BookingListGetRes>> getBooking() {
         return bookingService.getBooking();
     }
 

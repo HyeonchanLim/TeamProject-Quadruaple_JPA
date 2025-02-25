@@ -1,5 +1,5 @@
 package com.green.project_quadruaple.chat.model;
 
-public record MessageReq(String name) {
+public record JoinReq(Long roomId) {
 
 }
