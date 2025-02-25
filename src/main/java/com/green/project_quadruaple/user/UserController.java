@@ -59,6 +59,14 @@ public class UserController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
+    //닉네임 중복 체크
+    @GetMapping("name")
+    @Operation(summary = "닉네임 중복 체크", description = "false면 중복 있음, true면 중복 없음")
+    public ResponseEntity<?> checkDuplicatedName(@RequestParam String name) {
+        boolean result = userService.checkDuplicatedName(name);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+    }
+
     //로그인
     @PostMapping("sign-in")
     @Operation(summary = "로그인")
