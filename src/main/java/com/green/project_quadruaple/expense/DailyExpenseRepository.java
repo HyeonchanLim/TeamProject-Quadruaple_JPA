@@ -13,4 +13,5 @@ public interface DailyExpenseRepository extends JpaRepository<DailyExpense, Long
     @Query("UPDATE DailyExpense d SET d.expenseFor = :paidFor WHERE d.deId = :deId")
     int updatePaidFor(@Param("deId") Long deId, @Param("paidFor") String paidFor);
 
+
 }

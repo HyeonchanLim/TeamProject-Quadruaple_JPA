@@ -55,7 +55,8 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        DailyExpense de=new DailyExpense(null,p.getPaidFor());
+        DailyExpense de=new DailyExpense();
+        de.setExpenseFor(p.getPaidFor());
         dailyExpenseRepository.save(de);
         Long deId=de.getDeId();
         if(deId==null){
@@ -102,14 +103,7 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        DailyExpense de=dailyExpenseRepository.findById(p.getDeId()).orElse(null);
-        List<PaidUser> delPaidUserInfo =paidUserRepository.findAllByDailyExpense(de)
-                .orElse(new ArrayList<>());
-        if(delPaidUserInfo.size()==0){
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
-        }
-        paidUserRepository.deleteAll(delPaidUserInfo);
+        paidUserRepository.deleteByDeId(p.getDeId());
         int result=insPaidUsers(p.getPaidUserList(),p.getDeId(),p.getTripId(),p.getTotalPrice());
         if(result==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
@@ -176,14 +170,7 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        DailyExpense de=dailyExpenseRepository.findById(p.getDeId()).orElse(null);
-        List<PaidUser> delPaidUserInfo =paidUserRepository.findAllByDailyExpense(de)
-                .orElse(new ArrayList<>());
-        if(de==null||delPaidUserInfo.size()==0){
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
-        }
-        paidUserRepository.deleteAll(delPaidUserInfo);
+        paidUserRepository.deleteByDeId(p.getDeId());
         dailyExpenseRepository.deleteById(p.getDeId());
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
     }

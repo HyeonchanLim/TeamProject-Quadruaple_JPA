@@ -16,5 +16,6 @@ public class SearchBasicPopualarRes {
     private String strfName;
     private int popularCount;
     private Long strfId;
+
 }
 

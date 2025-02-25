@@ -48,12 +48,12 @@
         expense_summary AS (
         SELECT
         de_id,
-        `for` AS paidFor,
+        `expense_for` AS paidFor,
         SUM(price) AS totalPrice,
         price AS myPrice
         FROM depay
         WHERE trip_id = #{tripId}
-        GROUP BY de_id, `for`
+        GROUP BY de_id, `expense_for`
         )
         SELECT
         TW.title,
@@ -80,7 +80,7 @@
         <result property="paidFor" column="paidFor" />
         <result property="totalPrice" column="totalPrice" />
         <result property="myPrice" column="myPrice" />
-        <collection property="paidUserList" resultMap="InsedUserList" />
+        <collection property="paidUserInfoList" resultMap="InsedUserList" />
     </resultMap>
     <resultMap id="InsedUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUserInfo">
         <id property="userId" column="userId" />
@@ -92,7 +92,7 @@
     <select id="selInsedExpense" resultMap="expenseInsOne">
         SELECT
         p.de_id AS deId,
-        p.`for` AS paidFor,
+        p.`expense_for` AS paidFor,
         SUM(p.price) OVER w AS totalPrice,
         MAX(CASE WHEN p.user_id = #{userId} THEN p.price ELSE 0 END) OVER w AS myPrice,
         p.user_id AS userId,
@@ -122,7 +122,7 @@
         SELECT
         D.de_id AS deId,
         COALESCE(SUM(P.price), 0) AS totalPrice,
-        D.`for` AS paidFor,
+        D.`expense_for` AS paidFor,
         D.user_id AS userId,
         D.name,
         D.profile_pic AS profilePic,
@@ -130,7 +130,7 @@
         FROM depay D
         LEFT JOIN depay P ON D.de_id = P.de_id
         WHERE D.de_id = #{deId}
-        GROUP BY D.user_id, D.`for`, D.name, D.profile_pic, D.price
+        GROUP BY D.user_id, D.`expense_for`, D.name, D.profile_pic, D.price
     </select>
     
     <select id="getTripUser">
