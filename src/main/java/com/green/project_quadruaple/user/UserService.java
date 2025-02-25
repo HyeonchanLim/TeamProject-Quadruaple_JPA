@@ -7,6 +7,9 @@ import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.config.security.SignInProviderType;
+import com.green.project_quadruaple.entity.model.AuthenticationCode;
+import com.green.project_quadruaple.entity.model.Role;
+import com.green.project_quadruaple.entity.model.RoleId;
 import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.user.exception.CustomException;
 import com.green.project_quadruaple.user.exception.UserErrorCode;
@@ -36,6 +39,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -50,6 +54,7 @@ public class UserService {
     private final JavaMailSender javaMailSender;
     private final UserRepository userRepository;
     private final AuthenticationCodeRepository authenticationCodeRepository;
+    private final RoleRepository roleRepository;
 
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
@@ -89,7 +94,15 @@ public class UserService {
         }
 
         try {
+            // 인증 코드가 존재하는지 확인
+            AuthenticationCode authCode = authenticationCodeRepository.findByEmail(p.getEmail())
+                    .orElseThrow(() -> new RuntimeException("이메일 인증이 완료되지 않았습니다."));
+
+            //이메일을 authCode에서 가져오도록 수정
+            String email = authCode.getEmail();
+
             User user = new User();
+            user.setAuthenticationCode(authCode);
             user.setName(uniqueName);
             user.setProfilePic(savedPicName);
             user.setPassword(hashedPassword);
@@ -102,7 +115,15 @@ public class UserService {
             if (user != null) {
                 long userId = user.getUserId(); // DB에 삽입 후 userId 값 가져오기
                 p.setUserId(userId);
-                userMapper.insUserRole(p);
+
+                // Role 설정 추가
+                Role role = Role.builder()
+                        .id(new RoleId(UserRole.USER.getValue(), userId))
+                        .user(user)
+                        .role(UserRole.USER)
+                        .grantedAt(LocalDateTime.now())
+                        .build();
+                roleRepository.save(role);
 
                 // 프로필 사진 저장 경로 설정
                 String middlePath = String.format("user/%s", userId);
@@ -160,27 +181,30 @@ public class UserService {
     // 로그인
     @Transactional
     public UserSignInRes signIn(UserSignInReq req, HttpServletResponse response) {
-        UserSelOne userSelOne = userMapper.selUserByEmail(req).orElseThrow(() -> {
-            throw new RuntimeException("아이디를 확인해 주세요.");
-        });
+        // 이메일로 유저 정보 조회
+        User user = userRepository.findByAuthenticationCode_Email(req.getEmail())
+                .orElseThrow(() -> new RuntimeException("아이디를 확인해 주세요."));
 
-        if(!passwordEncoder.matches(req.getPw(), userSelOne.getPw())) {
+        // 비밀번호 검증
+        if (!passwordEncoder.matches(req.getPw(), user.getPassword())) {
             throw new RuntimeException("비밀번호를 확인해 주세요.");
         }
 
-        // 이메일 인증 여부 확인 (DB 기반)
-        if (userSelOne.getVerified() == 0) {
+        // 이메일 인증 여부 확인
+        Optional<AuthenticationCode> authCode = authenticationCodeRepository.findByEmail(user.getAuthenticationCode().getEmail());
+        if (authCode.isEmpty() || user.getVerified() == 0) {
             throw new RuntimeException("이메일 인증이 필요합니다.");
         }
 
-        List<UserRole> roles = new ArrayList<>(2);
-        roles.add(UserRole.USER);
-        roles.add(UserRole.ADMIN);
-        roles.add(UserRole.BUSI);
-        userSelOne.setRoles(roles);
+        // 사용자의 역할(Role) 조회
+        List<Role> roleEntities = roleRepository.findByUserUserId(user.getUserId());
+        List<UserRole> roles = roleEntities.stream()
+                .map(Role::getRole)
+                .collect(Collectors.toList());
+
 
         // AT, RT
-        JwtUser jwtUser = new JwtUser(userSelOne.getUserId(), userSelOne.getRoles());
+        JwtUser jwtUser = new JwtUser(user.getUserId(), roles);
         String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofHours(6));
         String refreshToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofDays(15));
 
@@ -191,8 +215,8 @@ public class UserService {
 
         return UserSignInRes.builder()
                 .accessToken(accessToken)
-                .userId(userSelOne.getUserId())
-                .name(userSelOne.getName())
+                .userId(user.getUserId())
+                .name(user.getName())
                 .build();
     }
 
