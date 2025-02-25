@@ -14,7 +14,6 @@ import java.time.LocalTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Table(name = "stay_tour_restaur_fest")
 public class StayTourRestaurFest extends EndAt {
 

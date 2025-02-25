@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Booking extends Refund {
+public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_id")
@@ -42,5 +42,8 @@ public class Booking extends Refund {
 
     @Column(nullable = false)
     private String tid;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(4) default 0")
+    private Integer state;
 
 }

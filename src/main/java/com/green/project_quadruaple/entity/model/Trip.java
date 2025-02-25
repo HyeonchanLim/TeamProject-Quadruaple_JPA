@@ -14,7 +14,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Trip extends CreatedAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

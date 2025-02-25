@@ -36,9 +36,7 @@ public class MailService {
 
     public static Map<String, String> codes = new HashMap<>();
     public static Map<String, Boolean> mailChecked = new HashMap<>();
-    public static Map<String, Integer> emailAttempts = new HashMap<>(); // 요청 횟수 저장
 
-    private static final int MAX_ATTEMPTS = 5; // 최대 5회
 
     public ResultResponse send(String email) {
         // 인증코드 생성
@@ -126,17 +124,12 @@ public class MailService {
         String email = req.getEmail();
         String code = req.getCode();
 
-        User user = userRepository.findByAuthenticationCode_Email(email)
-                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+        /// 이메일과 인증 코드로 AuthenticationCode 조회
+        boolean isValidCode = authenticationCodeRepository.existsByEmailAndCodeNum(email, code);
 
-        Optional<AuthenticationCode> authCode = authenticationCodeRepository.findByEmailAndCodeNum(email, code);
-
-        if (authCode.isEmpty()) {
+        if (!isValidCode) {
             return new ResultResponse("FAIL");
         }
-
-        user.setVerified(1);
-        userRepository.save(user);
 
         mailChecked.put(email, true);
         new Thread(new MailCheck(email)).start();
