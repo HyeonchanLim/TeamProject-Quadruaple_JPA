@@ -5,6 +5,7 @@ import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.entity.model.Trip;
+import com.green.project_quadruaple.entity.model.TripUser;
 import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.entity.model.DailyExpense;
 import com.green.project_quadruaple.entity.model.PaidUser;
@@ -13,7 +14,9 @@ import com.green.project_quadruaple.expense.model.req.*;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
 import com.green.project_quadruaple.expense.model.res.ExpensesRes;
 import com.green.project_quadruaple.expense.model.res.TripInUserInfo;
+import com.green.project_quadruaple.trip.TripRepository;
 import com.green.project_quadruaple.trip.TripUserRepository;
+import com.green.project_quadruaple.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,14 +36,14 @@ public class ExpenseService {
     private final DailyExpenseRepository dailyExpenseRepository;
     private final PaidUserRepository paidUserRepository;
     private final TripUserRepository tripUserRepository;
+    private final TripRepository tripRepository;
+    private final UserRepository userRepository;
 
     //trip 참여객 체크
     boolean isUserJoinTrip(long tripId){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user=new User();
-        user.setUserId(authenticationFacade.getSignedUserId());
-        Trip trip=new Trip();
-        trip.setTripId(tripId);
+        User user=userRepository.findById(authenticationFacade.getSignedUserId()).orElse(null);
+        Trip trip=tripRepository.findById(tripId).orElse(null);
         return !(principal instanceof JwtUser
                 ||!tripUserRepository.existsByUserAndTripAndDisable(user, trip,0));
     }
@@ -99,7 +102,7 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        DailyExpense de=new DailyExpense(null,p.getPaidFor());
+        DailyExpense de=dailyExpenseRepository.findById(p.getDeId()).orElse(null);
         List<PaidUser> delPaidUserInfo =paidUserRepository.findAllByDailyExpense(de)
                 .orElse(new ArrayList<>());
         if(delPaidUserInfo.size()==0){
@@ -173,12 +176,15 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        int respu=expenseMapper.delPaidUser(p.getDeId());
-        int resep=expenseMapper.delExpenses(p.getDeId());
-        if(resep+respu==0){
+        DailyExpense de=dailyExpenseRepository.findById(p.getDeId()).orElse(null);
+        List<PaidUser> delPaidUserInfo =paidUserRepository.findAllByDailyExpense(de)
+                .orElse(new ArrayList<>());
+        if(de==null||delPaidUserInfo.size()==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resep+respu));
+        paidUserRepository.deleteAll(delPaidUserInfo);
+        dailyExpenseRepository.deleteById(p.getDeId());
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
     }
 }
