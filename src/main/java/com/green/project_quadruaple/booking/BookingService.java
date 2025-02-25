@@ -2,27 +2,33 @@ package com.green.project_quadruaple.booking;
 
 import com.green.project_quadruaple.booking.model.*;
 import com.green.project_quadruaple.booking.model.dto.*;
+import com.green.project_quadruaple.booking.repository.BookingMapper;
+import com.green.project_quadruaple.booking.repository.BookingRepository;
+import com.green.project_quadruaple.booking.repository.MenuRepository;
+import com.green.project_quadruaple.booking.repository.RoomRepository;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import lombok.RequiredArgsConstructor;
+import com.green.project_quadruaple.entity.model.Booking;
+import com.green.project_quadruaple.entity.model.Menu;
+import com.green.project_quadruaple.entity.model.Room;
+import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Slf4j
@@ -34,10 +40,18 @@ public class BookingService {
     private final String affiliateCode;
     private final String secretKey;
     private final String payUrl;
+    private final BookingRepository bookingRepository;
+    private final MenuRepository menuRepository;
+    private final RoomRepository roomRepository;
+    private final UserRepository userRepository;
 
     private KakaoReadyDto kakaoReadyDto;
 
     public BookingService(BookingMapper bookingMapper,
+                          BookingRepository bookingRepository,
+                          MenuRepository menuRepository,
+                          RoomRepository roomRepository,
+                          UserRepository userRepository,
                           @Value("${kakao-api-const.affiliate-code}") String affiliateCode,
                           @Value("${kakao-api-const.secret-key}") String secretKey,
                           @Value("${kakao-api-const.url}") String payUrl) {
@@ -45,6 +59,10 @@ public class BookingService {
         this.affiliateCode = affiliateCode;
         this.secretKey = secretKey;
         this.payUrl = payUrl;
+        this.bookingRepository = bookingRepository;
+        this.menuRepository = menuRepository;
+        this.roomRepository = roomRepository;
+        this.userRepository = userRepository;
     }
 
     public ResponseWrapper<List<BookingListGetRes>> getBooking() {
@@ -56,10 +74,22 @@ public class BookingService {
     // check in - out 날짜 체크 (일정의 날짜 , check in - out 날짜 겹침x)
     // final_paymaent = 실제 결제 금액 맞는지 비교 필요
     // strf id 가 실제 상품과 맞는지 체크
+    @Transactional
     public ResponseWrapper<String> postBooking(BookingPostReq req) {
         Long signedUserId = AuthenticationFacade.getSignedUserId();
+        User signedUser = userRepository.findById(signedUserId).get();
         Long couponId = req.getCouponId();
-        List<MenuIdAndQuantityDto> orderList = req.getOrderList();
+        Room room = null;
+        Menu menu = null;
+        try { // room, menu null 체크, 값 바인딩
+            room = roomRepository.findById(req.getMenuId()).get();
+            menu = room.getMenu();
+            if(menu == null) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "존재하지 않는 메뉴");
+        }
 
         if(!checkTime(req)) { // 체크인, 아웃 시간 예외 처리
             log.error("체크인, 아웃 시간 에러");
@@ -72,20 +102,17 @@ public class BookingService {
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
             }
 
-            List<MenuDto> menuDtoList = bookingMapper.selMenu(orderList);
-            for(MenuDto menuDto : menuDtoList) {
-                for(MenuIdAndQuantityDto order : orderList) {
-                    if(menuDto.getMenuId() == order.getMenuId()) { // 메뉴의 상품 가격이 일치하는지
-                        if(menuDto.getStrfId() == req.getStrfId()) {
-                            log.info("상품 가격 일치!");
-                        } else {
-                            log.info("상품 가격 불일치!");
-                        }
-                    }
-                }
+            int price = menu.getPrice();
+            int discount = price / couponDto.getDiscountRate();
+            int resultPrice = price - discount;
+
+            if(resultPrice != req.getActualPaid()) {
+                return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 적용 금액이 맞지 않습니다.");
             }
+
             req.setReceiveId(couponDto.getReceiveId());
         }
+
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime checkInDate = LocalDateTime.parse(req.getCheckIn(), formatter);
@@ -93,6 +120,8 @@ public class BookingService {
         if(checkInDate.isAfter(checkOutDate) || checkInDate.isEqual(checkOutDate)) { // 날짜 체크
             throw new RuntimeException();
         }
+
+
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -103,7 +132,7 @@ public class BookingService {
 
         LocalDateTime localDateTime = LocalDateTime.now();
         String orderNo = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + (int)(Math.random()*1000);
-        String quantity = String.valueOf(orderList.get(0).getQuantity());
+        String quantity = "1";
         String totalAmount = String.valueOf(req.getActualPaid());
         String taxFreeAmount = String.valueOf((req.getActualPaid()/10));
 
@@ -130,9 +159,19 @@ public class BookingService {
                 kakaoReadyDto.setPartnerOrderId(orderNo);
                 kakaoReadyDto.setPartnerUserId(String.valueOf(signedUserId));
                 kakaoReadyDto.setBookingPostReq(req);
-                req.getOrderList().get(0).setQuantity(Integer.parseInt(quantity));
                 return new ResponseWrapper<>(ResponseCode.OK.getCode(), kakaoReadyDto.getNextRedirectPcUrl());
             }
+
+            Booking booking = Booking.builder()
+                    .menu(menu)
+                    .room(room)
+                    .user(signedUser)
+                    .checkIn(checkInDate)
+                    .checkOut(checkOutDate)
+                    .finalPayment(req.getActualPaid())
+                    .tid(kakaoReadyDto.getTid())
+                    .build();
+            bookingRepository.save(booking);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -186,14 +225,7 @@ public class BookingService {
                 throw new RuntimeException();
             }
 
-            int quantity = 0;
-
-            List<MenuIdAndQuantityDto> orderList = bookingPostReq.getOrderList();
-            if(orderList != null) {
-                for (MenuIdAndQuantityDto menuIdAndQuantityDto : orderList) {
-                    quantity += menuIdAndQuantityDto.getQuantity();
-                }
-            }
+            int quantity = 1;
 
             BookingApproveInfoDto bookingApproveInfoDto = bookingMapper.selApproveBookingInfo(bookingPostReq.getBookingId());
             String redirectParams = "?user_name=" + URLEncoder.encode(bookingApproveInfoDto.getUserName(), StandardCharsets.UTF_8) + "&"
