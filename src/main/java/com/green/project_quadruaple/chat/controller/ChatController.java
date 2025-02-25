@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.chat.controller;
 
+import com.green.project_quadruaple.chat.model.MessageRes;
 import com.green.project_quadruaple.chat.service.ChatService;
 import com.green.project_quadruaple.chat.model.ChatDto;
 import com.green.project_quadruaple.chat.model.JoinReq;
@@ -29,7 +30,8 @@ public class ChatController {
 //    @SendTo("/topic/greetings")
     public void sendMessage(@Payload ChatDto req) {
         log.info("[{}] message : [{}]", req.getSender(), req.getMessage());
+        MessageRes res = new MessageRes(req.getSender(), req.getMessage());
 //        chatService.save(req);
-        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), req.getMessage());
+        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), res);
     }
 }

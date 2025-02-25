@@ -12,12 +12,13 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Review extends UpdatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reviewId;
 
-    @Column(nullable = false)
+    @Column(nullable = false,length = 500)
     private String content;
 
     @Column(nullable = false, columnDefinition = "TINYINT(4) default 0")
