@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.expense;
 
-import com.green.project_quadruaple.expense.entity.DailyExpense;
+import com.green.project_quadruaple.entity.model.DailyExpense;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

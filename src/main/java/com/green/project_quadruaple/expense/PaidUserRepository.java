@@ -1,8 +1,8 @@
 package com.green.project_quadruaple.expense;
 
-import com.green.project_quadruaple.expense.entity.DailyExpense;
-import com.green.project_quadruaple.expense.entity.PaidUser;
-import com.green.project_quadruaple.expense.entity.PaidUserIds;
+import com.green.project_quadruaple.entity.model.DailyExpense;
+import com.green.project_quadruaple.entity.model.PaidUser;
+import com.green.project_quadruaple.entity.model.PaidUserIds;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
