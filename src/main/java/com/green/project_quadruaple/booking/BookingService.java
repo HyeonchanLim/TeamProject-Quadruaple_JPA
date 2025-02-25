@@ -47,26 +47,9 @@ public class BookingService {
         this.payUrl = payUrl;
     }
 
-    public ResponseWrapper<BookingListResponse> getBooking() {
-        Long signedUserId = AuthenticationFacade.getSignedUserId();
-        List<BookingListGetRes> bookingList = bookingMapper.getBooking(signedUserId);
+    public ResponseWrapper<List<BookingListGetRes>> getBooking() {
 
-        List<BookingListGetRes> beforeList = new ArrayList<>();
-        List<BookingListGetRes> afterList = new ArrayList<>();
-
-        for (BookingListGetRes booking : bookingList) {
-            if ("progress".equals(booking.getBookingStatus())) {
-                beforeList.add(booking);
-            } else {
-                afterList.add(booking);
-            }
-        }
-
-        BookingListResponse res = new BookingListResponse();
-        res.setBeforeList(beforeList);
-        res.setAfterList(afterList);
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
+        return null;
     }
 
     // 예약 변경 -> 결제 , 취소 내역 업데이트 필요
