@@ -264,6 +264,8 @@ public class UserService {
                     .signedUserId(signedUserId)
                     .name(user.getName())
                     .email(authenticationCode.getEmail())
+                    .tell(user.getTell())
+                    .birth(user.getBirth())
                     .profilePic(user.getProfilePic())
                     .build();
         } catch (ExpiredJwtException e) {
@@ -281,6 +283,16 @@ public class UserService {
         long signedUserId = authenticationFacade.getSignedUserId();
         req.setSignedUserId(signedUserId);
 
+        // 사용자 정보 조회
+        User user = userRepository.findById(signedUserId)
+                .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND)); // 사용자 없을 경우 예외 처리
+
+        // 이메일 인증 코드 조회
+        AuthenticationCode authenticationCode = authenticationCodeRepository
+                .findByAuthenticatedId(user.getAuthenticationCode().getAuthenticatedId())
+                .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND)); // 인증 코드가 없으면 예외 처리
+
+
         String targetDir = "user/" + req.getSignedUserId();
         myFileUtils.makeFolders(targetDir);
 
@@ -293,23 +305,37 @@ public class UserService {
             String filePath = String.format("%s/%s", targetDir, savedFileName);
             try {
                 myFileUtils.transferTo(profilePic, filePath);
-                req.setProfilePic(savedFileName);
+                user.setProfilePic(savedFileName);
             } catch (IOException e) {
                 throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);
             }
         } else {
             myFileUtils.deleteFolder(deletePath, false);
-            req.setProfilePic(null);
+            user.setProfilePic(null);
         }
 
-        int result = userMapper.updUser(req);
-        if (result == 0) {
-            throw new RuntimeException("사용자 정보를 업데이트하는 데 실패했습니다.");
+        // 전화번호(tell) 및 생일(birth) 업데이트
+        if (req.getTell() != null && !req.getTell().equals(user.getTell())) {
+            user.setTell(req.getTell()); // 전화번호 업데이트
         }
+
+        if (req.getBirth() != null && !req.getBirth().equals(user.getBirth())) {
+            user.setBirth(req.getBirth()); // 생일 업데이트
+        }
+
+        // 이름 업데이트
+        user.setName(req.getName());
+
+        // 사용자 정보 저장
+        userRepository.save(user); // 엔티티 저장(수정)
+        userRepository.flush();
 
         return UserUpdateRes.builder()
                 .signedUserId(signedUserId)
-                .profilePic(req.getProfilePic())
+                .profilePic(user.getProfilePic())
+                .name(user.getName())
+                .tell(user.getTell())   // 수정된 전화번호 반환
+                .birth(user.getBirth()) // 수정된 생일 반환
                 .build();
     }
 
