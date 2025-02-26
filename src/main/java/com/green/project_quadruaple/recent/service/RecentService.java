@@ -8,14 +8,13 @@ import com.green.project_quadruaple.recent.RecentMapper;
 import com.green.project_quadruaple.recent.model.RecentGetListRes;
 import com.green.project_quadruaple.recent.repository.RecentRepository;
 import com.green.project_quadruaple.strf.StrfRepository;
-import com.green.project_quadruaple.user.UserRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j

@@ -8,7 +8,7 @@ import com.green.project_quadruaple.entity.model.NoticeReceive;
 import com.green.project_quadruaple.entity.model.NoticeReceiveId;
 import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.expense.model.dto.ExpenseDto;
-import com.green.project_quadruaple.user.UserRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

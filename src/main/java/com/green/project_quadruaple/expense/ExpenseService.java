@@ -12,7 +12,7 @@ import com.green.project_quadruaple.expense.model.res.ExpensesRes;
 import com.green.project_quadruaple.expense.model.res.TripInUserInfo;
 import com.green.project_quadruaple.trip.TripRepository;
 import com.green.project_quadruaple.trip.TripUserRepository;
-import com.green.project_quadruaple.user.UserRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
