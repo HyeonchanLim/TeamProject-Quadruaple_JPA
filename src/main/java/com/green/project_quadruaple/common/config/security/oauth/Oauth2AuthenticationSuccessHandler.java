@@ -59,6 +59,7 @@ public class Oauth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             OAuth2JwtUser oAuth2JwtUser = (OAuth2JwtUser) jwtUser;
             nickName = oAuth2JwtUser.getNickName();
             pic = oAuth2JwtUser.getPic();
+            email= oAuth2JwtUser.getEmail();
         }
 
         //AT, RT 생성

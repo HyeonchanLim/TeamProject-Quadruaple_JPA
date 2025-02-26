@@ -13,7 +13,7 @@ import com.green.project_quadruaple.entity.model.Booking;
 import com.green.project_quadruaple.entity.model.Menu;
 import com.green.project_quadruaple.entity.model.Room;
 import com.green.project_quadruaple.entity.model.User;
-import com.green.project_quadruaple.user.UserRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;

@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.green.project_quadruaple.common.config.security.SignInProviderType;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -16,4 +17,5 @@ public class UserInfoDto {
     private final String tell;
     private final LocalDate birth;
     private final String profilePic;
+    private final SignInProviderType providerType;
 }
