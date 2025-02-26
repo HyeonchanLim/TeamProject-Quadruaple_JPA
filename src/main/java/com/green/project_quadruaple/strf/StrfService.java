@@ -1,12 +1,16 @@
 package com.green.project_quadruaple.strf;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.strf.model.GetNonDetail;
 import com.green.project_quadruaple.strf.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.service.GenericResponseService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -15,23 +19,35 @@ import org.springframework.stereotype.Service;
 public class StrfService {
     private final StrfMapper strfMapper;
     private final AuthenticationFacade authenticationFacade;
+    private final GenericResponseService responseBuilder;
 
 
     public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
-        Long signedUserId = authenticationFacade.getSignedUserId();
-        if (signedUserId == null || strfId == null){
+        Long userId = 0L;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
+            userId = authenticationFacade.getSignedUserId();
+        }
+
+        if (strfId == null){
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
-        StrfSelRes res = strfMapper.getMemberDetail(signedUserId,strfId);
+
+        StrfSelRes res = strfMapper.getMemberDetail(userId,strfId);
 
         if (res == null) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
         }
 
-        strfMapper.strfUpsert(signedUserId,strfId);
+        if (res.getRatingAvg() != null){
+            double roundedRating = Math.round(res.getRatingAvg() * 10) / 10.0;
+            res.setRatingAvg(roundedRating);
+        }
 
-        double roundedRating = Math.round(res.getRatingAvg() * 10) / 10.0;
-        res.setRatingAvg(roundedRating);
+        if (userId > 0){
+            strfMapper.strfUpsert(userId,strfId);
+        }
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
