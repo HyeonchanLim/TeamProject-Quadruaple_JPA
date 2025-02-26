@@ -97,7 +97,7 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
 
         List<UserRole> roles = Arrays.asList(UserRole.USER);
 
-        OAuth2JwtUser oAuth2JwtUser = new OAuth2JwtUser(user.getName(), user.getProfilePic(), user.getUserId(), roles);
+        OAuth2JwtUser oAuth2JwtUser = new OAuth2JwtUser(user.getName(), user.getProfilePic(), user.getUserId(), roles, user.getAuthenticationCode().getEmail());
 
         return oAuth2JwtUser;
     }

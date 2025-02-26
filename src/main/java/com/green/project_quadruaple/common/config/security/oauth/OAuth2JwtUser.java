@@ -10,10 +10,12 @@ import java.util.List;
 public class OAuth2JwtUser extends JwtUser {
     private final String nickName;
     private final String pic;
+    private final String email;
 
-    public OAuth2JwtUser(String nickName, String pic, long signedUserId, List<UserRole> roles) {
+    public OAuth2JwtUser(String nickName, String pic, long signedUserId, List<UserRole> roles, String email) {
         super(signedUserId, roles);
         this.nickName = nickName;
         this.pic = pic;
+        this.email = email;
     }
 }

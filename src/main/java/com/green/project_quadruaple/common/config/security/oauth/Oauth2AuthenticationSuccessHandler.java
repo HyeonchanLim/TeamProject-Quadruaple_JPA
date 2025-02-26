@@ -52,6 +52,7 @@ public class Oauth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String nickName = ""; // 기본적으로 빈 값 설정
         String pic = ""; // 기본적으로 빈 값 설정
+        String email = "";
 
         // OAuth2JwtUser로 캐스팅하여 nickName과 pic 가져오기
         if (jwtUser instanceof OAuth2JwtUser) {
@@ -82,6 +83,7 @@ public class Oauth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .queryParam("user_id", signedUserId)
                 .queryParam("nick_name", nickName).encode()
                 .queryParam("pic", pic)
+                .queryParam("email", email)
                 .build()
                 .toUriString();
 

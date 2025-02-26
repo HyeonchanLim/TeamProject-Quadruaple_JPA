@@ -19,9 +19,9 @@ import org.springframework.context.annotation.Configuration;
 
 @OpenAPIDefinition(
     info = @Info(
-          title = "JWT"
-        , description = "JWT Practice"
-        , version = "v0.1"
+          title = "Quadruaple"
+        , description = "last project"
+        , version = "v0.2"
     )
     , security = @SecurityRequirement(name = "Authorization")
 )
