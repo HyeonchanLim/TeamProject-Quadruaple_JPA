@@ -1,1 +1,0 @@
-import{c,r as i,j as e}from"./index-CT_B22pp.js";import{S as m}from"./index-DSisidfn.js";const l=()=>{const[s]=c(),a=s.get("accessToken"),r=s.get("userName"),t=s.get("userEmail"),o=s.get("userProfileImage"),[n]=i.useState(!1);return e.jsx("div",{children:e.jsxs(m,{spinning:n,tip:"카카오 로그인 진행 중...",size:"large",children:[a,r,t,o]})})};export{l as default};

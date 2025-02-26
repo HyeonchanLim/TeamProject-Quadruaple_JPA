@@ -47,7 +47,7 @@
 
     <select id="selStrfOpenAndClose">
         SELECT
-            open_check, close_check
+            open_check_in, close_check_out
         FROM
         stay_tour_restaur_fest strf
         WHERE strf.category = 'STAY'
