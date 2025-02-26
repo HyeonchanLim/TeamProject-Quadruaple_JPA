@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import com.green.project_quadruaple.entity.base.EndAt;
 import com.green.project_quadruaple.trip.model.Category;
@@ -15,6 +16,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "stay_tour_restaur_fest")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class StayTourRestaurFest extends EndAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -17,7 +17,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class User extends CreatedAt {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long userId;
 
