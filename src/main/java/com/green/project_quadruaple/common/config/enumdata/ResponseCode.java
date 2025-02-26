@@ -19,6 +19,8 @@ public enum ResponseCode {
     NOT_FOUND("404 URL 정보 없음"),
     //잘못된 요청
     BAD_REQUEST("400 잘못된 요청"),
+    //유저 정보 없음
+    NOT_FOUND_USER("400 유저 정보 없음"),
     // 요청 좌표 정보가 잘못됨
     WRONG_XY_VALUE("400 거리가 너무 가깝거나 잘못된 값입니다."),
     //규격 에러

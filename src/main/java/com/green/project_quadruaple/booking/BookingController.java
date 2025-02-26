@@ -4,6 +4,7 @@ import com.green.project_quadruaple.booking.model.BookingListGetRes;
 import com.green.project_quadruaple.booking.model.BookingPostReq;
 import com.green.project_quadruaple.booking.model.BookingPostRes;
 import com.green.project_quadruaple.booking.model.dto.ApproveData;
+import com.green.project_quadruaple.booking.model.dto.BookingRes;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +31,8 @@ public class BookingController {
     @GetMapping
     @ResponseBody
     @Operation(summary = "예약 목록 불러오기")
-    public ResponseWrapper<List<BookingListGetRes>> getBooking() {
-        return bookingService.getBooking();
+    public ResponseWrapper<List<BookingRes>> getBooking(Integer page) {
+        return bookingService.getBooking(page);
     }
 
     @PostMapping
