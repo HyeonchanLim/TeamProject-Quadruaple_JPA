@@ -2,26 +2,19 @@ package com.green.project_quadruaple.user.mail;
 
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.entity.model.AuthenticationCode;
-import com.green.project_quadruaple.entity.model.User;
-import com.green.project_quadruaple.user.AuthenticationCodeRepository;
-import com.green.project_quadruaple.user.UserRepository;
+import com.green.project_quadruaple.user.Repository.AuthenticationCodeRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.mail.thread.AuthCode;
 import com.green.project_quadruaple.user.mail.thread.MailCheck;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service

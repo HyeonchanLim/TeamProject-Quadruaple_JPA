@@ -7,8 +7,8 @@ import com.green.project_quadruaple.common.config.security.oauth.userinfo.Oauth2
 import com.green.project_quadruaple.entity.model.AuthenticationCode;
 import com.green.project_quadruaple.entity.model.Role;
 import com.green.project_quadruaple.entity.model.RoleId;
-import com.green.project_quadruaple.user.AuthenticationCodeRepository;
-import com.green.project_quadruaple.user.UserRepository;
+import com.green.project_quadruaple.user.Repository.AuthenticationCodeRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;

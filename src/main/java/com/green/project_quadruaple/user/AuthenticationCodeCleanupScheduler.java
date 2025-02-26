@@ -2,6 +2,8 @@ package com.green.project_quadruaple.user;
 
 import com.green.project_quadruaple.entity.model.AuthenticationCode;
 import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.user.Repository.AuthenticationCodeRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
