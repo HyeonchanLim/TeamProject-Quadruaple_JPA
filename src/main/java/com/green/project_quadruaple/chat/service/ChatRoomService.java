@@ -12,7 +12,7 @@ import com.green.project_quadruaple.entity.model.ChatJoin;
 import com.green.project_quadruaple.entity.model.ChatRoom;
 import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.strf.StrfRepository;
-import com.green.project_quadruaple.user.UserRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
