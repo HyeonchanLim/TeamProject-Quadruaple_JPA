@@ -66,6 +66,11 @@ public class BookingService {
 
     public ResponseWrapper<List<BookingListGetRes>> getBooking() {
 
+        long signedUserId = AuthenticationFacade.getSignedUserId();
+
+//        bookingRepository.findBookingListByUserId(signedUserId);
+
+
         return null;
     }
 

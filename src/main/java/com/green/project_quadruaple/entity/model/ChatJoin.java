@@ -19,7 +19,7 @@ public class ChatJoin {
     @Column(name = "cj_id")
     private Long cjId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
