@@ -8,9 +8,8 @@ import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.model.Notice;
 import com.green.project_quadruaple.entity.model.NoticeReceive;
 import com.green.project_quadruaple.entity.model.NoticeReceiveId;
-import com.green.project_quadruaple.entity.model.User;
-import com.green.project_quadruaple.expense.model.dto.ExpenseDto;
-import com.green.project_quadruaple.notice.model.dto.NoticeLine;
+import com.green.project_quadruaple.notice.model.res.NoticeLine;
+import com.green.project_quadruaple.notice.model.res.NoticeOne;
 import com.green.project_quadruaple.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,9 +75,11 @@ public class NoticeService {
         }
     }
 
+    //테스트 알람 추가
     public void testInsNotice (){
         Notice notice = new Notice();
         notice.setContent("테스트 알람입니다.");
+        notice.setTitle("테스트 제목입니다.");
         notice.setNoticeCategory(NoticeCategory.SERVICE);
         noticeRepository.save(notice);
         NoticeReceiveId noticeReceiveId = new NoticeReceiveId(116L, notice.getNoticeId());
@@ -92,6 +93,7 @@ public class NoticeService {
         noticeReceiveRepository.save(noticeReceive);
     }
 
+    // 알람 리스트 확인
     public ResponseEntity<ResponseWrapper<List<NoticeLine>>> noticeCheck(){
         if(!((SecurityContextHolder.getContext().getAuthentication().getPrincipal()) instanceof JwtUser)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -101,5 +103,23 @@ public class NoticeService {
         if(result.size()==0){return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), new ArrayList<>()));}
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
+    }
+
+    // 알람 하나 확인
+    public ResponseEntity<ResponseWrapper<NoticeOne>> checkNoticeOne(long noticeId){
+        if(!((SecurityContextHolder.getContext().getAuthentication().getPrincipal()) instanceof JwtUser)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+        }
+        Notice no = noticeRepository.findById(noticeId).orElse(null);
+        NoticeReceive nr=noticeReceiveRepository.findById(new NoticeReceiveId(authenticationFacade.getSignedUserId(), noticeId)).orElse(null);
+        if(no==null||nr==null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
+        nr.setOpen(true);
+        noticeReceiveRepository.save(nr);
+        NoticeOne result=new NoticeOne(no,nr.getCreatedAt());
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 }

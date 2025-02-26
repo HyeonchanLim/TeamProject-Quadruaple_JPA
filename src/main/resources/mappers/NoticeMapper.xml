@@ -3,10 +3,10 @@
 
 <mapper namespace="com.green.project_quadruaple.notice.NoticeMapper">
 
-    <resultMap id="NoticeLineMap" type="com.green.project_quadruaple.notice.model.dto.NoticeLine">
+    <resultMap id="NoticeLineMap" type="com.green.project_quadruaple.notice.model.res.NoticeLine">
         <id column="noticeId" property="noticeId" />
         <result column="category" property="category" />
-        <result column="content" property="content" />
+        <result column="title" property="title" />
         <result column="opened" property="opened" jdbcType="BOOLEAN"/>
         <result column="createdAt" property="createdAt" jdbcType="TIMESTAMP"/>
     </resultMap>
@@ -14,7 +14,7 @@
     <select id="checkNotice">
         SELECT N.notice_id AS noticeId,
         N.notice_category AS category,
-        N.content,
+        N.title,
         NR.`open` AS opened,
         NR.created_at AS createdAt
         FROM notice N
@@ -22,5 +22,6 @@
         ON N.notice_id = NR.notice_id
         WHERE NR.user_id = #{userId}
         AND NR.`disable` = 0
+        ORDER BY noticeId DESC
     </select>
 </mapper>

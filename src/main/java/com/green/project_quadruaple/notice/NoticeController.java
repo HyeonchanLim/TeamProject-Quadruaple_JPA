@@ -4,11 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
@@ -38,5 +36,11 @@ public class NoticeController {
     @Operation(summary = "알람리스트확인하기")
     public ResponseEntity<?> checkNotice(){
         return noticeService.noticeCheck();
+    }
+
+    @GetMapping("check-one")
+    @Operation(summary = "알람상세확인하기")
+    public ResponseEntity<?> checkNoticeOne(@ParameterObject long noticeId){
+        return noticeService.checkNoticeOne(noticeId);
     }
 }

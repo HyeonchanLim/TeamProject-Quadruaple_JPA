@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.notice;
 
-import com.green.project_quadruaple.notice.model.dto.NoticeLine;
+import com.green.project_quadruaple.notice.model.res.NoticeLine;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

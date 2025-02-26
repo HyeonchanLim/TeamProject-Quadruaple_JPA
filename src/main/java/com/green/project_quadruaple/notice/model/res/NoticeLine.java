@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.notice.model.dto;
+package com.green.project_quadruaple.notice.model.res;
 
 import com.green.project_quadruaple.entity.base.NoticeCategory;
 import lombok.*;
@@ -16,16 +16,10 @@ public class NoticeLine {
     private boolean opened;
     private String noticedAt;
 
-    @ConstructorProperties({"noticeId", "category", "content", "opened", "createdAt"})
-    public NoticeLine(Long noticeId, String category, String content, boolean opened, LocalDateTime createdAt) {
-        final int txtLength = 12;
+    @ConstructorProperties({"noticeId", "category", "title", "opened", "createdAt"})
+    public NoticeLine(Long noticeId, String category, String title, boolean opened, LocalDateTime createdAt) {
         StringBuilder sb=new StringBuilder("[");
-        if(content.length()>txtLength){
-            content=content.substring(0,txtLength);
-            sb.append(NoticeCategory.getNameByValue(category)).append("] ").append(content).append("...");
-        } else {
-            sb.append(NoticeCategory.getNameByValue(category)).append("] ").append(content);
-        }
+        sb.append(NoticeCategory.getNameByValue(category)).append("] ").append(title);
         this.noticeId = noticeId;
         this.opened = opened;
         this.txt = sb.toString();
