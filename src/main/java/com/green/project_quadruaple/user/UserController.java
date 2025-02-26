@@ -80,7 +80,6 @@ public class UserController {
         // 로그인 성공 시 반환할 데이터 생성
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("code", ResponseCode.OK.getCode());
-        responseBody.put("data", 200);  // 혹은 적절한 성공 데이터를 설정
         responseBody.put("userId", res.getUserId());
         responseBody.put("accessToken", res.getAccessToken());
         responseBody.put("role", res.getRoles());

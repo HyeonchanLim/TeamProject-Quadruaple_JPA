@@ -4,7 +4,7 @@
 <mapper namespace="com.green.project_quadruaple.coupon.CouponMapper">
     <!-- 쿠폰 조회 -->
     <select id="findCouponsByUserId">
-        SELECT A.coupon_id AS couponId, A.title, A.expired_at AS expiredAt, A.discountper AS discountPer, A.distribute_at AS distributeAt
+        SELECT A.coupon_id AS couponId, A.title, A.expired_at AS expiredAt, A.discount_per AS discountPer, A.distribute_at AS distributeAt
           FROM coupon A
          INNER JOIN receive_coupon B
             ON A.coupon_id = B.coupon_id
@@ -13,7 +13,7 @@
 
     <!-- 사용한 쿠폰 조회 -->
     <select id="selUsedCoupon">
-        SELECT C.coupon_id AS couponId, C.title, C.expired_at AS expiredAt, C.discountper AS discountPer, C.distribute_at AS distributeAt
+        SELECT C.coupon_id AS couponId, C.title, C.expired_at AS expiredAt, C.discount_per AS discountPer, C.distribute_at AS distributeAt
           FROM used_coupon A
          INNER JOIN receive_coupon B
             ON A.receive_id = B.receive_id
