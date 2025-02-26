@@ -16,35 +16,25 @@
         l.profile_pic AS hostProfilePic, l.name AS hostName , b.price AS menuPrice,
         n.inquired_at AS inquiredAt,
         COUNT(DISTINCT m.user_id) AS wishCnt,
-        COUNT(DISTINCT h.review_id) AS reviewCnt,
-        AVG(h.rating) AS ratingAvg,
+        COUNT(DISTINCT h.review_id) AS reviewCnt
 
-        IF(
-        EXISTS(
-        SELECT 1
-        FROM wishlist
-        WHERE strf_id = a.strf_id AND (#{userId} IS NULL OR user_id = #{userId})
-        ), 1, 0
-        ) AS wishIn ,
-        IF(
-        EXISTS(
-        SELECT 1
-        FROM recent
-        WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 0
-        ), 0, 1 ) AS recentCheck,
-        CASE
-        WHEN EXISTS(
-        SELECT 1
-        FROM recent
-        WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 1
-        ) THEN 0
-        WHEN EXISTS(
-        SELECT 1
-        FROM recent
-        WHERE j.user_id = #{userId} AND a.strf_id = #{strfId}
-        ) THEN 1
-        ELSE NULL
-        END AS recentCheckStatus
+            , AVG(h.rating) AS ratingAvg
+
+
+        <!--
+        <if test="userId != null">
+            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
+        </if>
+        <if test="userId == null">
+            0 AS wishIn
+        </if>
+        -->
+        <if test="userId != null">
+        , IF( EXISTS( SELECT 1 FROM wishlist WHERE strf_id = a.strf_id AND (#{userId} IS NULL OR user_id = #{userId}) ), 1, 0 ) AS wishIn,
+        IF( EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 0 ), 0, 1 ) AS recentCheck,
+        CASE WHEN EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 1 ) THEN 0
+        WHEN EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} ) THEN 1 ELSE NULL END AS recentCheckStatus
+        </if>
 
         FROM
         stay_tour_restaur_fest a
