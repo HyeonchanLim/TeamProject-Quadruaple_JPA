@@ -3,6 +3,7 @@ package com.green.project_quadruaple.booking.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.green.project_quadruaple.booking.model.BookingPostReq;
+import com.green.project_quadruaple.entity.model.Booking;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -28,4 +29,7 @@ public class KakaoReadyDto {
 
     @JsonIgnore
     private BookingPostReq bookingPostReq;
+
+    @JsonIgnore
+    private Booking booking;
 }

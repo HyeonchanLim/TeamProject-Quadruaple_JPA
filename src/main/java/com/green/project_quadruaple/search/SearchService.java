@@ -4,12 +4,16 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.entity.model.SearchWord;
+import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.filter.*;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
+import com.green.project_quadruaple.search.repository.SearchWordRepository;
 import com.green.project_quadruaple.trip.model.Category;
+import com.green.project_quadruaple.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +29,8 @@ import java.util.*;
 public class SearchService {
     private final AuthenticationFacade authenticationFacade;
     private final SearchMapper searchMapper;
+    private final SearchWordRepository searchWordRepository;
+    private final UserRepository userRepository;
 
     @Value("${const.default-review-size}")
     private int size;
@@ -100,12 +106,13 @@ public class SearchService {
     // 검색창 - 최근 검색어 출력
     public ResponseWrapper<List<SearchGetRes>> searchGetList (){
        Long userId = authenticationFacade.getSignedUserId();
-       if (userId <= 0){
-           return null;
-       }
-       List<SearchGetRes> res = searchMapper.searchGetList(userId);
+
+       User user = userRepository.findById(userId).orElseThrow( () -> new RuntimeException("user id not found"));
+       List<SearchWord> search = searchWordRepository.searchByUser(user.getUserId());
+
+       List<SearchGetRes> res = searchMapper.searchGetList(user.getUserId());
         for (SearchGetRes searchGetRes : res) {
-            searchGetRes.setUserId(userId);
+            searchGetRes.setUserId(user.getUserId());
         }
        return new ResponseWrapper<>(ResponseCode.OK.getCode(),res);
     }
@@ -195,46 +202,6 @@ public class SearchService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
-//    public ResponseWrapper<List<StaySearchRes>> searchStayFilter(int startIdx, String category, String searchWord, List<Long> amenityId) {
-//        Long userId = 0L;
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
-//            userId = authenticationFacade.getSignedUserId();
-//        }
-//        String categoryValue = null;
-//        if (category != null && Category.getKeyByName(category) != null) {
-//            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
-//        }
-//        int more = 1;
-//
-//        if (amenityId == null) {
-//            amenityId = new ArrayList<>();
-//        }
-//
-////        List<SearchAmenity> amenities = new ArrayList<>();
-////        if (!amenityId.isEmpty()) {
-////            amenities = searchMapper.searchAmenity(amenityId);
-////        }
-//        try {
-//            List<StaySearchRes> stays = searchMapper.searchStay(categoryValue, searchWord, startIdx, size + more, userId,amenityId);
-//            stays.forEach(stay -> {
-//                if (stay.getAverageRating() != null) {
-//                    double roundedRating = Math.round(stay.getAverageRating() * 10) / 10.0;
-//                    stay.setAverageRating(roundedRating);
-//                }
-//            });
-//            StaySearchRes res = new StaySearchRes();
-//            if (stays.size() >= size) {
-//
-//                res.setMore(true);
-//            }
-//            res.setAmenityId(amenityId);
-//            return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw new RuntimeException();
-//        }
-//    }
     public ResponseWrapper<List<SearchStay>> searchStayFilter(int startIdx, String category, String searchWord, List<Long> amenityId) {
        Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
