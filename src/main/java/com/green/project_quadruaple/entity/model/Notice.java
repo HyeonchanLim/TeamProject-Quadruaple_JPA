@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter
+@Getter()
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,6 +14,9 @@ public class Notice extends CreatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long noticeId;
+
+    @Column(nullable = false, length = 100)
+    private String title;
 
     @Column(nullable = false,length = 800)
     private String content;

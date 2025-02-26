@@ -1,0 +1,1 @@
+import{q as i,t as I,r as n,s as f}from"./index-BldMvkj-.js";function v(){var r=i({},I);return r.useId}var a=0,s=v();const p=s?function(e){var t=s();return e||t}:function(e){var t=n.useState("ssr-id"),u=f(t,2),c=u[0],o=u[1];return n.useEffect(function(){var d=a;a+=1,o("rc_unique_".concat(d))},[]),e||c};export{p as u};
