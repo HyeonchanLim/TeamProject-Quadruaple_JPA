@@ -36,7 +36,6 @@ public class ReviewService {
 
     @Value("${const.default-review-size}")
     private int size;
-
     public List<ReviewSelRes> getReviewWithPics(Long strfId,int startIdx ) {
         int more = 1;
         List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(strfId,startIdx,size+more);
