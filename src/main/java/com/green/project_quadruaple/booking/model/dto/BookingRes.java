@@ -1,15 +1,16 @@
 package com.green.project_quadruaple.booking.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Getter
 @Setter
-@Builder
 public class BookingRes {
     private Long bookingId;
     private Long strfId;
@@ -17,23 +18,35 @@ public class BookingRes {
     private String createdAt;
     private String checkInDate;
     private String checkOutDate;
-    private LocalDate checkInTime;
-    private LocalDate checkOutTime;
-    private int price;
-    private int state;
-    private Integer chatRoomId;
+    private Integer price;
+    private Integer state;
+    private Long chatRoomId;
+
+    private LocalTime checkInTime;
+    private LocalTime checkOutTime;
+
+    // DB 에서 가져와서 (2025-01-01 수) 형태로 변환
+    @JsonIgnore
+    private LocalDateTime createdAtLD;
+    @JsonIgnore
+    private LocalDateTime checkInDateLD;
+    @JsonIgnore
+    private LocalDateTime checkOutDateLD;
+
+    public BookingRes(Long bookingId, Long strfId, String strfPic,
+                      LocalDateTime createdAtLD, LocalDateTime checkInDateLD, LocalDateTime checkOutDateLD,
+                      int price, int state, Long chatRoomId)
+    {
+        this.bookingId = bookingId;
+        this.strfId = strfId;
+        this.strfPic = strfPic;
+        this.createdAtLD = createdAtLD;
+        this.checkInDateLD = checkInDateLD;
+        this.checkOutDateLD = checkOutDateLD;
+        this.price = price;
+        this.state = state;
+        this.chatRoomId = chatRoomId;
+    }
 }
 
-/*
-        *  "bookingId": 1,
-        "strfId": 3,
-        "strfPic": "image.jpg",
-        "createdAt": "2025-06-21 수",
-        "checkInDate": "2025-07-08 토",
-        "checkOutDate": "2025-07-09 일",
-        "checkInTime": "14:00",
-        "checkOutTime": "11:00",
-        "price": 225000,
-        "state" : 1,
-        "chatRoomId" : 1 or null
-*/
+
