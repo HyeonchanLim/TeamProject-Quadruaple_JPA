@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
+import com.green.project_quadruaple.entity.base.NoticeCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +18,7 @@ public class Notice extends CreatedAt {
     @Column(nullable = false,length = 800)
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "notice_category_id", nullable = false)
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private NoticeCategory noticeCategory;
 }
