@@ -10,6 +10,7 @@ public class BusinessDto {
     private String strfTitle;
     private Integer state;
     private Integer reviewCnt;
+    private Integer wishCnt;
     private Double ratingAvg;
     private String content;
     private Integer rating;

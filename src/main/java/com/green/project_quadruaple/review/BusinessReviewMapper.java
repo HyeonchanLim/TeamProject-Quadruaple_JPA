@@ -7,12 +7,15 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 @Mapper
-public interface BusinessMapper {
+public interface BusinessReviewMapper {
 
-    // 전체 비즈니스 리뷰 조회
-    List<BusinessDto> selectAllBusinessReviews(@Param("userId") Long userId,
-                                               @Param("startIdx") int startIdx);
+    List<BusinessDto> selectBusinessReviews(
+            @Param("userId") Long userId,
+            @Param("startIdx") int startIdx,
+            @Param("pageSize") int pageSize
+    );
 
-    // 사용자 역할 조회 (유저 권한 체크용)
+    // 사용자 역할 조회 (사업자 여부 확인용)
     String findUserRoleByUserId(@Param("userId") Long userId);
+
 }
