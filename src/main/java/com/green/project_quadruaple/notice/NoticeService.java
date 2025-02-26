@@ -1,7 +1,5 @@
 package com.green.project_quadruaple.notice;
 
-import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
-import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.entity.base.NoticeCategory;
@@ -13,15 +11,11 @@ import com.green.project_quadruaple.notice.model.res.NoticeOne;
 import com.green.project_quadruaple.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -33,7 +27,6 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final AuthenticationFacade authenticationFacade;
     private final UserRepository userRepository;
-    private final NoticeMapper mapper;
 
     // SSE 연결을 관리하는 저장소 (여러 유저 지원 가능)
     private final ConcurrentHashMap<Long, CopyOnWriteArrayList<SseEmitter>> emitters = new ConcurrentHashMap<>();
@@ -55,7 +48,7 @@ public class NoticeService {
 
     // 30초마다 알림 갯수 전송
     public void sendNoticeCount(long userId) {
-        boolean noticeCnt = noticeReceiveRepository.existsUnreadNoticesByUserId(userId);
+        long noticeCnt = noticeReceiveRepository.countUnreadNoticesByUserId(userId);
         if (emitters.containsKey(userId)) {
             for (SseEmitter emitter : emitters.get(userId)) {
                 try {
@@ -75,11 +68,9 @@ public class NoticeService {
         }
     }
 
-    //테스트 알람 추가
     public void testInsNotice (){
         Notice notice = new Notice();
         notice.setContent("테스트 알람입니다.");
-        notice.setTitle("테스트 제목입니다.");
         notice.setNoticeCategory(NoticeCategory.SERVICE);
         noticeRepository.save(notice);
         NoticeReceiveId noticeReceiveId = new NoticeReceiveId(116L, notice.getNoticeId());
@@ -91,35 +82,5 @@ public class NoticeService {
                 .disable(false)
                 .build();
         noticeReceiveRepository.save(noticeReceive);
-    }
-
-    // 알람 리스트 확인
-    public ResponseEntity<ResponseWrapper<List<NoticeLine>>> noticeCheck(){
-        if(!((SecurityContextHolder.getContext().getAuthentication().getPrincipal()) instanceof JwtUser)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
-        }
-        List<NoticeLine> result=mapper.checkNotice(authenticationFacade.getSignedUserId());
-        if(result.size()==0){return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), new ArrayList<>()));}
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
-    }
-
-    // 알람 하나 확인
-    public ResponseEntity<ResponseWrapper<NoticeOne>> checkNoticeOne(long noticeId){
-        if(!((SecurityContextHolder.getContext().getAuthentication().getPrincipal()) instanceof JwtUser)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
-        }
-        Notice no = noticeRepository.findById(noticeId).orElse(null);
-        NoticeReceive nr=noticeReceiveRepository.findById(new NoticeReceiveId(authenticationFacade.getSignedUserId(), noticeId)).orElse(null);
-        if(no==null||nr==null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
-        }
-        nr.setOpen(true);
-        noticeReceiveRepository.save(nr);
-        NoticeOne result=new NoticeOne(no,nr.getCreatedAt());
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 }

@@ -1,11 +1,11 @@
-package com.green.project_quadruaple.chat.model;
+package com.green.project_quadruaple.chat.model.req;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ChatRoomReq {
+public class PostChatRoomReq {
     private Long strfId;
     private String title;
 }

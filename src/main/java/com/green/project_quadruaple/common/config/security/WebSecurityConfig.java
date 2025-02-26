@@ -49,7 +49,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable()) // SSR(Server Side Rendering)이 아니다. 보안 관련 SSR이 아니면 보안 이슈가 없기 때문에 기능을 끈다.
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 추가
                 .authorizeHttpRequests(req -> req.requestMatchers(HttpMethod.GET, "/api/user/userInfo").permitAll()  // "USER"로 체크됨
-                        .requestMatchers(HttpMethod.PATCH, "/api/user").hasAuthority(UserRole.USER.name()) // "USER"로 체크됨
+                        .requestMatchers(HttpMethod.PATCH, "/api/user").authenticated()
                         .anyRequest().permitAll())// 나머지 요청은 모두 허용
                 .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

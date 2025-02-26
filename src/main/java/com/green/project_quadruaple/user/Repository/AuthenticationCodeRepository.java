@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.user;
+package com.green.project_quadruaple.user.Repository;
 
 import com.green.project_quadruaple.entity.model.AuthenticationCode;
 import org.springframework.data.jpa.repository.JpaRepository;

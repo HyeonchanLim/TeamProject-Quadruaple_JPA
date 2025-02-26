@@ -1,8 +1,7 @@
 package com.green.project_quadruaple.common.config.security;
 
 public enum SignInProviderType {
-      LOCAL
-    , PASS
+      NULL
+    , LOCAL
     , KAKAO
-    , NAVER
 }
