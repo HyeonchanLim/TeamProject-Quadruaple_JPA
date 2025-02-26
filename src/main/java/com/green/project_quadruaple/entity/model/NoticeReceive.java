@@ -22,7 +22,7 @@ public class NoticeReceive extends CreatedAt {
     @JoinColumn(name = "notice_id", nullable = false)
     private Notice notice;
     @Column(columnDefinition = "TINYINT(4) DEFAULT 0",nullable = false)
-    private int open;
+    private boolean open;
     @Column(columnDefinition = "TINYINT(4) DEFAULT 0",nullable = false)
-    private int disable;
+    private boolean disable;
 }

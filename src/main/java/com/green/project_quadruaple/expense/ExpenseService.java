@@ -4,11 +4,7 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.entity.model.Trip;
-import com.green.project_quadruaple.entity.model.TripUser;
-import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.entity.model.DailyExpense;
-import com.green.project_quadruaple.entity.model.PaidUser;
 import com.green.project_quadruaple.expense.model.dto.ExpenseDto;
 import com.green.project_quadruaple.expense.model.req.*;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
@@ -42,10 +38,8 @@ public class ExpenseService {
     //trip 참여객 체크
     boolean isUserJoinTrip(long tripId){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user=userRepository.findById(authenticationFacade.getSignedUserId()).orElse(null);
-        Trip trip=tripRepository.findById(tripId).orElse(null);
-        return !(principal instanceof JwtUser
-                ||!tripUserRepository.existsByUserAndTripAndDisable(user, trip,0));
+        if(!(principal instanceof JwtUser)){ return true;}
+        return !tripUserRepository.existsByUser_userIdAndTrip_tripIdAndDisable(authenticationFacade.getSignedUserId(), tripId,0);
     }
 
     //추가하기
