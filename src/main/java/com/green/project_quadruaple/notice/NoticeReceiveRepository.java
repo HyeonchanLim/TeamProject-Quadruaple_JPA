@@ -9,4 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 public interface NoticeReceiveRepository extends JpaRepository<NoticeReceive, NoticeReceiveId> {
     @Query("SELECT COUNT(nr) FROM NoticeReceive nr WHERE nr.open = false AND nr.disable = false AND nr.id.userId = :userId")
     long countUnreadNoticesByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT CASE WHEN EXISTS (SELECT 1 FROM NoticeReceive nr WHERE nr.open = false AND nr.disable = false AND nr.id.userId = :userId) THEN true ELSE false END")
+    boolean existsUnreadNoticesByUserId(@Param("userId") Long userId);
+
+
 }
