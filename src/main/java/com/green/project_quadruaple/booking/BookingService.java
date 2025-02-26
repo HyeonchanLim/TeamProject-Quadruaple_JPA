@@ -16,6 +16,7 @@ import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -64,9 +65,14 @@ public class BookingService {
         this.userRepository = userRepository;
     }
 
-    public ResponseWrapper<List<BookingListGetRes>> getBooking() {
+    public ResponseWrapper<List<BookingRes>> getBooking(Integer page) {
 
-        return null;
+        long signedUserId = AuthenticationFacade.getSignedUserId();
+        PageRequest pageAble = PageRequest.of(page, 30);
+
+        List<BookingRes> bookingList = bookingRepository.findBookingListByUserId(signedUserId, pageAble);
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), bookingList);
     }
 
     // 예약 변경 -> 결제 , 취소 내역 업데이트 필요
@@ -95,23 +101,25 @@ public class BookingService {
             return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
         }
 
+        int discount = 0;
+        int price = menu.getPrice();
+
         if(couponId != null) { // 쿠폰이 요청에 담겨 있을 경우
+
             CouponDto couponDto = bookingMapper.selExistUserCoupon(signedUserId, couponId);
             if(couponDto == null || couponDto.getUsedCouponId() != null) { // 쿠폰 미소지시, 사용시 에러
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
             }
-
-            int price = menu.getPrice();
-            int discount = price / couponDto.getDiscountRate();
-            int resultPrice = price - discount;
-
-            if(resultPrice != req.getActualPaid()) {
-                return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 적용 금액이 맞지 않습니다.");
-            }
+            discount = price / couponDto.getDiscountRate();
 
             req.setReceiveId(couponDto.getReceiveId());
         }
 
+        int resultPrice = price - discount;
+
+        if(resultPrice != req.getActualPaid()) {
+            return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "금액이 맞지 않습니다.");
+        }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime checkInDate = LocalDateTime.parse(req.getCheckIn(), formatter);
@@ -142,12 +150,12 @@ public class BookingService {
         params.put("quantity", quantity); // 상품 수량
         params.put("total_amount", totalAmount); // 상품 가격
         params.put("tax_free_amount", taxFreeAmount); // 상품 비과세 금액
-        params.put("approval_url", "http://112.222.157.157:5231/api/booking/pay-approve"); // 성공시 url
-        params.put("cancel_url", "http://112.222.157.157:5231/api/booking/kakaoPayCancle"); // 실패시 url
-        params.put("fail_url", "http://112.222.157.157:5231/api/booking/kakaoPayFail");
-//        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
-//        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
-//        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
+//        params.put("approval_url", "http://112.222.157.157:5231/api/booking/pay-approve"); // 성공시 url
+//        params.put("cancel_url", "http://112.222.157.157:5231/api/booking/kakaoPayCancle"); // 실패시 url
+//        params.put("fail_url", "http://112.222.157.157:5231/api/booking/kakaoPayFail");
+        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
+        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
+        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
 
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
@@ -236,8 +244,8 @@ public class BookingService {
                     + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
                     + "check_out=" + URLEncoder.encode(bookingApproveInfoDto.getCheckOut(), StandardCharsets.UTF_8) + "&"
                     + "personnel=" + quantity;
-            String url = "http://112.222.157.157:5231/booking/complete" + redirectParams;
-//            String url = "http://localhost:8080/booking/complete" + redirectParams;
+//            String url = "http://112.222.157.157:5231/booking/complete" + redirectParams;
+            String url = "http://localhost:8080/booking/complete" + redirectParams;
             return url;
         } catch (Exception e) {
             e.printStackTrace();
