@@ -8,4 +8,5 @@ import lombok.Setter;
 public class SearchGetRes {
     private Long userId;
     private String txt;
+    private String searchAt;
 }

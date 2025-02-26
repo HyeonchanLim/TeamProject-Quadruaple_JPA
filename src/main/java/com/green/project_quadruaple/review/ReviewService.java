@@ -4,7 +4,12 @@ import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.entity.model.Review;
+import com.green.project_quadruaple.entity.model.StayTourRestaurFest;
+import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.review.model.*;
+import com.green.project_quadruaple.strf.StrfRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,10 +30,12 @@ public class ReviewService {
     private final ReviewMapper reviewMapper;
     private final MyFileUtils myFileUtils;
     private final AuthenticationFacade authenticationFacade;
+    private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
+    private final StrfRepository strfRepository;
 
     @Value("${const.default-review-size}")
     private int size;
-
     public List<ReviewSelRes> getReviewWithPics(Long strfId,int startIdx ) {
         int more = 1;
         List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(strfId,startIdx,size+more);
@@ -58,9 +65,7 @@ public class ReviewService {
             dtoList.get(dtoList.size()-1).setMore(true);
             dtoList.remove(dtoList.size()-1);
         }
-
         Map<Long, MyReviewSelRes> reviewMap = new LinkedHashMap<>();
-
         for (MyReviewSelRes item : dtoList) {
             // 기존 리뷰 ID로 저장된 객체가 있는지 확인
             MyReviewSelRes review = reviewMap.get(item.getReviewId());
@@ -68,19 +73,23 @@ public class ReviewService {
         return dtoList;
     }
 
-
-
     @Transactional
-    public int postRating(List<MultipartFile> pics, ReviewPostReq p) {
+    public int postRating(List<MultipartFile> pics, ReviewPostJpaReq p) {
         Long userId = authenticationFacade.getSignedUserId();
 
-        int result = reviewMapper.postRating(p,userId);
-        if (result == 0) {
-            return 0;
-        }
+        User user = userRepository.findById(userId).orElseThrow( () -> new RuntimeException("user id not found"));
 
-        long reviewId = p.getReviewId();
-        String middlePath = String.format("reviewId/%d", reviewId);
+        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId()).orElseThrow( () -> new RuntimeException("strf id not found"));
+
+        Review review = new Review();
+        review.setRating(p.getRating());
+        review.setContent(p.getContent());
+        review.setStayTourRestaurFest(strf);
+        review.setUser(user);
+        Review savedReview = reviewRepository.save(review);
+
+//        long reviewId = p.getReviewId();
+        String middlePath = String.format("reviewId/%d", savedReview.getReviewId());
         myFileUtils.makeFolders(middlePath);
 
         List<String> picNameList = new ArrayList<>(pics.size());
@@ -98,7 +107,7 @@ public class ReviewService {
             }
         }
         ReviewPicDto reviewPicDto = new ReviewPicDto();
-        reviewPicDto.setReviewId(reviewId);
+        reviewPicDto.setReviewId(savedReview.getReviewId());
         reviewPicDto.setPics(picNameList);
 
         // DB에 사진 저장
@@ -106,7 +115,6 @@ public class ReviewService {
         if (resultPics == 0) {
             throw new RuntimeException("리뷰 사진 저장 실패");
         }
-
         return 1;
     }
 
