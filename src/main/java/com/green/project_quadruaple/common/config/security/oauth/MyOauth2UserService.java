@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -46,7 +47,8 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
 
     }
 
-    private OAuth2User process(OAuth2UserRequest req) {
+    @Transactional
+    public OAuth2User process(OAuth2UserRequest req) {
         OAuth2User oAuth2User = super.loadUser(req);
 
         /*
