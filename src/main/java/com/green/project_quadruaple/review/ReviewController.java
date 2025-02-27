@@ -41,11 +41,8 @@ public class ReviewController {
     @Operation(summary = "리뷰 등록")
     public ResponseEntity<?> postReview(@RequestPart(required = false) List<MultipartFile> pics
                                         , @Valid @RequestPart ReviewPostJpaReq p) {
-        int result = reviewService.postRating(pics,p);
-        if (result<0){
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
-        }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+        ReviewPostRes res = reviewService.postRating(pics,p);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), res));
     }
 
 
