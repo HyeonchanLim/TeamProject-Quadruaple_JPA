@@ -28,4 +28,13 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             ORDER BY c.chatId ASC
             """)
     List<ChatDto> findChatLimit30(Long chatRoomId, Long signedUserId, Pageable pageable);
+
+
+    @Query("""
+            select count(cj) from ChatJoin cj
+            where cj.chatRoom.chatRoomId = :roomId
+                and cj.user.userId = :signedUserId
+            """)
+    Integer existsJoinUser(Long roomId, Long signedUserId);
+
 }

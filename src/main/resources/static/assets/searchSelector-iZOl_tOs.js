@@ -1,0 +1,1 @@
+import{k as r}from"./index-CG8vYf2y.js";import{s as e}from"./searchAtom-C3LxS7Az.js";const o=r({key:"resetSearchData",get:({get:a})=>a(e),set:({set:a})=>{a(e,{searchWord:"",searchData:[],startIndex:0,category:0})}});export{o as r};

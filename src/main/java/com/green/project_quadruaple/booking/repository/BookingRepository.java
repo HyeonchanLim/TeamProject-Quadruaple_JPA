@@ -16,6 +16,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             select new com.green.project_quadruaple.booking.model.dto.BookingRes(
                 b.bookingId
                 , strf.strfId
+                , strf.title
                 , sp.picName
                 , b.createdAt
                 , b.checkIn
