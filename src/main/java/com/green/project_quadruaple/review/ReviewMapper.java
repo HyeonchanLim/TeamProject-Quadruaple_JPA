@@ -21,12 +21,14 @@ public interface ReviewMapper {
     int deleteReview (Long reviewId,Long userId);
     int deleteReviewPic(Long reviewId);
 
+
+
+    // 사업자 리뷰 조회
     String findUserRoleByUserId(Long userId);
 
-    List<BusinessDto> selectBusinessReviews(
+    List<BusinessDto> selectBusinessReview(
             @Param("userId") Long userId,
-            @Param("startIdx") int startIdx,
-            @Param("pageSize") int pageSize
+            @Param("startIdx") int startIdx
     );
 
 }
