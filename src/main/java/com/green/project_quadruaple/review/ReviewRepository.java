@@ -12,4 +12,6 @@ public interface ReviewRepository extends JpaRepository<Review , Long> {
     Review postRating (@Param("userId")Long userId);
 
     Review save(Review review);
+
+    //void deleteReviewBy(Long reviewId);
 }

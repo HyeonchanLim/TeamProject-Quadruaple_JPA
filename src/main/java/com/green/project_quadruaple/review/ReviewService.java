@@ -87,7 +87,6 @@ public class ReviewService {
         review.setStayTourRestaurFest(strf);
         review.setUser(user);
         Review savedReview = reviewRepository.save(review);
-
 //        long reviewId = p.getReviewId();
         String middlePath = String.format("reviewId/%d", savedReview.getReviewId());
         myFileUtils.makeFolders(middlePath);
@@ -101,9 +100,10 @@ public class ReviewService {
                 myFileUtils.transferTo(pic, filePath);
             } catch (IOException e) {
                 // 폴더 삭제 처리
+                e.printStackTrace();
                 String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
                 myFileUtils.deleteFolder(delFolderPath, true);
-                return 0;
+                throw new RuntimeException(e);
             }
         }
         ReviewPicDto reviewPicDto = new ReviewPicDto();
@@ -160,27 +160,22 @@ public class ReviewService {
     public ResponseEntity<ResponseWrapper<Integer>> deleteReview(Long reviewId) {
         Long userId = authenticationFacade.getSignedUserId();
 
-        ReviewDelPicReq picReq = new ReviewDelPicReq();
-        picReq.setReviewId(reviewId);
+        User user = userRepository.findById(userId).orElseThrow( () -> new RuntimeException("user id not found"));
 
-        int affectedRowsPic = reviewMapper.deleteReviewPic(reviewId);
-        int affectedRowsReview = reviewMapper.deleteReview(reviewId,userId);
+        Review review = reviewRepository.findById(reviewId).orElseThrow( () -> new NoSuchElementException("review id not found"));
 
-        String deletePath = String.format("%s/feed/%d", myFileUtils.getUploadPath(), reviewId);
+//        ReviewDelPicReq picReq = new ReviewDelPicReq();
+//        picReq.setReviewId(reviewId);
+
+        int affectedRowsPic = reviewMapper.deleteReviewPic(review.getReviewId());
+//        int affectedRowsReview = reviewMapper.deleteReview(review.getReviewId(),user.getUserId());
+
+//        reviewRepository.deleteReviewBy(reviewId);
+
+        String deletePath = String.format("%s/feed/%d", myFileUtils.getUploadPath(), review.getReviewId());
 
         myFileUtils.deleteFolder(deletePath, true);
 
-        if (affectedRowsReview > 0) {
-            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), affectedRowsReview));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
-        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
     }
-
-
-
-
-
-
 }

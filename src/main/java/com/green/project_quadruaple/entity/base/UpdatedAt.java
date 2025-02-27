@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +12,8 @@ import java.time.LocalDateTime;
 public class UpdatedAt extends CreatedAt {
 
     @Column(name = "updated_at")
-    @CreationTimestamp
+//    @CreationTimestamp
+    @UpdateTimestamp
     @Setter
     private LocalDateTime updatedAt;
 }
