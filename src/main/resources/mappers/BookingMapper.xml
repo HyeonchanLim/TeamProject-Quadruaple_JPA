@@ -97,5 +97,11 @@
         WHERE b.booking_id = #{bookingId}
     </select>
 
+    <update id="updateAllStateAfterCheckOut">
+        update booking
+        set state = 2
+        where state = 1
+            and check_out &lt; #{now}
+    </update>
 
 </mapper>

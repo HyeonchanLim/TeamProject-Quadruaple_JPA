@@ -5,6 +5,7 @@ import com.green.project_quadruaple.booking.model.BookingPostReq;
 import com.green.project_quadruaple.booking.model.BookingPostRes;
 import com.green.project_quadruaple.booking.model.dto.ApproveData;
 import com.green.project_quadruaple.booking.model.dto.BookingRes;
+import com.green.project_quadruaple.booking.repository.BookingMapper;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +28,7 @@ import java.util.Map;
 @Tag(name = "예약")
 public class BookingController {
     private final BookingService bookingService;
+    private final BookingMapper bookingMapper;
 
     @GetMapping
     @ResponseBody
@@ -59,5 +61,11 @@ public class BookingController {
 //    public String getRedirect(@RequestParam("id") Long id) {
 //        log.info("id = {}", id);
 //        return String.valueOf(id);
+//    }
+
+//    @GetMapping("update-state")
+//    @ResponseBody
+//    public void updateState() {
+//        bookingService.updateState();
 //    }
 }
