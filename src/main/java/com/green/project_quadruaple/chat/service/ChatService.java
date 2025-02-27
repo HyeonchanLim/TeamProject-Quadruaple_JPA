@@ -15,6 +15,7 @@ import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.user.SimpSession;
 import org.springframework.messaging.simp.user.SimpUser;
@@ -40,7 +41,7 @@ public class ChatService {
 
     // 유저 입장 시
     @Transactional
-    public JoinRes joinChat(JoinReq req, Principal principal) {
+    public JoinRes joinChat(Long roomId, Principal principal) {
 
         Long signedUserId = getSignedUserId(principal);
         if(signedUserId == null) { // 인증 정보 없으면 return
@@ -49,11 +50,13 @@ public class ChatService {
                     .error("유저 정보 없음")
                     .build();
         }
-        User user = userRepository.findById(signedUserId).get();
-        return JoinRes.builder()
-                .userName(user.getName())
-                .error(null)
-                .build();
+
+        PageRequest pageAble = PageRequest.of(0, 1);
+        if(chatRoomRepository.existsUser(roomId, signedUserId, pageAble)) {
+
+        }
+
+        return null;
     }
 
     // 채팅 저장

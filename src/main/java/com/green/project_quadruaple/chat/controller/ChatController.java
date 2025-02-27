@@ -25,11 +25,11 @@ public class ChatController {
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/chat.join")
-    public void join(@Payload JoinReq req, Principal principal) {
-        JoinRes res = chatService.joinChat(req, principal);
-        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), String.format( "[%s]채팅방 입장", res.getUserName()));
-    }
+//    @MessageMapping("/chat.join")
+//    public void join(@Payload JoinReq req, Principal principal) {
+//        JoinRes res = chatService.joinChat(req, principal);
+//        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), String.format( "[%s]채팅방 입장", res.getUserName()));
+//    }
 
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload PostChatReq req, Principal principal) {
@@ -45,8 +45,9 @@ public class ChatController {
     }
 
     @SubscribeMapping("/chat/{roomId}")
-    public String subChat(@DestinationVariable String roomId, Principal principal) {
+    public String subChat(@DestinationVariable Long roomId, Principal principal) {
         log.info("roomId : {}", roomId);
+        chatService.joinChat(roomId, principal);
         return "1w";
     }
 }
