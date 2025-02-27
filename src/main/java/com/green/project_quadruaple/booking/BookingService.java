@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.Schedules;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -26,9 +28,12 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.*;
 
 @Slf4j
@@ -71,6 +76,34 @@ public class BookingService {
         PageRequest pageAble = PageRequest.of(page, 30);
 
         List<BookingRes> bookingList = bookingRepository.findBookingListByUserId(signedUserId, pageAble);
+
+        // 날짜 포맷팅
+        for (BookingRes bookingRes : bookingList) {
+            LocalDateTime createdAtLD = bookingRes.getCreatedAtLD();
+            LocalDateTime checkInDateLD = bookingRes.getCheckInDateLD();
+            LocalDateTime checkOutDateLD = bookingRes.getCheckOutDateLD();
+
+            // 요일 SHORT ex) 월
+            String dayOfWeekOfCreatedAt = createdAtLD.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREA);
+            String dayOfWeekOfCheckIn = checkInDateLD.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREA);
+            String dayOfWeekOfCheckOut = checkOutDateLD.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREA);
+
+            // String 변환 ex) 2025-01-01 월
+            String dateOfCreatedAt = createdAtLD.toLocalDate().toString() + " " + dayOfWeekOfCreatedAt;
+            String dateOfCheckIn = checkInDateLD.toLocalDate().toString() + " " + dayOfWeekOfCheckIn;
+            String dateOfCheckOut = checkOutDateLD.toLocalDate().toString() + " " + dayOfWeekOfCheckOut;
+
+            bookingRes.setCreatedAt(dateOfCreatedAt);
+            bookingRes.setCheckInDate(dateOfCheckIn);
+            bookingRes.setCheckOutDate(dateOfCheckOut);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+            // 시간 세팅 ex) 14:00
+            bookingRes.setCheckInTime(checkInDateLD.format(formatter));
+            bookingRes.setCheckOutTime(checkOutDateLD.format(formatter));
+
+        }
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), bookingList);
     }
@@ -150,12 +183,12 @@ public class BookingService {
         params.put("quantity", quantity); // 상품 수량
         params.put("total_amount", totalAmount); // 상품 가격
         params.put("tax_free_amount", taxFreeAmount); // 상품 비과세 금액
-//        params.put("approval_url", "http://112.222.157.157:5231/api/booking/pay-approve"); // 성공시 url
-//        params.put("cancel_url", "http://112.222.157.157:5231/api/booking/kakaoPayCancle"); // 실패시 url
-//        params.put("fail_url", "http://112.222.157.157:5231/api/booking/kakaoPayFail");
-        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
-        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
-        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
+        params.put("approval_url", "http://112.222.157.157:5231/api/booking/pay-approve"); // 성공시 url
+        params.put("cancel_url", "http://112.222.157.157:5231/api/booking/kakaoPayCancle"); // 실패시 url
+        params.put("fail_url", "http://112.222.157.157:5231/api/booking/kakaoPayFail");
+//        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
+//        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
+//        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
 
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
@@ -244,12 +277,18 @@ public class BookingService {
                     + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
                     + "check_out=" + URLEncoder.encode(bookingApproveInfoDto.getCheckOut(), StandardCharsets.UTF_8) + "&"
                     + "personnel=" + quantity;
-//            String url = "http://112.222.157.157:5231/booking/complete" + redirectParams;
-            String url = "http://localhost:8080/booking/complete" + redirectParams;
+            String url = "http://112.222.157.157:5231/booking/complete" + redirectParams;
+//            String url = "http://localhost:8080/booking/complete" + redirectParams;
             return url;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();
         }
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 0 6 * * ?")
+    public void updateState() {
+        bookingMapper.updateAllStateAfterCheckOut(LocalDateTime.now());
     }
 }
