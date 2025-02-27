@@ -17,6 +17,7 @@ file:
 
 const:
   default-review-size: 10
+  default-search-size: 10
 
 spring:
   profiles:

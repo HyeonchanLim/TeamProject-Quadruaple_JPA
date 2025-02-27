@@ -12,14 +12,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TripLike {
+    @EmbeddedId
+    private TripLikeId id;
 
-    @Id
-    @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
     private User userId;
 
-    @JoinColumn(name = "trip_review_id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("tripReviewId")
+    @JoinColumn(name = "trip_review_id")
     private TripReview tripReviewId;
 
 }

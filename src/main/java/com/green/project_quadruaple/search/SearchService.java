@@ -32,7 +32,7 @@ public class SearchService {
     private final SearchWordRepository searchWordRepository;
     private final UserRepository userRepository;
 
-    @Value("${const.default-review-size}")
+    @Value("${const.default-search-size}")
     private int size;
 
     // 기존
