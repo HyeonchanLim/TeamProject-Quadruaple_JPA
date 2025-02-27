@@ -26,23 +26,23 @@ import java.util.Optional;
 public class AuthenticationCodeController {
     private final AuthenticationCodeService authenticationCodeService;
 
-    @GetMapping("getAuthentication")
-    @Operation(summary = "인증 코드 조회")
-    public ResponseEntity<?> getAuthenticationCode(@RequestParam("email") String email) {
-        Optional<AuthenticationCode> authCodeOptional = authenticationCodeService.getAuthenticationCodeByEmail(email);
-
-        if (authCodeOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), "이메일 인증 코드가 존재하지 않습니다."));
-        }
-
-        AuthenticationCode authCode = authCodeOptional.get();
-        Map<String, Object> response = new HashMap<>();
-        response.put("code_num", authCode.getCodeNum()); // 인증 코드
-        response.put("email", authCode.getEmail());
-
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), response));
-    }
+//    @GetMapping("getAuthentication")
+//    @Operation(summary = "인증 코드 조회")
+//    public ResponseEntity<?> getAuthenticationCode(@RequestParam("email") String email) {
+//        Optional<AuthenticationCode> authCodeOptional = authenticationCodeService.getAuthenticationCodeByEmail(email);
+//
+//        if (authCodeOptional.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), "이메일 인증 코드가 존재하지 않습니다."));
+//        }
+//
+//        AuthenticationCode authCode = authCodeOptional.get();
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("code_num", authCode.getCodeNum()); // 인증 코드
+//        response.put("email", authCode.getEmail());
+//
+//        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), response));
+//    }
 
     @GetMapping("countAuthentication")
     @Operation(summary = "인증 코드 발급 횟수")
