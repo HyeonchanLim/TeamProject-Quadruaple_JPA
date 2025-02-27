@@ -6,6 +6,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -132,7 +133,7 @@ public class UserController {
 
     //임시 비밀번호 발급 여부
     @GetMapping("check-temp-password")
-    @Operation(summary = "임시 비밀번호 발급 여부", description = "임시 비밀번호 발급 받았으면 true, 임시 비밀번호에서 다시 수정했으면 false")
+    @Operation(summary = "임시 비밀번호 발급 여부", description = "임시 비밀번호 발급 받았으면 true, 임시 비밀번호를 발급 받은 적이 없거나 임시 비밀번호에서 다시 수정했으면 false")
     public ResponseEntity<Map<String, Object>> checkTempPassword(@RequestParam String email) {
         boolean isSame = userService.checkTempPassword(email);
 
