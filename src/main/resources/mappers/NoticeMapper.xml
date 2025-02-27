@@ -23,5 +23,6 @@
         WHERE NR.user_id = #{userId}
         AND NR.`disable` = 0
         ORDER BY noticeId DESC
+        LIMIT #{startIdx},#{size}
     </select>
 </mapper>

@@ -34,13 +34,13 @@ public class NoticeController {
     //알람 리스트 확인
     @GetMapping("check")
     @Operation(summary = "알람리스트확인하기")
-    public ResponseEntity<?> checkNotice(){
-        return noticeService.noticeCheck();
+    public ResponseEntity<?> checkNotice(@RequestParam("start_idx") int startIdx){
+        return noticeService.noticeCheck(startIdx);
     }
 
     @GetMapping("check-one")
     @Operation(summary = "알람상세확인하기")
-    public ResponseEntity<?> checkNoticeOne(@ParameterObject long noticeId){
+    public ResponseEntity<?> checkNoticeOne(@RequestParam("notice_id") long noticeId){
         return noticeService.checkNoticeOne(noticeId);
     }
 }
