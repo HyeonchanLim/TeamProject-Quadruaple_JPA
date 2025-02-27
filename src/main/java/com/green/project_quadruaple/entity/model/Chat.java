@@ -18,7 +18,7 @@ public class Chat extends CreatedAt {
     private Long chatId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cj_id", nullable = false)
+    @JoinColumn(name = "speaker_id", nullable = false)
     private ChatJoin chatJoin;
 
     @Column(nullable = false, length = 1000)

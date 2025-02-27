@@ -43,4 +43,10 @@ public class NoticeController {
     public ResponseEntity<?> checkNoticeOne(@RequestParam("notice_id") long noticeId){
         return noticeService.checkNoticeOne(noticeId);
     }
+
+    @PutMapping
+    @Operation(summary = "알람 일괄 읽음처리")
+    public ResponseEntity<?> readAllNotice(){
+        return noticeService.readAllNotice();
+    }
 }
