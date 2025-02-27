@@ -2,9 +2,12 @@ package com.green.project_quadruaple.tripreview;
 
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.trip.TripMapper;
-import com.green.project_quadruaple.trip.model.req.PostTripReq;
+import com.green.project_quadruaple.trip.TripRepository;
 import com.green.project_quadruaple.tripreview.model.*;
+import com.green.project_quadruaple.tripreview.repository.*;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -29,18 +33,39 @@ public class TripReviewService {
     private final TripMapper tripMapper;
     private final MyFileUtils myFileUtils;
     private final AuthenticationFacade authenticationFacade;
+    private final TripReviewRepository tripReviewRepository;
+    private final TripRepository tripRepository;
+    private final UserRepository userRepository;
+    private final TripLikeRepository likeRepository;
+    private final RecentTrRepository recentTrRepository;
+    private final ScrapRepository scrapRepository;
+    private final TripReviewPicRepository tripReviewPicRepository;
+    private final TripLikeRepository tripLikeRepository;
 
     @Value("${const.default-review-size}")
     private int size;
 
     // 여행기 등록
+    @Transactional
     public TripReviewPostRes postTripReview(List<MultipartFile> tripReviewPic, TripReviewPostReq req) {
         req.setUserId(authenticationFacade.getSignedUserId());
-        tripReviewMapper.insTripReview(req);
 
+        TripReview tripReview = new TripReview();
+
+        User user = userRepository.findById(req.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Trip trip = tripRepository.findById(req.getTripId())
+                .orElseThrow(() -> new RuntimeException("Trip not found"));
+
+        tripReview.setUser(user);
+        tripReview.setTrip(trip);
+        tripReview.setTitle(req.getTitle());
+        tripReview.setContent(req.getContent());
+
+        tripReviewRepository.save(tripReview);
 
         // 파일 등록
-        long tripReviewId = req.getTripReviewId();
+        long tripReviewId = tripReview.getTripReviewId();
         String middlePath = String.format("tripReview/%d", tripReviewId);
         myFileUtils.makeFolders(middlePath);
 
@@ -85,7 +110,7 @@ public class TripReviewService {
     }
     public int getMyTripReviewsCount() {
         long userId = authenticationFacade.getSignedUserId();
-        return tripReviewMapper.getMyTripReviewsCount(userId);
+        return tripReviewRepository.countByUser_UserId(userId);
     }
     // 모든 사용자의 여행기 조회
     public List<TripReviewGetDto> getAllTripReviews(String orderType, int pageNumber) {
@@ -114,7 +139,7 @@ public class TripReviewService {
         return result;
     }
     public int getTripReviewCount() {
-        return tripReviewMapper.getTotalTripReviewsCount();
+        return tripReviewRepository.countAllBy();
     }
     // 다른 사용자의 여행기 조회
     public List<TripReviewGetDto> getOtherTripReviews(long tripReviewId) {
@@ -137,13 +162,23 @@ public class TripReviewService {
     }
 
     // 여행기 수정
+    @Transactional
     public int patchTripReview(List<MultipartFile> tripPic, TripReviewPatchDto dto) {
         dto.setUserId(authenticationFacade.getSignedUserId());
 
-        int result = tripReviewMapper.updTripReview(dto);
-        if (result == 0) {
-            throw new RuntimeException("여행기 수정에 실패했습니다.");
+        TripReview tripReview = tripReviewRepository.findById(dto.getTripReviewId())
+                .orElseThrow(() -> new RuntimeException("해당 여행기를 찾을 수 없습니다."));
+
+        // 현재 로그인한 유저와 여행기 작성자가 같은지 확인
+        if (!tripReview.getUser().getUserId().equals(dto.getUserId())) {
+            throw new RuntimeException("본인의 여행기만 수정할 수 있습니다.");
         }
+
+        tripReview.setTitle(dto.getTitle());
+        tripReview.setContent(dto.getContent());
+
+        tripReviewRepository.save(tripReview);
+
 
         if (tripPic != null && !tripPic.isEmpty()) {
             // 기존 DB의 여행기 사진 삭제
@@ -187,50 +222,84 @@ public class TripReviewService {
             }
         }
 
-        return result;
+        return 1;
     }
 
     //여행기 삭제
+    @Transactional
     public int deleteTripReview(long tripReviewId) {
         long signedUserId = authenticationFacade.getSignedUserId();
 
-        TripReviewDeleteDto tripReviewDeleteDto = tripReviewMapper.selTripReviewByUserId(tripReviewId);
+        // 여행기 조회
+        TripReview tripReview = tripReviewRepository.findById(tripReviewId)
+                .orElseThrow(() -> new RuntimeException("해당 여행기를 찾을 수 없습니다."));
 
-        if (tripReviewDeleteDto == null || tripReviewDeleteDto.getUserId() != signedUserId) {
+        // 본인 작성 여행기인지 확인
+        if (!tripReview.getUser().getUserId().equals(signedUserId)) {
             return 0;
         }
 
-        tripReviewMapper.delTripReviewRecentTr(tripReviewId);
+        recentTrRepository.deleteByTripReviewId_TripReviewId(tripReviewId);
+        scrapRepository.deleteByTripReviewId_TripReviewId(tripReviewId);
+        likeRepository.deleteByTripReviewId_TripReviewId(tripReviewId);
+        tripReviewPicRepository.deleteByTripReview_TripReviewId(tripReviewId);
 
-        tripReviewMapper.delTripReviewScrap(tripReviewId);
-
-        tripReviewMapper.delTripReviewLikeByTripReviewId(tripReviewId);
-
-        tripReviewMapper.delTripReviewPic(tripReviewId);
         String basePath = myFileUtils.getUploadPath(); // 기본 업로드 경로
         String middlePath = String.format("tripReview/%d", tripReviewId);
         String targetPath = String.format("%s/%s", basePath, middlePath); // 중복 경로 방지
         myFileUtils.deleteFolder(targetPath, true);
 
-        return tripReviewMapper.delTripReview(tripReviewId);
+        tripReviewRepository.delete(tripReview);
+
+        return 1;
     }
 
 
     // 여행기 추천
+    @Transactional
     public int insTripLike(TripLikeDto like) {
         long userId = authenticationFacade.getSignedUserId();
-        like.setUserId(userId);
-        return tripReviewMapper.insTripLike(like);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        TripReview tripReview = tripReviewRepository.findById(like.getTripReviewId())
+                .orElseThrow(() -> new RuntimeException("TripReview not found"));
+
+        TripLikeId tripLikeId = new TripLikeId(like.getTripReviewId(), userId);
+
+        TripLike tripLike = new TripLike();
+        tripLike.setId(tripLikeId);
+        tripLike.setUserId(user);
+        tripLike.setTripReviewId(tripReview);
+
+        tripLikeRepository.save(tripLike);
+
+        return 1;
     }
 
+
+    @Transactional
     public int delTripLike(TripLikeDto like) {
         long userId = authenticationFacade.getSignedUserId();
-        like.setUserId(userId);
-        return tripReviewMapper.delTripLike(like);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // TripLikeId 객체를 생성
+        TripLikeId tripLikeId = new TripLikeId(like.getTripReviewId(), userId);
+
+        // TripLikeId를 사용하여 TripLike 엔티티를 조회
+        TripLike tripLike = tripLikeRepository.findById(tripLikeId)
+                .orElseThrow(() -> new RuntimeException("TripReviewLike not found"));
+
+        // 삭제
+        tripLikeRepository.delete(tripLike);
+
+        return 1;
     }
 
     public int getTripLikeCount(Long tripReviewId) {
-        return Optional.ofNullable(tripReviewMapper.tripLikeCount(tripReviewId)).orElse(0);
+        return tripLikeRepository.countByTripReviewId_TripReviewId(tripReviewId);
     }
 
     // 여행기 스크랩

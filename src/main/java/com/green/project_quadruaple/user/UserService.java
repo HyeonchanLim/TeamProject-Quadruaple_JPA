@@ -177,11 +177,7 @@ public class UserService {
 
 
     public boolean checkDuplicatedEmail(String email) {
-        boolean isDuplicated = userMapper.isEmailDuplicated(email);
-        if (isDuplicated) {
-            return false;
-        }
-        return true;
+        return !userRepository.existsByAuthenticationCode_Email(email);
     }
 
     //-------------------------------------------------
@@ -485,8 +481,14 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 
         // User의 userId로 임시 비밀번호 조회
-        TemporaryPw temporaryPw = temporaryPwRepository.findByUserId(user.getUserId())
-                .orElseThrow(() -> new CustomException(UserErrorCode.TEMPORARY_PASSWORD_NOT_FOUND));
+        Optional<TemporaryPw> optionalTempPw = temporaryPwRepository.findByUserId(user.getUserId());
+
+        // 임시 비밀번호가 없으면 false 반환
+        if (optionalTempPw.isEmpty()) {
+            return false;
+        }
+
+        TemporaryPw temporaryPw = optionalTempPw.get();
 
         // 비밀번호와 임시 비밀번호 비교
         String pw = user.getPassword(); // 원본 비밀번호
