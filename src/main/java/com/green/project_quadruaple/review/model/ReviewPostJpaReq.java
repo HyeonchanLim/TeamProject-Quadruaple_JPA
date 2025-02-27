@@ -12,6 +12,8 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 public class ReviewPostJpaReq {
+    @JsonIgnore
+    private Long reviewId;
     private String content;
     private int rating;
     private Long strfId;

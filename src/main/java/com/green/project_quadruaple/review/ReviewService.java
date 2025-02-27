@@ -73,6 +73,45 @@ public class ReviewService {
         return dtoList;
     }
 
+//    @Transactional
+//    public int postRating(List<MultipartFile> pics, ReviewPostReq p) {
+//        Long userId = authenticationFacade.getSignedUserId();
+//
+//        int result = reviewMapper.postRating(p,userId);
+//        if (result == 0) {
+//            return 0;
+//        }
+//
+//        long reviewId = p.getReviewId();
+//        String middlePath = String.format("reviewId/%d", reviewId);
+//        myFileUtils.makeFolders(middlePath);
+//
+//        List<String> picNameList = new ArrayList<>(pics.size());
+//        for (MultipartFile pic : pics) {
+//            String savedPicName = myFileUtils.makeRandomFileName(pic);
+//            picNameList.add(savedPicName);
+//            String filePath = String.format("%s/%s", middlePath, savedPicName);
+//            try {
+//                myFileUtils.transferTo(pic, filePath);
+//            } catch (IOException e) {
+//                // 폴더 삭제 처리
+//                String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
+//                myFileUtils.deleteFolder(delFolderPath, true);
+//                return 0;
+//            }
+//        }
+//        ReviewPicDto reviewPicDto = new ReviewPicDto();
+//        reviewPicDto.setReviewId(reviewId);
+//        reviewPicDto.setPics(picNameList);
+//
+//        // DB에 사진 저장
+//        int resultPics = reviewMapper.postReviewPic(reviewPicDto);
+//        if (resultPics == 0) {
+//            throw new RuntimeException("리뷰 사진 저장 실패");
+//        }
+//
+//        return 1;
+//    }
     @Transactional
     public int postRating(List<MultipartFile> pics, ReviewPostJpaReq p) {
         Long userId = authenticationFacade.getSignedUserId();
@@ -86,8 +125,8 @@ public class ReviewService {
         review.setContent(p.getContent());
         review.setStayTourRestaurFest(strf);
         review.setUser(user);
+        review.setReviewId(p.getReviewId());
         Review savedReview = reviewRepository.save(review);
-
 //        long reviewId = p.getReviewId();
         String middlePath = String.format("reviewId/%d", savedReview.getReviewId());
         myFileUtils.makeFolders(middlePath);
@@ -101,9 +140,10 @@ public class ReviewService {
                 myFileUtils.transferTo(pic, filePath);
             } catch (IOException e) {
                 // 폴더 삭제 처리
+                e.printStackTrace();
                 String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
                 myFileUtils.deleteFolder(delFolderPath, true);
-                return 0;
+                throw new RuntimeException(e);
             }
         }
         ReviewPicDto reviewPicDto = new ReviewPicDto();
@@ -160,27 +200,22 @@ public class ReviewService {
     public ResponseEntity<ResponseWrapper<Integer>> deleteReview(Long reviewId) {
         Long userId = authenticationFacade.getSignedUserId();
 
-        ReviewDelPicReq picReq = new ReviewDelPicReq();
-        picReq.setReviewId(reviewId);
+        User user = userRepository.findById(userId).orElseThrow( () -> new RuntimeException("user id not found"));
 
-        int affectedRowsPic = reviewMapper.deleteReviewPic(reviewId);
-        int affectedRowsReview = reviewMapper.deleteReview(reviewId,userId);
+        Review review = reviewRepository.findById(reviewId).orElseThrow( () -> new NoSuchElementException("review id not found"));
 
-        String deletePath = String.format("%s/feed/%d", myFileUtils.getUploadPath(), reviewId);
+//        ReviewDelPicReq picReq = new ReviewDelPicReq();
+//        picReq.setReviewId(reviewId);
+
+        int affectedRowsPic = reviewMapper.deleteReviewPic(review.getReviewId());
+//        int affectedRowsReview = reviewMapper.deleteReview(review.getReviewId(),user.getUserId());
+
+//        reviewRepository.deleteReviewBy(reviewId);
+
+        String deletePath = String.format("%s/feed/%d", myFileUtils.getUploadPath(), review.getReviewId());
 
         myFileUtils.deleteFolder(deletePath, true);
 
-        if (affectedRowsReview > 0) {
-            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), affectedRowsReview));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
-        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
     }
-
-
-
-
-
-
 }
