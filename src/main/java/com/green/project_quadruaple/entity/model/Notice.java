@@ -24,4 +24,7 @@ public class Notice extends CreatedAt {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private NoticeCategory noticeCategory;
+
+    @Column
+    private Long foreignNum;
 }
