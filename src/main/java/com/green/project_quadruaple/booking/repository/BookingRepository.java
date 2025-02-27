@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -29,27 +31,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             order by b.checkIn asc
             """)
     List<BookingRes> findBookingListByUserId(Long userId, Pageable pageable);
+
+    @Query("""
+            update Booking b
+            set b.state = 2
+            where b.state = 1
+                and b.checkOut < :now
+            """)
+    void updateAllStateAfterCheckOut(LocalDateTime now);
 }
-/*
-        *  "bookingId": 1,
-        "strfId": 3,
-        "strfPic": "image.jpg",
-        "createdAt": "2025-06-21 수",
-        "checkInDate": "2025-07-08 토",
-        "checkOutDate": "2025-07-09 일",
-        "checkInTime": "14:00",
-        "checkOutTime": "11:00",
-        "price": 225000,
-        "state" : 1,
-        "chatRoomId" : 1 or null
-        *
-        *         this.bookingId = bookingId;
-        this.strfId = strfId;
-        this.strfPic = strfPic;
-        this.createdAtLD = createdAtLD;
-        this.checkInDateLD = checkInDateLD;
-        this.checkOutDateLD = checkOutDateLD;
-        this.price = price;
-        this.state = state;
-        this.chatRoomId = chatRoomId;
-*/
