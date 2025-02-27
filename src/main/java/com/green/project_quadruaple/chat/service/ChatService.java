@@ -1,7 +1,6 @@
 package com.green.project_quadruaple.chat.service;
 
 import com.green.project_quadruaple.chat.model.req.PostChatReq;
-import com.green.project_quadruaple.chat.model.req.JoinReq;
 import com.green.project_quadruaple.chat.model.res.JoinRes;
 import com.green.project_quadruaple.chat.model.res.MessageRes;
 import com.green.project_quadruaple.chat.repository.ChatJoinRepository;
@@ -10,23 +9,15 @@ import com.green.project_quadruaple.chat.repository.ChatRoomRepository;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.entity.model.Chat;
 import com.green.project_quadruaple.entity.model.ChatJoin;
-import com.green.project_quadruaple.entity.model.ChatRoom;
-import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.user.SimpSession;
-import org.springframework.messaging.simp.user.SimpUser;
-import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
-import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -51,9 +42,8 @@ public class ChatService {
                     .build();
         }
 
-        PageRequest pageAble = PageRequest.of(0, 1);
-        if(chatRoomRepository.existsUser(roomId, signedUserId, pageAble)) {
-
+        if(chatRoomRepository.existsJoinUser(roomId, signedUserId) > 0) {
+            log.info("exists user");
         }
 
         return null;

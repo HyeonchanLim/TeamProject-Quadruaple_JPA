@@ -29,12 +29,12 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             """)
     List<ChatDto> findChatLimit30(Long chatRoomId, Long signedUserId, Pageable pageable);
 
+
     @Query("""
-            select cr from ChatRoom cr
-                join ChatJoin cj
-                    on cj.chatRoom.chatRoomId = cr.chatRoomId
-            where cr.chatRoomId = :chatRoomId
+            select count(cj) from ChatJoin cj
+            where cj.chatRoom.chatRoomId = :roomId
                 and cj.user.userId = :signedUserId
             """)
-    boolean existsUser(Long chatRoomId, Long signedUserId, Pageable pageable);
+    Integer existsJoinUser(Long roomId, Long signedUserId);
+
 }
