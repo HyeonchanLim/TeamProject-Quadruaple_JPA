@@ -22,4 +22,13 @@ public interface ReviewMapper {
     int deleteReviewPic(Long reviewId);
 
 
+
+    // 사업자 리뷰 조회
+    String findUserRoleByUserId(Long userId);
+
+    List<BusinessDto> selectBusinessReview(
+            @Param("userId") Long userId,
+            @Param("startIdx") int startIdx
+    );
+
 }
