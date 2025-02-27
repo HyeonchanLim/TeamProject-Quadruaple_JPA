@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -14,6 +13,6 @@ public class UsedExpiredCouponResponse {
     private long userId;
     private int usedCouponCount;
     private int expiredCouponCount;
-    private List<CouponDto> usedCoupons;
-    private List<CouponDto> expiredCoupons;
+    private List<UsedCouponDto> usedCoupons;
+    private List<ExpiredCouponDto> expiredCoupons;
 }
