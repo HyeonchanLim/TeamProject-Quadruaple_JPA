@@ -2,6 +2,8 @@ package com.green.project_quadruaple.user;
 
 import com.green.project_quadruaple.entity.model.AuthenticationCode;
 import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.user.Repository.AuthenticationCodeRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -19,7 +21,7 @@ public class AuthenticationCodeCleanupScheduler {
     /**
      * 매일 자정(00:00)에 실행되어 5개 이상인 이메일의 인증 코드를 삭제하는 스케줄러
      */
-    @Scheduled(cron = "0 58 16 * * ?") // 매일 00:00 실행
+    @Scheduled(cron = "0 0 0 * * ?") // 매일 00:00 실행
     @Transactional
     public void cleanUpExpiredAuthenticationCodes() {
         // 5개 이상인 이메일을 찾아서

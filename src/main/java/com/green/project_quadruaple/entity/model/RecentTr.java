@@ -14,13 +14,17 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecentTr {
-    @Id
-    @JoinColumn(name = "user_id")
+    @EmbeddedId
+    private RecentTrId id;
+
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
     private User userId;
 
-    @JoinColumn(name = "trip_review_id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("tripReviewId")
+    @JoinColumn(name = "trip_review_id")
     private TripReview tripReviewId;
 
     @Column(name = "inquired_at", nullable = false)

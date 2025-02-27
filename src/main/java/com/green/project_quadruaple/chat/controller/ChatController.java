@@ -1,19 +1,18 @@
 package com.green.project_quadruaple.chat.controller;
 
-import com.green.project_quadruaple.chat.model.JoinRes;
-import com.green.project_quadruaple.chat.model.MessageRes;
+import com.green.project_quadruaple.chat.model.*;
+import com.green.project_quadruaple.chat.model.req.JoinReq;
+import com.green.project_quadruaple.chat.model.req.PostChatReq;
+import com.green.project_quadruaple.chat.model.res.JoinRes;
+import com.green.project_quadruaple.chat.model.res.MessageRes;
 import com.green.project_quadruaple.chat.service.ChatService;
-import com.green.project_quadruaple.chat.model.ChatDto;
-import com.green.project_quadruaple.chat.model.JoinReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
@@ -27,19 +26,28 @@ public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.join")
-//    @SendTo("/topic/greetings")
     public void join(@Payload JoinReq req, Principal principal) {
-        MessageRes res = chatService.joinChat(req, principal);
-        messagingTemplate.convertAndSend("/sub/chat/" + req.roomId(), res);
+        JoinRes res = chatService.joinChat(req.getRoomId(), principal);
+        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), String.format( "[%s]채팅방 입장", res.getUserName()));
     }
 
     @MessageMapping("/chat.sendMessage")
-//    @SendTo("/topic/greetings")
-    public void sendMessage(@Payload ChatDto req,
-                            @Header("Authorization") String token) {
-        log.info("[{}] message : [{}]", req.getSender(), req.getMessage());
-        log.info("token : {}", token);
-        MessageRes res = chatService.insChat(req);
-        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), req);
+    public void sendMessage(@Payload PostChatReq req, Principal principal) {
+
+        MessageRes res = chatService.insChat(req, principal);
+        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), res);
+    }
+
+    @MessageMapping("/chat.setStatus")
+    public void setStatus(@Payload ChatStatus req) {
+        log.info("req : {}", req);
+        messagingTemplate.convertAndSend("/sub/chat/status", req);
+    }
+
+    @SubscribeMapping("/chat/{roomId}")
+    public String subChat(@DestinationVariable Long roomId, Principal principal) {
+        log.info("roomId : {}", roomId);
+        chatService.joinChat(roomId, principal);
+        return "1w";
     }
 }

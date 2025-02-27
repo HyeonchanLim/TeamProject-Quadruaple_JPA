@@ -57,6 +57,7 @@ public class SearchController {
 
 
 
+
     // 상품 검색어 최근 리스트
 
     @GetMapping("/list")

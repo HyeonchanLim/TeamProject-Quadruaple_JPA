@@ -2,16 +2,14 @@ package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Chat extends CreatedAt {
 
     @Id
@@ -20,7 +18,7 @@ public class Chat extends CreatedAt {
     private Long chatId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cj_id", nullable = false)
+    @JoinColumn(name = "speaker_id", nullable = false)
     private ChatJoin chatJoin;
 
     @Column(nullable = false, length = 1000)

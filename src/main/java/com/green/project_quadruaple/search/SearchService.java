@@ -13,7 +13,7 @@ import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
 import com.green.project_quadruaple.search.repository.SearchWordRepository;
 import com.green.project_quadruaple.trip.model.Category;
-import com.green.project_quadruaple.user.UserRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +32,7 @@ public class SearchService {
     private final SearchWordRepository searchWordRepository;
     private final UserRepository userRepository;
 
-    @Value("${const.default-review-size}")
+    @Value("${const.default-search-size}")
     private int size;
 
     // 기존

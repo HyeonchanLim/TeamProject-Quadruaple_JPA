@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.notice.NoticeMapper">
+
+    <resultMap id="NoticeLineMap" type="com.green.project_quadruaple.notice.model.res.NoticeLine">
+        <id column="noticeId" property="noticeId" />
+        <result column="category" property="category" />
+        <result column="title" property="title" />
+        <result column="opened" property="opened" jdbcType="BOOLEAN"/>
+        <result column="createdAt" property="createdAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="checkNotice">
+        SELECT N.notice_id AS noticeId,
+        N.notice_category AS category,
+        N.title,
+        NR.`open` AS opened,
+        NR.created_at AS createdAt
+        FROM notice N
+        JOIN notice_receive NR
+        ON N.notice_id = NR.notice_id
+        WHERE NR.user_id = #{userId}
+        AND NR.`disable` = 0
+        ORDER BY noticeId DESC
+        LIMIT #{startIdx},#{size}
+    </select>
+</mapper>

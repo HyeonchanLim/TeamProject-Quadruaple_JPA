@@ -13,11 +13,14 @@ import com.green.project_quadruaple.entity.model.Booking;
 import com.green.project_quadruaple.entity.model.Menu;
 import com.green.project_quadruaple.entity.model.Room;
 import com.green.project_quadruaple.entity.model.User;
-import com.green.project_quadruaple.user.UserRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.Schedules;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -25,9 +28,12 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.*;
 
 @Slf4j
@@ -64,9 +70,42 @@ public class BookingService {
         this.userRepository = userRepository;
     }
 
-    public ResponseWrapper<List<BookingListGetRes>> getBooking() {
+    public ResponseWrapper<List<BookingRes>> getBooking(Integer page) {
 
-        return null;
+        long signedUserId = AuthenticationFacade.getSignedUserId();
+        PageRequest pageAble = PageRequest.of(page, 30);
+
+        List<BookingRes> bookingList = bookingRepository.findBookingListByUserId(signedUserId, pageAble);
+
+        // 날짜 포맷팅
+        for (BookingRes bookingRes : bookingList) {
+            LocalDateTime createdAtLD = bookingRes.getCreatedAtLD();
+            LocalDateTime checkInDateLD = bookingRes.getCheckInDateLD();
+            LocalDateTime checkOutDateLD = bookingRes.getCheckOutDateLD();
+
+            // 요일 SHORT ex) 월
+            String dayOfWeekOfCreatedAt = createdAtLD.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREA);
+            String dayOfWeekOfCheckIn = checkInDateLD.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREA);
+            String dayOfWeekOfCheckOut = checkOutDateLD.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREA);
+
+            // String 변환 ex) 2025-01-01 월
+            String dateOfCreatedAt = createdAtLD.toLocalDate().toString() + " " + dayOfWeekOfCreatedAt;
+            String dateOfCheckIn = checkInDateLD.toLocalDate().toString() + " " + dayOfWeekOfCheckIn;
+            String dateOfCheckOut = checkOutDateLD.toLocalDate().toString() + " " + dayOfWeekOfCheckOut;
+
+            bookingRes.setCreatedAt(dateOfCreatedAt);
+            bookingRes.setCheckInDate(dateOfCheckIn);
+            bookingRes.setCheckOutDate(dateOfCheckOut);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+            // 시간 세팅 ex) 14:00
+            bookingRes.setCheckInTime(checkInDateLD.format(formatter));
+            bookingRes.setCheckOutTime(checkOutDateLD.format(formatter));
+
+        }
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), bookingList);
     }
 
     // 예약 변경 -> 결제 , 취소 내역 업데이트 필요
@@ -95,23 +134,25 @@ public class BookingService {
             return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
         }
 
+        int discount = 0;
+        int price = menu.getPrice();
+
         if(couponId != null) { // 쿠폰이 요청에 담겨 있을 경우
+
             CouponDto couponDto = bookingMapper.selExistUserCoupon(signedUserId, couponId);
             if(couponDto == null || couponDto.getUsedCouponId() != null) { // 쿠폰 미소지시, 사용시 에러
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
             }
-
-            int price = menu.getPrice();
-            int discount = price / couponDto.getDiscountRate();
-            int resultPrice = price - discount;
-
-            if(resultPrice != req.getActualPaid()) {
-                return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 적용 금액이 맞지 않습니다.");
-            }
+            discount = price / couponDto.getDiscountRate();
 
             req.setReceiveId(couponDto.getReceiveId());
         }
 
+        int resultPrice = price - discount;
+
+        if(resultPrice != req.getActualPaid()) {
+            return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "금액이 맞지 않습니다.");
+        }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime checkInDate = LocalDateTime.parse(req.getCheckIn(), formatter);
@@ -243,5 +284,11 @@ public class BookingService {
             e.printStackTrace();
             throw new RuntimeException();
         }
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 0 6 * * ?")
+    public void updateState() {
+        bookingMapper.updateAllStateAfterCheckOut(LocalDateTime.now());
     }
 }

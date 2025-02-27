@@ -1,12 +1,11 @@
 package com.green.project_quadruaple.search.model.strf_list;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.green.project_quadruaple.common.model.Constants;
+import com.green.project_quadruaple.common.model.SizeConstants;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import lombok.Value;
 
 @Getter
 @ToString
@@ -21,7 +20,7 @@ public class StrfSearchPaging {
 
     public StrfSearchPaging(Integer page, Integer size) {
         this.page = page==null || page<=0? 1 : page;
-        this.size = (size == null || size <= 0) ? Constants.getDefault_search_size() : size;
+        this.size = (size == null || size <= 0) ? SizeConstants.getDefault_search_size() : size;
         this.startIdx = ( this.page - 1 ) * this.size;
     }
 }
