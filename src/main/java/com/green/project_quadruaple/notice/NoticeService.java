@@ -3,6 +3,7 @@ package com.green.project_quadruaple.notice;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.common.model.SizeConstants;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.model.Notice;
@@ -94,12 +95,12 @@ public class NoticeService {
     }
 
     // 알람 리스트 확인
-    public ResponseEntity<ResponseWrapper<List<NoticeLine>>> noticeCheck(){
+    public ResponseEntity<ResponseWrapper<List<NoticeLine>>> noticeCheck(int startIdx){
         if(!((SecurityContextHolder.getContext().getAuthentication().getPrincipal()) instanceof JwtUser)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        List<NoticeLine> result=mapper.checkNotice(authenticationFacade.getSignedUserId());
+        List<NoticeLine> result=mapper.checkNotice(authenticationFacade.getSignedUserId(),startIdx, SizeConstants.getDefault_page_size());
         if(result.size()==0){return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), new ArrayList<>()));}
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
@@ -122,4 +123,10 @@ public class NoticeService {
         NoticeOne result=new NoticeOne(no,nr.getCreatedAt());
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
+
+    // 알람 전체 확인
+    //public ResponseEntity<ResponseWrapper<>>
+    //알람 삭제
+
+    //알람 전체 삭제
 }

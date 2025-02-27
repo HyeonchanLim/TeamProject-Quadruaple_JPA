@@ -19,7 +19,7 @@ public class Paging {
 
     public Paging(Integer page , Integer size){
         this.page = page==null || page<=0? 1 : page;
-        this.size = (size == null || size <= 0) ? Constants.getDefault_page_size() : size;
+        this.size = (size == null || size <= 0) ? SizeConstants.getDefault_page_size() : size;
         this.startIdx = ( this.page - 1 ) * this.size;
     }
 }
