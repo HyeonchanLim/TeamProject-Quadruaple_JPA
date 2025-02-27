@@ -14,6 +14,7 @@ import java.time.LocalTime;
 public class BookingRes {
     private Long bookingId;
     private Long strfId;
+    private String strfTitle;
     private String strfPic;
     private String createdAt;
     private String checkInDate; // (2025-01-01 수)
@@ -33,12 +34,13 @@ public class BookingRes {
     @JsonIgnore
     private LocalDateTime checkOutDateLD;
 
-    public BookingRes(Long bookingId, Long strfId, String strfPic,
+    public BookingRes(Long bookingId, Long strfId, String strfTitle, String strfPic,
                       LocalDateTime createdAtLD, LocalDateTime checkInDateLD, LocalDateTime checkOutDateLD,
                       int price, int state, Long chatRoomId)
     {
         this.bookingId = bookingId;
         this.strfId = strfId;
+        this.strfTitle = strfTitle;
         this.strfPic = strfPic;
         this.createdAtLD = createdAtLD;
         this.checkInDateLD = checkInDateLD;
