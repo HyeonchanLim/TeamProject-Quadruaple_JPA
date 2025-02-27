@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -88,8 +89,7 @@ public class NoticeService {
                 .id(noticeReceiveId)
                 .notice(notice)
                 .user(userRepository.findById(116L).orElseThrow(() -> new RuntimeException("User not found")))
-                .open(false)
-                .disable(false)
+                .opened(false)
                 .build();
         noticeReceiveRepository.save(noticeReceive);
     }
@@ -118,15 +118,24 @@ public class NoticeService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
-        nr.setOpen(true);
+        nr.setOpened(true);
         noticeReceiveRepository.save(nr);
         NoticeOne result=new NoticeOne(no,nr.getCreatedAt());
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
     // 알람 전체 확인
-    //public ResponseEntity<ResponseWrapper<>>
-    //알람 삭제
-
-    //알람 전체 삭제
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Integer>> readAllNotice(){
+        if(!((SecurityContextHolder.getContext().getAuthentication().getPrincipal()) instanceof JwtUser)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+        }
+        int result=noticeReceiveRepository.markNoticeAsRead(authenticationFacade.getSignedUserId());
+        if(result==0){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+    }
 }
