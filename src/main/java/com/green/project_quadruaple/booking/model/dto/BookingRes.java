@@ -16,14 +16,14 @@ public class BookingRes {
     private Long strfId;
     private String strfPic;
     private String createdAt;
-    private String checkInDate;
-    private String checkOutDate;
+    private String checkInDate; // (2025-01-01 수)
+    private String checkOutDate; // (2025-01-01 수)
     private Integer price;
     private Integer state;
     private Long chatRoomId;
 
-    private LocalTime checkInTime;
-    private LocalTime checkOutTime;
+    private String checkInTime; // (14:00)
+    private String checkOutTime; // (14:00)
 
     // DB 에서 가져와서 (2025-01-01 수) 형태로 변환
     @JsonIgnore
