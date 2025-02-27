@@ -9,6 +9,8 @@ import com.green.project_quadruaple.chat.repository.ChatRoomRepository;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.entity.model.Chat;
 import com.green.project_quadruaple.entity.model.ChatJoin;
+import com.green.project_quadruaple.entity.model.ChatRoom;
+import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -42,8 +45,16 @@ public class ChatService {
                     .build();
         }
 
-        if(chatRoomRepository.existsJoinUser(roomId, signedUserId) > 0) {
-            log.info("exists user");
+        // 채팅방에 참여중인 유저가 아니라면 저장.
+        if(chatJoinRepository.existsJoinUser(roomId, signedUserId) <= 0) {
+            User user = userRepository.findById(signedUserId).orElse(null);
+            ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElse(null);
+            ChatJoin chatJoin = ChatJoin.builder()
+                    .chatRoom(chatRoom)
+                    .user(user)
+                    .build();
+            chatJoinRepository.save(chatJoin);
+
         }
 
         return null;
