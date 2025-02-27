@@ -15,7 +15,6 @@ public interface NoticeReceiveRepository extends JpaRepository<NoticeReceive, No
     @Query("SELECT CASE WHEN EXISTS (SELECT 1 FROM NoticeReceive nr WHERE nr.opened = false AND nr.id.userId = :userId) THEN true ELSE false END")
     boolean existsUnreadNoticesByUserId(@Param("userId") Long userId);
 
-
     @Modifying
     @Query("UPDATE NoticeReceive nr SET nr.opened = true WHERE nr.id.userId = :userId")
     int markNoticeAsRead(@Param("userId") Long userId);
