@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -130,6 +131,31 @@ public class ReviewService {
 //        long reviewId = p.getReviewId();
         String middlePath = String.format("reviewId/%d", savedReview.getReviewId());
         myFileUtils.makeFolders(middlePath);
+
+        File folder = new File(myFileUtils.getUploadPath(), middlePath);
+        if (!folder.exists()) {
+            System.out.println("폴더가 생성되지 않았습니다: " + folder.getAbsolutePath());
+        } else {
+            System.out.println("폴더가 성공적으로 생성되었습니다: " + folder.getAbsolutePath());
+        }
+        File savedFile = new File(folder, "파일이름.jpg"); // 저장할 파일 이름
+        if (!savedFile.exists()) {
+            System.out.println("파일이 저장되지 않았습니다: " + savedFile.getAbsolutePath());
+        } else {
+            System.out.println("파일이 성공적으로 저장되었습니다: " + savedFile.getAbsolutePath());
+        }
+        File testFile = new File(folder, "test.txt");
+        try {
+            if (testFile.createNewFile()) {
+                System.out.println("테스트 파일이 성공적으로 생성되었습니다: " + testFile.getAbsolutePath());
+            } else {
+                System.out.println("테스트 파일이 이미 존재합니다: " + testFile.getAbsolutePath());
+            }
+        } catch (IOException e) {
+            System.out.println("파일 생성 중 오류 발생: " + e.getMessage());
+        }
+
+
 
         List<String> picNameList = new ArrayList<>(pics.size());
         for (MultipartFile pic : pics) {

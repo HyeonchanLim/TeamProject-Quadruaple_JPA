@@ -35,7 +35,7 @@ public class MemoController {
 
     @PostMapping("/post")
     @Operation(summary = "메모 생성")
-    public ResponseWrapper<Long> postMemo(@RequestBody MemoPostReq memoDto) {
+    public ResponseWrapper<?> postMemo(@RequestBody MemoPostReq memoDto) {
         return memoService.addMemo(memoDto);
 
     }
@@ -54,12 +54,6 @@ public class MemoController {
         return memoService.deleteMemo(memoId);
 
     }
-
-
-
-
-
-
 }
 
 

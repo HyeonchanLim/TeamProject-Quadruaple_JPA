@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.trip.model.PathInfoVo;
 import com.green.project_quadruaple.trip.model.PathType;
 import com.green.project_quadruaple.trip.model.PathTypeVo;
 import com.green.project_quadruaple.trip.model.PubTransPathVo;
 import com.green.project_quadruaple.trip.model.req.*;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,6 +41,8 @@ import java.util.*;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class TripService {
+
+
 
     private final TripMapper tripMapper;
     private final OdsayApiConst odsayApiConst;
