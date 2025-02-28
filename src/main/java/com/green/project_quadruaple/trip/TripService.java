@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.entity.repository.LocationRepository;
 import com.green.project_quadruaple.trip.model.PathInfoVo;
 import com.green.project_quadruaple.trip.model.PathType;
 import com.green.project_quadruaple.trip.model.PathTypeVo;
@@ -41,8 +42,11 @@ import java.util.*;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class TripService {
-
-
+//    private final UserRepository userRepository;
+//    private final TripRepository tripRepository;
+//    private final TripUserRepository tripUserRepository;
+//    private final LocationRepository locationRepository;
+//    private final TripLocationRepository tripLocationRepository;
 
     private final TripMapper tripMapper;
     private final OdsayApiConst odsayApiConst;
