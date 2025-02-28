@@ -1,19 +1,26 @@
 package com.green.project_quadruaple.review;
 
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.entity.model.ReviewReply;
 import com.green.project_quadruaple.review.model.BusinessDto;
+import com.green.project_quadruaple.review.repository.ReviewReplyRepository;
+import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BusinessReviewService {
     private final ReviewMapper reviewMapper;
     private final AuthenticationFacade authenticationFacade;
+    private final ReviewReplyRepository reviewReplyRepository;
+    private final RoleRepository roleRepository;
 
 
 
@@ -36,8 +43,6 @@ public class BusinessReviewService {
 
         return reviews;
     }
-
-
 
 
 
