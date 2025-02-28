@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.review;
 
+import com.green.project_quadruaple.entity.model.ReviewReply;
 import com.green.project_quadruaple.review.model.BusinessDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +30,8 @@ public class BusinessReviewController {
         List<BusinessDto> reviews = businessReviewService.getBusinessReview(startIdx);
         return ResponseEntity.ok(reviews);
     }
+
+
 
 
 }

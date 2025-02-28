@@ -122,7 +122,6 @@
 
 
 
-
     <select id="selectBusinessReview" parameterType="map" resultType="com.green.project_quadruaple.review.model.BusinessDto">
         SELECT
         s.strf_id AS strfId,
@@ -152,16 +151,12 @@
         GROUP BY s.strf_id, s.title, s.state, u.user_id, u.name, u.profile_pic, u.provider_type
         ORDER BY s.strf_id ASC
         LIMIT 10 OFFSET #{startIdx}
+
     </select>
 
     <select id="findUserRoleByUserId" parameterType="long" resultType="string">
         SELECT role FROM role WHERE user_id = #{userId} AND role = 'BUSI' LIMIT 1
     </select>
-
-
-
-
-
 
 
 
