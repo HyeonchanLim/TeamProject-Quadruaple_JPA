@@ -217,6 +217,20 @@
         <result property="wishIn" column="wishIn" />
     </resultMap>
 
+    <select id="categoryCount">
+        SELECT COUNT(*)
+        FROM stay_tour_restaur_fest a
+        JOIN location_detail b ON a.location_detail_id = b.location_detail_id
+        JOIN location c ON b.location_id = c.location_id
+        LEFT JOIN strf_pic f ON f.strf_id = a.strf_id
+        WHERE a.category = #{category}
+        <if test="searchWord != null and searchWord != ''">
+            AND ( a.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.address LIKE CONCAT('%', #{searchWord}, '%') OR
+            c.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.category LIKE CONCAT('%', #{searchWord}, '%') )
+        </if>
+    </select>
 
     <select id="searchCategory" resultMap="searchCategoryResultMap">
         SELECT *
@@ -230,11 +244,11 @@
         COALESCE((SELECT AVG(RO.rating) FROM review RO WHERE RO.strf_id = a.strf_id), 0) AS ratingAvg
         , COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = a.strf_id), 0) AS wishlistCount
         , COALESCE((SELECT COUNT(*) FROM review WL WHERE WL.strf_id = a.strf_id), 0) AS reviewCount
-        COUNT(d.rating) AS ratingCnt ,
-        COALESCE(a.created_at, NOW()) AS createdAt,
-        MAX(CASE WHEN d.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview,
+        , COUNT(d.rating) AS ratingCnt
+        , COALESCE(a.created_at, NOW()) AS createdAt
+        , MAX(CASE WHEN d.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview
         <if test="userId != null">
-            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
+           , IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
         </if>
         <if test="userId == null">
             0 AS wishIn
@@ -262,7 +276,6 @@
         CASE WHEN #{orderType} = 'ratingCnt' THEN reviewCount END DESC
         LIMIT #{startIdx}, #{size}
     </select>
-
 
     <resultMap id="searchCategoryResultMap" type="com.green.project_quadruaple.search.model.SearchCategoryRes">
         <id property="strfId" column="strfId"/>

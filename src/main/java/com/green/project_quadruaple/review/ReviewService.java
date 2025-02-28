@@ -146,6 +146,8 @@ public class ReviewService {
 
                 reviewPicRepository.save(reviewPic);
 
+                log.info("=============================================== filePath: {}", filePath);
+                log.info("=============================================== pic: {}", pic);
                 myFileUtils.transferTo(pic, filePath);
             } catch (IOException e) {
                 e.printStackTrace();

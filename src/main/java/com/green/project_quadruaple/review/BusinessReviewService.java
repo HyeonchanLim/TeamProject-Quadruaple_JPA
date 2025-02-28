@@ -1,9 +1,17 @@
 package com.green.project_quadruaple.review;
 
+import com.green.project_quadruaple.common.MyFileUtils;
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.entity.model.Review;
 import com.green.project_quadruaple.entity.model.ReviewReply;
+import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.review.model.BusinessDto;
+import com.green.project_quadruaple.review.model.ReviewReplyReq;
 import com.green.project_quadruaple.review.repository.ReviewReplyRepository;
+import com.green.project_quadruaple.strf.StrfRepository;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +29,12 @@ public class BusinessReviewService {
     private final AuthenticationFacade authenticationFacade;
     private final ReviewReplyRepository reviewReplyRepository;
     private final RoleRepository roleRepository;
+
+    private final MyFileUtils myFileUtils;
+    private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
+    private final StrfRepository strfRepository;
+    private final ReviewPicRepository reviewPicRepository;
 
 
 
@@ -44,6 +58,21 @@ public class BusinessReviewService {
         return reviews;
     }
 
+    public ResponseWrapper<Long> updateBusiReview(ReviewReplyReq p) {
+        Long userId = authenticationFacade.getSignedUserId();
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+
+        Review review = reviewRepository.findById(user.getUserId()).orElseThrow( () -> new RuntimeException("id not found"));
+
+        ReviewReply reviewReply = ReviewReply.builder()
+                .replyId(p.getReviewReplyId())
+                .content(p.getContent())
+                .review(review)
+                .build();
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1L);
+    }
 
 
 

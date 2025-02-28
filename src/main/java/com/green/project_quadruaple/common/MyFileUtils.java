@@ -63,8 +63,14 @@ public class MyFileUtils {
 
     //파일을 원하는 경로에 저장(이동)
     public void transferTo(MultipartFile mf, String path) throws IOException {
-         File file = new File(uploadPath, path);
-         mf.transferTo(file);
+        Path targetPath = Paths.get(String.format("%s/%s", uploadPath, path)).toAbsolutePath();
+
+//        File file = new File(uploadPath, path);
+//        log.info("originFile: {}", file.getAbsolutePath());
+
+        File pathFile = targetPath.toFile();
+        log.info("PathFile: {}", pathFile.getAbsolutePath());
+//        mf.transferTo(pathFile);
     }
 
     //파일을 원하는 경로에 저장(복사)
