@@ -27,4 +27,8 @@ public class Coupon {
 
     @Column(name = "distribute_at", nullable = false)
     private LocalDateTime distributeAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "strf_id")
+    private StayTourRestaurFest strf;
 }
