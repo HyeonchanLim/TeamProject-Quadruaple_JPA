@@ -8,6 +8,7 @@ import com.green.project_quadruaple.entity.model.Review;
 import com.green.project_quadruaple.entity.model.ReviewReply;
 import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.review.model.BusinessDto;
+import com.green.project_quadruaple.review.model.ReviewPicDto;
 import com.green.project_quadruaple.review.model.ReviewReplyReq;
 import com.green.project_quadruaple.review.repository.ReviewReplyRepository;
 import com.green.project_quadruaple.strf.StrfRepository;
@@ -39,21 +40,24 @@ public class BusinessReviewService {
 
 
     public List<BusinessDto> getBusinessReview(int startIdx) {
-        // 로그인된 사용자 ID 가져오기
+        // 로그인 사용자 ID 가져오기
         Long signedUserId = authenticationFacade.getSignedUserId();
         System.out.println("Signed User ID: " + signedUserId);
 
-        // 사업자 권한 체크
+        // 사장님 권한 체크
         String userRole = reviewMapper.findUserRoleByUserId(signedUserId);
-        System.out.println("Fetched userRole: " + userRole);
-
         if (!"BUSI".equalsIgnoreCase(userRole)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "사업자 권한이 없습니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "사장님 권한이 없습니다.");
         }
 
         // 전체 리뷰 조회
         List<BusinessDto> reviews = reviewMapper.selectBusinessReview(signedUserId, startIdx);
-        System.out.println("Fetched Reviews: " + reviews);
+
+        // ✅ 추가: 리뷰마다 reviewPicList 데이터 매핑
+        for (BusinessDto review : reviews) {
+            List<ReviewPicDto> pics = reviewMapper.selectReviewPics(review.getReviewId());
+            review.setReviewPicList(pics);
+        }
 
         return reviews;
     }

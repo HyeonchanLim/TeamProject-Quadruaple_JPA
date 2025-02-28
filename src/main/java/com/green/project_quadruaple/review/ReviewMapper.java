@@ -31,5 +31,8 @@ public interface ReviewMapper {
             @Param("startIdx") int startIdx
     );
 
+    List<ReviewPicDto> selectReviewPics(@Param("reviewId") Long reviewId);
+
+
 
 }
