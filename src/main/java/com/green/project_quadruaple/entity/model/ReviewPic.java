@@ -2,6 +2,8 @@ package com.green.project_quadruaple.entity.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -15,5 +17,6 @@ public class ReviewPic {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("reviewId")
     @JoinColumn(name = "review_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Review review;
 }

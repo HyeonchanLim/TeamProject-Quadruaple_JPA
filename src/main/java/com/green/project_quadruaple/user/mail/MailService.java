@@ -4,7 +4,6 @@ import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.entity.model.AuthenticationCode;
 import com.green.project_quadruaple.user.Repository.AuthenticationCodeRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
-import com.green.project_quadruaple.user.mail.thread.AuthCode;
 import com.green.project_quadruaple.user.mail.thread.MailCheck;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -48,8 +48,6 @@ public class MailService {
         authenticationCodeRepository.save(authCode);
 
         MailService.codes.put(email, codeStr);
-        // 인증코드 유지 시간 설정
-        new Thread(new AuthCode(email)).start();
 
         try {
             // HTML 이메일 본문 생성
@@ -118,10 +116,17 @@ public class MailService {
         String code = req.getCode();
 
         /// 이메일과 인증 코드로 AuthenticationCode 조회
-        boolean isValidCode = authenticationCodeRepository.existsByEmailAndCodeNum(email, code);
+        Optional<AuthenticationCode> authCodeOpt = authenticationCodeRepository.findByEmailAndCodeNum(email, code);
 
-        if (!isValidCode) {
+        if (authCodeOpt.isEmpty()) {
             return new ResultResponse("FAIL");
+        }
+
+        AuthenticationCode authCode = authCodeOpt.get();
+
+        // grantedAt이 5분 이상 지났다면 만료된 코드
+        if (authCode.getGrantedAt().isBefore(LocalDateTime.now().minusMinutes(5))) {
+            return new ResultResponse("EXPIRED"); // 만료 처리
         }
 
         mailChecked.put(email, true);

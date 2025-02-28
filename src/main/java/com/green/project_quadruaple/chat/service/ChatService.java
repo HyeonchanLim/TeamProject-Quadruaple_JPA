@@ -1,7 +1,6 @@
 package com.green.project_quadruaple.chat.service;
 
 import com.green.project_quadruaple.chat.model.req.PostChatReq;
-import com.green.project_quadruaple.chat.model.req.JoinReq;
 import com.green.project_quadruaple.chat.model.res.JoinRes;
 import com.green.project_quadruaple.chat.model.res.MessageRes;
 import com.green.project_quadruaple.chat.repository.ChatJoinRepository;
@@ -16,16 +15,12 @@ import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.user.SimpSession;
-import org.springframework.messaging.simp.user.SimpUser;
-import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -40,7 +35,7 @@ public class ChatService {
 
     // 유저 입장 시
     @Transactional
-    public JoinRes joinChat(JoinReq req, Principal principal) {
+    public JoinRes joinChat(Long roomId, Principal principal) {
 
         Long signedUserId = getSignedUserId(principal);
         if(signedUserId == null) { // 인증 정보 없으면 return
@@ -49,11 +44,20 @@ public class ChatService {
                     .error("유저 정보 없음")
                     .build();
         }
-        User user = userRepository.findById(signedUserId).get();
-        return JoinRes.builder()
-                .userName(user.getName())
-                .error(null)
-                .build();
+
+        // 채팅방에 참여중인 유저가 아니라면 저장.
+        if(chatJoinRepository.existsJoinUser(roomId, signedUserId) <= 0) {
+            User user = userRepository.findById(signedUserId).orElse(null);
+            ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElse(null);
+            ChatJoin chatJoin = ChatJoin.builder()
+                    .chatRoom(chatRoom)
+                    .user(user)
+                    .build();
+            chatJoinRepository.save(chatJoin);
+
+        }
+
+        return null;
     }
 
     // 채팅 저장

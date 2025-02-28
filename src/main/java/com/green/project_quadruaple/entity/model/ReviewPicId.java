@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.*;
 
@@ -10,6 +11,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewPicId {
+    @Column(length = 100)
     private String title;
+
     private Long reviewId;
 }

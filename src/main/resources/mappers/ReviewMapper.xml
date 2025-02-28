@@ -33,7 +33,7 @@
         <result property="strfTitle" column="strfTitle"/>
         <collection property="reviewPic" resultMap="reviewPic"/>
     </resultMap>
-    <resultMap id="reviewPic" type="com.green.project_quadruaple.review.model.ReviewPic">
+    <resultMap id="reviewPic" type="com.green.project_quadruaple.review.model.ReviewPicBatis">
         <result property="pic" column="pic"/>
     </resultMap>
 
@@ -116,8 +116,50 @@
         <result property="reviewWriteDate" column="reviewWriteDate"/>
         <collection property="myReviewPic" resultMap="myReviewPic"/>
     </resultMap>
-    <resultMap id="myReviewPic" type="com.green.project_quadruaple.review.model.ReviewPic">
+    <resultMap id="myReviewPic" type="com.green.project_quadruaple.review.model.ReviewPicBatis">
         <result property="pic" column="pic"/>
     </resultMap>
+
+
+
+    <select id="selectBusinessReview" parameterType="map" resultType="com.green.project_quadruaple.review.model.BusinessDto">
+        SELECT
+        s.strf_id AS strfId,
+        s.title AS strfTitle,
+        s.state AS state,
+        (SELECT COUNT(*) FROM review r1 WHERE r1.strf_id = s.strf_id) AS reviewCnt,
+        (SELECT COUNT(DISTINCT w1.user_id) FROM wishlist w1 WHERE w1.strf_id = s.strf_id) AS wishCnt,
+        ROUND(IFNULL((SELECT AVG(r2.rating) FROM review r2 WHERE r2.strf_id = s.strf_id), 0), 1) AS ratingAvg,
+        (SELECT r3.content FROM review r3 WHERE r3.strf_id = s.strf_id ORDER BY r3.created_at ASC LIMIT 1) AS content,
+        (SELECT r3.rating FROM review r3 WHERE r3.strf_id = s.strf_id ORDER BY r3.created_at ASC LIMIT 1) AS rating,
+        u.user_id AS userId,
+        u.name AS userName,
+        u.profile_pic AS writerUserProfilePic,
+        u.provider_type AS providerType,
+        IFNULL((SELECT rr.content FROM review_reply rr WHERE rr.review_id =
+        (SELECT r.review_id FROM review r WHERE r.strf_id = s.strf_id ORDER BY r.created_at ASC LIMIT 1)
+        LIMIT 1), '') AS reviewReply,
+        IFNULL((SELECT JSON_ARRAYAGG(JSON_OBJECT('title', rp.title))
+        FROM review_pic rp
+        JOIN review r4 ON rp.review_id = r4.review_id
+        WHERE r4.strf_id = s.strf_id), '[]') AS reviewPicList
+        FROM
+        stay_tour_restaur_fest s
+        LEFT JOIN business_num bn ON s.busi_num = bn.busi_num
+        LEFT JOIN user u ON bn.user_id = u.user_id
+        WHERE bn.user_id = #{userId}
+        GROUP BY s.strf_id, s.title, s.state, u.user_id, u.name, u.profile_pic, u.provider_type
+        ORDER BY s.strf_id ASC
+        LIMIT 10 OFFSET #{startIdx}
+
+    </select>
+
+    <select id="findUserRoleByUserId" parameterType="long" resultType="string">
+        SELECT role FROM role WHERE user_id = #{userId} AND role = 'BUSI' LIMIT 1
+    </select>
+
+
+
+
 
 </mapper>

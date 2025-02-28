@@ -13,4 +13,5 @@ import java.util.List;
 public class ReviewPicDto {
     private long reviewId;
     private List<String> pics;
+    private String title;
 }

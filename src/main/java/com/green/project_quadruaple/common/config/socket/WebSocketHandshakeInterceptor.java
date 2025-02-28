@@ -23,7 +23,6 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
                                    WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) throws Exception
     {
-//        chatRoomRepository.existsById()
         return true;
     }
 

@@ -27,8 +27,8 @@ public class ChatController {
 
     @MessageMapping("/chat.join")
     public void join(@Payload JoinReq req, Principal principal) {
-        JoinRes res = chatService.joinChat(req, principal);
-        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), String.format( "[%s]채팅방 입장", res.getUserName()));
+        JoinRes res = JoinRes.builder().userName(principal.getName()).build();
+        messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), res);
     }
 
     @MessageMapping("/chat.sendMessage")
@@ -45,8 +45,8 @@ public class ChatController {
     }
 
     @SubscribeMapping("/chat/{roomId}")
-    public String subChat(@DestinationVariable String roomId, Principal principal) {
+    public void subChat(@DestinationVariable Long roomId, Principal principal) {
         log.info("roomId : {}", roomId);
-        return "1w";
+        chatService.joinChat(roomId, principal);
     }
 }

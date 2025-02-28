@@ -14,13 +14,16 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Wishlist extends CreatedAt {
 
-    @Id
+    @EmbeddedId
+    private WishlistId id;
+
+    @MapsId("userId") // userId 필드가 복합 키의 일부임을 나타냄
     @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private User userId;
 
+    @MapsId("strfId") // strfId 필드가 복합 키의 일부임을 나타냄
     @JoinColumn(name = "strf_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private StayTourRestaurFest strfId;
-
 }

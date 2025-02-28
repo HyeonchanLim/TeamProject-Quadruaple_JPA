@@ -28,4 +28,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             ORDER BY c.chatId ASC
             """)
     List<ChatDto> findChatLimit30(Long chatRoomId, Long signedUserId, Pageable pageable);
+
+
 }

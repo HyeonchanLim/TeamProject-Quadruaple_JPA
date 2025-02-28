@@ -1,11 +1,8 @@
 package com.green.project_quadruaple.review.model;
 
-import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
-import com.green.project_quadruaple.common.model.ResultResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -33,7 +30,7 @@ public class ReviewSelRes{
         @Schema(description = "리뷰 작성 날짜")
         private String reviewWriteDate;
         @Schema(description = "리뷰 사진 리스트")
-        private List<ReviewPic> reviewPic;
+        private List<ReviewPicBatis> reviewPic;
 
         private boolean isMore;
 
