@@ -142,6 +142,7 @@ public class NoticeService {
     //알람 발송 기본 템플릿
     public void postNotice(NoticeCategory category,String title, String content, Long userId, Long foreignNum){
         Notice notice = new Notice();
+        notice.setNoticeCategory(category);
         notice.setContent(content);
         notice.setTitle(title);
         notice.setForeignNum(foreignNum);
