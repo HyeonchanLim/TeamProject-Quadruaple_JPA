@@ -113,7 +113,7 @@ public class ExpenseService {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
     }
 
-    //이 결제에서 제외된 인원보기
+    //결제할 인원 보기
     public ResponseEntity<ResponseWrapper<List<TripInUserInfo>>> getTripUser(Long deId, long tripId){
         if(isUserJoinTrip(tripId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)

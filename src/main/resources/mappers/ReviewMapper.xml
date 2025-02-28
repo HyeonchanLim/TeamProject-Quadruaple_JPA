@@ -33,7 +33,7 @@
         <result property="strfTitle" column="strfTitle"/>
         <collection property="reviewPic" resultMap="reviewPic"/>
     </resultMap>
-    <resultMap id="reviewPic" type="com.green.project_quadruaple.review.model.ReviewPic">
+    <resultMap id="reviewPic" type="com.green.project_quadruaple.review.model.ReviewPicBatis">
         <result property="pic" column="pic"/>
     </resultMap>
 
@@ -116,10 +116,9 @@
         <result property="reviewWriteDate" column="reviewWriteDate"/>
         <collection property="myReviewPic" resultMap="myReviewPic"/>
     </resultMap>
-    <resultMap id="myReviewPic" type="com.green.project_quadruaple.review.model.ReviewPic">
+    <resultMap id="myReviewPic" type="com.green.project_quadruaple.review.model.ReviewPicBatis">
         <result property="pic" column="pic"/>
     </resultMap>
-
 
 
 
@@ -152,16 +151,12 @@
         GROUP BY s.strf_id, s.title, s.state, u.user_id, u.name, u.profile_pic, u.provider_type
         ORDER BY s.strf_id ASC
         LIMIT 10 OFFSET #{startIdx}
+
     </select>
 
     <select id="findUserRoleByUserId" parameterType="long" resultType="string">
         SELECT role FROM role WHERE user_id = #{userId} AND role = 'BUSI' LIMIT 1
     </select>
-
-
-
-
-
 
 
 

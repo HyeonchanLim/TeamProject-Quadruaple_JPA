@@ -3,6 +3,8 @@ package com.green.project_quadruaple.memo.model.Req;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.green.project_quadruaple.entity.model.TripUser;
+import com.green.project_quadruaple.entity.model.User;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

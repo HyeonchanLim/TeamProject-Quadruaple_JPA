@@ -5,11 +5,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.entity.base.NoticeCategory;
+import com.green.project_quadruaple.entity.model.Location;
+import com.green.project_quadruaple.entity.model.Trip;
+import com.green.project_quadruaple.entity.repository.LocationRepository;
+import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.trip.model.PathInfoVo;
 import com.green.project_quadruaple.trip.model.PathType;
 import com.green.project_quadruaple.trip.model.PathTypeVo;
 import com.green.project_quadruaple.trip.model.PubTransPathVo;
 import com.green.project_quadruaple.trip.model.req.*;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,7 +27,6 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.trip.model.dto.*;
 import com.green.project_quadruaple.trip.model.res.*;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +50,13 @@ public class TripService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final WeatherApiCall weatherApiCall;
+    private final NoticeService noticeService;
+    private final LocationRepository locationRepository;
+    private final UserRepository userRepository;
+    private final TripRepository tripRepository;
+    private final TripLocationRepository tripLocationRepository;
+    private final TripUserRepository tripUserRepository;
+
 
     private final String ADD_USER_LINK;
 
@@ -55,7 +67,13 @@ public class TripService {
                        WebClient webClient,
                        ObjectMapper objectMapper,
                        @Value("${add-user-link}") String ADD_USER_LINK,
-                       WeatherApiCall weatherApiCall)
+                       WeatherApiCall weatherApiCall,
+                       NoticeService noticeService,
+                       LocationRepository locationRepository,
+                       UserRepository userRepository,
+                       TripRepository tripRepository,
+                       TripLocationRepository tripLocationRepository,
+                       TripUserRepository tripUserRepository)
     {
         this.tripMapper = tripMapper;
         this.odsayApiConst = odsayApiConst;
@@ -63,7 +81,42 @@ public class TripService {
         this.objectMapper = objectMapper;
         this.ADD_USER_LINK = ADD_USER_LINK;
         this.weatherApiCall = weatherApiCall;
+        this.noticeService = noticeService;
+        this.locationRepository= locationRepository;
+        this.userRepository = userRepository;
+        this.tripRepository = tripRepository;
+        this.tripLocationRepository = tripLocationRepository;
+        this.tripUserRepository = tripUserRepository;
     }
+
+    //여행참여 알람
+    private void postJoinTripNotice (Trip trip,Long userId){
+        if (trip==null){return;}
+        String noticeTitle=trip.getTitle()+"여행에 참석하셨습니다!";
+
+        String joinUserName=userRepository.findNameById(userId);
+        List<Location> locations=tripLocationRepository.findLocationByTrip(trip);
+        String locationName=locations.get(0).getTitle();
+        if(locations.size()>1) {
+            locationName=String.format("%s 외 %d곳",locationName,locations.size()-1);
+        }
+
+        String startAt = trip.getPeriod().getStartAt().toString();
+        String endAt= trip.getPeriod().getEndAt().toString();
+
+        long managerId=trip.getManager().getUserId();
+
+        StringBuilder content=new StringBuilder();
+            content.append(startAt).append("부터 ").append(endAt).append("까지 ")
+                    .append(locationName).append("을(를) 여행하는 ");
+        if(userId!=managerId){
+            content.append(userRepository.findNameById(managerId)).append("님의 ");
+        }
+          content.append("그룹에 참석하셨습니다.\n즐거운 여행 되세요! ").append(joinUserName).append("님!");
+
+        noticeService.postNotice(NoticeCategory.TRIP,noticeTitle,content.toString(),userId,trip.getTripId());
+    }
+
 
     public ResponseWrapper<MyTripListRes> getMyTripList() {
         long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
@@ -101,6 +154,11 @@ public class TripService {
         tripMapper.insTripLocation(req.getTripId(), req.getLocationId());
         PostTripRes res = new PostTripRes();
         res.setTripId(req.getTripId());
+
+        //알람발송
+        Trip trip=tripRepository.findById(req.getTripId()).orElse(null);
+        postJoinTripNotice(trip,signedUserId);
+
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
@@ -578,6 +636,11 @@ public class TripService {
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
             }
             tripMapper.insTripUser(tripId, List.of(signedUserId));
+
+            //알람발송
+            Trip trip=tripRepository.findById(tripId).orElse(null);
+            postJoinTripNotice(trip,signedUserId);
+
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), tripId); // 리다이렉션 필요
         } catch (Exception e) {
             e.printStackTrace();

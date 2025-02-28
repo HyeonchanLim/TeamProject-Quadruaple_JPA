@@ -1,6 +1,10 @@
 package com.green.project_quadruaple.review;
 
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.entity.model.ReviewReply;
 import com.green.project_quadruaple.review.model.BusinessDto;
+import com.green.project_quadruaple.review.model.ReviewReplyReq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +34,10 @@ public class BusinessReviewController {
         return ResponseEntity.ok(reviews);
     }
 
+    @PostMapping
+    public ResponseWrapper<?> updateBusiReview (ReviewReplyReq p){
 
+        ResponseWrapper<Long> success = businessReviewService.updateBusiReview(p);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), success);
+    }
 }

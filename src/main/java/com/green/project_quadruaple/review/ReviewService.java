@@ -4,16 +4,13 @@ import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.entity.model.Review;
-import com.green.project_quadruaple.entity.model.StayTourRestaurFest;
-import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.review.model.*;
 import com.green.project_quadruaple.strf.StrfRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +30,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final StrfRepository strfRepository;
+    private final ReviewPicRepository reviewPicRepository;
 
     @Value("${const.default-review-size}")
     private int size;
@@ -113,7 +111,7 @@ public class ReviewService {
 //        return 1;
 //    }
     @Transactional
-    public int postRating(List<MultipartFile> pics, ReviewPostJpaReq p) {
+    public ReviewPostRes postRating(List<MultipartFile> pics, ReviewPostJpaReq p) {
         Long userId = authenticationFacade.getSignedUserId();
 
         User user = userRepository.findById(userId).orElseThrow( () -> new RuntimeException("user id not found"));
@@ -126,9 +124,10 @@ public class ReviewService {
         review.setStayTourRestaurFest(strf);
         review.setUser(user);
         review.setReviewId(p.getReviewId());
-        Review savedReview = reviewRepository.save(review);
-//        long reviewId = p.getReviewId();
-        String middlePath = String.format("reviewId/%d", savedReview.getReviewId());
+        reviewRepository.save(review);
+
+        long reviewId = review.getReviewId();
+        String middlePath = String.format("reviewId/%d", reviewId);
         myFileUtils.makeFolders(middlePath);
 
         List<String> picNameList = new ArrayList<>(pics.size());
@@ -137,26 +136,34 @@ public class ReviewService {
             picNameList.add(savedPicName);
             String filePath = String.format("%s/%s", middlePath, savedPicName);
             try {
+                ReviewPicId id = new ReviewPicId();
+                id.setReviewId(reviewId);
+                id.setTitle(savedPicName);
+
+                ReviewPic reviewPic = new ReviewPic();
+                reviewPic.setId(id);
+                reviewPic.setReview(review);
+
+                reviewPicRepository.save(reviewPic);
+
+                log.info("=============================================== filePath: {}", filePath);
+                log.info("=============================================== pic: {}", pic);
                 myFileUtils.transferTo(pic, filePath);
             } catch (IOException e) {
-                // 폴더 삭제 처리
                 e.printStackTrace();
                 String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
                 myFileUtils.deleteFolder(delFolderPath, true);
                 throw new RuntimeException(e);
             }
         }
-        ReviewPicDto reviewPicDto = new ReviewPicDto();
-        reviewPicDto.setReviewId(savedReview.getReviewId());
-        reviewPicDto.setPics(picNameList);
-
-        // DB에 사진 저장
-        int resultPics = reviewMapper.postReviewPic(reviewPicDto);
-        if (resultPics == 0) {
-            throw new RuntimeException("리뷰 사진 저장 실패");
-        }
-        return 1;
+        return ReviewPostRes.builder()
+                .reviewId(reviewId)
+                .pics(picNameList)
+                .build();
     }
+
+
+
 
 //    @Transactional
 //    public ResponseEntity<ResponseWrapper<Integer>> updateReview(List<MultipartFile> pics, ReviewUpdReq p) {

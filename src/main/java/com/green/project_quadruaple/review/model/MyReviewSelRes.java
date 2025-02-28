@@ -33,7 +33,7 @@ public class MyReviewSelRes {
     @Schema(description = "리뷰 작성 날짜")
     private String reviewWriteDate;
     @Schema(description = "리뷰 사진 목록")
-    private List<ReviewPic> myReviewPic;
+    private List<ReviewPicBatis> myReviewPic;
     private boolean isMore;
 }
 
