@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.entity.model.Trip;
 import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.entity.repository.LocationRepository;
+import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.trip.model.PathInfoVo;
 import com.green.project_quadruaple.trip.model.PathType;
 import com.green.project_quadruaple.trip.model.PathTypeVo;
@@ -43,12 +46,16 @@ import java.util.*;
 public class TripService {
 
 
-
     private final TripMapper tripMapper;
     private final OdsayApiConst odsayApiConst;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final WeatherApiCall weatherApiCall;
+    private final NoticeService noticeService;
+    private final LocationRepository locationRepository;
+    private final UserRepository userRepository;
+    private final TripRepository tripRepository;
+
 
     private final String ADD_USER_LINK;
 
@@ -59,7 +66,11 @@ public class TripService {
                        WebClient webClient,
                        ObjectMapper objectMapper,
                        @Value("${add-user-link}") String ADD_USER_LINK,
-                       WeatherApiCall weatherApiCall)
+                       WeatherApiCall weatherApiCall,
+                       NoticeService noticeService,
+                       LocationRepository locationRepository,
+                       UserRepository userRepository,
+                       TripRepository tripRepository)
     {
         this.tripMapper = tripMapper;
         this.odsayApiConst = odsayApiConst;
@@ -67,7 +78,41 @@ public class TripService {
         this.objectMapper = objectMapper;
         this.ADD_USER_LINK = ADD_USER_LINK;
         this.weatherApiCall = weatherApiCall;
+        this.noticeService = noticeService;
+        this.locationRepository= locationRepository;
+        this.userRepository = userRepository;
+        this.tripRepository = tripRepository;
     }
+
+//    //여행참여 알람
+//    private void postJoinTripNotice (String title, Long tripId, List<Long> locationIds,
+//                                     LocalDate startAt, LocalDate endAt, Long userId, Long foreignNum){
+//        String noticeTitle=title+"여행에 참석하셨습니다!";
+//        StringBuilder content=new StringBuilder();
+//
+//        Optional<Trip> trip = tripRepository.findById(tripId);
+//        String locationName;
+//        if(locationIds!=null||locationIds.size()==0){
+//
+//        }else{
+//
+//        }
+//        if(locationIds.size()==1){
+//
+//        }else {
+//           locationName=locationRepository.findTitleById(locationIds.get(0));
+//        }
+////        String locationName=locationId!=null?
+////                    locationRepository.findTitleById(locationId)
+////                    : ;
+//        String joinUserName=userRepository.findNameById(userId);
+//        if(startAt==null||endAt==null){
+//            startAt = trip.map(t -> t.getPeriod().getStartAt()).orElse(null);
+//            endAt= trip.map(t -> t.getPeriod().getStartAt()).orElse(null);
+//        }
+//        noticeService.postNotice(NoticeCategory.TRIP,noticeTitle,content.toString(),userId,foreignNum);
+//    }
+
 
     public ResponseWrapper<MyTripListRes> getMyTripList() {
         long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
