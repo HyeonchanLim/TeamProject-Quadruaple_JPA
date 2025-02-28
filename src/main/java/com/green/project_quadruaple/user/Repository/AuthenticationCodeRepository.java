@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface AuthenticationCodeRepository extends JpaRepository<AuthenticationCode, Long> {
     List<AuthenticationCode> findByEmail(String email);
     Optional<AuthenticationCode> findFirstByEmailOrderByGrantedAtDesc(String email);
-    boolean existsByEmailAndCodeNum(String email, String codeNum);
+    Optional<AuthenticationCode> findByEmailAndCodeNum(String email, String codeNum);
     int countByEmail(String email);
     int getByCodeNum(String codeNum);
     int deleteByEmail(String email);
