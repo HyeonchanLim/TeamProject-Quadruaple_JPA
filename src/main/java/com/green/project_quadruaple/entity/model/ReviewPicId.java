@@ -9,6 +9,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class ReviewPicId {
     private String title;
     private Long reviewId;
