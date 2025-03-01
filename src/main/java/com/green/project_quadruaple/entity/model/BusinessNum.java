@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,6 +10,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class BusinessNum extends CreatedAt {
 
     @Id

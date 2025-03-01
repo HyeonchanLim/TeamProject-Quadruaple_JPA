@@ -1,6 +1,5 @@
 package com.green.project_quadruaple.coupon.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,7 +11,9 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode
-public class CouponPostReq {
+public class CouponUpdateDto {
+    @Schema(title="쿠폰 PK")
+    private long couponId;
     @Schema(title="쿠폰 이름", example = "조기 예약 쿠폰")
     private String title;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -21,5 +22,4 @@ public class CouponPostReq {
     private int discountPer;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime distributeAt;
-    private Long strfId;
 }
