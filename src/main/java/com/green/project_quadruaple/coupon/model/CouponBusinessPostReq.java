@@ -11,15 +11,18 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode
-public class CouponUpdateDto {
-    @Schema(title="쿠폰 PK")
-    private long couponId;
+public class CouponBusinessPostReq {
     @Schema(title="쿠폰 이름", example = "조기 예약 쿠폰")
     private String title;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime expiredAt;
+
     @Schema(title="할인율", example = "10")
     private int discountPer;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime distributeAt;
+
+    private Long strfId;
 }

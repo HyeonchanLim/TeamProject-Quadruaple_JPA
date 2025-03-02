@@ -1,17 +1,16 @@
-package com.green.project_quadruaple.coupon.business;
+package com.green.project_quadruaple.coupon.admin;
 
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
-import com.green.project_quadruaple.coupon.model.CouponGetDto;
-import com.green.project_quadruaple.coupon.model.CouponPostReq;
-import com.green.project_quadruaple.coupon.model.CouponUpdateDto;
+import com.green.project_quadruaple.coupon.model.CouponAdminGetDto;
+import com.green.project_quadruaple.coupon.model.CouponAdminPostReq;
+import com.green.project_quadruaple.coupon.model.CouponAdminUpdateDto;
+import com.green.project_quadruaple.coupon.model.CouponBusinessUpdateDto;
 import com.green.project_quadruaple.coupon.repository.CouponRepository;
 import com.green.project_quadruaple.entity.model.Coupon;
 import com.green.project_quadruaple.entity.model.Role;
 import com.green.project_quadruaple.entity.model.StayTourRestaurFest;
-import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.strf.StrfRepository;
-import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,33 +24,22 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CouponIssuanceService {
-    private final UserRepository userRepository;
+public class CouponAdminIssuanceService {
     private final RoleRepository roleRepository;
     private final CouponRepository couponRepository;
     private final StrfRepository strfRepository;
     private final AuthenticationFacade authenticationFacade;
 
-    public int insCoupon(CouponPostReq req) {
+    public int insCoupon(CouponAdminPostReq req) {
         long userId = authenticationFacade.getSignedUserId();
 
-        // 사용자 권한 확인 (BUSI 권한이 있는지 확인)
+        // 사용자 권한 확인 (ADMIN 권한이 있는지 확인)
         List<Role> roles = roleRepository.findByUserUserId(userId);
-        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
+        boolean isAdmin = roles.stream().anyMatch(role -> role.getRole() == UserRole.ADMIN);
 
-        if (!isBusi) {
+        if (!isAdmin) {
             log.error("쿠폰 발급 권한이 없습니다. 사용자 권한: {}", roles.isEmpty() ? "없음" : roles.get(0).getRole());
             return 0;  // 권한이 없으면 쿠폰 발급하지 않음
-        }
-
-        // 관련된 StayTourRestaurFest 정보 조회
-        StayTourRestaurFest stayTourRestaurFest = strfRepository.findById(req.getStrfId())
-            .orElseThrow(() -> new RuntimeException("Invalid StayTourRestaurFest ID"));
-
-        // 해당 사업자가 올린 게시물인지 확인
-        if (!stayTourRestaurFest.getBusiNum().getUser().getUserId().equals(userId)) {
-            log.error("해당 사업자가 올린 게시물이 아닙니다. 사용자 ID: {}", userId);
-            return 0;  // 사업자가 올린 게시물이 아니면 쿠폰 발급하지 않음
         }
 
         // 쿠폰 객체 생성
@@ -60,7 +48,6 @@ public class CouponIssuanceService {
         coupon.setExpiredAt(req.getExpiredAt());
         coupon.setDiscountPer(req.getDiscountPer());
         coupon.setDistributeAt(req.getDistributeAt());
-        coupon.setStrf(stayTourRestaurFest);
 
         // 쿠폰 발급
         couponRepository.save(coupon);
@@ -70,24 +57,25 @@ public class CouponIssuanceService {
     }
 
     @Transactional
-    public List<CouponGetDto> getCouponsByUser() {
+    public List<CouponAdminGetDto> getCouponsByUser() {
         long userId = authenticationFacade.getSignedUserId();
+
+        // 로그인한 유저가 ADMIN 권한인지 확인
+        List<Role> roles = roleRepository.findByUserUserId(userId);
+        boolean isAdmin = roles.stream().anyMatch(role -> role.getRole() == UserRole.ADMIN);
+
+        if (!isAdmin) {
+            log.warn("유저 {}는 Admin이 아니므로 쿠폰을 조회할 수 없습니다.", userId);
+            return new ArrayList<>(); // 권한이 없으면 빈 리스트 반환
+        }
 
         // 모든 쿠폰 조회
         List<Coupon> coupons = couponRepository.findAll();  // 모든 쿠폰을 가져오기
 
         // 로그인한 유저가 발급한 쿠폰만 필터링
-        List<CouponGetDto> userCoupons = coupons.stream()
-                .filter(coupon -> {
-                    // coupon.getStrf()가 null인지 체크
-                    StayTourRestaurFest strf = coupon.getStrf();
-                    if (strf != null && strf.getBusiNum() != null && strf.getBusiNum().getUser() != null) {
-                        // BusinessNum의 User와 비교
-                        return strf.getBusiNum().getUser().getUserId().equals(userId);
-                    }
-                    return false;  // strf 또는 비즈니스 번호가 없으면 무시
-                })
-                .map(CouponGetDto::new)
+        List<CouponAdminGetDto> userCoupons = coupons.stream()
+                .filter(coupon -> coupon.getStrf() == null)
+                .map(CouponAdminGetDto::new)
                 .collect(Collectors.toList());
 
         if (userCoupons.isEmpty()) {
@@ -99,18 +87,26 @@ public class CouponIssuanceService {
     }
 
     @Transactional
-    public int updCoupon(CouponUpdateDto req) {
+    public int updCoupon(CouponAdminUpdateDto req) {
         long userId = authenticationFacade.getSignedUserId();
+
+        // 로그인한 유저가 ADMIN 권한인지 확인
+        List<Role> roles = roleRepository.findByUserUserId(userId);
+        boolean isAdmin = roles.stream().anyMatch(role -> role.getRole() == UserRole.ADMIN);
+
+        if (!isAdmin) {
+            log.warn("유저 {}는 Admin이 아니므로 쿠폰을 조회할 수 없습니다.", userId);
+            return 0; // 권한이 없으면 0 반환
+        }
 
         // 쿠폰 조회 (존재하지 않으면 예외 발생)
         Coupon coupon = couponRepository.findById(req.getCouponId())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 쿠폰입니다."));
 
-        // 해당 쿠폰이 사용자가 발급한 쿠폰인지 확인
-        StayTourRestaurFest stayTourRestaurFest = coupon.getStrf();
-        if (!stayTourRestaurFest.getBusiNum().getUser().getUserId().equals(userId)) {
-            log.error("쿠폰 수정 권한이 없습니다. 사용자 ID: {}", userId);
-            return 0;  // 권한이 없으면 수정하지 않음
+        // strf가 null인지 체크 (null인 경우에만 수정 가능)
+        if (coupon.getStrf() != null) {
+            log.error("쿠폰 수정 불가: strf가 존재합니다. 쿠폰 ID: {}", req.getCouponId());
+            return 0;
         }
 
         // 쿠폰 정보 업데이트
