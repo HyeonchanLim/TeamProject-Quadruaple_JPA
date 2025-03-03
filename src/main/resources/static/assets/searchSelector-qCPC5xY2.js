@@ -1,1 +1,0 @@
-import{n as r}from"./index-xgrFPZPY.js";import{s as e}from"./searchAtom-BpenQGdG.js";const o=r({key:"resetSearchData",get:({get:a})=>a(e),set:({set:a})=>{a(e,{searchWord:"",searchData:[],startIndex:0,category:0})}});export{o as r};

@@ -5,14 +5,15 @@ import com.green.project_quadruaple.chat.model.dto.ChatRoomDto;
 import com.green.project_quadruaple.chat.model.req.GetChatRoomReq;
 import com.green.project_quadruaple.chat.model.req.PostChatRoomReq;
 import com.green.project_quadruaple.chat.repository.ChatJoinRepository;
+import com.green.project_quadruaple.chat.repository.ChatRoomMapper;
 import com.green.project_quadruaple.chat.repository.ChatRoomRepository;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 //import com.green.project_quadruaple.entity.model.ChatJoin;
 import com.green.project_quadruaple.entity.model.ChatRoom;
 import com.green.project_quadruaple.entity.model.Role;
-import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.strf.StrfRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
@@ -27,6 +28,7 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -38,14 +40,15 @@ public class ChatRoomService {
     private final ChatJoinRepository chatJoinRepository;
     private final StrfRepository strfRepository;
     private final RoleRepository roleRepository;
+    private final ChatRoomMapper chatRoomMapper;
 
     @Transactional
     public ResponseWrapper<Long> createChatRoom(PostChatRoomReq req) {
 
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
-        Role hostUserRole = roleRepository.findByUserIdAndRoleName(signedUserId, "USER");
-        Role inviteUserRole = roleRepository.findByUserIdAndRoleName(signedUserId, "BUSI");
+        Role hostUserRole = roleRepository.findByUserIdAndRoleName(signedUserId, UserRole.USER);
+        Role inviteUserRole = roleRepository.findByUserIdAndRoleName(signedUserId, UserRole.BUSI);
 
         if(hostUserRole == null || inviteUserRole == null) {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND_USER.getCode(), null);
@@ -86,38 +89,50 @@ public class ChatRoomService {
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
         PageRequest pageRequest = PageRequest.of(req.getPage(), 30);
-        LocalDateTime now = LocalDateTime.now();
-
         List<ChatDto> chatLimit30 = chatRoomRepository.findChatLimit30(roomId, signedUserId, pageRequest);
+        LocalDateTime now = LocalDateTime.now();
         for (ChatDto chatDto : chatLimit30) {
             LocalDateTime createdAtLD = chatDto.getCreatedAtLD();
-
-            Period diffYMD = Period.between(createdAtLD.toLocalDate(), now.toLocalDate());
-
-
-            if(diffYMD.getYears() != 0) {
-                String StringAt = diffYMD.getYears() + "년전";
-                chatDto.setCreatedAt(StringAt);
-            }
-            else if(diffYMD.getMonths() != 0) {
-                String StringAt = diffYMD.getMonths() + "개월전";
-                chatDto.setCreatedAt(StringAt);
-            }
-            else if(diffYMD.getDays() != 0) {
-                String StringAt = diffYMD.getDays() + "일전";
-                chatDto.setCreatedAt(StringAt);
-            } else {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("a hh:mm", Locale.KOREA);
-                String StringAt = createdAtLD.format(formatter);
-                chatDto.setCreatedAt(StringAt);
-            }
+            chatDto.setCreatedAt(formatDate(createdAtLD, now));
         }
+
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatLimit30);
     }
 
-    public ResponseWrapper<List<ChatRoomDto>> getChatRoomList(int page) {
+    public ResponseWrapper<List<ChatRoomDto>> getChatRoomList(int page, String roleReq) {
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
-        return null;
+        UserRole role = UserRole.getByValue(roleReq);
+        if(role == null) {
+            return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
+        }
+        int startIdx = page * 10;
+        List<ChatRoomDto> chatRoomDtoList = chatRoomMapper.selChatRoomList(signedUserId, role.getValue(), startIdx);
+        LocalDateTime now = LocalDateTime.now();
+        for (ChatRoomDto chatRoomDto : chatRoomDtoList) {
+            LocalDateTime latestChatDLT = chatRoomDto.getLatestChatDLT();
+            chatRoomDto.setLastChatTime(formatDate(latestChatDLT, now));
+        }
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoomDtoList);
+    }
+
+    private String formatDate(LocalDateTime time, LocalDateTime now) {
+        Period diffYMD = Period.between(time.toLocalDate(), now.toLocalDate());
+
+        String StringAt;
+
+        if(diffYMD.getYears() != 0) {
+            StringAt = diffYMD.getYears() + "년전";
+        }
+        else if(diffYMD.getMonths() != 0) {
+            StringAt = diffYMD.getMonths() + "개월전";
+        }
+        else if(diffYMD.getDays() != 0) {
+            StringAt = diffYMD.getDays() + "일전";
+        } else {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("a hh:mm", Locale.KOREA);
+            StringAt = time.format(formatter);
+        }
+        return StringAt;
     }
 }

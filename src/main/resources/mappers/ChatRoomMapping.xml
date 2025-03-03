@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.chat.repository.ChatRoomMapper">
+
+    <select id="selChatRoomList">
+        SELECT
+            cr.chat_room_id as roomId
+            , cr.title as title
+            , latest_chat.content as latestChat
+            , latest_chat.latest_created_at as latestChatDLT
+            , latest_chat.crc_cnt as unreadChat
+            , u.profile_pic as pic
+        FROM chat_room cr
+        JOIN chat_join cj
+            ON cr.chat_room_id = cj.chat_room_id
+        JOIN (
+            SELECT
+                c.speaker_id
+                , c.content
+                , c.created_at
+                , latest.crc_cnt
+                , latest.latest_created_at
+            FROM chat c
+            JOIN chat_join cj ON c.speaker_id = cj.cj_id
+            JOIN (
+                SELECT cj2.chat_room_id, MAX(c2.created_at) AS latest_created_at, count(crc.chat_id) AS crc_cnt
+                FROM chat c2
+                JOIN chat_join cj2
+                    ON c2.speaker_id = cj2.cj_id
+                LEFT JOIN chat_receive crc
+                    ON crc.chat_id = c2.chat_id
+                GROUP BY cj2.chat_room_id
+            ) latest
+                ON cj.chat_room_id = latest.chat_room_id
+                AND c.created_at = latest.latest_created_at
+            WHERE cj.chat_room_id IN (
+                SELECT cj3.chat_room_id FROM chat_join cj3
+                WHERE cj3.user_id = #{signedUserId}
+                AND cj3.`role` = #{role}
+            )
+            GROUP BY c.created_at
+        ) latest_chat
+            ON latest_chat.speaker_id = cj.cj_id
+        JOIN USER u
+            ON u.user_id = cj.user_id
+    </select>
+</mapper>

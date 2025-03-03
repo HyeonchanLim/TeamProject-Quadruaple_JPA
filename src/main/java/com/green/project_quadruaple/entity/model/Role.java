@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.green.project_quadruaple.common.config.enumdata.UserRoleConverter;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,8 +23,9 @@ public class Role {
     @JoinColumn(name = "user_id", insertable = false, nullable = false)
     private User user;
 
-    @Enumerated(EnumType.STRING)
+//    @Enumerated(EnumType.STRING)
 //    @MapsId("role")
+    @Convert(converter = UserRoleConverter.class)
     @Column(name = "role", insertable = false, updatable = false)
     private UserRole role;
 

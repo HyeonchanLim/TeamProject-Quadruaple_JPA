@@ -28,8 +28,8 @@ public class ChatJoin {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
-            @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false),
-            @JoinColumn(name = "role", referencedColumnName = "role", insertable = false, updatable = false)
+            @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
+            @JoinColumn(name = "role", referencedColumnName = "role")
     })
     private Role role;
 

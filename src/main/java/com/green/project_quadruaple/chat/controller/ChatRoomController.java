@@ -5,6 +5,7 @@ import com.green.project_quadruaple.chat.model.dto.ChatRoomDto;
 import com.green.project_quadruaple.chat.model.req.GetChatRoomReq;
 import com.green.project_quadruaple.chat.service.ChatRoomService;
 import com.green.project_quadruaple.chat.model.req.PostChatRoomReq;
+import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,7 +37,8 @@ public class ChatRoomController {
 
     @GetMapping()
     @Operation(summary = "내 채팅방 목록 30개씩 불러오기")
-    public ResponseWrapper<List<ChatRoomDto>> getChatRoomList(@Parameter @RequestParam int page) {
-        return chatRoomService.getChatRoomList(page);
+    public ResponseWrapper<List<ChatRoomDto>> getChatRoomList(@Parameter @RequestParam int page,
+                                                              @Parameter @RequestParam String role) {
+        return chatRoomService.getChatRoomList(page, role);
     }
 }
