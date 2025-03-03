@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Coupon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

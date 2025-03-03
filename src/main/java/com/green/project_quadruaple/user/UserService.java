@@ -184,9 +184,11 @@ public class UserService {
     // 로그인
     @Transactional
     public UserSignInRes signIn(UserSignInReq req, HttpServletResponse response) {
-        // 이메일로 유저 정보 조회
-        User user = userRepository.findByAuthenticationCode_Email(req.getEmail())
-                .orElseThrow(() -> new RuntimeException("아이디를 확인해 주세요."));
+        // LOCAL 유저만 swagger 로그인 가능
+        User user = userRepository.findByAuthenticationCode_EmailAndProviderType(req.getEmail(), SignInProviderType.LOCAL);
+        if (user == null) {
+            throw new RuntimeException("아이디를 확인해 주세요.");
+        }
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(req.getPw(), user.getPassword())) {

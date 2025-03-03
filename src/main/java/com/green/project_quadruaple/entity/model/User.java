@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.green.project_quadruaple.common.config.security.SignInProviderType;
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User extends CreatedAt {
 
     @Id
