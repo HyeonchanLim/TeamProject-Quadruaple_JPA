@@ -13,6 +13,8 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BusinessDto {
+    private String createdAt;
+    private Long reviewId;
     private Long strfId;
     private String strfTitle;
     private Integer state;
@@ -21,11 +23,12 @@ public class BusinessDto {
     private Double ratingAvg;
     private String content;
     private Integer rating;
-    private Long userId;
+    private Integer userId;
     private String userName;
     private String writerUserProfilePic;
     private Integer providerType;
     private String reviewReply;
-    private List<ReviewPicDto> reviewPicList;   // 추가된 필드
+    private String reviewReplyCreatedAt;
+    private List<ReviewPicDto> reviewPicList;
 
 }
