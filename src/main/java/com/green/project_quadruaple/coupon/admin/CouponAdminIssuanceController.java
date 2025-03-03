@@ -35,7 +35,7 @@ public class CouponAdminIssuanceController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
-    @GetMapping("admin")
+    @GetMapping()
     @Operation(summary = "관리자 쿠폰 조회")
     public ResponseEntity<?> getCouponAdmin() {
         List<CouponAdminGetDto> getCoupon = couponAdminIssuanceService.getCouponsByUser();
@@ -54,6 +54,13 @@ public class CouponAdminIssuanceController {
         if (result < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
         }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+    }
+
+    @GetMapping("count_all")
+    @Operation(summary = "관리자 쿠폰 총 개수 조회")
+    public ResponseEntity<?> countAdminCouponAll() {
+        int result = couponAdminIssuanceService.countAdminCoupon();
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 }

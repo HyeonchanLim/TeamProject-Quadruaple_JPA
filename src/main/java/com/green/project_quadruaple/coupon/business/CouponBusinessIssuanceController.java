@@ -34,7 +34,7 @@ public class CouponBusinessIssuanceController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
-    @GetMapping("business")
+    @GetMapping()
     @Operation(summary = "사업자 쿠폰 조회")
     public ResponseEntity<?> getCoupon() {
         List<CouponBusinessGetDto> getCoupon = couponIssuanceService.getCouponsByUser();
@@ -52,6 +52,13 @@ public class CouponBusinessIssuanceController {
         if (result < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
         }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+    }
+
+    @GetMapping("count_all")
+    @Operation(summary = "사업자 쿠폰 총 개수 조회")
+    public ResponseEntity<?> countBusinessCouponAll() {
+        int result = couponIssuanceService.countBusinessCoupon();
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 }

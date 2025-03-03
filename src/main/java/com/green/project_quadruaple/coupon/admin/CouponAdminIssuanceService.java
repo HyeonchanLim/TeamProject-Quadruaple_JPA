@@ -121,4 +121,19 @@ public class CouponAdminIssuanceService {
         log.info("쿠폰 수정 성공: {}", coupon.getTitle());
         return 1;
     }
+
+    public int countAdminCoupon() {
+        long userId = authenticationFacade.getSignedUserId();
+
+        // 로그인한 유저가 ADMIN 권한인지 확인
+        List<Role> roles = roleRepository.findByUserUserId(userId);
+        boolean isAdmin = roles.stream().anyMatch(role -> role.getRole() == UserRole.ADMIN);
+
+        if (!isAdmin) {
+            log.warn("유저 {}는 Admin이 아니므로 쿠폰을 조회할 수 없습니다.", userId);
+            return 0; // 권한이 없으면 0 반환
+        }
+
+        return couponRepository.countAllByStrfIsNull();
+    }
 }
