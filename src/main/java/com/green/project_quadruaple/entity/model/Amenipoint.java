@@ -21,6 +21,6 @@ public class Amenipoint extends CreatedAt {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("strfId")
-    @JoinColumn(name = "strf_id", nullable = false)
+    @JoinColumn(name = "strf_id", nullable = false, columnDefinition = "CHAR(10) DEFAULT 0")
     private StayTourRestaurFest stayTourRestaurFest;
 }

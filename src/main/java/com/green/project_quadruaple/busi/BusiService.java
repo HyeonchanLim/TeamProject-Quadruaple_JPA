@@ -54,110 +54,110 @@ public class BusiService {
     @Value("${file.directory}")
     private String fileDirectory;
 
-    // 회원가입
-//    public int busiSignUp(MultipartFile pic, BusiPostReq p) {
-//
-//        // 이메일 중복 체크
-//        if (userRepository.existsByAuthenticationCode_Email(p.getEmail())) {
-//            return 0;
-//        }
-//
-//        // 닉네임 중복 체크 및 유니크한 닉네임 생성
-//        if (userRepository.existsByName(p.getName())) {
-//            return 0;
-//        }
-////        if (roleRepository.existsById(p.getBusiNum())){
-////            return 0;
-////        }
-//
-//        // 비밀번호 해싱
-//        String hashedPassword = passwordEncoder.encode(p.getPw());
-//        p.setPw(hashedPassword);
-//
-//        String savedPicName;
-//        boolean isDefaultPic = false;
-//
-//        if (pic != null && !pic.isEmpty()) {
-//            savedPicName = myFileUtils.makeRandomFileName(pic);
-//        } else {
-//            // 프로필 사진이 없으면 기본 사진 사용
-//            savedPicName = "user_profile.png";
-//            isDefaultPic = true;
-//        }
-//
-//        try {
-//            // 인증 코드가 존재하는지 확인
-//            AuthenticationCode authCode = authenticationCodeRepository.findFirstByEmailOrderByGrantedAtDesc(p.getEmail())
-//                    .orElseThrow(() -> new RuntimeException("이메일 인증이 완료되지 않았습니다."));
-//
-//            //이메일을 authCode에서 가져오도록 수정
-//            String email = authCode.getEmail();
-//
-//            User user = new User();
-//            user.setAuthenticationCode(authCode);
-//            user.setName(p.getName());
-//            user.setProfilePic(savedPicName);
-//            user.setPassword(hashedPassword);
-//            user.setBirth(p.getBirth());
-//            user.setTell(p.getTell());
-//            user.setProviderType(SignInProviderType.LOCAL);
-//            user.setVerified(1);
-//
-//            userRepository.save(user);
-//
-//            if (user != null) {
-//                long userId = user.getUserId(); // DB에 삽입 후 userId 값 가져오기
-//                p.setUserId(userId);
-//
-//                // Role 설정 추가
-//                Role role = Role.builder()
-//                        .id(new RoleId(UserRole.BUSI.getValue(), userId))
-//                        .user(user)
-//                        .role(UserRole.BUSI)
-//                        .grantedAt(LocalDateTime.now())
-//                        .build();
-//                roleRepository.save(role);
-//
-//                // 프로필 사진 저장 경로 설정
-//                String middlePath = String.format("user/%s", userId);
-//                myFileUtils.makeFolders(middlePath);
-//                String filePath = String.format("%s/%s", middlePath, savedPicName);
-//                Path destination = Paths.get(fileDirectory, filePath); // 절대 경로로 설정
-//
-//                try {
-//                    if (isDefaultPic) {
-//                        // 기본 프로필 사진 복사
-//                        Path source = Paths.get(fileDirectory, "common", "user_profile.png");
-//
-//                        // 디버깅용 로그 추가
-//                        System.out.println("Source Path: " + source.toAbsolutePath());
-//                        System.out.println("Destination Path: " + destination.toAbsolutePath());
-//
-//                        // 원본 파일 존재 여부 확인
-//                        if (!Files.exists(source)) {
-//                            System.out.println("기본 프로필 사진이 존재하지 않습니다!");
-//                        } else {
-//                            System.out.println("기본 프로필 사진이 존재합니다.");
-//                        }
-//
-//                        // 대상 폴더 생성 (존재하지 않으면 생성)
-//                        Files.createDirectories(destination.getParent());
-//
-//                        // 기본 사진 복사
-//                        Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-//                        System.out.println("기본 프로필 사진 복사 완료!");
-//                    } else {
-//                        myFileUtils.transferTo(pic, filePath);
-//                    }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        } catch (Exception e) {
-//            return 0;
-//        }
-//
-//        return 1;
-//    }
+//     회원가입
+    public int busiSignUp(MultipartFile pic, BusiPostReq p) {
 
+        // 이메일 중복 체크
+        if (userRepository.existsByAuthenticationCode_Email(p.getEmail())) {
+            return 0;
+        }
+
+        // 닉네임 중복 체크 및 유니크한 닉네임 생성
+        if (userRepository.existsByName(p.getName())) {
+            return 0;
+        }
+        // 사업자 번호 중복 체크
+        if (busiRepository.existsById(p.getBusiNum())){
+            return 0;
+        }
+
+        // 비밀번호 해싱
+        String hashedPassword = passwordEncoder.encode(p.getPw());
+        p.setPw(hashedPassword);
+
+        String savedPicName;
+        boolean isDefaultPic = false;
+
+        if (pic != null && !pic.isEmpty()) {
+            savedPicName = myFileUtils.makeRandomFileName(pic);
+        } else {
+            // 프로필 사진이 없으면 기본 사진 사용
+            savedPicName = "user_profile.png";
+            isDefaultPic = true;
+        }
+
+        try {
+            // 인증 코드가 존재하는지 확인
+            AuthenticationCode authCode = authenticationCodeRepository.findFirstByEmailOrderByGrantedAtDesc(p.getEmail())
+                    .orElseThrow(() -> new RuntimeException("이메일 인증이 완료되지 않았습니다."));
+
+            //이메일을 authCode에서 가져오도록 수정
+            String email = authCode.getEmail();
+
+            User user = new User();
+            user.setAuthenticationCode(authCode);
+            user.setName(p.getName());
+            user.setProfilePic(savedPicName);
+            user.setPassword(hashedPassword);
+            user.setBirth(p.getBirth());
+            user.setTell(p.getTell());
+            user.setProviderType(SignInProviderType.LOCAL);
+            user.setVerified(1);
+
+            userRepository.save(user);
+
+            if (user != null) {
+                long userId = user.getUserId(); // DB에 삽입 후 userId 값 가져오기
+                p.setUserId(userId);
+
+                // Role 설정 추가
+                Role role = Role.builder()
+                        .id(new RoleId(UserRole.BUSI.getValue(), userId))
+                        .user(user)
+                        .role(UserRole.BUSI)
+                        .grantedAt(LocalDateTime.now())
+                        .build();
+                roleRepository.save(role);
+
+                // 프로필 사진 저장 경로 설정
+                String middlePath = String.format("user/%s", userId);
+                myFileUtils.makeFolders(middlePath);
+                String filePath = String.format("%s/%s", middlePath, savedPicName);
+                Path destination = Paths.get(fileDirectory, filePath); // 절대 경로로 설정
+
+                try {
+                    if (isDefaultPic) {
+                        // 기본 프로필 사진 복사
+                        Path source = Paths.get(fileDirectory, "common", "user_profile.png");
+
+                        // 디버깅용 로그 추가
+                        System.out.println("Source Path: " + source.toAbsolutePath());
+                        System.out.println("Destination Path: " + destination.toAbsolutePath());
+
+                        // 원본 파일 존재 여부 확인
+                        if (!Files.exists(source)) {
+                            System.out.println("기본 프로필 사진이 존재하지 않습니다!");
+                        } else {
+                            System.out.println("기본 프로필 사진이 존재합니다.");
+                        }
+
+                        // 대상 폴더 생성 (존재하지 않으면 생성)
+                        Files.createDirectories(destination.getParent());
+
+                        // 기본 사진 복사
+                        Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
+                        System.out.println("기본 프로필 사진 복사 완료!");
+                    } else {
+                        myFileUtils.transferTo(pic, filePath);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            return 0;
+        }
+
+        return 1;
+    }
 }
