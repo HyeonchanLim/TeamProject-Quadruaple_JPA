@@ -9,14 +9,14 @@ public interface ChatJoinRepository extends JpaRepository<ChatJoin, Long> {
     @Query("""
             select cj from ChatJoin cj
             where cj.chatRoom.chatRoomId = :chatRoomId
-                and cj.user.userId = :userId
+                and cj.role.user.userId = :userId
             """)
     ChatJoin findByChatRoomIdAndUserId(Long chatRoomId, Long userId);
 
     @Query("""
             select count(cj) from ChatJoin cj
             where cj.chatRoom.chatRoomId = :roomId
-                and cj.user.userId = :signedUserId
+                and cj.role.user.userId = :signedUserId
             """)
     Integer existsJoinUser(Long roomId, Long signedUserId);
 }
