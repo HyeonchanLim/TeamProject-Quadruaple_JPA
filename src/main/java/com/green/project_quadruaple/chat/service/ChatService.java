@@ -1,7 +1,6 @@
 package com.green.project_quadruaple.chat.service;
 
 import com.green.project_quadruaple.chat.model.req.PostChatReq;
-import com.green.project_quadruaple.chat.model.res.JoinRes;
 import com.green.project_quadruaple.chat.model.res.MessageRes;
 //import com.green.project_quadruaple.chat.repository.ChatJoinRepository;
 import com.green.project_quadruaple.chat.repository.ChatJoinRepository;
@@ -9,6 +8,7 @@ import com.green.project_quadruaple.chat.repository.ChatRepository;
 import com.green.project_quadruaple.chat.repository.ChatRoomRepository;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
+import com.green.project_quadruaple.common.config.socket.UserSubscribeState;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
@@ -20,8 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -37,19 +37,16 @@ public class ChatService {
 
     // 유저 입장 시
     @Transactional
-    public JoinRes joinChat(Long roomId, Principal principal) {
-
+    public void joinChat(Long roomId, Principal principal) {
         Long signedUserId = getSignedUserId(principal);
         if(signedUserId == null) { // 인증 정보 없으면 return
-            return JoinRes.builder()
-                    .userName(null)
-                    .error("유저 정보 없음")
-                    .build();
+            return;
         }
 
         try {
             // 채팅방에 참여중인 유저가 아니라면 저장.
-            if(chatJoinRepository.existsJoinUser(roomId, signedUserId) <= 0) {
+            Long cjId = chatJoinRepository.findChatJoinIdByChatRoomIdAndUserId(roomId, signedUserId);
+            if(cjId == null) {
                 Role role = roleRepository.findByUserIdAndRoleName(signedUserId, UserRole.USER);
                 ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElse(null);
                 ChatJoin chatJoin = ChatJoin.builder()
@@ -57,12 +54,12 @@ public class ChatService {
                         .role(role)
                         .build();
                 chatJoinRepository.save(chatJoin);
+                cjId = chatJoin.getCjId();
             }
+            UserSubscribeState.USER_SUB_STATE.add(cjId); // 채팅방 구독 시 구독상태 저장
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        return null;
     }
 
     // 채팅 저장
@@ -84,6 +81,8 @@ public class ChatService {
                     .content(req.getMessage())
                     .build();
             chatRepository.save(chat);
+
+            List<Long> cjIds = chatJoinRepository.findChatJoinIdListByChatRoomId(req.getRoomId());
 
             return MessageRes.builder()
                     .sender(chatJoin.getRole().getUser().getName())
