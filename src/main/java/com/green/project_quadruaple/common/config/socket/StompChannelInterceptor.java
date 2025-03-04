@@ -69,7 +69,8 @@ public class StompChannelInterceptor implements ChannelInterceptor {
                     throw new IllegalStateException(e);
                 }
             }
-        } else if (messageType.equals("DISCONNECT") || messageType.equals("UNSUBSCRIBE")) {
+            // 구독 해제 시 Set에 구독 상태 삭제
+        } else if (messageType.equals("UNSUBSCRIBE")) {
             Long signedUserId = getSignedUserId(accessor.getUser());
             String subPath = String.valueOf(accessor.getHeader("simpSubscriptionId"));
             Long roomId = Long.parseLong(subPath.substring(subPath.lastIndexOf('/') + 1));

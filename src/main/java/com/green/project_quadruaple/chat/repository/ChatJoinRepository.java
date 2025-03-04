@@ -23,8 +23,8 @@ public interface ChatJoinRepository extends JpaRepository<ChatJoin, Long> {
     Long findChatJoinIdByChatRoomIdAndUserId(Long roomId, Long signedUserId);
 
     @Query("""
-        select cj.cjId from ChatJoin cj
+        select cj from ChatJoin cj
         where cj.chatRoom.chatRoomId = :roomId
         """)
-    List<Long> findChatJoinIdListByChatRoomId(Long roomId);
+    List<ChatJoin> findChatJoinIdListByChatRoomId(Long roomId);
 }

@@ -20,7 +20,7 @@ public class NoticeController {
     //알람 여부 확인
     @GetMapping
     @Operation(summary = "알람 여부 확인", description = "postman이나 swagger에서 확인안됨. 브라우저 네트워크 확인바람\n 30초에 한번 통신")
-    public SseEmitter noticeCnt (){
+    public SseEmitter noticeCnt() {
         return noticeService.noticeCnt();
     }
 
