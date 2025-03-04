@@ -16,19 +16,16 @@
         l.profile_pic AS hostProfilePic, l.name AS hostName , b.price AS menuPrice,
         n.inquired_at AS inquiredAt,
         COUNT(DISTINCT m.user_id) AS wishCnt,
-        COUNT(DISTINCT h.review_id) AS reviewCnt
+        COUNT(DISTINCT h.review_id) AS reviewCnt , AVG(h.rating) AS ratingAvg
+        , a.state , p.max_capacity AS maxCapacity , p.recom_capacity AS recomCapacity , p.surcharge
+        , q.room_num AS roomNum
 
-            , AVG(h.rating) AS ratingAvg
-
-
-        <!--
         <if test="userId != null">
-            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
+            , IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
         </if>
         <if test="userId == null">
-            0 AS wishIn
+            , 0 AS wishIn
         </if>
-        -->
         <if test="userId != null">
         , IF( EXISTS( SELECT 1 FROM wishlist WHERE strf_id = a.strf_id AND (#{userId} IS NULL OR user_id = #{userId}) ), 1, 0 ) AS wishIn,
         IF( EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 0 ), 0, 1 ) AS recentCheck,
@@ -52,6 +49,8 @@
         LEFT JOIN wishlist m ON m.strf_id = a.strf_id
         LEFT JOIN recent n ON n.strf_id = a.strf_id
         LEFT JOIN rest_date o ON o.strf_id = a.strf_id
+        LEFT JOIN parlor p ON b.menu_id = p.menu_id
+        LEFT JOIN room q ON b.menu_id = q.menu_id
 
         WHERE a.strf_id = #{strfId}
         GROUP BY a.strf_id,b.menu_id,d.amenity_id,b.title,e.pic_name

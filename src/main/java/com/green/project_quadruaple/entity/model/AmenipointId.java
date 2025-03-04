@@ -12,5 +12,5 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class AmenipointId implements Serializable {
     private Long amenityId;
-    private String strfId;
+    private Long strfId;
 }

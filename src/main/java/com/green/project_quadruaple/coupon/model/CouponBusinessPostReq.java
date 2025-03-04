@@ -24,5 +24,5 @@ public class CouponBusinessPostReq {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime distributeAt;
 
-    private String strfId;
+    private Long strfId;
 }

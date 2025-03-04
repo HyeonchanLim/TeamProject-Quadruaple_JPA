@@ -13,7 +13,7 @@ public interface RecentRepository extends JpaRepository<Recent , RecentId> {
 
     @Modifying
     @Query("UPDATE Recent r SET r.undoRecent = 1 WHERE r.id.userId = :userId AND r.id.strfId = :strfId")
-    int hideRecent(@Param("userId") Long userId, @Param("strfId") String strfId);
+    int hideRecent(@Param("userId") Long userId, @Param("strfId") Long strfId);
 
     @Modifying
     @Query("UPDATE Recent r SET r.undoRecent = 1 WHERE r.id.userId = :userId")

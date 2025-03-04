@@ -41,7 +41,7 @@ public class WishListService {
     private String endAt;
 
     @Transactional
-    public ResponseEntity<ResponseWrapper<String>> toggleWishList(String strfId) {
+    public ResponseEntity<ResponseWrapper<String>> toggleWishList(Long strfId) {
         Long userId = authenticationFacade.getSignedUserId();
 
         User user = userRepository.findById(userId)

@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @Setter
 public class BookingRes {
     private Long bookingId;
-    private String strfId;
+    private Long strfId;
     private String strfTitle;
     private String strfPic;
     private String createdAt;
@@ -34,7 +34,7 @@ public class BookingRes {
     @JsonIgnore
     private LocalDateTime checkOutDateLD;
 
-    public BookingRes(Long bookingId, String strfId, String strfTitle, String strfPic,
+    public BookingRes(Long bookingId, Long strfId, String strfTitle, String strfPic,
                       LocalDateTime createdAtLD, LocalDateTime checkInDateLD, LocalDateTime checkOutDateLD,
                       int price, int state, Long chatRoomId)
     {
