@@ -13,9 +13,10 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 public class StrfInsReq {
-    private long strf_id;
+    private long strfId;
     private long locationDetailId;
     private String category;
+    private String cid;
     private String title;
     private double lat;
     private double lng;
