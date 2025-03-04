@@ -18,5 +18,5 @@ public class ReviewPostJpaReq {
     private Long userId;
     private String content;
     private int rating;
-    private Long strfId;
+    private String strfId;
 }

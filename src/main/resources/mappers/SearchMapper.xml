@@ -290,6 +290,18 @@
         <result property="wishIn" column="wishIn"/>
     </resultMap>
 
+    <select id="amenityCnt">
+        SELECT COALESCE(COUNT(DISTINCT j.amenity_id), 0) AS amenityCnt
+        FROM stay_tour_restaur_fest a
+        LEFT JOIN amenipoint i ON i.strf_id = a.strf_id
+        LEFT JOIN amenity j ON i.amenity_id = j.amenity_id
+        WHERE j.amenity_id IN (
+        <foreach item="id" collection="amenityId" separator=",">
+            #{id}
+        </foreach>
+        )
+    </select>
+
     <select id="searchStay" resultMap="searchStayResultMap">
         SELECT a.strf_id AS strfId
         , a.title AS strfTitle
@@ -303,6 +315,7 @@
         , j.amenity_id AS amenityId
         , j.title AS amenityTitle
         , MAX(CASE WHEN f.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview
+
         <if test="userId != 0">
             ,IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
         </if>

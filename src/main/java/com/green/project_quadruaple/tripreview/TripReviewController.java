@@ -43,7 +43,7 @@ public class TripReviewController {
         List<TripReviewGetDto> myTripReview = tripReviewService.getMyTripReviews(orderType);
 
         if (myTripReview == null || myTripReview.size() == 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), "등록된 여행기가 없습니다."));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), myTripReview));
     }

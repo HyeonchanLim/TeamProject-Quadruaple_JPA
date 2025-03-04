@@ -11,13 +11,15 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReviewPic {
-    @EmbeddedId
-    private ReviewPicId id;
+public class RestDate {
+    @Id
+    @Column(nullable = false, columnDefinition = "TINYINT(4) default 0")
+    private Integer dayWeek;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("reviewId")
-    @JoinColumn(name = "review_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Review review;
+    @JoinColumn(name = "strf_id", nullable = false)
+    private StayTourRestaurFest strfId;
 }
+
+
+

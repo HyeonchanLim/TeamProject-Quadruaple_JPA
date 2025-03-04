@@ -4,6 +4,7 @@ import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.common.model.SizeConstants;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.review.model.*;
 import com.green.project_quadruaple.strf.StrfRepository;
@@ -35,16 +36,15 @@ public class ReviewService {
     @Value("${const.default-review-size}")
     private int size;
     public List<ReviewSelRes> getReviewWithPics(Long strfId,int startIdx ) {
-        int more = 1;
-        List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(strfId,startIdx,size+more);
+        List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(strfId,startIdx, SizeConstants.getDefault_page_size());
         if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }
-        boolean hasMore = dtoList.size() > size;
-        if (hasMore) {
-            dtoList.get(dtoList.size()-1).setMore(true);
-            dtoList.remove(dtoList.size()-1);
-        }
+//        boolean hasMore = dtoList.size() > size;
+//        if (hasMore) {
+//            dtoList.get(dtoList.size()-1).setMore(true);
+//            dtoList.remove(dtoList.size()-1);
+//        }
         Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
         for (ReviewSelRes item : dtoList) {
             ReviewSelRes review = reviewMap.get(item.getReviewId());
@@ -53,16 +53,16 @@ public class ReviewService {
     }
     public List<MyReviewSelRes> getMyReviews(int startIdx) {
         Long userId = authenticationFacade.getSignedUserId();
-        int more = 1;
-        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(userId,startIdx,size+more);
+//        int more = 1;
+        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(userId,startIdx,SizeConstants.getDefault_page_size());
         if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }
-        boolean hasMore = dtoList.size() > size;
-        if (hasMore) {
-            dtoList.get(dtoList.size()-1).setMore(true);
-            dtoList.remove(dtoList.size()-1);
-        }
+//        boolean hasMore = dtoList.size() > size;
+//        if (hasMore) {
+//            dtoList.get(dtoList.size()-1).setMore(true);
+//            dtoList.remove(dtoList.size()-1);
+//        }
         Map<Long, MyReviewSelRes> reviewMap = new LinkedHashMap<>();
         for (MyReviewSelRes item : dtoList) {
             // 기존 리뷰 ID로 저장된 객체가 있는지 확인
@@ -222,6 +222,8 @@ public class ReviewService {
         String deletePath = String.format("%s/feed/%d", myFileUtils.getUploadPath(), review.getReviewId());
 
         myFileUtils.deleteFolder(deletePath, true);
+
+        int affectedRowsReview = reviewMapper.deleteReview(reviewId,userId);
 
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
     }

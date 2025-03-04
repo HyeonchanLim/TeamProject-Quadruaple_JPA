@@ -15,7 +15,7 @@ public class PointCard {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "point_card_id",nullable = false)
+    @Column(name = "point_card_id",nullable = false, columnDefinition = "CHAR(10) DEFAULT 0")
     private Long pointCardId;
 
     @Column(nullable = false)

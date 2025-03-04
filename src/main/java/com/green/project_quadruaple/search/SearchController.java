@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.search;
 
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
 
@@ -87,6 +88,12 @@ public class SearchController {
         return searchService.searchAll(searchWord);
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<?> categoryCount (String category,@RequestParam(value = "search_word") String searchWord){
+        ResponseWrapper<Integer> count = searchService.categoryCount(category,searchWord);
+
+        return ResponseEntity.ok(count);
+    }
     @GetMapping("/category")
     public ResponseEntity<?> searchCategory(@RequestParam("start_idx") int startIdx,
                                             @RequestParam String category,
@@ -95,6 +102,13 @@ public class SearchController {
 
         ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(startIdx,category,searchWord, orderType);
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/amenity/count")
+    public ResponseEntity<?> amenityCnt (@RequestParam List<Long> amenityId){
+        ResponseWrapper<Integer> count = searchService.amenityCnt(amenityId);
+
+        return ResponseEntity.ok(count);
     }
     @GetMapping("/filter")
     public ResponseWrapper<?> searchStayFilter(@RequestParam("start_idx") int startIdx,
