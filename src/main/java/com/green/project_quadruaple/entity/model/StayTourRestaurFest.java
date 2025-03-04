@@ -20,8 +20,9 @@ import java.time.LocalTime;
 public class StayTourRestaurFest extends EndAt {
 
     @Id
-    @Column(name = "strf_id", updatable = false, nullable = false, length = 10, columnDefinition = "CHAR(10) DEFAULT 0")
-    private String strfId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "strf_id", nullable = false)
+    private Long strfId;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

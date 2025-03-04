@@ -15,7 +15,7 @@ import java.util.List;
 @Schema
 public class StrfSelRes {
 
-    private Long strfId;
+    private String strfId;
     private String category;
     private String strfTitle;
     private double latit;
@@ -27,7 +27,7 @@ public class StrfSelRes {
     private String endAt;
     private String openCheck;
     private String closeCheck;
-    private String restDate;
+    private String restDate; // 테이블 분리함
     private String detail;
     private String busiNum;
     private String locationName;

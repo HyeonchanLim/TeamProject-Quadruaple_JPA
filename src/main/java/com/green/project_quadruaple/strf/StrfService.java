@@ -40,7 +40,7 @@ public class StrfService {
     private final BusinessNumRepository businessNumRepository;
 
 
-    public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
+    public ResponseWrapper<StrfSelRes> getMemberDetail(String strfId) {
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -96,8 +96,8 @@ public class StrfService {
         }
         BusinessNum businessNum = businessNumRepository.findByBusiNum(p.getBusiNum());
 
-//        // 관련된 StayTourRestaurFest 정보 조회
-//        StayTourRestaurFest stayTourRestaurFest = strfRepository.findById(req.getStrfId())
+        // 관련된 StayTourRestaurFest 정보 조회
+//        StayTourRestaurFest stayTourRestaurFest = strfRepository.findById(p.getStrfId()).orElseThrow()
 //                .orElseThrow(() -> new RuntimeException("Invalid StayTourRestaurFest ID"));
 //
 //        // 해당 사업자가 올린 게시물인지 확인
@@ -105,7 +105,6 @@ public class StrfService {
 //            log.error("해당 사업자가 올린 게시물이 아닙니다. 사용자 ID: {}", userId);
 //            return 0;  // 사업자가 올린 게시물이 아니면 쿠폰 발급하지 않음
 //        }
-
 
         return null;
     }

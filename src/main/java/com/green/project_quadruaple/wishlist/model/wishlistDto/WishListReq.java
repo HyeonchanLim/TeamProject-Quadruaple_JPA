@@ -10,14 +10,14 @@ import java.util.List;
 @NoArgsConstructor
 public class WishListReq {
 
-    private String strfId;
+    private Long strfId;
 
     // Getter 및 Setter
-    public String getStrfId() {
+    public Long getStrfId() {
         return strfId;
     }
 
-    public void setStrfId(String strfId) {
+    public void setStrfId(Long strfId) {
         this.strfId = strfId;
     }
 }

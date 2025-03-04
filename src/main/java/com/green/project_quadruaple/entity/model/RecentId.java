@@ -13,5 +13,5 @@ import java.io.Serializable;
 @Embeddable
 public class RecentId implements Serializable {
     private Long userId;
-    private String strfId;
+    private Long strfId;
 }

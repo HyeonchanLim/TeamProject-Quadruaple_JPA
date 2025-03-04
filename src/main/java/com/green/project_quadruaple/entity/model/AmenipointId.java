@@ -13,5 +13,5 @@ import java.io.Serializable;
 @EqualsAndHashCode
 public class AmenipointId implements Serializable {
     private Long amenityId;
-    private String strfId;
+    private Long strfId;
 }
