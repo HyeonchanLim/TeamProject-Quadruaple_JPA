@@ -312,7 +312,7 @@ public class UserService {
             }
         } else {
             myFileUtils.deleteFolder(deletePath, false);
-            user.setProfilePic(null);
+            user.setProfilePic("user_profile.png");
         }
 
         // 전화번호(tell) 및 생일(birth) 업데이트
