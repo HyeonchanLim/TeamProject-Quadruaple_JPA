@@ -6,6 +6,8 @@ import com.green.project_quadruaple.booking.repository.ParlorRepository;
 import com.green.project_quadruaple.booking.repository.RoomRepository;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.config.jwt.UserRole;
+import com.green.project_quadruaple.common.config.security.SignInProviderType;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.datamanager.model.*;
@@ -19,10 +21,13 @@ import com.green.project_quadruaple.trip.ScheduleRepository;
 import com.green.project_quadruaple.trip.TripRepository;
 import com.green.project_quadruaple.trip.TripUserRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.user.model.RoleRepository;
+import com.green.project_quadruaple.user.model.UserSignUpReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +37,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @Log4j2
@@ -50,18 +58,20 @@ public class DataService {
     private final RoomRepository roomRepository;
     private final ParlorRepository parlorRepository;
     private final MenuRepository menuRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
 
     //카테고리별로 리뷰 더미데이터 넣기
-    public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPicsFromCategory(String category){
+    public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPicsFromCategory(String category) {
         //카테고리별 넣어야할 strfId들 가져오기
-        List<Long> strfIds= dataMapper.selectReviewStrfId(
-                new StrfReviewGetReq(category,null,null,null,0,0,null,null));
-        List<Long> reviewIds=new ArrayList<>(strfIds.size()); //리뷰id 저장
+        List<Long> strfIds = dataMapper.selectReviewStrfId(
+                new StrfReviewGetReq(category, null, null, null, 0, 0, null, null));
+        List<Long> reviewIds = new ArrayList<>(strfIds.size()); //리뷰id 저장
         //상품id마다 랜덤 리뷰 넣기
-        for(long strfId:strfIds){
-            for(int i=0; i<randomNum(5,2); i++){
-                ReviewRandomReq req=randomReview(category,strfId);
+        for (long strfId : strfIds) {
+            for (int i = 0; i < randomNum(5, 2); i++) {
+                ReviewRandomReq req = randomReview(category, strfId);
                 dataMapper.postRating(req);
                 reviewIds.add(req.getReviewId());
             }
@@ -71,60 +81,61 @@ public class DataService {
         ${file:directory}/reviewId/${reviewId} 아래로 옮기기
          */
 
-        String filePath=String.format("%s/reviewsample/%s",myFileUtils.getUploadPath(),category);
+        String filePath = String.format("%s/reviewsample/%s", myFileUtils.getUploadPath(), category);
 
         int fileCnt = 0; //reviewsample에 카테고리별 파일 갯수 확인
-        int reviewPicCnt=0; //리뷰 하나당 들어가 사진 갯수
-        try{
-            fileCnt=(int) myFileUtils.countFiles(filePath);
+        int reviewPicCnt = 0; //리뷰 하나당 들어가 사진 갯수
+        try {
+            fileCnt = (int) myFileUtils.countFiles(filePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        List<Map<String,Object>> reviewPics=new ArrayList<>(reviewIds.size()); //어느리뷰에 어느사진들이 들어가는지, review_pic에 insert할 내용
-        for(long reviewId:reviewIds){
+        List<Map<String, Object>> reviewPics = new ArrayList<>(reviewIds.size()); //어느리뷰에 어느사진들이 들어가는지, review_pic에 insert할 내용
+        for (long reviewId : reviewIds) {
             //category 내부의 랜덤 숫자 파일
-            String sourcePath=String.format("%s/%d",filePath,randomNum(fileCnt));
+            String sourcePath = String.format("%s/%d", filePath, randomNum(fileCnt));
             //review id별로 저장될 사진 경로
-            String destinationPath=String.format("%s/reviewId/%d",myFileUtils.getUploadPath(),reviewId);
+            String destinationPath = String.format("%s/reviewId/%d", myFileUtils.getUploadPath(), reviewId);
             try {
                 //저장될 사진 갯수
-                reviewPicCnt=(int) myFileUtils.countFiles(sourcePath);
+                reviewPicCnt = (int) myFileUtils.countFiles(sourcePath);
                 //source에서 destination으로 파일 복사
-                myFileUtils.copyFolder(Path.of(sourcePath),Path.of(destinationPath));
+                myFileUtils.copyFolder(Path.of(sourcePath), Path.of(destinationPath));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            for(int i=1; i<=reviewPicCnt; i++){
-                Map<String, Object> pics=new HashMap<>();  //reviewPics에 넣을 객체
-                pics.put("reviewId",reviewId);
-                pics.put("pics", String.format("%d.png",i));
+            for (int i = 1; i <= reviewPicCnt; i++) {
+                Map<String, Object> pics = new HashMap<>();  //reviewPics에 넣을 객체
+                pics.put("reviewId", reviewId);
+                pics.put("pics", String.format("%d.png", i));
                 reviewPics.add(pics);
             }
         }
-        int reviewInsCnt=dataMapper.postReviewPicList(reviewPics);
+        int reviewInsCnt = dataMapper.postReviewPicList(reviewPics);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), reviewInsCnt));
     }
 
     //max까지의 랜덤숫자
-    private int randomNum(int max){
-        return randomNum(max,1);
+    private int randomNum(int max) {
+        return randomNum(max, 1);
     }
+
     //min부터 max까지 랜덤숫자
-    private int randomNum(int max, int min){
+    private int randomNum(int max, int min) {
         Random random = new Random();
-        return random.nextInt(max)+min;
+        return random.nextInt(max) + min;
     }
 
     // review 테이블에 insert될 랜덤객체
-    private ReviewRandomReq randomReview (String category, long strfId){
+    private ReviewRandomReq randomReview(String category, long strfId) {
         ReviewRandomReq req = new ReviewRandomReq();
         req.setUserId(randomNum(138)); //랜덤 유저
         req.setStrfId(strfId);
-        int random=randomNum(5); //랜덤점수
+        int random = randomNum(5); //랜덤점수
         req.setRating(random);
-        switch (category){
+        switch (category) {
             case "STAY":
-                switch (random){
+                switch (random) {
                     case 1:
                         req.setContent("침구가 눅눅하고 소음이 심했어요. 직원 응대도 불친절했습니다.");
                         return req;
@@ -142,7 +153,7 @@ public class DataService {
                         return req;
                 }
             case "TOUR":
-                switch (random){
+                switch (random) {
                     case 1:
                         req.setContent("너무 붐비고 기대했던 것보다 별로였어요.");
                         return req;
@@ -160,7 +171,7 @@ public class DataService {
                         return req;
                 }
             case "RESTAUR":
-                switch (random){
+                switch (random) {
                     case 1:
                         req.setContent("위생 상태가 너무 안 좋았어요.");
                         return req;
@@ -178,7 +189,7 @@ public class DataService {
                         return req;
                 }
             case "FEST":
-                switch (random){
+                switch (random) {
                     case 1:
                         req.setContent("기대했던 것보다 실망스러웠어요.");
                         return req;
@@ -204,44 +215,44 @@ public class DataService {
     public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPicsFromTitle(StrfReviewGetReq p) {
         // 리뷰 넣을 strfId list 가져오기
         List<Long> strfIds = dataMapper.selectReviewStrfId(p);
-        if (strfIds==null || strfIds.isEmpty()) {
+        if (strfIds == null || strfIds.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
 
-        String sourcePath=String.format("%s/reviewsample/%s/%s",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
+        String sourcePath = String.format("%s/reviewsample/%s/%s", myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
         int reviewPicCnt;
 
-        try{
+        try {
             //review사진 파일 갯수 확인
-            reviewPicCnt=(int) myFileUtils.countFiles(sourcePath);
+            reviewPicCnt = (int) myFileUtils.countFiles(sourcePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         //reviewId를 저장할 리스트
-        List<Long> reviewIds=new ArrayList<>();
+        List<Long> reviewIds = new ArrayList<>();
         //여기서 insert 먼저 실행
-        for(long strfId : strfIds){
-            ReviewPostReq req=new ReviewPostReq();
+        for (long strfId : strfIds) {
+            ReviewPostReq req = new ReviewPostReq();
             req.setContent(p.getContent());
             req.setRating(p.getRating());
             req.setStrfId(strfId);
-            reviewMapper.postRating(req,p.getUserId());
+            reviewMapper.postRating(req, p.getUserId());
             reviewIds.add(req.getReviewId());
         }
-        int reviewInserted=0;
+        int reviewInserted = 0;
 
-        for(long reviewId:reviewIds){
-            String middlePath = String.format("reviewId/%d",reviewId);
+        for (long reviewId : reviewIds) {
+            String middlePath = String.format("reviewId/%d", reviewId);
             myFileUtils.makeFolders(middlePath);
 
-            String filePath = String.format("%s/reviewId/%d",myFileUtils.getUploadPath(),reviewId);
-            try{
+            String filePath = String.format("%s/reviewId/%d", myFileUtils.getUploadPath(), reviewId);
+            try {
                 Path source = Paths.get(sourcePath);
                 Path destination = Paths.get(filePath);
-                myFileUtils.copyFolder(source,destination);
-            } catch (IOException e){
+                myFileUtils.copyFolder(source, destination);
+            } catch (IOException e) {
                 String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
                 myFileUtils.deleteFolder(delFolderPath, true);
                 e.printStackTrace();
@@ -251,10 +262,10 @@ public class DataService {
             ReviewPicDto dto = new ReviewPicDto();
             dto.setReviewId(reviewId);
             dto.setPics(new ArrayList<>());
-            for(int i=1;i<=reviewPicCnt; i++){
-                dto.getPics().add(String.format("%d.png",i));
+            for (int i = 1; i <= reviewPicCnt; i++) {
+                dto.getPics().add(String.format("%d.png", i));
             }
-            reviewInserted+=reviewMapper.postReviewPic(dto);
+            reviewInserted += reviewMapper.postReviewPic(dto);
         }
 
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), reviewInserted));
@@ -265,8 +276,8 @@ public class DataService {
     @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> insPicAndMenuToStrf(StrfIdGetReq p) {
         //'strfTitle(title 검색어)' 기준으로 혹은 'startId와 endId 사이에서' category에 해당하는 strf_id목록 가져오기
-        List<Long> strfIds= dataMapper.selectStrfId(p);
-        if(strfIds==null){ //못가져오면 예외처리
+        List<Long> strfIds = dataMapper.selectStrfId(p);
+        if (strfIds == null) { //못가져오면 예외처리
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
@@ -277,25 +288,25 @@ public class DataService {
         //menu가 있는 상품이 있고 없는 상품이 있음. 없으면 빈배열로.
         List<MenuDto> menus = p.getMenus() == null || p.getMenus().size() == 0 ? new ArrayList<>() : p.getMenus();
         //menu 테이블에 INSERT하는 collection
-        List<Map<String,Object>> menuData = new ArrayList<>(strfIds.size()*menus.size());
+        List<Map<String, Object>> menuData = new ArrayList<>(strfIds.size() * menus.size());
 
         // sourcePath: ${file.directory}/pics/${category}/${picFolder}
-        String sourcePath=String.format("%s/pics/%s/%s",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
+        String sourcePath = String.format("%s/pics/%s/%s", myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
         // menuPath: ${file.directory}/pics/${category}/${picFolder}/menu
         // menu는 기본적으로 strf 파일 아래에 존재하지만 menu 사진 갯수를 파악하기 위함
-        String menuPath=String.format("%s/pics/%s/%s/menu",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
+        String menuPath = String.format("%s/pics/%s/%s/menu", myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
         int strfCnt;
         int menuCnt;
         try {
             // 경로에 존재하는 디렉토리와 파일의 갯수를 확인하는 메서드.
             // sourceFile은 menu 디렉토리를 포함하므로 -1하여 실제 사진 파일 갯수를 count
-            strfCnt=(int) myFileUtils.countFiles(sourcePath) - 1;
-            menuCnt=(int) myFileUtils.countFiles(menuPath);
+            strfCnt = (int) myFileUtils.countFiles(sourcePath) - 1;
+            menuCnt = (int) myFileUtils.countFiles(menuPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         //req로 들어온 메뉴 리스트의 길이가 menu 디렉토리 안의 사진 갯수와 다르면 예외발생
-        if(menuCnt!=menus.size()){
+        if (menuCnt != menus.size()) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
@@ -340,40 +351,42 @@ public class DataService {
             }
         }
         //insert
-        int result= dataMapper.insStrfPic(picAndStrfIds);
+        int result = dataMapper.insStrfPic(picAndStrfIds);
         //menu insert
-        if (menuCnt != 0) { int menuResult= dataMapper.insMenu(menuData);
-            if(menuResult==0){
+        if (menuCnt != 0) {
+            int menuResult = dataMapper.insMenu(menuData);
+            if (menuResult == 0) {
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                         .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
             }
         }
         //예외처리
-        if(result==0){
+        if (result == 0) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
     //strf사진 삭제
     @Transactional
-    public ResponseEntity<ResponseWrapper<Integer>> delPicToStrf (StrfIdGetReq p){
-        List<Long> strfIds= dataMapper.selectStrfId(p);
-        if(strfIds==null){
+    public ResponseEntity<ResponseWrapper<Integer>> delPicToStrf(StrfIdGetReq p) {
+        List<Long> strfIds = dataMapper.selectStrfId(p);
+        if (strfIds == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
 
-        int result= dataMapper.delStrfIdPic(strfIds);
-        if(result==0){
+        int result = dataMapper.delStrfIdPic(strfIds);
+        if (result == 0) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
-        for(int i=0; i<strfIds.size(); i++){
+        for (int i = 0; i < strfIds.size(); i++) {
             String deletePath = String.format("%s/strf/%d", myFileUtils.getUploadPath(), strfIds.get(i));
             myFileUtils.deleteFolder(deletePath, true);
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
     //메뉴 데이터 넣기
@@ -529,37 +542,37 @@ public class DataService {
     @Transactional
     public ResultResponse insRoom(String code) {
 
-        if(!code.equals("wooks")) {
+        if (!code.equals("wooks")) {
             return ResultResponse.forbidden();
         }
-        long[] menuIds = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
-                21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
-                41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,
-                61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,
-                81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,
-                101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,
-                116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,
-                131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,
-                146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,
-                161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,
-                176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,
-                191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,
-                206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,
-                221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,
-                236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,
-                251,252,253,254,255,256,257,258,259,260,261,262,263,264,265,
-                266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,
-                281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297};
+        long[] menuIds = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+                41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+                61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+                81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
+                101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115,
+                116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
+                131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145,
+                146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
+                161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
+                176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190,
+                191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205,
+                206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220,
+                221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235,
+                236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250,
+                251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265,
+                266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280,
+                281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297};
 
 
         int[] roomNums = {101, 102, 103, 104, 105, 201, 202, 203, 204, 205, 206, 301, 302, 303, 304};
-        for(long id : menuIds) {
+        for (long id : menuIds) {
             Menu menu = menuRepository.findById(id).orElse(null);
-            if(menu == null) {
+            if (menu == null) {
                 return ResultResponse.severError();
             }
 
-            int recomCapacity = (int)(Math.random()*10)+1;
+            int recomCapacity = (int) (Math.random() * 10) + 1;
             int maxCapacity = recomCapacity + 3;
 
             Parlor parlor = Parlor.builder()
@@ -571,7 +584,7 @@ public class DataService {
             parlorRepository.save(parlor);
             parlorRepository.flush();
 
-            for(int roomNum : roomNums) {
+            for (int roomNum : roomNums) {
                 Room room = Room.builder()
                         .menu(menu)
                         .roomNum(roomNum)
@@ -581,4 +594,5 @@ public class DataService {
         }
         return ResultResponse.success();
     }
+
 }

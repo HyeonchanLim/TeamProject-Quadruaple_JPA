@@ -1,29 +1,36 @@
 package com.green.project_quadruaple.notice;
 
+import com.green.project_quadruaple.booking.repository.BookingRepository;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.SizeConstants;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.coupon.repository.CouponRepository;
 import com.green.project_quadruaple.entity.base.NoticeCategory;
-import com.green.project_quadruaple.entity.model.Notice;
-import com.green.project_quadruaple.entity.model.NoticeReceive;
-import com.green.project_quadruaple.entity.model.NoticeReceiveId;
+import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.notice.model.res.NoticeLine;
 import com.green.project_quadruaple.notice.model.res.NoticeOne;
+import com.green.project_quadruaple.trip.TripRepository;
+import com.green.project_quadruaple.trip.TripUserRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -36,6 +43,10 @@ public class NoticeService {
     private final AuthenticationFacade authenticationFacade;
     private final UserRepository userRepository;
     private final NoticeMapper mapper;
+    private final TripRepository tripRepository;
+    private final BookingRepository bookingRepository;
+    private final CouponRepository couponRepository;
+    private final TripUserRepository tripUserRepository;
 
     // SSE 연결을 관리하는 저장소 (여러 유저 지원 가능)
     private final ConcurrentHashMap<Long, CopyOnWriteArrayList<SseEmitter>> emitters = new ConcurrentHashMap<>();
@@ -159,5 +170,50 @@ public class NoticeService {
     }
 
     //자동 시간계산 알람 발송
+    @Scheduled(cron = "0 0 5 * * *")
+    public void autoSendNotice(){
+
+    }
+
+    //일주일 앞으로 다가온 여행
+    public void dDayTripNotice(){
+        List<Trip> trips=tripRepository.findTripBefore7days();
+        for(Trip trip:trips){
+            String title=String.format("%s 여행이 일주일 앞으로 다가왔습니다!",trip.getTitle());
+            List<User> users=tripUserRepository.findUserByTripId(trip.getTripId());
+            List<String> contents=new ArrayList<>();
+            if(users.size()>1){
+                Map<Long,String> userNames=new HashMap<>();
+                for(User user:users){
+                    userNames.put(user.getUserId(),user.getName());
+                }
+                for(User user:users){
+                    StringBuilder content=new StringBuilder();
+                    int index= users.indexOf(user);
+                    for(int i=users.size(); i>=0; i--){
+                        if(i!=0 && i!=index){
+                            content.append(users.get(i-1).getName());
+                            content.append("님, ");
+                        } else {
+                            content.append(users.get(i-1).getName());
+                            content.append("님과 떠나는 ");
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    //쿠폰이 만료되기 사흘 전
+    public void dDayExpireCouponNotice(){
+        List<Coupon> coupons=couponRepository.findExpireBeforeCoupon();
+
+    }
+
+    //예약된 숙소 하루 전
+    public void dDayBookingNotice(){
+        List<Booking> bookings=bookingRepository.findBookingBeforeExpired();
+    }
 
 }
