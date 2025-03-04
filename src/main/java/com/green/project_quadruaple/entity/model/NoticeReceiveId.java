@@ -8,6 +8,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class NoticeReceiveId implements java.io.Serializable {
     private Long userId;
     private Long noticeId;
