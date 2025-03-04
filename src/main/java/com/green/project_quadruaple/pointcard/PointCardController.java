@@ -5,6 +5,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.pointcard.model.PointCardGetDto;
 import com.green.project_quadruaple.pointcard.model.PointCardNonMemberGetDto;
 import com.green.project_quadruaple.pointcard.model.PointCardPostDto;
+import com.green.project_quadruaple.pointcard.model.PointCardUpdateDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,17 @@ public class PointCardController {
 
         if (result == null || result.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), 0));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+    }
+
+    @PatchMapping()
+    @Operation(summary = "포인트 상품권 수정")
+    public ResponseEntity<?> updatePointCard(@RequestBody PointCardUpdateDto pointCardUpdateDto) {
+        int result = pointCardService.updPointCard(pointCardUpdateDto);
+
+        if (result < 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
