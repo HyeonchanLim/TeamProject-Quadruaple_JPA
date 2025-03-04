@@ -6,6 +6,7 @@ import com.green.project_quadruaple.entity.model.PointCard;
 import com.green.project_quadruaple.entity.model.Role;
 import com.green.project_quadruaple.pointcard.model.PointCardGetDto;
 import com.green.project_quadruaple.pointcard.model.PointCardNonMemberGetDto;
+import com.green.project_quadruaple.pointcard.model.PointCardPostDto;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -110,11 +110,19 @@ public class CouponBusinessIssuanceService {
             return 0;  // 권한이 없으면 수정하지 않음
         }
 
-        // 쿠폰 정보 업데이트
-        coupon.setTitle(req.getTitle());
-        coupon.setExpiredAt(req.getExpiredAt());
-        coupon.setDiscountPer(req.getDiscountPer());
-        coupon.setDistributeAt(req.getDistributeAt());
+        // 선택적으로 필드만 업데이트
+        if (req.getTitle() != null) {
+            coupon.setTitle(req.getTitle());
+        }
+        if (req.getExpiredAt() != null) {
+            coupon.setExpiredAt(req.getExpiredAt());
+        }
+        if (req.getDiscountPer() != 0) {
+            coupon.setDiscountPer(req.getDiscountPer());
+        }
+        if (req.getDistributeAt() != null) {
+            coupon.setDistributeAt(req.getDistributeAt());
+        }
 
         // 변경 사항 저장
         couponRepository.save(coupon);

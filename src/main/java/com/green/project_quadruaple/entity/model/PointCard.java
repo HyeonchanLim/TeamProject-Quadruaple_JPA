@@ -18,9 +18,6 @@ public class PointCard {
     @Id
     @Column(name = "point_card_id",nullable = false, columnDefinition = "CHAR(10)")
     private String pointCardId = String.format("%010d", new Random().nextInt(1000000000));
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "point_card_id",nullable = false, columnDefinition = "CHAR(10) DEFAULT 0")
-    private Long pointCardId;
 
     @Column(nullable = false)
     private int available;

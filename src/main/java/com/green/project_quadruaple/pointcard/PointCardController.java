@@ -4,6 +4,7 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.pointcard.model.PointCardGetDto;
 import com.green.project_quadruaple.pointcard.model.PointCardNonMemberGetDto;
+import com.green.project_quadruaple.pointcard.model.PointCardPostDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
