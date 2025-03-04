@@ -1,0 +1,1 @@
+import{_ as s,o as r,p as a}from"./index-Cwx4I7Vi.js";var m=function(){function t(n,e){r(this,t),a(this,"name",void 0),a(this,"style",void 0),a(this,"_keyframe",!0),this.name=n,this.style=e}return s(t,[{key:"getName",value:function(){var e=arguments.length>0&&arguments[0]!==void 0?arguments[0]:"";return e?"".concat(e,"-").concat(this.name):this.name}}]),t}();export{m as K};
