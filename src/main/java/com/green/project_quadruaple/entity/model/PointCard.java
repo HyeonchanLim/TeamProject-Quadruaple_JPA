@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Random;
+
 @Entity
 @Getter
 @Setter
@@ -14,9 +16,8 @@ import lombok.Setter;
 public class PointCard {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "point_card_id",nullable = false)
-    private Long pointCardId;
+    @Column(name = "point_card_id",nullable = false, columnDefinition = "CHAR(10)")
+    private String pointCardId = String.format("%010d", new Random().nextInt(1000000000));
 
     @Column(nullable = false)
     private int available;
