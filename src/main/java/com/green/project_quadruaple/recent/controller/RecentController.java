@@ -26,7 +26,7 @@ public class RecentController {
 
     @PatchMapping("hide")
     @Operation(description = "최근 본 목록 개별 비활성화")
-    public ResponseWrapper<?> hideRecentItem(@RequestParam("strf_id") String strfId) {
+    public ResponseWrapper<?> hideRecentItem(@RequestParam("strf_id") Long strfId) {
 
         return recentService.recentHide(strfId);
     }

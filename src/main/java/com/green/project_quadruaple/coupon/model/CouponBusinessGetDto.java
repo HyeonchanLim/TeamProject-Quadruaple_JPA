@@ -15,7 +15,7 @@ public class CouponBusinessGetDto {
     private LocalDateTime expiredAt;
     private int discountPer;
     private LocalDateTime distributeAt;
-    private String strfId;
+    private Long strfId;
 
     // Coupon 객체를 받아서 필드를 초기화하는 생성자
     public CouponBusinessGetDto(Coupon coupon) {

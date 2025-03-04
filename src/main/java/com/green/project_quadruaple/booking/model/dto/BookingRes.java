@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @Setter
 public class BookingRes {
     private Long bookingId;
-    private String strfId;
+    private Long strfId;
     private String strfTitle;
     private String strfPic;
     private String createdAt;
@@ -25,7 +25,6 @@ public class BookingRes {
 
     private String checkInTime; // (14:00)
     private String checkOutTime; // (14:00)
-
     // DB 에서 가져와서 (2025-01-01 수) 형태로 변환
     @JsonIgnore
     private LocalDateTime createdAtLD;
@@ -34,7 +33,7 @@ public class BookingRes {
     @JsonIgnore
     private LocalDateTime checkOutDateLD;
 
-    public BookingRes(Long bookingId, String strfId, String strfTitle, String strfPic,
+    public BookingRes(Long bookingId, Long strfId, String strfTitle, String strfPic,
                       LocalDateTime createdAtLD, LocalDateTime checkInDateLD, LocalDateTime checkOutDateLD,
                       int price, int state, Long chatRoomId)
     {
