@@ -12,6 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Room {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;

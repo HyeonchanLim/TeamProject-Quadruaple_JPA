@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.common.config.socket;
 
+import com.green.project_quadruaple.chat.repository.ChatReceiveRepository;
 import com.green.project_quadruaple.chat.repository.ChatRoomRepository;
 import com.green.project_quadruaple.common.config.jwt.TokenProvider;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -28,6 +29,7 @@ public class StompChannelInterceptor implements ChannelInterceptor {
     private final static String HEADER_AUTHORIZATION = "Authorization";
     private final static String TOKEN_PREFIX = "Bearer ";
     private final ChatRoomRepository chatRoomRepository;
+//    private final ChatReceiveRepository chatReceiveRepository;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {

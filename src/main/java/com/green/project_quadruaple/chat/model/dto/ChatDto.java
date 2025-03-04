@@ -19,12 +19,15 @@ public class ChatDto {
     private boolean signedUser;
     private String message;
     private String title;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdAt;
+    private String createdAt;
+
+    @JsonIgnore
+    private LocalDateTime createdAtLD;
+
 
 
     public ChatDto(Long chatId, String senderName, String senderPic
-            , boolean signedUser, Long senderId, String message, String title, LocalDateTime createdAt) {
+            , boolean signedUser, Long senderId, String message, String title, LocalDateTime createdAtLD) {
         this.chatId = chatId;
         this.senderName = senderName;
         this.senderPic = senderPic;
@@ -32,6 +35,6 @@ public class ChatDto {
         this.senderId = senderId;
         this.message = message;
         this.title = title;
-        this.createdAt = createdAt;
+        this.createdAtLD = createdAtLD;
     }
 }

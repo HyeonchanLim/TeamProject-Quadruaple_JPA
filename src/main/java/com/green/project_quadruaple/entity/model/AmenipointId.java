@@ -10,6 +10,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class AmenipointId implements Serializable {
     private Long amenityId;
     private String strfId;

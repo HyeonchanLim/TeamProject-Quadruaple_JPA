@@ -9,5 +9,4 @@ public class JoinReq {
 
     private Long roomId;
     private String sender;
-    private String error;
 }
