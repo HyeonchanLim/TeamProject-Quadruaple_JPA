@@ -22,7 +22,7 @@ public class Recent {
     @ManyToOne(fetch = FetchType.LAZY)
     private User userId;
 
-    @JoinColumn(name = "strf_id",nullable = true)
+    @JoinColumn(name = "strf_id",nullable = true, columnDefinition = "CHAR(10) DEFAULT 0")
     @MapsId("strfId") // 복합키 사용 - Embedded 로 설정해놔서 JoinColumn 충돌 발생 -> MapsId 로 해결 + fk 관리
     @ManyToOne(fetch = FetchType.LAZY)
     private StayTourRestaurFest strfId;

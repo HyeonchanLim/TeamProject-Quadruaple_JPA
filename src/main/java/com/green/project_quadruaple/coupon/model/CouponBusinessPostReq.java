@@ -24,5 +24,5 @@ public class CouponBusinessPostReq {
     @Schema(example = "2025-01-01T00:00:00", type = "string")
     private LocalDateTime distributeAt;
 
-    private Long strfId;
+    private String strfId;
 }

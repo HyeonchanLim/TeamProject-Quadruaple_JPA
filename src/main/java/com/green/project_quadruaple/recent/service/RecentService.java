@@ -42,7 +42,7 @@ public class RecentService {
     }
 
     @Transactional
-    public ResponseWrapper<Long> recentHide(Long strfId) {
+    public ResponseWrapper<Long> recentHide(String strfId) {
         Long userId = authenticationFacade.getSignedUserId();
 
         User user = userRepository.findById(userId)
