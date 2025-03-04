@@ -5,6 +5,7 @@ import com.green.project_quadruaple.chat.model.dto.ChatRoomDto;
 import com.green.project_quadruaple.chat.model.req.GetChatRoomReq;
 import com.green.project_quadruaple.chat.model.req.PostChatRoomReq;
 import com.green.project_quadruaple.chat.repository.ChatJoinRepository;
+import com.green.project_quadruaple.chat.repository.ChatReceiveRepository;
 import com.green.project_quadruaple.chat.repository.ChatRoomMapper;
 import com.green.project_quadruaple.chat.repository.ChatRoomRepository;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
@@ -12,6 +13,7 @@ import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 //import com.green.project_quadruaple.entity.model.ChatJoin;
+import com.green.project_quadruaple.entity.model.ChatJoin;
 import com.green.project_quadruaple.entity.model.ChatRoom;
 import com.green.project_quadruaple.entity.model.Role;
 import com.green.project_quadruaple.strf.StrfRepository;
@@ -41,6 +43,7 @@ public class ChatRoomService {
     private final StrfRepository strfRepository;
     private final RoleRepository roleRepository;
     private final ChatRoomMapper chatRoomMapper;
+    private final ChatReceiveRepository chatReceiveRepository;
 
     @Transactional
     public ResponseWrapper<Long> createChatRoom(PostChatRoomReq req) {
@@ -60,17 +63,17 @@ public class ChatRoomService {
         chatRoomRepository.save(chatRoom);
         chatRoomRepository.flush();
 
-//        ChatJoin hostUserJoin = ChatJoin.builder()
-//                .role(hostUserRole)
-//                .chatRoom(chatRoom)
-//                .build();
-//        chatJoinRepository.save(hostUserJoin);
-//
-//        ChatJoin inviteUserJoin = ChatJoin.builder()
-//                .role(inviteUserRole)
-//                .chatRoom(chatRoom)
-//                .build();
-//        chatJoinRepository.save(inviteUserJoin);
+        ChatJoin hostUserJoin = ChatJoin.builder()
+                .role(hostUserRole)
+                .chatRoom(chatRoom)
+                .build();
+        chatJoinRepository.save(hostUserJoin);
+
+        ChatJoin inviteUserJoin = ChatJoin.builder()
+                .role(inviteUserRole)
+                .chatRoom(chatRoom)
+                .build();
+        chatJoinRepository.save(inviteUserJoin);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoom.getChatRoomId());
     }
@@ -85,6 +88,7 @@ public class ChatRoomService {
     }
 
     // 채팅방 불러오기
+    @Transactional
     public ResponseWrapper<List<ChatDto>> getChatList(Long roomId, GetChatRoomReq req) {
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
@@ -94,6 +98,12 @@ public class ChatRoomService {
         for (ChatDto chatDto : chatLimit30) {
             LocalDateTime createdAtLD = chatDto.getCreatedAtLD();
             chatDto.setCreatedAt(formatDate(createdAtLD, now));
+        }
+        try {
+            chatReceiveRepository.deleteByUserId(signedUserId, roomId);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatLimit30);
