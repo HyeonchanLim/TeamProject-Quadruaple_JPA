@@ -3,16 +3,17 @@ package com.green.project_quadruaple.strf;
 import com.green.project_quadruaple.booking.repository.MenuRepository;
 import com.green.project_quadruaple.booking.repository.ParlorRepository;
 import com.green.project_quadruaple.booking.repository.RoomRepository;
+import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.entity.model.BusinessNum;
-import com.green.project_quadruaple.entity.model.Role;
-import com.green.project_quadruaple.entity.model.StayTourRestaurFest;
+import com.green.project_quadruaple.entity.model.*;
+import com.green.project_quadruaple.entity.repository.LocationDetailRepository;
 import com.green.project_quadruaple.strf.model.GetNonDetail;
 import com.green.project_quadruaple.strf.model.*;
+import com.green.project_quadruaple.trip.model.Category;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +22,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -38,9 +43,11 @@ public class StrfService {
     private final RoleRepository roleRepository;
     private final StrfRepository strfRepository;
     private final BusinessNumRepository businessNumRepository;
+    private final LocationDetailRepository locationDetailRepository;
+    private final MyFileUtils myFileUtils;
+    private final StrfPicRepository strfPicRepository;
 
-
-    public ResponseWrapper<StrfSelRes> getMemberDetail(String strfId) {
+    public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -84,7 +91,7 @@ public class StrfService {
     }
 
     @Transactional
-    public ResponseWrapper<Integer> strfIns (StrfInsReq p){
+    public ResponseWrapper<Integer> strfIns (List<MultipartFile> strfPic, List<MultipartFile> menuPic , StrfInsReq p){
         long userId = authenticationFacade.getSignedUserId();
 
         // 사용자 권한 확인 (BUSI 권한이 있는지 확인)
@@ -96,16 +103,63 @@ public class StrfService {
         }
         BusinessNum businessNum = businessNumRepository.findByBusiNum(p.getBusiNum());
 
-        // 관련된 StayTourRestaurFest 정보 조회
-//        StayTourRestaurFest stayTourRestaurFest = strfRepository.findById(p.getStrfId()).orElseThrow()
-//                .orElseThrow(() -> new RuntimeException("Invalid StayTourRestaurFest ID"));
-//
-//        // 해당 사업자가 올린 게시물인지 확인
-//        if (!stayTourRestaurFest.getBusiNum().getUser().getUserId().equals(userId)) {
-//            log.error("해당 사업자가 올린 게시물이 아닙니다. 사용자 ID: {}", userId);
-//            return 0;  // 사업자가 올린 게시물이 아니면 쿠폰 발급하지 않음
-//        }
+        LocationDetail locationDetail = locationDetailRepository.findById(p.getLocationDetailId())
+                .orElseThrow( () ->  new RuntimeException("locationDetailId wrong input"));
 
+        String categoryValue = null;
+        if (p.getCategory() != null && Category.getKeyByName(p.getCategory()) != null) {
+            categoryValue = Objects.requireNonNull(Category.getKeyByName(p.getCategory())).getValue();
+        }
+
+        StayTourRestaurFest strf = StayTourRestaurFest.builder()
+                .cid(p.getCid())
+                .category(categoryValue)
+                .title(p.getTitle())
+                .lat(p.getLat())
+                .lng(p.getLng())
+                .address(p.getAddress())
+                .locationDetail(locationDetail)
+                .post(p.getPost())
+                .tell(p.getTell())
+                .startAt(p.getStartAt())
+                .endAt(p.getEndAt())
+                .openCheckIn(p.getOpenCheckIn())
+                .closeCheckOut(p.getCloseCheckOut())
+                .detail(p.getDetail())
+                .busiNum(businessNum)
+                .state(p.getState())
+                .build();
+        strfRepository.save(strf);
+
+        String middlePath = String.format("reviewId/%d", strf.getStrfId());
+        myFileUtils.makeFolders(middlePath);
+
+        List<String> picNameList = new ArrayList<>(strfPic.size());
+        for (MultipartFile pic : strfPic) {
+            String savedPicName = myFileUtils.makeRandomFileName(pic);
+            picNameList.add(savedPicName);
+            String filePath = String.format("%s/%s", middlePath, savedPicName);
+            try {
+                StrfPic strfPics = new StrfPic();
+                strfPics.setStrfId(strf);
+                strfPics.setPicName(savedPicName);
+
+                strfPicRepository.save(strfPics);
+
+                myFileUtils.transferTo(pic, filePath);
+            } catch (IOException e) {
+                e.printStackTrace();
+                String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
+                myFileUtils.deleteFolder(delFolderPath, true);
+                throw new RuntimeException(e);
+            }
+        }
+
+//        List<AmenipointId> amenipointIds = AmenipointId.builder()
+//                .strfId(strf.getStrfId())
+//                .amenityId(p.getAmenipoints())
+//                .build();
+//Amenipoint
         return null;
     }
 

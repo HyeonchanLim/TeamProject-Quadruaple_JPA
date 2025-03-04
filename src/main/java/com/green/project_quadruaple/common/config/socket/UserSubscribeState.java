@@ -7,14 +7,8 @@ import java.util.Set;
 
 public class UserSubscribeState {
     
-    // Map<cjId, state>
+    // Set<cjId>
     public static final Set<Long> USER_SUB_STATE = new HashSet<>();
 
-    public static void changeState(Long cjId) {
-        if(USER_SUB_STATE.contains(cjId)) {
-            USER_SUB_STATE.remove(cjId);
-        } else {
-            USER_SUB_STATE.add(cjId);
-        }
-    }
+
 }

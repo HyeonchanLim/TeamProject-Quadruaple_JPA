@@ -11,6 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@Builder
 public class AmenipointId implements Serializable {
     private Long amenityId;
     private Long strfId;

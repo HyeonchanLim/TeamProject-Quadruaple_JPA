@@ -4,6 +4,8 @@ import com.green.project_quadruaple.entity.model.ChatJoin;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface ChatJoinRepository extends JpaRepository<ChatJoin, Long> {
 
     @Query("""
@@ -14,9 +16,15 @@ public interface ChatJoinRepository extends JpaRepository<ChatJoin, Long> {
     ChatJoin findByChatRoomIdAndUserId(Long chatRoomId, Long userId);
 
     @Query("""
-            select count(cj) from ChatJoin cj
-            where cj.chatRoom.chatRoomId = :roomId
-                and cj.role.user.userId = :signedUserId
-            """)
-    Integer existsJoinUser(Long roomId, Long signedUserId);
+        select cj.cjId from ChatJoin cj
+        where cj.chatRoom.chatRoomId = :roomId
+            and cj.role.user.userId = :signedUserId
+        """)
+    Long findChatJoinIdByChatRoomIdAndUserId(Long roomId, Long signedUserId);
+
+    @Query("""
+        select cj from ChatJoin cj
+        where cj.chatRoom.chatRoomId = :roomId
+        """)
+    List<ChatJoin> findChatJoinIdListByChatRoomId(Long roomId);
 }

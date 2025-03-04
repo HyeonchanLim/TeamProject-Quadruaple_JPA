@@ -9,17 +9,18 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class ChatReceive {
 
     @EmbeddedId
-    private ChatReceiveId id;
+    private ChatReceiveId id = new ChatReceiveId();
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("chatId")
     @JoinColumn(name = "chat_id", nullable = false, insertable = false, updatable = false)
     private Chat chat;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("listenerId")
     @JoinColumn(name = "listener_id", nullable = false, insertable = false, updatable = false)
     private ChatJoin listenerId;
 
