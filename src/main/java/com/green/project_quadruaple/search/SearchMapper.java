@@ -10,6 +10,7 @@ import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.eclipse.angus.mail.imap.protocol.INTERNALDATE;
 
 import java.util.List;
 
@@ -34,10 +35,10 @@ public interface SearchMapper {
 
     // 전체 상품에서 해당 카테고리 전환
     List<SearchCategoryRes> searchCategory(int startIdx, int size, String category, String searchWord, Long userId, String orderType);
-
+    int categoryCount (String category, String searchWord);
     // 전체 상품에서 숙소 카테고리 전환
     List<SearchStay> searchStay(int startIdx ,int size, String category, String searchWord,  Long userId, List<Long> amenityId);
-
+    int amenityCnt (List<Long> amenityId);
 //    List<SearchAmenity> searchAmenity(List<Long> amenityId);
 
 

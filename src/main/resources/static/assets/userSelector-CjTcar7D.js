@@ -1,0 +1,1 @@
+import{n as r,t as s,b as t,o as a}from"./index-CGf2ioEP.js";const n=r({key:"resetUserData",get:({get:e})=>e(s),set:({set:e})=>{e(t,{userId:0,email:"",name:"",profilePic:"",accessToken:"",role:[],providerType:a.LOCAL})}});export{n as r};

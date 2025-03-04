@@ -19,9 +19,9 @@ import java.time.LocalTime;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class StayTourRestaurFest extends EndAt {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "strf_id")
-    private Long strfId;
+    @Id
+    @Column(name = "strf_id", updatable = false, nullable = false, length = 10, columnDefinition = "CHAR(10) DEFAULT 0")
+    private String strfId;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

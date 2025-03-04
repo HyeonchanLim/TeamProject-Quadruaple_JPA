@@ -16,5 +16,5 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class WishlistId implements Serializable {
     private Long userId;
-    private Long strfId;
+    private String strfId;
 }
