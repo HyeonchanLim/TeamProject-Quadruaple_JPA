@@ -138,4 +138,26 @@ public class NoticeService {
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
+
+    //알람 발송 기본 템플릿
+    public void postNotice(NoticeCategory category,String title, String content, Long userId, Long foreignNum){
+        Notice notice = new Notice();
+        notice.setNoticeCategory(category);
+        notice.setContent(content);
+        notice.setTitle(title);
+        notice.setForeignNum(foreignNum);
+        notice.setNoticeCategory(NoticeCategory.SERVICE);
+        noticeRepository.save(notice);
+        NoticeReceiveId noticeReceiveId = new NoticeReceiveId(userId, notice.getNoticeId());
+        NoticeReceive noticeReceive = NoticeReceive.builder()
+                .id(noticeReceiveId)
+                .notice(notice)
+                .user(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found")))
+                .opened(false)
+                .build();
+        noticeReceiveRepository.save(noticeReceive);
+    }
+
+    //자동 시간계산 알람 발송
+
 }
