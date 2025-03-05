@@ -319,7 +319,6 @@ public class TripReviewService {
         if (newTripId == null || newTripId <= 0) {
             throw new RuntimeException("Failed to copy trip. No new tripId generated.");
         }
-        trip.setTripId(newTripId);
 
         tripReviewMapper.insTripUser(newTripId, userId);
 
