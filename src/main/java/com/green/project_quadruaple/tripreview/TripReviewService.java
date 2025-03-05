@@ -5,6 +5,7 @@ import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.trip.TripMapper;
 import com.green.project_quadruaple.trip.TripRepository;
+import com.green.project_quadruaple.trip.model.req.PostTripReq;
 import com.green.project_quadruaple.tripreview.model.*;
 import com.green.project_quadruaple.tripreview.repository.*;
 import com.green.project_quadruaple.user.Repository.UserRepository;
@@ -310,27 +311,37 @@ public class TripReviewService {
         // 1. tripReviewId와 tripId 유효성 검증
         validateTripReview(trip.getTripReviewId(), trip.getCopyTripId());
 
-        // 2. 여행 복사
-        int copyTrip = tripReviewMapper.copyInsTrip(trip);
+        // 2. 여행 복사 실행 (기존 여행 정보 그대로 가져와 삽입)
+        tripReviewMapper.copyInsTrip(trip);
+
+        // 새롭게 생성된 tripId 가져오기
+        Long newTripId = trip.getTripId();
+        if (newTripId == null || newTripId <= 0) {
+            throw new RuntimeException("Failed to copy trip. No new tripId generated.");
+        }
+        trip.setTripId(newTripId);
+
+        tripReviewMapper.insTripUser(newTripId, userId);
 
         // 3. 일정/메모 복사
         CopyInsertScheMemoDto copyInsertScheMemoDto = new CopyInsertScheMemoDto();
-        copyInsertScheMemoDto.setTripId(trip.getTripId());
+        copyInsertScheMemoDto.setTripId(newTripId);
         copyInsertScheMemoDto.setCopyTripId(trip.getCopyTripId());
         int copyScheMemo = tripReviewMapper.copyInsScheMemo(copyInsertScheMemoDto);
 
-        // 4. 기존 sche_memo_id 목록 조회 (originalScheMemoIds 찾기)
+        // 4. 기존 sche_memo_id 목록 조회
         List<Long> originalScheMemoIds = tripReviewMapper.getOriginalScheMemoIds(trip.getCopyTripId());
 
         // 5. 새롭게 생성된 scheduleMemoId 목록 조회
-        List<Long> newScheMemoIds = tripReviewMapper.getNewScheMemoIds(trip.getTripId());
+        List<Long> newScheMemoIds = tripReviewMapper.getNewScheMemoIds(newTripId);
 
         // 6. 기존 일정의 schedule_id 목록 조회
         List<Long> originalScheduleIds = tripReviewMapper.getOriginalScheduleIds(originalScheMemoIds);
 
-        // 7. 기존 일정 개수와 새로 복사된 일정 개수가 같은지 확인
+        // 7. 일정 개수 확인
         if (originalScheduleIds.size() != newScheMemoIds.size()) {
-            throw new RuntimeException("Mismatch in schedule_memo mapping. Expected: " + originalScheduleIds.size() + ", but got: " + newScheMemoIds.size());
+            throw new RuntimeException("Mismatch in schedule_memo mapping. Expected: "
+                    + originalScheduleIds.size() + ", but got: " + newScheMemoIds.size());
         }
 
         // 8. 일정 복사
@@ -338,24 +349,24 @@ public class TripReviewService {
             CopyScheduleDto copyScheduleDto = new CopyScheduleDto();
             copyScheduleDto.setScheduleMemoId(newScheMemoIds.get(i)); // 새로 생성된 scheduleMemoId 사용
             copyScheduleDto.setOriginalScheduleId(originalScheduleIds.get(i)); // 기존 schedule_id 사용
-
             int copySchedule = tripReviewMapper.copyInsSchedule(copyScheduleDto);
         }
 
         // 9. 여행 위치 복사
         List<Long> originalLocationIds = tripReviewMapper.getOriginalLocationIds(trip.getCopyTripId());
         if (!originalScheduleIds.isEmpty()) {
-            tripReviewMapper.copyInsTripLocation(trip.getCopyTripId(), trip.getTripId());
+            tripReviewMapper.copyInsTripLocation(trip.getCopyTripId(), newTripId);
         }
 
         // 10. 스크랩 테이블에 담기
         TripReviewScrapDto tripReviewScrapDto = new TripReviewScrapDto();
         tripReviewScrapDto.setTripReviewId(trip.getTripReviewId());
-        tripReviewScrapDto.setTripId(trip.getTripId());
+        tripReviewScrapDto.setTripId(newTripId);
         int insScrap = tripReviewMapper.insTripReviewScrap(tripReviewScrapDto);
 
         return 1;
     }
+
 
 
     // tripReviewId와 tripId의 유효성 검증
