@@ -73,6 +73,20 @@ public class MyFileUtils {
 //        mf.transferTo(pathFile);
     }
 
+    public void transferToUser(MultipartFile mf, String path) throws IOException {
+        Path targetPath = Paths.get(String.format("%s/%s", uploadPath, path)).toAbsolutePath();
+        File pathFile = targetPath.toFile();
+
+        // 로그 출력 (디버깅용)
+        log.info("PathFile: {}", pathFile.getAbsolutePath());
+
+        // 디렉토리가 존재하지 않으면 생성
+        pathFile.getParentFile().mkdirs();  // 디렉토리 생성 (필요시)
+
+        // 파일을 실제로 지정된 경로로 저장
+        mf.transferTo(pathFile);  // 파일을 저장
+    }
+
     //파일을 원하는 경로에 저장(복사)
     public void copyFolder(Path source, Path destination) throws IOException {
         Files.walkFileTree(source, new SimpleFileVisitor<Path>() {

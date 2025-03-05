@@ -106,10 +106,10 @@ public class StrfService {
         LocationDetail locationDetail = locationDetailRepository.findById(p.getLocationDetailId())
                 .orElseThrow( () ->  new RuntimeException("locationDetailId wrong input"));
 
-        String categoryValue = null;
-        if (p.getCategory() != null && Category.getKeyByName(p.getCategory()) != null) {
-            categoryValue = Objects.requireNonNull(Category.getKeyByName(p.getCategory())).getValue();
-        }
+        Category categoryValue = null;
+//        if (p.getCategory() != null && Category.getKeyByName(p.getCategory()) != null) {
+//            categoryValue = Objects.requireNonNull(Category.getKeyByName(p.getCategory())).getValue();
+//        }
 
         StayTourRestaurFest strf = StayTourRestaurFest.builder()
                 .cid(p.getCid())
