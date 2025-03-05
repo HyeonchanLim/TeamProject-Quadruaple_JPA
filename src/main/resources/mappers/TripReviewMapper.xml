@@ -253,6 +253,11 @@
          WHERE trip_id = #{copyTripId}
     </insert>
 
+    <insert id="insTripUser">
+        INSERT IGNORE INTO trip_user (trip_id, user_id)
+        VALUES (#{tripId}, #{userId})
+    </insert>
+
     <!-- 여행기 스크랩 조회수-->
     <select id="selTripReviewScrapCount">
         SELECT COUNT(*)
