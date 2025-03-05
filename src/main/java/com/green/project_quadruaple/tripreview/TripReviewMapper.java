@@ -51,4 +51,5 @@ public interface TripReviewMapper {
     List<Long> getNewScheMemoIds(long copyTripId);
     List<Long> getOriginalLocationIds(long tripId);
     void copyInsTripLocation(long copyTripId, long tripId);
+    int insTripUser(long tripId, long userId);
 }

@@ -61,6 +61,7 @@ public class CouponService {
                     couponDto.setExpiredAt(coupon.getExpiredAt());
                     couponDto.setDistributeAt(coupon.getDistributeAt());
                     couponDto.setDaysLeft(ChronoUnit.DAYS.between(now, coupon.getExpiredAt().toLocalDate())); // D-Day 설정
+                    couponDto.setDiscountPer(coupon.getDiscountPer()); // discountPer 값을 설정
                     return couponDto;
                 })
                 .collect(Collectors.toList());

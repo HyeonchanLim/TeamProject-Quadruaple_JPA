@@ -23,6 +23,9 @@ public class Booking extends CreatedAt {
     @JoinColumn(name = "menu_id", nullable = false)
     private Menu menu;
 
+    @Column(nullable = false)
+    private int num;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     private Room room;

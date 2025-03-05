@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.entity.base.NoticeCategory;
-import com.green.project_quadruaple.entity.model.Location;
-import com.green.project_quadruaple.entity.model.Trip;
+import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.entity.repository.LocationRepository;
+import com.green.project_quadruaple.notice.NoticeReceiveRepository;
+import com.green.project_quadruaple.notice.NoticeRepository;
 import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.trip.model.PathInfoVo;
 import com.green.project_quadruaple.trip.model.PathType;
@@ -39,6 +40,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,6 +63,8 @@ public class TripService {
     private final String ADD_USER_LINK;
 
     public static final Map<String, Long> addUserLinkMap = new HashMap<>();
+    private final NoticeRepository noticeRepository;
+    private final NoticeReceiveRepository noticeReceiveRepository;
 
     public TripService(TripMapper tripMapper,
                        OdsayApiConst odsayApiConst,
@@ -73,7 +77,7 @@ public class TripService {
                        UserRepository userRepository,
                        TripRepository tripRepository,
                        TripLocationRepository tripLocationRepository,
-                       TripUserRepository tripUserRepository)
+                       TripUserRepository tripUserRepository, NoticeRepository noticeRepository, NoticeReceiveRepository noticeReceiveRepository)
     {
         this.tripMapper = tripMapper;
         this.odsayApiConst = odsayApiConst;
@@ -87,6 +91,8 @@ public class TripService {
         this.tripRepository = tripRepository;
         this.tripLocationRepository = tripLocationRepository;
         this.tripUserRepository = tripUserRepository;
+        this.noticeRepository = noticeRepository;
+        this.noticeReceiveRepository = noticeReceiveRepository;
     }
 
     //여행참여 알람
@@ -94,7 +100,7 @@ public class TripService {
         if (trip==null){return;}
         String noticeTitle=trip.getTitle()+"여행에 참석하셨습니다!";
 
-        String joinUserName=userRepository.findNameById(userId);
+        User joinUser=userRepository.findById(userId).orElseThrow(()->new RuntimeException());
         List<Location> locations=tripLocationRepository.findLocationByTrip(trip);
         String locationName=locations.get(0).getTitle();
         if(locations.size()>1) {
@@ -111,10 +117,36 @@ public class TripService {
                     .append(locationName).append("을(를) 여행하는 ");
         if(userId!=managerId){
             content.append(userRepository.findNameById(managerId)).append("님의 ");
+            sendNoticeJoin(trip,joinUser);
         }
-          content.append("그룹에 참석하셨습니다.\n즐거운 여행 되세요! ").append(joinUserName).append("님!");
+          content.append("그룹에 참석하셨습니다.\n즐거운 여행 되세요! ").append(joinUser.getName()).append("님!");
 
-        noticeService.postNotice(NoticeCategory.TRIP,noticeTitle,content.toString(),userId,trip.getTripId());
+        noticeService.postNotice(NoticeCategory.TRIP,noticeTitle,content.toString(),joinUser,trip.getTripId());
+    }
+
+    private void sendNoticeJoin (Trip trip, User user){
+        List<NoticeReceive> noticeReceives=new ArrayList<>();
+        StringBuilder title=new StringBuilder(user.getName());
+        title.append("님이 ").append(trip.getTitle()).append("에 참석하셨습니다.");
+        String content=title.toString()+" 환영해주세요!";
+        Notice notice = Notice.builder()
+                .foreignNum(trip.getTripId())
+                .title(title.toString())
+                .content(content)
+                .noticeCategory(NoticeCategory.TRIP)
+                .build();
+        noticeRepository.save(notice);
+        List<User> users=tripUserRepository.findUserByTrip(trip).stream().filter(u-> u != user).collect(Collectors.toList());
+        for(User u:users){
+            NoticeReceive noticeReceive=NoticeReceive.builder()
+                    .id(new NoticeReceiveId(u.getUserId(),notice.getNoticeId()))
+                    .user(u)
+                    .notice(notice)
+                    .opened(false)
+                    .build();
+            noticeReceives.add(noticeReceive);
+        }
+        noticeReceiveRepository.saveAll(noticeReceives);
     }
 
 

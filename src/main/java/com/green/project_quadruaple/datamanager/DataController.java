@@ -5,6 +5,7 @@ import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.datamanager.model.ReviewDummyReq;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
 import com.green.project_quadruaple.datamanager.model.StrfReviewGetReq;
+import com.green.project_quadruaple.user.model.UserSignUpReq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
