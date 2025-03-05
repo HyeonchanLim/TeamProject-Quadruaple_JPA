@@ -29,7 +29,7 @@ public class StayTourRestaurFest extends UpdatedAt {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private String category;
+    private Category category;
 
     @Column(nullable = false, length = 100)
     private String title;
@@ -60,10 +60,10 @@ public class StayTourRestaurFest extends UpdatedAt {
     private LocalDate endAt;
 
     @Column(name = "open_check_in")
-    private LocalDateTime openCheckIn;
+    private LocalTime openCheckIn;
 
     @Column(name = "close_check_out")
-    private LocalDateTime closeCheckOut;
+    private LocalTime closeCheckOut;
 
     @Column(columnDefinition = "TEXT")
     private String detail;
