@@ -40,4 +40,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 and b.checkOut < :now
             """)
     void updateAllStateAfterCheckOut(LocalDateTime now);
+
+
+    @Query("""
+        SELECT DISTINCT b 
+        FROM Booking b
+        LEFT JOIN FETCH b.menu m 
+        LEFT join fetch b.user u
+        LEFT JOIN FETCH m.stayTourRestaurFest s
+        WHERE DATEDIFF(b.checkIn, NOW()) = 1 
+        AND b.state = 1
+    """)
+    List<Booking> findBookingBeforeExpired();
 }

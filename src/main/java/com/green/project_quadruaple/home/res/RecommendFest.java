@@ -8,7 +8,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class RecommendFest {
-    private long strfId;
+    private String strfId;
     private String strfPic;
     private String festTitle;
     private boolean isOpen;
