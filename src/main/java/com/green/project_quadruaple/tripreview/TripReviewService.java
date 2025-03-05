@@ -79,7 +79,7 @@ public class TripReviewService {
                 picNameList.add(savedPicName);
                 String filePath = String.format("%s/%s", middlePath, savedPicName);
                 try {
-                    myFileUtils.transferTo(pic, filePath);
+                    myFileUtils.transferToUser(pic, filePath);
                 } catch (IOException e) {
                     // 업로드된 폴더 삭제
                     String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
@@ -208,7 +208,7 @@ public class TripReviewService {
                     String filePath = String.format("%s/%s", middlePath, savedPicName); // 중복 경로 수정
 
                     try {
-                        myFileUtils.transferTo(pic, filePath);
+                        myFileUtils.transferToUser(pic, filePath);
                     } catch (IOException e) {
                         throw new RuntimeException("여행기 사진 저장에 실패했습니다.", e);
                     }
