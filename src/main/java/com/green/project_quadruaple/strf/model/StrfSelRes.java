@@ -47,7 +47,7 @@ public class StrfSelRes {
 
     private List<StrfAmenity> amenities;
     private List<StrfPicSel> strfPics;
-    private List<Menu> menu;
+    private List<StrfMenu> menu;
     private List<StrfParlor> parlors;
     private List<StrfRooms> rooms;
 

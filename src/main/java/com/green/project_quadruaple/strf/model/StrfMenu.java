@@ -8,16 +8,17 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Menu {
+public class StrfMenu {
 
     @Schema(description = "메뉴 가격")
     private int menuPrice;
     @Schema(description = "메뉴 ID")
-    private String menuId;
+    private long menuId;
     @Schema(description = "메뉴 이름")
     private String menuTitle;
     @Schema(description = "메뉴 사진")
     private String menuPic;
-
+    @Schema(description = "상품 ID")
+    private long strfId;
 }
 

@@ -91,8 +91,9 @@
             <result property="amenityTitle" column="amenityTitle" />
         </collection>
 
-        <collection property="menu" ofType="com.green.project_quadruaple.strf.model.Menu">
+        <collection property="menu" ofType="com.green.project_quadruaple.strf.model.StrfMenu">
             <id property="menuId" column="menuId" />
+            <result property="strfId" column="strfId" />
             <result property="menuTitle" column="menuTitle" />
             <result property="menuPrice" column="menuPrice" />
             <result property="menuPic" column="menuPic" />
@@ -116,82 +117,82 @@
         </collection>
     </resultMap>
 
-    <select id="getNonMemberDetail" resultMap="nonMemberResultMap">
-        SELECT
-        a.strf_id AS strfId , a.category , a.title AS strfTitle ,
-        a.lat AS latit, a.lng AS longitude, a.address, b.menu_id AS menuId,
-        a.post, a.tell, a.start_at AS startAt, a.end_at AS endAt,
-        a.open_check_in as openCheck, a.close_check_out as closeCheck , m.day_week AS restDate,
-        a.`explain`, a.detail, a.busi_num AS busiNum, b.menu_pic AS menuPic,
-        f.detail_title AS locationName, e.pic_name AS strfPic , d.amenity_id AS amenityId,
-        b.title AS menuTitle, d.title AS amenityTitle,
-        j.name AS reviewWriterName , j.profile_pic AS reviewWriterUserPic ,
-        l.profile_pic AS hostProfilePic, l.name AS hostName , b.price AS menuPrice,
-        COUNT(DISTINCT h.review_id) AS reviewCnt,
-        <if test="rating != null">
-            AVG(h.rating) AS ratingAvg
-        </if>
+<!--    <select id="getNonMemberDetail" resultMap="nonMemberResultMap">-->
+<!--        SELECT-->
+<!--        a.strf_id AS strfId , a.category , a.title AS strfTitle ,-->
+<!--        a.lat AS latit, a.lng AS longitude, a.address, b.menu_id AS menuId,-->
+<!--        a.post, a.tell, a.start_at AS startAt, a.end_at AS endAt,-->
+<!--        a.open_check_in as openCheck, a.close_check_out as closeCheck , m.day_week AS restDate,-->
+<!--        a.`explain`, a.detail, a.busi_num AS busiNum, b.menu_pic AS menuPic,-->
+<!--        f.detail_title AS locationName, e.pic_name AS strfPic , d.amenity_id AS amenityId,-->
+<!--        b.title AS menuTitle, d.title AS amenityTitle,-->
+<!--        j.name AS reviewWriterName , j.profile_pic AS reviewWriterUserPic ,-->
+<!--        l.profile_pic AS hostProfilePic, l.name AS hostName , b.price AS menuPrice,-->
+<!--        COUNT(DISTINCT h.review_id) AS reviewCnt,-->
+<!--        <if test="rating != null">-->
+<!--            AVG(h.rating) AS ratingAvg-->
+<!--        </if>-->
 
-        FROM
-        stay_tour_restaur_fest a
-        LEFT JOIN menu b ON a.strf_id = b.strf_id
-        LEFT JOIN amenipoint c ON a.strf_id = c.strf_id
-        LEFT JOIN amenity d ON c.amenity_id = d.amenity_id
-        LEFT JOIN strf_pic e ON a.strf_id = e.strf_id
-        LEFT JOIN location_detail f ON a.location_detail_id = f.location_detail_id
-        LEFT JOIN location g ON f.location_id = g.location_id
-        LEFT JOIN review h ON a.strf_id = h.strf_id
-        LEFT JOIN review_pic i ON h.review_id = i.review_id
-        LEFT JOIN user j ON h.user_id = j.user_id
-        LEFT JOIN business_num k ON a.busi_num = k.busi_num
-        LEFT JOIN user l ON l.user_id = k.user_id
-        LEFT JOIN rest_date m ON m.strf_id = a.strf_id
+<!--        FROM-->
+<!--        stay_tour_restaur_fest a-->
+<!--        LEFT JOIN menu b ON a.strf_id = b.strf_id-->
+<!--        LEFT JOIN amenipoint c ON a.strf_id = c.strf_id-->
+<!--        LEFT JOIN amenity d ON c.amenity_id = d.amenity_id-->
+<!--        LEFT JOIN strf_pic e ON a.strf_id = e.strf_id-->
+<!--        LEFT JOIN location_detail f ON a.location_detail_id = f.location_detail_id-->
+<!--        LEFT JOIN location g ON f.location_id = g.location_id-->
+<!--        LEFT JOIN review h ON a.strf_id = h.strf_id-->
+<!--        LEFT JOIN review_pic i ON h.review_id = i.review_id-->
+<!--        LEFT JOIN user j ON h.user_id = j.user_id-->
+<!--        LEFT JOIN business_num k ON a.busi_num = k.busi_num-->
+<!--        LEFT JOIN user l ON l.user_id = k.user_id-->
+<!--        LEFT JOIN rest_date m ON m.strf_id = a.strf_id-->
 
-        WHERE a.strf_id = #{strfId}
-        GROUP BY a.strf_id, f.detail_title, b.menu_id, e.pic_name, d.amenity_id
-    </select>
-    <resultMap id="nonMemberResultMap" type="com.green.project_quadruaple.strf.model.GetNonDetail">
-        <id property="strfId" column="strfId" />
-        <result property="category" column="category" />
-        <result property="strfTitle" column="strfTitle" />
-        <result property="latit" column="latit" />
-        <result property="longitude" column="longitude" />
-        <result property="address" column="address" />
-        <result property="post" column="post" />
-        <result property="tell" column="tell" />
-        <result property="startAt" column="startAt" />
-        <result property="endAt" column="endAt" />
-        <result property="openCheck" column="openCheck" />
-        <result property="closeCheck" column="closeCheck" />
-        <result property="restDate" column="restDate" />
-        <result property="explain" column="explain" />
-        <result property="detail" column="detail" />
-        <result property="busiNum" column="busiNum" />
-        <result property="locationName" column="locationName" />
-        <result property="ratingAvg" column="ratingAvg" />
-        <result property="reviewWriterName" column="reviewWriterName" />
-        <result property="hostProfilePic" column="hostProfilePic" />
-        <result property="reviewWriterUserPic" column="reviewWriterUserPic" />
-        <result property="hostName" column="hostName" />
-        <result property="reviewCnt" column="reviewCnt" />
+<!--        WHERE a.strf_id = #{strfId}-->
+<!--        GROUP BY a.strf_id, f.detail_title, b.menu_id, e.pic_name, d.amenity_id-->
+<!--    </select>-->
+<!--    <resultMap id="nonMemberResultMap" type="com.green.project_quadruaple.strf.model.GetNonDetail">-->
+<!--        <id property="strfId" column="strfId" />-->
+<!--        <result property="category" column="category" />-->
+<!--        <result property="strfTitle" column="strfTitle" />-->
+<!--        <result property="latit" column="latit" />-->
+<!--        <result property="longitude" column="longitude" />-->
+<!--        <result property="address" column="address" />-->
+<!--        <result property="post" column="post" />-->
+<!--        <result property="tell" column="tell" />-->
+<!--        <result property="startAt" column="startAt" />-->
+<!--        <result property="endAt" column="endAt" />-->
+<!--        <result property="openCheck" column="openCheck" />-->
+<!--        <result property="closeCheck" column="closeCheck" />-->
+<!--        <result property="restDate" column="restDate" />-->
+<!--        <result property="explain" column="explain" />-->
+<!--        <result property="detail" column="detail" />-->
+<!--        <result property="busiNum" column="busiNum" />-->
+<!--        <result property="locationName" column="locationName" />-->
+<!--        <result property="ratingAvg" column="ratingAvg" />-->
+<!--        <result property="reviewWriterName" column="reviewWriterName" />-->
+<!--        <result property="hostProfilePic" column="hostProfilePic" />-->
+<!--        <result property="reviewWriterUserPic" column="reviewWriterUserPic" />-->
+<!--        <result property="hostName" column="hostName" />-->
+<!--        <result property="reviewCnt" column="reviewCnt" />-->
 
-        <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.StrfAmenity">
-            <id property="amenityId" column="amenityId" />
-            <result property="amenityTitle" column="amenityTitle" />
-        </collection>
+<!--        <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.StrfAmenity">-->
+<!--            <id property="amenityId" column="amenityId" />-->
+<!--            <result property="amenityTitle" column="amenityTitle" />-->
+<!--        </collection>-->
 
-        <collection property="strfPics" ofType="com.green.project_quadruaple.strf.model.StrfPicSel">
-            <id property="strfId" column="strfId" />
-            <result property="pic" column="strfPic" />
-        </collection>
+<!--        <collection property="strfPics" ofType="com.green.project_quadruaple.strf.model.StrfPicSel">-->
+<!--            <id property="strfId" column="strfId" />-->
+<!--            <result property="pic" column="strfPic" />-->
+<!--        </collection>-->
 
-        <collection property="menu" ofType="com.green.project_quadruaple.strf.model.Menu">
-            <id property="menuId" column="menuId" />
-            <result property="menuTitle" column="menuTitle" />
-            <result property="menuPrice" column="menuPrice" />
-            <result property="menuPic" column="menuPic" />
-        </collection>
-    </resultMap>
+<!--        <collection property="menu" ofType="com.green.project_quadruaple.strf.model.StrfMenu">-->
+<!--            <id property="menuId" column="menuId" />-->
+<!--            <result property="menuTitle" column="menuTitle" />-->
+<!--            <result property="menuPrice" column="menuPrice" />-->
+<!--            <result property="menuPic" column="menuPic" />-->
+<!--        </collection>-->
+<!--    </resultMap>-->
 
     <insert id="strfUpsert">
         INSERT INTO recent (user_id, strf_id, undo_recent, inquired_at)
