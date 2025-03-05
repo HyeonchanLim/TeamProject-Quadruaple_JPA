@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Getter
@@ -25,8 +26,8 @@ public class StrfInsReq {
     private String tell;
     private LocalDate startAt;
     private LocalDate endAt;
-    private LocalDateTime openCheckIn;
-    private LocalDateTime closeCheckOut;
+    private LocalTime openCheckIn;
+    private LocalTime closeCheckOut;
     private String detail;
     private String busiNum;
     private int state;
