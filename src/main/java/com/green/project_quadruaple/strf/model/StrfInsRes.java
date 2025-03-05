@@ -3,8 +3,6 @@ package com.green.project_quadruaple.strf.model;
 import com.green.project_quadruaple.entity.model.*;
 import lombok.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -18,7 +16,7 @@ public class StrfInsRes {
     private List<RestDate> restdates;
     private List<Amenipoint> amenipoints;
     private List<Amenity> amenities;
-    private List<Menu> menus;
+    private List<StrfMenu> menus;
     private List<Parlor> parlors;
     private List<Room> rooms;
 

@@ -59,10 +59,10 @@ public class StayTourRestaurFest extends UpdatedAt {
     @Column(name = "end_at")
     private LocalDate endAt;
 
-    @Column(name = "open_check_in")
+    @Column(name = "open_check_in", columnDefinition = "TIME")
     private LocalTime openCheckIn;
 
-    @Column(name = "close_check_out")
+    @Column(name = "close_check_out", columnDefinition = "TIME")
     private LocalTime closeCheckOut;
 
     @Column(columnDefinition = "TEXT")
