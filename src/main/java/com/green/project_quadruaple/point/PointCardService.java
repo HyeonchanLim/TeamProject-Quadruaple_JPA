@@ -1,13 +1,13 @@
-package com.green.project_quadruaple.pointcard;
+package com.green.project_quadruaple.point;
 
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.entity.model.PointCard;
 import com.green.project_quadruaple.entity.model.Role;
-import com.green.project_quadruaple.pointcard.model.PointCardGetDto;
-import com.green.project_quadruaple.pointcard.model.PointCardNonMemberGetDto;
-import com.green.project_quadruaple.pointcard.model.PointCardPostDto;
-import com.green.project_quadruaple.pointcard.model.PointCardUpdateDto;
+import com.green.project_quadruaple.point.model.PointCardGetDto;
+import com.green.project_quadruaple.point.model.PointCardNonMemberGetDto;
+import com.green.project_quadruaple.point.model.PointCardPostDto;
+import com.green.project_quadruaple.point.model.PointCardUpdateDto;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
