@@ -1,21 +1,27 @@
 package com.green.project_quadruaple.busi;
 
 import com.green.project_quadruaple.busi.model.BusiPostReq;
+import com.green.project_quadruaple.busi.model.BusiUserInfoDto;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.CookieUtils;
 import com.green.project_quadruaple.common.config.jwt.TokenProvider;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.config.security.SignInProviderType;
-import com.green.project_quadruaple.entity.model.AuthenticationCode;
-import com.green.project_quadruaple.entity.model.Role;
-import com.green.project_quadruaple.entity.model.RoleId;
-import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.entity.model.*;
+import com.green.project_quadruaple.strf.BusinessNumRepository;
+import com.green.project_quadruaple.strf.StrfRepository;
+import com.green.project_quadruaple.trip.model.Category;
 import com.green.project_quadruaple.user.Repository.AuthenticationCodeRepository;
 import com.green.project_quadruaple.user.Repository.TemporaryPwRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.user.exception.CustomException;
+import com.green.project_quadruaple.user.exception.UserErrorCode;
 import com.green.project_quadruaple.user.model.RoleRepository;
+import com.green.project_quadruaple.user.model.UserInfoDto;
 import com.green.project_quadruaple.user.model.UserSignUpReq;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.query.sql.internal.ParameterRecognizerImpl;
@@ -31,6 +37,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -38,6 +45,7 @@ import java.time.LocalDateTime;
 public class BusiService {
     private final RoleRepository roleRepository;
     private final BusiRepository busiRepository;
+    private final BusinessNumRepository businessNumRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MyFileUtils myFileUtils;
@@ -47,6 +55,7 @@ public class BusiService {
     private final JavaMailSender javaMailSender;
     private final AuthenticationCodeRepository authenticationCodeRepository;
     private final TemporaryPwRepository temporaryPwRepository;
+    private final StrfRepository strfRepository;
 
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
@@ -159,5 +168,52 @@ public class BusiService {
         }
 
         return 1;
+    }
+
+    // 프로필 및 계정 조회
+    public BusiUserInfoDto infoUser() {
+        try {
+            // 토큰에서 사용자 ID 가져오기
+            long signedUserId = authenticationFacade.getSignedUserId();
+
+            // JPA로 사용자 정보 조회
+            User user = userRepository.findById(signedUserId)
+                    .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND)); // 사용자 없을 경우 예외 처리
+
+            // 사용자 정보를 통해 사업자 번호 조회
+            String businessNum = businessNumRepository.findBusinessNumByUserId(user.getUserId());
+
+            StayTourRestaurFest strf = strfRepository.findByCategory(businessNum).orElseThrow( () -> new RuntimeException("businessNum not found"));
+
+            String categoryValue = (strf.getCategory() != null) ? strf.getCategory().name() : null;
+
+//            if (strf.getCategory() != null && Category.getKeyByName(strf.getCategory()) != null) {
+//                categoryValue = Objects.requireNonNull(Category.getKeyByName(strf.getCategory())).getValue();
+//            }
+
+            // authenticatedId를 이용해 AuthenticationCode에서 이메일 조회
+            AuthenticationCode authenticationCode = authenticationCodeRepository
+                    .findByAuthenticatedId(user.getAuthenticationCode().getAuthenticatedId()) // authenticatedId로 이메일 조회
+                    .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND)); // 인증 코드가 없으면 예외 처리
+
+            // DTO로 변환하여 반환
+            return BusiUserInfoDto.builder()
+                    .signedUserId(signedUserId)
+                    .name(user.getName())
+                    .email(authenticationCode.getEmail())
+                    .tell(user.getTell())
+                    .birth(user.getBirth())
+                    .profilePic(user.getProfilePic())
+                    .providerType(user.getProviderType())
+                    .busiNum(businessNum)
+                    .category(categoryValue)
+                    .build();
+        } catch (ExpiredJwtException e) {
+            // 토큰 만료 에러 처리
+            throw new CustomException(UserErrorCode.EXPIRED_TOKEN);
+        } catch (MalformedJwtException e) {
+            // 유효하지 않은 토큰 에러 처리
+            throw new CustomException(UserErrorCode.INVALID_TOKEN);
+        }
     }
 }

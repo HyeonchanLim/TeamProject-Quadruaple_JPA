@@ -93,8 +93,12 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
-        LocationDetail locationDetail = locationDetailRepository.findById(p.getLocationDetailId())
-                .orElseThrow(() -> new RuntimeException("locationDetailId wrong input"));
+        Long locationDetailId = locationDetailRepository.findByTitle(p.getLocationTitle())
+                .map(LocationDetail::getLocationDetailId)
+                .orElseThrow(() -> new RuntimeException("Location title not found in DB"));
+
+        LocationDetail locationDetail = locationDetailRepository.findById(locationDetailId)
+                .orElseThrow(() -> new RuntimeException("LocationDetail not found for ID: " + locationDetailId));
 
         Category categoryValue = null;
         if (p.getCategory() != null && Category.getKeyByName(p.getCategory()) != null) {
@@ -102,7 +106,6 @@ public class StrfService {
         }
 
         StayTourRestaurFest strf = StayTourRestaurFest.builder()
-                .cid(p.getCid())
                 .category(categoryValue)
                 .title(p.getTitle())
                 .lat(p.getLat())
@@ -120,6 +123,21 @@ public class StrfService {
                 .state(p.getState())
                 .build();
         strfRepository.save(strf);
+
+        if (p.getRestdates() != null && !p.getRestdates().isEmpty()) {
+            StrfRestDate restDateHandler = new StrfRestDate();
+            restDateHandler.addRestDays(p.getRestdates());  // "sun", "wed", "fri" 등 받아서 숫자로 변환
+
+            List<Integer> restDays = restDateHandler.getRestDays();
+            for (Integer day : restDays) {
+                // RestDate 엔티티 저장
+                RestDate restDate = RestDate.builder()
+                        .strfId(strf)
+                        .dayWeek(day)  // "sun" -> 0, "wed" -> 3 등
+                        .build();
+                restDateRepository.save(restDate);  // 휴무일 저장
+            }
+        }
 
         String middlePathStrf = String.format("strf/%d", strf.getStrfId());
         myFileUtils.makeFolders(middlePathStrf);
@@ -140,7 +158,6 @@ public class StrfService {
             }
         }
 
-
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
@@ -157,7 +174,7 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
-        StayTourRestaurFest strf = new StayTourRestaurFest();
+        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId()).orElseThrow(() -> new RuntimeException("StayTourRestaurFest not found"));
 
         Category categoryValue = null;
         if (p.getCategory() != null && Category.getKeyByName(p.getCategory()) != null) {
@@ -204,11 +221,10 @@ public class StrfService {
         BusinessNum businessNum = businessNumRepository.findByBusiNum(p.getBusiNum());
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
 
-        StayTourRestaurFest strf = new StayTourRestaurFest();
-        Menu menu = menuRepository.findById(p.getStrfId()).orElseThrow(() -> new RuntimeException("strf id not found"));
-        Parlor parlor = parlorRepository.findById(menu.getMenuId()).orElseThrow( () -> new RuntimeException("menu id not found"));
-        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
+        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId())
+                .orElseThrow(() -> new RuntimeException("StayTourRestaurFest not found"));
 
+        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
         if (!isBusi) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
@@ -217,45 +233,71 @@ public class StrfService {
         if (p.getCategory() != null && Category.getKeyByName(p.getCategory()) != null) {
             categoryValue = Category.getKeyByName(p.getCategory());
         }
+
+        List<Menu> menus = new ArrayList<>();
+
         if (categoryValue == Category.RESTAUR || categoryValue == Category.STAY) {
+            // 메뉴 저장 로직
+            for (MenuIns strfMenu : p.getMenus()) {
+                Menu newMenu = Menu.builder()
+                        .stayTourRestaurFest(strf)
+                        .title(strfMenu.getMenuTitle())
+                        .price(strfMenu.getMenuPrice())
+                        .menuPic(strfMenu.getMenuPic())
+                        .build();
+                menus.add(newMenu);
+            }
+            menuRepository.saveAll(menus);
+        }
+
+        if (categoryValue == Category.STAY) {
             List<Parlor> parlors = new ArrayList<>();
             List<Room> rooms = new ArrayList<>();
             List<Amenipoint> amenipoints = new ArrayList<>();
 
-            String middlePathMenu = String.format("strf/%d/menu", strf.getStrfId());
-            myFileUtils.makeFolders(middlePathMenu);
+            for (StrfParlor strfParlor : p.getParlors()) {
+                Menu menu = menus.stream()
+                        .filter(m -> m.getMenuId().equals(strfParlor.getMenuId()))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Menu not found"));
 
-            if (categoryValue == Category.STAY) {
-                p.getParlors().stream()
-                        .forEach(strfParlor -> {
-                            Parlor newParlor = Parlor.builder()
-                                    .menu(menu)
-                                    .maxCapacity(strfParlor.getMaxCapacity())
-                                    .recomCapacity(strfParlor.getRecomCapacity())
-                                    .surcharge(strfParlor.getSurcharge())
-                                    .build();
-                            parlors.add(newParlor);
-                        });
-                for (Long roomId : p.getRooms()) {
-                    Room newRoom = Room.builder()
-                            .menu(menu)
-                            .roomId(roomId)
-                            .roomNum(1)
-                            .build();
-                    rooms.add(newRoom);
-                }
-                amenipoints = p.getAmenipoints().stream()
-                        .map(amenityId -> Amenipoint.builder()
-                                .id(new AmenipointId(amenityId, strf.getStrfId()))
-                                .build())
-                        .collect(Collectors.toList());
+                Parlor newParlor = Parlor.builder()
+                        .menu(menu)
+                        .maxCapacity(strfParlor.getMaxCapacity())
+                        .recomCapacity(strfParlor.getRecomCapacity())
+                        .surcharge(strfParlor.getSurcharge())
+                        .build();
+                parlors.add(newParlor);
             }
+
+            amenipoints = p.getAmenipoints().stream()
+                    .map(amenityId -> Amenipoint.builder()
+                            .id(new AmenipointId(amenityId, strf.getStrfId()))
+                            .build())
+                    .collect(Collectors.toList());
+
+            for (Long roomId : p.getRooms()) {
+                Menu menu = menus.stream()
+                        .filter(m -> m.getMenuId().equals(roomId))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Room menu not found"));
+
+                Room newRoom = Room.builder()
+                        .menu(menu)
+                        .roomId(roomId)
+                        .roomNum(1)
+                        .build();
+                rooms.add(newRoom);
+            }
+
             parlorRepository.saveAll(parlors);
             roomRepository.saveAll(rooms);
             amenipointRepository.saveAll(amenipoints);
         }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
+
+
 
 
 
@@ -302,7 +344,7 @@ public class StrfService {
     public ResponseWrapper<Integer> updateStrf(Long strfId,
                                                List<MultipartFile> strfPic,
                                                List<MultipartFile> menuPic,
-                                               StrfInsReq p,
+                                               StrfUpdInfo p,
                                                StrfMenuInsReq menuReq,
                                                StrfStayInsReq stayReq) {
         StayTourRestaurFest strf = strfRepository.findById(strfId)
@@ -325,7 +367,7 @@ public class StrfService {
     }
 
     // STRF 기본 정보 업데이트
-    private void updateStrfBasicInfo(StayTourRestaurFest strf, StrfInsReq p) {
+    private void updateStrfBasicInfo(StayTourRestaurFest strf, StrfUpdInfo p) {
         LocationDetail locationDetail = locationDetailRepository.findById(p.getLocationDetailId())
                 .orElseThrow(() -> new RuntimeException("LocationDetail not found"));
         BusinessNum busiNum = businessNumRepository.findByBusiNum(p.getBusiNum());
@@ -439,6 +481,7 @@ public class StrfService {
         });
     }
 }
+
 
 
 /*

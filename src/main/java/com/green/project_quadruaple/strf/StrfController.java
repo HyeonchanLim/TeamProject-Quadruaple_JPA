@@ -65,7 +65,7 @@ public class StrfController {
             @Param("strf_id") Long strfId,
             @RequestPart(value = "strf_pic", required = false) List<MultipartFile> strfPic,
             @RequestPart(value = "menu_pic", required = false) List<MultipartFile> menuPic,
-            @RequestPart @Valid StrfInsReq request,
+            @RequestPart @Valid StrfUpdInfo request,
             @RequestPart @Valid StrfMenuInsReq menuReq,
             @RequestPart @Valid StrfStayInsReq stayReq
             ) {
