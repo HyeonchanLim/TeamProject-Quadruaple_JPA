@@ -16,4 +16,7 @@ public interface BusinessNumRepository extends JpaRepository<BusinessNum , Strin
 
     @Query("SELECT bn.busiNum FROM BusinessNum bn WHERE bn.user.userId = :userId")
     List<String> findBusiNumByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT a.busiNum FROM BusinessNum a WHERE a.user.userId = :userId")
+    String findBusinessNumByUserId(@Param("userId") Long userId);
 }

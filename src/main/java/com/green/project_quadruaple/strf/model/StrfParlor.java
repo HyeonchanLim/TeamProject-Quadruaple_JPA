@@ -8,7 +8,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class StrfParlor {
-    private long menuId;
     private int maxCapacity;
     private int recomCapacity;
     private int surcharge;

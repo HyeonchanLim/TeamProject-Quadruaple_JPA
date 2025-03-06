@@ -15,6 +15,7 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 public class StrfInsReq {
+    private long strfId;
     private String cid;
     private String category;
     private String title;
@@ -33,11 +34,8 @@ public class StrfInsReq {
     private String detail;
     private String busiNum;
     private int state;
-    private List<Long> amenipoints;
+
     private List<String> restdates;
-    private List<StrfMenu> menus;
-    private List<StrfParlor> parlors;
-    private List<Long> rooms;
 }
 
 
