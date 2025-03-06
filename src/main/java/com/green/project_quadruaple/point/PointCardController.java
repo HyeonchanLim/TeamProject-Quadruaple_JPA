@@ -1,11 +1,11 @@
-package com.green.project_quadruaple.pointcard;
+package com.green.project_quadruaple.point;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.pointcard.model.PointCardGetDto;
-import com.green.project_quadruaple.pointcard.model.PointCardNonMemberGetDto;
-import com.green.project_quadruaple.pointcard.model.PointCardPostDto;
-import com.green.project_quadruaple.pointcard.model.PointCardUpdateDto;
+import com.green.project_quadruaple.point.model.PointCardGetDto;
+import com.green.project_quadruaple.point.model.PointCardNonMemberGetDto;
+import com.green.project_quadruaple.point.model.PointCardPostDto;
+import com.green.project_quadruaple.point.model.PointCardUpdateDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

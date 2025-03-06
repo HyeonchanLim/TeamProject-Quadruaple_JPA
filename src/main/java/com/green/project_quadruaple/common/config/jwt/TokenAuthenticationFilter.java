@@ -3,6 +3,7 @@ package com.green.project_quadruaple.common.config.jwt;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +25,28 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        log.info("uri: {}", uri);
         log.info("ip Address: {}", request.getRemoteAddr());
         String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);  //"Bearer 토큰값"
         log.info("authorizationHeader: {}", authorizationHeader);
-
         String token = getAccessToken(authorizationHeader);
+//        if(uri.equals("/api/notice")){ //해당 uri로 요청하면
+//            //파라미터로 token 값을 받도록 설정
+//            token = request.getParameter("token");
+//        }else {
+//            token = getAccessToken(authorizationHeader);
+//        }
+
+        getAuthenticationFromToken(token, request);
+
         log.info("token: {}", token);
 
+
+        filterChain.doFilter(request, response);
+    }
+
+    private void getAuthenticationFromToken(String token, HttpServletRequest request) {
         if (token != null) {
             try {
                 // 토큰에서 Authentication 객체를 얻어옴
@@ -46,8 +62,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 log.error("Error during authentication", e);
             }
         }
-        filterChain.doFilter(request, response);
     }
+
 
     private String getAccessToken(String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith(TOKEN_PREFIX)) { // 문자열이 TOKEN_PREFIX 로 시작하는지 확인

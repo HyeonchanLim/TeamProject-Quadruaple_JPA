@@ -119,7 +119,7 @@ public class TripService {
             content.append(userRepository.findNameById(managerId)).append("님의 ");
             sendNoticeJoin(trip,joinUser);
         }
-          content.append("그룹에 참석하셨습니다.\n즐거운 여행 되세요! ").append(joinUser.getName()).append("님!");
+          content.append("그룹에 참석하셨습니다. \n즐거운 여행 되세요! ").append(joinUser.getName()).append("님!");
 
         noticeService.postNotice(NoticeCategory.TRIP,noticeTitle,content.toString(),joinUser,trip.getTripId());
     }
