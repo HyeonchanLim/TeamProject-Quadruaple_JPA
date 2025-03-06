@@ -87,7 +87,6 @@ public class ChatRoomService {
         return null;
     }
 
-    // 채팅방 불러오기
     @Transactional
     public ResponseWrapper<List<ChatDto>> getChatList(Long roomId, GetChatRoomReq req) {
         long signedUserId = AuthenticationFacade.getSignedUserId();
@@ -109,6 +108,7 @@ public class ChatRoomService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatLimit30);
     }
 
+    // 채팅방 불러오기
     public ResponseWrapper<List<ChatRoomDto>> getChatRoomList(int page, String roleReq) {
         long signedUserId = AuthenticationFacade.getSignedUserId();
 

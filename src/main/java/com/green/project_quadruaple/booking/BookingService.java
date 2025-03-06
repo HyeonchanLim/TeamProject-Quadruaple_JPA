@@ -201,6 +201,7 @@ public class BookingService {
                         .menu(menu)
                         .room(room)
                         .user(signedUser)
+                        .num(req.getNum())
                         .checkIn(checkInDate)
                         .checkOut(checkOutDate)
                         .finalPayment(req.getActualPaid())
