@@ -18,7 +18,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
                 , u.name
                 , u.profilePic
                 , CASE WHEN u.userId = :signedUserId THEN true ELSE false END
-                , u.userId
                 , c.content
                 , cj.chatRoom.title
                 , c.createdAt

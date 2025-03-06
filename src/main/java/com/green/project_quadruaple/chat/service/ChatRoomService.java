@@ -89,10 +89,10 @@ public class ChatRoomService {
 
     // 채팅방 불러오기
     @Transactional
-    public ResponseWrapper<List<ChatDto>> getChatList(Long roomId, GetChatRoomReq req) {
+    public ResponseWrapper<List<ChatDto>> getChatList(Long roomId, int page) {
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
-        PageRequest pageRequest = PageRequest.of(req.getPage(), 30);
+        PageRequest pageRequest = PageRequest.of(page, 30);
         List<ChatDto> chatLimit30 = chatRoomRepository.findChatLimit30(roomId, signedUserId, pageRequest);
         LocalDateTime now = LocalDateTime.now();
         for (ChatDto chatDto : chatLimit30) {
