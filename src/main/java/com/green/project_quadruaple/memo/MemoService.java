@@ -4,18 +4,17 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.entity.model.Memo;
-import com.green.project_quadruaple.entity.model.Trip;
-import com.green.project_quadruaple.entity.model.TripUser;
-import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.memo.model.Req.MemoPostReq;
 import com.green.project_quadruaple.memo.model.Req.MemoUpReq;
 import com.green.project_quadruaple.memo.model.Res.MemoGetRes;
+import com.green.project_quadruaple.trip.ScheMemoRepository;
 import com.green.project_quadruaple.trip.TripMapper;
 
 
 import com.green.project_quadruaple.trip.TripRepository;
 import com.green.project_quadruaple.trip.TripUserRepository;
+import com.green.project_quadruaple.trip.model.ScheMemoType;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
@@ -24,6 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -36,10 +38,11 @@ public class MemoService {
     private final MemoRepository memoRepository;
     private final TripRepository tripRepository;
     private final TripUserRepository tripUserRepository;
+    private final ScheMemoRepository scheMemoRepository;
 
     @Transactional
     public  ResponseEntity<ResponseWrapper<MemoGetRes>> getMemo(Long memoId) {
-        long signedUserId=authenticationFacade.getSignedUserId();
+        long signedUserId=AuthenticationFacade.getSignedUserId();
         if(signedUserId==0){ return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));}
         MemoGetRes memo = memoMapper.selectMemo(memoId);
@@ -50,32 +53,39 @@ public class MemoService {
 
     @Transactional
     public ResponseWrapper<Long> addMemo(MemoPostReq p) {
-        Long signedUserId = authenticationFacade.getSignedUserId();
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).orElseThrow();
 
-        User user = userRepository.findById(signedUserId).orElseThrow( () -> new RuntimeException("user id not found"));
-        Trip trip = tripRepository.findById(user.getUserId()).orElseThrow( () -> new RuntimeException("trip id not found"));
-        TripUser tripUser = tripUserRepository.findById(trip.getTripId()).orElseThrow( () -> new RuntimeException("user id not found"));
+        Long tripId = p.getTripId();
+        List<TripUser> tripUserList = tripUserRepository.findByTripId(tripId);
+        TripUser tripUser = null;
+        for (TripUser item : tripUserList) {
+            if(item.getUser().getUserId() == signedUserId) {
+                tripUser = item;
+                break;
+            }
+        }
+        if(tripUser == null) {
+            return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null);
+        }
+
+        ScheduleMemo scheMemo = ScheduleMemo.builder()
+                .trip(tripUser.getTrip())
+                .day(p.getDay())
+                .seq(p.getSeq())
+                .scheMemoType(ScheMemoType.MEMO)
+                .build();
         Memo memo = Memo.builder()
+                .scheduleMemo(scheMemo)
                 .content(p.getContent())
                 .tripUser(tripUser)
                 .build();
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1L);
-//        Long tripId = p.getTripId();
-//        if(signedUserId==0){
-//            return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), 0L);
-//        }
-//        Long tripUserId = memoMapper.selTripUserId(tripId, signedUserId); // trip_user_id 가져오기
-//
-//        if(tripUserId == null) {
-//            return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null);
-//        }
-//
-//        tripMapper.updateSeqScheMemo(tripId, p.getSeq(), false); // 등록할 메모의 다음 일정,메모들의 seq + 1
-//        memoMapper.postScheMemo(p); // sche_memo 에 저장
-//
-//        p.setTripUserId(tripUserId); // dto 에 trip_user_id 세팅
-//        memoMapper.insMemo(p); // memo 에 저장
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), p.getScheMemoId());
+        tripMapper.updateSeqScheMemo(tripId, p.getSeq(), false); // 등록할 메모의 다음 일정,메모들의 seq + 1
+
+        scheMemoRepository.save(scheMemo);
+        scheMemoRepository.flush();
+        memoRepository.save(memo);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), scheMemo.getScheduleMemoId());
+
     }
 
     // 메모 수정 권한
