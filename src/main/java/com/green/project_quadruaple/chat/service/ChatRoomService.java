@@ -51,7 +51,7 @@ public class ChatRoomService {
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
         Role hostUserRole = roleRepository.findByUserIdAndRoleName(signedUserId, UserRole.USER);
-        Role inviteUserRole = roleRepository.findByUserIdAndRoleName(signedUserId, UserRole.BUSI);
+        Role inviteUserRole = roleRepository.findByStrfIdAndRoleName(req.getStrfId(), UserRole.BUSI);
 
         if(hostUserRole == null || inviteUserRole == null) {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND_USER.getCode(), null);
