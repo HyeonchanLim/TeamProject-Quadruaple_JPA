@@ -23,4 +23,6 @@ public class BusinessMyPageBookingDetails {
     private int recomCapacity;
     private int maxCapacity;
     private int extraPersonCount;
+    private int extraFee;
+    private int usedPoint;
 }
