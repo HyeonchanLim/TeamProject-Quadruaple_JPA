@@ -9,6 +9,8 @@ import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("chat-room")
+@Tag(name = "채팅룸")
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;

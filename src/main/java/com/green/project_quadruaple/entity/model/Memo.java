@@ -18,6 +18,11 @@ public class Memo  {
     @Column(name = "memo_id",nullable = false)
     private Long memoId;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @MapsId
+    @JoinColumn(name = "memo_id")
+    private ScheduleMemo scheduleMemo;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_user_id", nullable = false)
     private TripUser tripUser;

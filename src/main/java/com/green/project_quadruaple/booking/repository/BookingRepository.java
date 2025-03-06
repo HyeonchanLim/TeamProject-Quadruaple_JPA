@@ -28,6 +28,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             join b.menu.stayTourRestaurFest strf
             left join StrfPic sp
                 on strf.strfId = sp.strfId.strfId
+            where b.user.userId = :userId
             group by b.bookingId
             order by b.checkIn asc
             """)
