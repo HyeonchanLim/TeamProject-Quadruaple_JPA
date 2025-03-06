@@ -154,7 +154,7 @@ public class UserService {
                         Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
                         System.out.println("기본 프로필 사진 복사 완료!");
                     } else {
-                        myFileUtils.transferTo(pic, filePath);
+                        myFileUtils.transferToUser(pic, filePath);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -305,7 +305,7 @@ public class UserService {
 
             String filePath = String.format("%s/%s", targetDir, savedFileName);
             try {
-                myFileUtils.transferTo(profilePic, filePath);
+                myFileUtils.transferToUser(profilePic, filePath);
                 user.setProfilePic(savedFileName);
             } catch (IOException e) {
                 throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);

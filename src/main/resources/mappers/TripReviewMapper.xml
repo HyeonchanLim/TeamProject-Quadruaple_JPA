@@ -233,11 +233,19 @@
 
     <select id="getOriginalScheduleIds">
         SELECT schedule_id
-          FROM schedule
-         WHERE schedule_id IN
-        <foreach item="scheduleMemoId" collection="scheduleMemoIds" open="(" separator="," close=")">
-            #{scheduleMemoId}
-        </foreach>
+        FROM schedule
+        WHERE
+        <choose>
+            <when test="scheduleMemoIds != null and !scheduleMemoIds.isEmpty()">
+                schedule_id IN
+                <foreach item="scheduleMemoId" collection="scheduleMemoIds" open="(" separator="," close=")">
+                    #{scheduleMemoId}
+                </foreach>
+            </when>
+            <otherwise>
+                1=0  <!-- 빈 리스트일 경우 쿼리 결과가 없도록 처리 -->
+            </otherwise>
+        </choose>
     </select>
 
     <select id="getOriginalLocationIds">
@@ -251,6 +259,11 @@
         SELECT #{tripId}, location_id
           FROM trip_location
          WHERE trip_id = #{copyTripId}
+    </insert>
+
+    <insert id="insTripUser">
+        INSERT IGNORE INTO trip_user (trip_id, user_id)
+        VALUES (#{tripId}, #{userId})
     </insert>
 
     <!-- 여행기 스크랩 조회수-->

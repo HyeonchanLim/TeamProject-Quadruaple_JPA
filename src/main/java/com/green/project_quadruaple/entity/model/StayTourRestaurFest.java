@@ -3,11 +3,13 @@ package com.green.project_quadruaple.entity.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import com.green.project_quadruaple.entity.base.EndAt;
+import com.green.project_quadruaple.entity.base.UpdatedAt;
 import com.green.project_quadruaple.trip.model.Category;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -16,8 +18,9 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "stay_tour_restaur_fest")
+@Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class StayTourRestaurFest extends EndAt {
+public class StayTourRestaurFest extends UpdatedAt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,10 +53,16 @@ public class StayTourRestaurFest extends EndAt {
     @Column(length = 50)
     private String tell;
 
-    @Column(name = "open_check_in")
+    @Column(name = "start_at")
+    private LocalDate startAt;
+
+    @Column(name = "end_at")
+    private LocalDate endAt;
+
+    @Column(name = "open_check_in", columnDefinition = "TIME")
     private LocalTime openCheckIn;
 
-    @Column(name = "close_check_out")
+    @Column(name = "close_check_out", columnDefinition = "TIME")
     private LocalTime closeCheckOut;
 
     @Column(columnDefinition = "TEXT")
@@ -65,4 +74,7 @@ public class StayTourRestaurFest extends EndAt {
 
     @Column(nullable = false, columnDefinition = "TINYINT")
     private Integer state;
+
+    @Column(nullable = false, columnDefinition = "CHAR(10)")
+    private String cid;
 }

@@ -1,12 +1,21 @@
 package com.green.project_quadruaple.strf;
 
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.review.model.ReviewPostJpaReq;
 import com.green.project_quadruaple.strf.model.GetNonDetail;
+import com.green.project_quadruaple.strf.model.StrfInsReq;
+import com.green.project_quadruaple.strf.model.StrfInsRes;
 import com.green.project_quadruaple.strf.model.StrfSelRes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("detail")
@@ -17,7 +26,7 @@ public class StrfController {
 
     @GetMapping("member")
     @Operation(summary = "회원 상품 조회")
-    public ResponseWrapper<StrfSelRes> getMemberDetail(@RequestParam("strf_id") String strfId) {
+    public ResponseWrapper<StrfSelRes> getMemberDetail(@RequestParam("strf_id") Long strfId) {
 
         return strfService.getMemberDetail(strfId);
     }
@@ -28,23 +37,31 @@ public class StrfController {
 
         return strfService.getNonMemberDetail(strfId);
     }
+
+    @PostMapping
+    @Operation(summary = "사업자 상품 생성")
+    public ResponseWrapper<?> strfIns (@RequestPart(required = false) List<MultipartFile> strfPic,
+                                         @RequestPart(required = false) List<MultipartFile> menuPic,
+                                         @Valid @RequestPart  StrfInsReq p){
+        return strfService.strfIns(strfPic,menuPic,p);
+    }
+
+    @PutMapping
+    public ResponseEntity<?> updateStrf(
+            @Param("strf_id") Long strfId,
+            @RequestPart(value = "strfPic", required = false) List<MultipartFile> strfPic,
+            @RequestPart(value = "menuPic", required = false) List<MultipartFile> menuPic,
+            @RequestPart("request") @Valid StrfInsReq request
+    ) {
+        ResponseWrapper<Integer> response = strfService.updateStrf(strfId, strfPic, menuPic, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteStrf(@PathVariable("strf_id") Long strfId) {
+        ResponseWrapper<Integer> response = strfService.deleteStrf(strfId);
+        return ResponseEntity.ok(response);
+    }
+
 }
 
-
-//    @GetMapping("detail/review")
-//    @PostMapping("booking-post")
-
-//    @GetMapping("booking")
-//    @GetMapping("booking-list")
-
-//    @Operation(summary = "리뷰 목록 조회", description = "상품 PK를 기반으로 리뷰를 최신순 정렬로 가져옵니다.")
-//    @GetMapping("/{strfId}")
-//    public ResponseEntity<ReviewResponse> getReviews(
-//            @Parameter(description = "상품 PK", example = "1", required = true)
-//            @PathVariable Long strfId,
-//            @Parameter(description = "최대 리뷰 개수", example = "4", required = false)
-//            @RequestParam(defaultValue = "4") int limit
-//    ) {
-//        ReviewResponse response = reviewService.getReviews(strfId, limit);
-//        return ResponseEntity.ok(response);
-//    }

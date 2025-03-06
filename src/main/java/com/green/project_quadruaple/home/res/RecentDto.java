@@ -8,7 +8,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class RecentDto {
-    private long strfId;
+    private String strfId;
     private String strfTitle;
     private String strfPic;
     private String locationName;

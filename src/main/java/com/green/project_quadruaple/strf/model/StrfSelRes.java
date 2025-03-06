@@ -15,7 +15,7 @@ import java.util.List;
 @Schema
 public class StrfSelRes {
 
-    private String strfId;
+    private Long strfId;
     private String category;
     private String strfTitle;
     private double latit;
@@ -40,11 +40,15 @@ public class StrfSelRes {
     private int wishIn;
     private int recentCheck;
     private int recentCheckStatus;
+    private int state;
     private String inquiredAt;
     private String reviewCnt;
+    private String cid;
 
     private List<StrfAmenity> amenities;
     private List<StrfPicSel> strfPics;
-    private List<Menu> menu;
+    private List<StrfMenu> menu;
+    private List<StrfParlor> parlors;
+    private List<StrfRooms> rooms;
 
 }

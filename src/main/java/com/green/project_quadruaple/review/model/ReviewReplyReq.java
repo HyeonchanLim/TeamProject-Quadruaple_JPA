@@ -12,7 +12,6 @@ import org.hibernate.query.sql.internal.ParameterRecognizerImpl;
 @EqualsAndHashCode
 @ToString
 public class ReviewReplyReq {
-    private Long reviewReplyId;
     private Long reviewId;
     private String content;
 
