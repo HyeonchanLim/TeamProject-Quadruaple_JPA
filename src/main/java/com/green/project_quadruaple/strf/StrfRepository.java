@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface StrfRepository extends JpaRepository<StayTourRestaurFest, Long> {
@@ -15,4 +16,11 @@ public interface StrfRepository extends JpaRepository<StayTourRestaurFest, Long>
 
     @Query("SELECT a.category FROM StayTourRestaurFest a WHERE a.busiNum.busiNum = :busiNum")
     Optional<StayTourRestaurFest> findByCategory(String businessNum);
+
+    @Query("SELECT c.category FROM StayTourRestaurFest c " +
+            "JOIN c.busiNum b " +
+            "JOIN b.user u " +
+            "WHERE u.userId = :userId")
+    List<String> findCategoryByUserId(Long userId);
+
 }
