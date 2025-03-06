@@ -44,6 +44,6 @@
             ON latest_chat.speaker_id = cj.cj_id
         JOIN USER u
             ON u.user_id = cj.user_id
-        ORDER BY latestChatDLT ASC
+        ORDER BY latestChatDLT DESC
     </select>
 </mapper>

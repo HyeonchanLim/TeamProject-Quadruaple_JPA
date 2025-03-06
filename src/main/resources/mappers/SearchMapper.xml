@@ -47,10 +47,12 @@
         FROM stay_tour_restaur_fest s
         INNER JOIN location_detail ld
             ON ld.location_detail_id = s.location_detail_id
-            AND ld.location_id IN
-            <foreach collection="locationIdList" item="id" open="(" separator="," close=")">
-                #{id.locationId}
-            </foreach>
+            <if test="locationIdList != null">
+                AND ld.location_id IN
+                <foreach collection="locationIdList" item="id" open="(" separator="," close=")">
+                    #{id.locationId}
+                </foreach>
+            </if>
         LEFT JOIN (
                 SELECT
                 strf_id

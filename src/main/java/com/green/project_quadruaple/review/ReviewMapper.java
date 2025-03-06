@@ -28,7 +28,9 @@ public interface ReviewMapper {
 
     List<BusinessDto> selectBusinessReview(
             @Param("userId") Long userId,
-            @Param("startIdx") int startIdx
+            @Param("startIdx") int startIdx,
+            @Param("pageSize") int pageSize,
+            @Param("offset") int offset
     );
 
     List<ReviewPicDto> selectReviewPics(@Param("reviewId") Long reviewId);
