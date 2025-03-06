@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.review.model;
+package com.green.project_quadruaple.review.reviewReply;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewReplyDto {
+    private Long reviewId;
     private String content;
     private String createdAt;
 }
