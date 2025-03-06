@@ -140,5 +140,18 @@
         AND C.category = 'RESTAUR'
     </select>
 
+    <!-- point 조회 -->
+    <select id="selPointList">
+        SELECT A.amount, A.used_at, A.refund, B.title,
+            SUM(CASE WHEN A.refund = 0 THEN A.amount ELSE 0 END)
+            OVER (PARTITION BY E.user_id) AS total_amount
+          FROM used_point A
+          LEFT JOIN menu B ON A.menu_id = B.menu_id
+          LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
+          LEFT JOIN business_num D ON C.busi_num = D.busi_num
+          LEFT JOIN user E ON D.user_id = E.user_id
+         WHERE E.user_id = #{userId}
+           AND C.category IN ('STAY', 'RESTAUR')
+    </select>
 
 </mapper>

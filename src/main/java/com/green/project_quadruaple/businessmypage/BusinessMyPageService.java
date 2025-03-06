@@ -2,6 +2,7 @@ package com.green.project_quadruaple.businessmypage;
 
 import com.green.project_quadruaple.businessmypage.model.BusinessMyPageBooking;
 import com.green.project_quadruaple.businessmypage.model.BusinessMyPageBookingDetails;
+import com.green.project_quadruaple.businessmypage.model.BusinessMyPagePointList;
 import com.green.project_quadruaple.businessmypage.model.BusinessMyPageSales;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.strf.StrfRepository;
@@ -56,5 +57,11 @@ public class BusinessMyPageService {
 
         // 해당하는 category가 없을 경우 빈 객체 반환
         return new BusinessMyPageSales();
+    }
+
+    public List<BusinessMyPagePointList> selBusinessMyPagePointList() {
+        long userId = authenticationFacade.getSignedUserId();
+
+        return businessMyPageMapper.selPointList(userId);
     }
 }

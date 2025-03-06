@@ -2,6 +2,7 @@ package com.green.project_quadruaple.businessmypage;
 
 import com.green.project_quadruaple.businessmypage.model.BusinessMyPageBooking;
 import com.green.project_quadruaple.businessmypage.model.BusinessMyPageBookingDetails;
+import com.green.project_quadruaple.businessmypage.model.BusinessMyPagePointList;
 import com.green.project_quadruaple.businessmypage.model.BusinessMyPageSales;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -14,6 +15,7 @@ public interface BusinessMyPageMapper {
     BusinessMyPageBookingDetails selBookingDetails(Long bookingId, Long userId);
     BusinessMyPageSales selBusinessSTAYSales(Integer orderType, Long userId, List<Integer> monthOffsets);
     BusinessMyPageSales selUsedPointsByBusinessRESTAUR(Integer orderType, Long userId, List<Integer> monthOffsets);
+    List<BusinessMyPagePointList> selPointList(Long userId);
 
     default List<Integer> calculateMonthOffsets(Integer orderType) {
         List<Integer> monthOffsets = new ArrayList<>();
