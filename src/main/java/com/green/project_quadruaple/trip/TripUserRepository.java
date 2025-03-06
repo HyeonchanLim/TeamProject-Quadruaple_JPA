@@ -11,6 +11,13 @@ import java.util.List;
 public interface TripUserRepository extends JpaRepository<TripUser, Long> {
     boolean existsByUser_userIdAndTrip_tripIdAndDisable(Long userId, Long tripId, int disable);
 
+    @Query("""
+            select tu from TripUser tu
+            join fetch tu.user
+            where tu.trip.tripId = :tripId
+            """)
+    List<TripUser> findByTripId(Long tripId);
+
     @Query("select tu.user from TripUser tu where tu.trip=:trip")
     List<User> findUserByTrip(Trip trip);
 }

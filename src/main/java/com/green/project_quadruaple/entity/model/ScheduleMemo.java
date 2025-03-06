@@ -11,6 +11,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "sche_memo")
 public class ScheduleMemo extends CreatedAt {
 
