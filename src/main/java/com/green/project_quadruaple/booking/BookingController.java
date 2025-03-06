@@ -45,7 +45,7 @@ public class BookingController {
     }
 
 //    @PatchMapping
-//    @Operation(summary = "예약 취소")
+//    @Operation(summary = "예약 취소", description = "예약 취소를 누르면 사업자에게 예약 취소 접수됨.")
 //    public ResponseWrapper<String> cancelBooking(@RequestBody ) {
 //
 //    }
@@ -55,17 +55,4 @@ public class BookingController {
     public String getBookingList(@RequestParam("pg_token") String pgToken) {
         return "redirect:" + bookingService.approve(pgToken);
     }
-
-//    @GetMapping("/complete")
-//    @ResponseBody
-//    public String getRedirect(@RequestParam("id") Long id) {
-//        log.info("id = {}", id);
-//        return String.valueOf(id);
-//    }
-
-//    @GetMapping("update-state")
-//    @ResponseBody
-//    public void updateState() {
-//        bookingService.updateState();
-//    }
 }

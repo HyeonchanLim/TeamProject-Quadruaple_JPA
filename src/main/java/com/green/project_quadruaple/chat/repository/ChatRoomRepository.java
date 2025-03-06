@@ -25,7 +25,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             JOIN c.chatJoin cj
             JOIN cj.role.user u
             WHERE cj.chatRoom.chatRoomId = :chatRoomId
-            ORDER BY c.chatId ASC
+            ORDER BY c.chatId DESC
             """)
     List<ChatDto> findChatLimit30(Long chatRoomId, Long signedUserId, Pageable pageable);
 

@@ -41,6 +41,6 @@ public class GetNonDetail {
 
     private List<StrfAmenity> amenities;
     private List<StrfPicSel> strfPics;
-    private List<Menu> menu;
+    private List<StrfMenu> strfMenus;
 }
 

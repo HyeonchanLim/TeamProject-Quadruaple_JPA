@@ -4,6 +4,8 @@ import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -19,6 +21,17 @@ public class ReviewReply extends CreatedAt {
     @JoinColumn(name = "review_id", nullable = false)
     private Review review;
 
+
     @Column(nullable = false)
     private String content;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+
+
+
 }

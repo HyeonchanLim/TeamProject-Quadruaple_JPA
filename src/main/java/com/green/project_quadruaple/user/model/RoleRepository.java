@@ -23,12 +23,12 @@ public interface RoleRepository extends JpaRepository<Role, RoleId> {
     @Query("""
             select r from Role r
             join r.user u
-            join BusinessNum b
-                on b.user.userId = u.userId
+            join BusinessNum bn
+                on bn.user.userId = u.userId
             join StayTourRestaurFest strf
-                on strf.busiNum.busiNum = b.busiNum
-                and strf.strfId = :strfId
-            where r.role = :roleName
+                on strf.busiNum.busiNum = bn.busiNum
+            where strf.strfId = :strfId
+                and r.role = :role
             """)
-    Role findByStrfIdAndRoleName(Long strfId, String roleName);
+    Role findByStrfIdAndRoleName(Long strfId, UserRole role);
 }

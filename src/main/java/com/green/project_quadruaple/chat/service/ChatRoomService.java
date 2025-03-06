@@ -51,7 +51,7 @@ public class ChatRoomService {
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
         Role hostUserRole = roleRepository.findByUserIdAndRoleName(signedUserId, UserRole.USER);
-        Role inviteUserRole = roleRepository.findByUserIdAndRoleName(signedUserId, UserRole.BUSI);
+        Role inviteUserRole = roleRepository.findByStrfIdAndRoleName(req.getStrfId(), UserRole.BUSI);
 
         if(hostUserRole == null || inviteUserRole == null) {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND_USER.getCode(), null);
@@ -87,7 +87,6 @@ public class ChatRoomService {
         return null;
     }
 
-    // 채팅방 불러오기
     @Transactional
     public ResponseWrapper<List<ChatDto>> getChatList(Long roomId, int page) {
         long signedUserId = AuthenticationFacade.getSignedUserId();
@@ -109,6 +108,7 @@ public class ChatRoomService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatLimit30);
     }
 
+    // 채팅방 불러오기
     public ResponseWrapper<List<ChatRoomDto>> getChatRoomList(int page, String roleReq) {
         long signedUserId = AuthenticationFacade.getSignedUserId();
 

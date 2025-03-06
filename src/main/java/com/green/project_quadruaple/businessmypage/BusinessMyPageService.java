@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.businessmypage;
 
 import com.green.project_quadruaple.businessmypage.model.BusinessMyPageBooking;
+import com.green.project_quadruaple.businessmypage.model.BusinessMyPageBookingDetails;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,4 +28,7 @@ public class BusinessMyPageService {
         return bookingList;
     }
 
+    public BusinessMyPageBookingDetails selBusinessMyPageBookingDetails(Long bookingId) {
+        return businessMyPageMapper.selBookingDetails(bookingId);
+    }
 }

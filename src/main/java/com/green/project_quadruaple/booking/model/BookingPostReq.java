@@ -36,6 +36,10 @@ public class BookingPostReq {
     @Schema(title = "체크아웃 시각", type= "string", example = "2025-02-15 21:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     private String checkOut;
 
+    @NotBlank
+    @Schema(title = "인원", type= "int", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Integer num;
+
     @JsonProperty("coupon_id")
     @Schema(title = "쿠폰 번호", type= "long", example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Long couponId;

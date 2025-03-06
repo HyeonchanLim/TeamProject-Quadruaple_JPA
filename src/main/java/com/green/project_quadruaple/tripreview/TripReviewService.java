@@ -319,7 +319,6 @@ public class TripReviewService {
         if (newTripId == null || newTripId <= 0) {
             throw new RuntimeException("Failed to copy trip. No new tripId generated.");
         }
-        trip.setTripId(newTripId);
 
         tripReviewMapper.insTripUser(newTripId, userId);
 
@@ -354,7 +353,7 @@ public class TripReviewService {
 
         // 9. 여행 위치 복사
         List<Long> originalLocationIds = tripReviewMapper.getOriginalLocationIds(trip.getCopyTripId());
-        if (!originalScheduleIds.isEmpty()) {
+        if (!originalLocationIds.isEmpty()) {
             tripReviewMapper.copyInsTripLocation(trip.getCopyTripId(), newTripId);
         }
 
