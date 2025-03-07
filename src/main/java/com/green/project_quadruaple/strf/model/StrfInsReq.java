@@ -27,11 +27,11 @@ public class StrfInsReq {
     private LocalDate startAt;
     private LocalDate endAt;
     @Schema(description = "오픈 체크인 시간 (HH:mm 형식)", example = "09:00")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime openCheckIn;
 
     @Schema(description = "클로즈 체크아웃 시간 (HH:mm 형식)", example = "18:00")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime closeCheckOut;
     private String detail;
     private String busiNum;

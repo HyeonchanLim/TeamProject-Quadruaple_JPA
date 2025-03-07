@@ -52,7 +52,7 @@ public class StrfService {
 
     public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
 
-        Long userId = null;
+        Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
@@ -87,11 +87,11 @@ public class StrfService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), amenities);
     }
 
-    public ResponseWrapper<List<StrfMenu>> getStrfMenu(Long strfId , String category) {
-        String categoryValue = null;
-        if (category != null && Category.getKeyByName(category) != null) {
-            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
-        }
+    public ResponseWrapper<List<StrfMenu>> getStrfMenu(Long strfId) {
+//        String categoryValue = null;
+//        if (category != null && Category.getKeyByName(category) != null) {
+//            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
+//        }
         List<StrfMenu> menus = strfMapper.strfMenu(strfId);
         if (menus == null || menus.isEmpty()){
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), menus);
@@ -103,7 +103,7 @@ public class StrfService {
         if (category != null && Category.getKeyByName(category) != null) {
             categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
         }
-        List<StrfParlorDto> parlor = strfMapper.strfParlor(strfId , category);
+        List<StrfParlorDto> parlor = strfMapper.strfParlor(strfId , categoryValue);
         if (parlor == null || parlor.isEmpty()){
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), parlor);
         }
@@ -117,8 +117,13 @@ public class StrfService {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
 
         BusinessNum businessNum = businessNumRepository.findByBusiNum(p.getBusiNum());
-        if (businessNum.getBusiNum().equals(p.getBusiNum())) {
+
+        if (businessNum != null) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+        } else {
+            businessNum = new BusinessNum();
+            businessNum.setBusiNum(p.getBusiNum());
+            businessNumRepository.save(businessNum);
         }
 
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
@@ -127,11 +132,10 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
-        // 프론트에서 받은 locationTitle 이름이 맞는 지역이 있는지 확인 ->
-        // 있다면 해당 지역의 location_detail_id 가져와서 매핑
         Long locationDetailId = locationDetailRepository.findByTitle(p.getLocationTitle())
                 .map(LocationDetail::getLocationDetailId)
                 .orElseThrow(() -> new RuntimeException("Location title not found in DB"));
+
         LocationDetail locationDetail = locationDetailRepository.findById(locationDetailId)
                 .orElseThrow(() -> new RuntimeException("LocationDetail not found for ID: " + locationDetailId));
 
@@ -200,9 +204,13 @@ public class StrfService {
     public ResponseWrapper<Integer> strfMenuIns(List<MultipartFile> menuPic, StrfMenuInsReq p) {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusiNum(p.getBusiNum());
-        if (!businessNum.getBusiNum().equals(p.getBusiNum())) {
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+
+        // 비즈니스 번호 조회
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
+
+        // 비즈니스 번호가 없으면 에러 처리
+        if (businessNum == null) {
+            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), 0); // 404 Not Found
         }
 
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
@@ -247,6 +255,7 @@ public class StrfService {
                 }
             }
             menuRepository.saveAll(menus);
+            menuRepository.flush();
         }
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
@@ -280,7 +289,7 @@ public class StrfService {
                         .stayTourRestaurFest(strf)
                         .title(strfMenu.getMenuTitle())
                         .price(strfMenu.getMenuPrice())
-                        .menuPic(strfMenu.getMenuPic())
+//                        .menuPic(strfMenu.getMenuPic())
                         .build();
                 menus.add(newMenu);
             }
@@ -331,49 +340,6 @@ public class StrfService {
             roomRepository.saveAll(rooms);
             amenipointRepository.saveAll(amenipoints);
         }
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-
-
-
-
-    @Transactional
-    public ResponseWrapper<Integer> deleteStrf(Long strfId) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-
-        String businessNum = businessNumRepository.findBusinessNumByUserId(user.getUserId());
-
-        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
-
-        StayTourRestaurFest strf = strfRepository.findById(strfId).orElseThrow(() -> new RuntimeException("STRF ID not found"));
-
-        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
-
-        if (!isBusi) {
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-        }
-        log.info("==========businessNum : {}" , businessNum);
-        log.info("==========strf.getBusiNum : {}" , strf.getBusiNum());
-
-        if (businessNum != null && !businessNum.equals(strf.getBusiNum().getBusiNum())) {
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-        }
-
-        if (strf.getCategory() == Category.STAY){
-            amenipointRepository.deleteByStayTourRestaurFest(strf);
-            parlorRepository.deleteAllByMenuStayTourRestaurFest(strf);
-            roomRepository.deleteAllByMenuStayTourRestaurFest(strf);
-        }
-        if (strf.getCategory() == Category.RESTAUR || strf.getCategory() == Category.STAY){
-            menuRepository.deleteByStayTourRestaurFest(strf);
-
-        }
-
-        strfPicRepository.deleteAllByStrfId(strf);
-        strfRepository.delete(strf);
-
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
@@ -516,6 +482,45 @@ public class StrfService {
                     .build();
             strfPicRepository.save(pic);
         });
+    }
+
+    @Transactional
+    public ResponseWrapper<Integer> deleteStrf(Long strfId) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+
+        String businessNum = businessNumRepository.findBusinessNumByUserId(user.getUserId());
+
+        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
+
+        StayTourRestaurFest strf = strfRepository.findById(strfId).orElseThrow(() -> new RuntimeException("STRF ID not found"));
+
+        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
+
+        if (!isBusi) {
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+        }
+        log.info("==========businessNum : {}" , businessNum);
+        log.info("==========strf.getBusiNum : {}" , strf.getBusiNum());
+
+        if (businessNum != null && !businessNum.equals(strf.getBusiNum().getBusiNum())) {
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+        }
+
+        if (strf.getCategory() == Category.STAY){
+            amenipointRepository.deleteByStayTourRestaurFest(strf);
+            parlorRepository.deleteAllByMenuStayTourRestaurFest(strf);
+            roomRepository.deleteAllByMenuStayTourRestaurFest(strf);
+        }
+        if (strf.getCategory() == Category.RESTAUR || strf.getCategory() == Category.STAY){
+            menuRepository.deleteByStayTourRestaurFest(strf);
+
+        }
+
+        strfPicRepository.deleteAllByStrfId(strf);
+        strfRepository.delete(strf);
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 }
 

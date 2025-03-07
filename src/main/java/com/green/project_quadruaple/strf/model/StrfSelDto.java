@@ -30,7 +30,6 @@ public class StrfSelDto {
     private String busiNum;
     private String locationName;
     private int state;
-    private String cid;
     private String hostProfilePic;
     private String hostName;
     private String inquiredAt;
