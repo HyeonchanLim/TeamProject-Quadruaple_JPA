@@ -124,6 +124,7 @@
             </if>
         </where>
     </select>
+
     <resultMap id="parlorResultMap" type="com.green.project_quadruaple.strf.model.StrfParlorDto">
         <collection property="parlors" ofType="com.green.project_quadruaple.strf.model.StrfParlor">
             <id property="menuId" column="menuId" />
