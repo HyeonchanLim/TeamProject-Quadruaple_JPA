@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class PointCardGetDto {
-    private String pointCardId;
+    private Long pointCardId;
     private int available;
     private int discountPer;
     private int finalPayment;
