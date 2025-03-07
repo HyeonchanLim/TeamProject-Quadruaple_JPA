@@ -14,6 +14,6 @@ public class BusinessMyPagePointDetail {
     private long menuId;
     private String title;
     private int amount;
-    private LocalDateTime usedAt;
+    private LocalDateTime createdAt;
     private boolean refund; //(0 = false, 1 = true)
 }

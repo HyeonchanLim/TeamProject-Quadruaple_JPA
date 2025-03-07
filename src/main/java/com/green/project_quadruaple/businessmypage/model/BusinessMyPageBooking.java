@@ -22,7 +22,7 @@ public class BusinessMyPageBooking {
     private LocalDateTime checkIn;
     @JsonIgnore
     private LocalDateTime checkOut;
-    private int finalPayment;
+    private int totalPayment;
     private String state;
 
     // 포맷팅된 날짜와 시간
@@ -34,14 +34,14 @@ public class BusinessMyPageBooking {
     // 생성자에서 날짜와 시간을 포맷팅
     public BusinessMyPageBooking(Long bookingId, Long strfId, String title, String picName,
                                  LocalDateTime checkIn, LocalDateTime checkOut,
-                                 int finalPayment, String state) {
+                                 int totalPayment, String state) {
         this.bookingId = bookingId;
         this.strfId = strfId;
         this.title = title;
         this.picName = picName;
         this.checkIn = checkIn;
         this.checkOut = checkOut;
-        this.finalPayment = finalPayment;
+        this.totalPayment = totalPayment;
         this.state = state;
 
         // 날짜와 시간 포맷팅
