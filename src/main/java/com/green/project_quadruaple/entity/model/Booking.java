@@ -40,10 +40,16 @@ public class Booking extends CreatedAt {
     @Column(name = "check_out", nullable = false)
     private LocalDateTime checkOut;
 
-    @Column(name = "final_payment", nullable = false)
+    @Column(name = "used_point")
+    private int usedPoint;
+
+    @Column(name = "total_payment")
+    private int totalPayment;
+
+    @Column(name = "final_payment")
     private int finalPayment;
 
-    @Column(nullable = false)
+    @Column
     private String tid;
 
     @Column(nullable = false, columnDefinition = "TINYINT(4) default 0")

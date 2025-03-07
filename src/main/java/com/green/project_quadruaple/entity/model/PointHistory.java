@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.green.project_quadruaple.entity.base.CreatedAt;
 import com.green.project_quadruaple.entity.base.Refund;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,28 +15,30 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PurchasedPoint extends Refund {
+public class PointHistory extends CreatedAt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "purchased_point_id",nullable = false)
-    private Long purchasedPointId;
+    @Column(name = "point_history_id",nullable = false)
+    private Long pointHistoryId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "point_card_id", nullable = false)
-    private PointCard pointCard;
+    @Column(nullable = false, columnDefinition = "TINYINT(4) default 0")
+    private int category;
 
-    @Column(name = "purchase_at", nullable = false)
-    private LocalDateTime purchaseAt;
+    @Column(name = "related_id", nullable = false)
+    private Long relatedId;
 
-    @Column(nullable = false, length = 30)
+    @Column(length = 30)
     private String tid;
 
-    @Column(nullable = false)
-    private int remain;
+    @Column
+    private Integer amount;
+
+    @Column(name = "remain_point",nullable = false)
+    private int remainPoint;
 
 }

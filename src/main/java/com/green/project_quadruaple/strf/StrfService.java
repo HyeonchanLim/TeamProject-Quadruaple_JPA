@@ -115,7 +115,6 @@ public class StrfService {
         }
 
         StayTourRestaurFest strf = StayTourRestaurFest.builder()
-                .cid(p.getCid())
                 .category(categoryValue)
                 .title(p.getTitle())
                 .lat(p.getLat())
