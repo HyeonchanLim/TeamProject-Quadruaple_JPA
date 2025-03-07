@@ -16,6 +16,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.entity.model.ChatJoin;
 import com.green.project_quadruaple.entity.model.ChatRoom;
 import com.green.project_quadruaple.entity.model.Role;
+import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.strf.StrfRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
@@ -49,10 +50,10 @@ public class ChatRoomService {
 
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
-        Role hostUserRole = roleRepository.findByUserIdAndRoleName(signedUserId, UserRole.USER);
-        Role inviteUserRole = roleRepository.findByStrfIdAndRoleName(req.getStrfId(), UserRole.BUSI);
+        User hostUser = userRepository.findById(signedUserId).orElse(null);
+        User inviteUser = userRepository.findByStrfId(req.getStrfId());
 
-        if(hostUserRole == null || inviteUserRole == null) {
+        if(hostUser == null || inviteUser == null) {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND_USER.getCode(), null);
         }
 
@@ -63,13 +64,13 @@ public class ChatRoomService {
         chatRoomRepository.flush();
 
         ChatJoin hostUserJoin = ChatJoin.builder()
-                .role(hostUserRole)
+                .user(hostUser)
                 .chatRoom(chatRoom)
                 .build();
         chatJoinRepository.save(hostUserJoin);
 
         ChatJoin inviteUserJoin = ChatJoin.builder()
-                .role(inviteUserRole)
+                .user(inviteUser)
                 .chatRoom(chatRoom)
                 .build();
         chatJoinRepository.save(inviteUserJoin);

@@ -14,10 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(
-        name = "chat_join",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "chat_join_unique", columnNames = { "user_id", "role" })
-        }
+        name = "chat_join"
 )
 public class ChatJoin {
 
@@ -27,11 +24,8 @@ public class ChatJoin {
     private Long cjId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
-            @JoinColumn(name = "role", referencedColumnName = "role")
-    })
-    private Role role;
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id", nullable = false)
