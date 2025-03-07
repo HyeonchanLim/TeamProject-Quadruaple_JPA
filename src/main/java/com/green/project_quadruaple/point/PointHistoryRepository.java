@@ -10,7 +10,7 @@ import java.util.List;
 public interface PointHistoryRepository extends JpaRepository<PointHistory, Long> {
 
     @Query("""
-        select p from PointHistory p
+        select p.remainPoint from PointHistory p
         where p.user.userId = :signedUserId
         order by p.pointHistoryId desc
         """)

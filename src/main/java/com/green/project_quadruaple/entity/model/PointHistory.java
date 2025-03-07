@@ -3,10 +3,7 @@ package com.green.project_quadruaple.entity.model;
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import com.green.project_quadruaple.entity.base.Refund;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class PointHistory extends CreatedAt {
 
     @Id
@@ -39,6 +37,6 @@ public class PointHistory extends CreatedAt {
     private Integer amount;
 
     @Column(name = "remain_point",nullable = false)
-    private int remainPoint;
+    private Integer remainPoint;
 
 }
