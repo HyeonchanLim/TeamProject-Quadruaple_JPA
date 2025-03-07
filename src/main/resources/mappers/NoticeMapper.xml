@@ -15,13 +15,12 @@
         SELECT N.notice_id AS noticeId,
         N.notice_category AS category,
         N.title,
-        NR.`open` AS opened,
+        NR.opened,
         NR.created_at AS createdAt
         FROM notice N
         JOIN notice_receive NR
         ON N.notice_id = NR.notice_id
         WHERE NR.user_id = #{userId}
-        AND NR.`disable` = 0
         ORDER BY noticeId DESC
         LIMIT #{startIdx},#{size}
     </select>

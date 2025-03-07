@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StrfRestDateReq {
+public class StrfRestDate {
     // 휴무일 req key - sun, mon, tue, wed, thu, fri, sat
     // 휴무일 res value - 0, 1, 2, 3, 4, 5, 6
     private static final Map<String, Integer> restDayMap = new HashMap<>();

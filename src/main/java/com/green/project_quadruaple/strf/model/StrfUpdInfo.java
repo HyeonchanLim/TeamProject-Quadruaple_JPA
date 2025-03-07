@@ -1,9 +1,6 @@
 package com.green.project_quadruaple.strf.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.green.project_quadruaple.entity.model.*;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -15,22 +12,21 @@ import java.util.List;
 @ToString
 @EqualsAndHashCode
 @Builder
-public class StrfInsReq {
+public class StrfUpdInfo {
+    private long strfId;
+    private String cid;
     private String category;
     private String title;
     private double lat;
     private double lng;
     private String address;
-    private String locationTitle;
+    private long locationDetailId;
     private String post;
     private String tell;
     private LocalDate startAt;
     private LocalDate endAt;
-    @Schema(description = "오픈 체크인 시간 (HH:mm 형식)", example = "09:00")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime openCheckIn;
-
-    @Schema(description = "클로즈 체크아웃 시간 (HH:mm 형식)", example = "18:00")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime closeCheckOut;
     private String detail;
@@ -39,20 +35,3 @@ public class StrfInsReq {
 
     private List<String> restdates;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

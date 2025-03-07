@@ -11,6 +11,5 @@ public interface StrfMapper {
     StrfSelRes getMemberDetail(Long userId, Long strfId);
     void strfUpsert(Long userId, Long strfId);
 
-    GetNonDetail getNonMemberDetail (Long strfId);
 }
 

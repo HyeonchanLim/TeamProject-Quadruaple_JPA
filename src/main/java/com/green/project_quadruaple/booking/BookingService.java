@@ -9,10 +9,12 @@ import com.green.project_quadruaple.booking.repository.RoomRepository;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.model.Booking;
 import com.green.project_quadruaple.entity.model.Menu;
 import com.green.project_quadruaple.entity.model.Room;
 import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +52,7 @@ public class BookingService {
     private final MenuRepository menuRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final NoticeService noticeService;
 
     private KakaoReadyDto kakaoReadyDto;
 
@@ -58,6 +61,7 @@ public class BookingService {
                           MenuRepository menuRepository,
                           RoomRepository roomRepository,
                           UserRepository userRepository,
+                          NoticeService noticeService,
                           @Value("${kakao-api-const.affiliate-code}") String affiliateCode,
                           @Value("${kakao-api-const.secret-key}") String secretKey,
                           @Value("${kakao-api-const.url}") String payUrl) {
@@ -69,8 +73,17 @@ public class BookingService {
         this.menuRepository = menuRepository;
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
+        this.noticeService = noticeService;
     }
 
+    // 예약 확정시 알람보내기
+//    private void postConfirmBookingNotice (Booking booking, User user) {
+//
+//        StringBuilder content = new StringBuilder();
+//
+//        noticeService.postNotice(NoticeCategory.BOOKING,title,content.toString(), user, booking.getBookingId());
+//    }
+//
     public ResponseWrapper<List<BookingRes>> getBooking(Integer page) {
 
         long signedUserId = AuthenticationFacade.getSignedUserId();
@@ -270,6 +283,10 @@ public class BookingService {
             if(approveDto == null) {
                 throw new RuntimeException();
             }
+
+            // 예약완료 알람발송
+//            User noticeUser = userRepository.findById(bookingPostReq.getUserId()).orElse(null);
+//            postConfirmBookingNotice(booking, noticeUser);
 
             int quantity = 1;
 

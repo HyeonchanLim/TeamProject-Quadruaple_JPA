@@ -3,7 +3,6 @@ package com.green.project_quadruaple.entity.model;
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
 import lombok.*;
-
 @Entity
 @Getter
 @Setter
