@@ -57,7 +57,11 @@ public class ChatRoomService {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND_USER.getCode(), null);
         }
 
-        ChatRoom chatRoom = ChatRoom.builder()
+        ChatRoom chatRoom = chatRoomRepository.findByBookingId(req.getBookingId());
+        if(chatRoom != null) { // 이미 존재하는 채팅방
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoom.getChatRoomId());
+        }
+        chatRoom = ChatRoom.builder()
                 .title(req.getTitle())
                 .build();
         chatRoomRepository.save(chatRoom);

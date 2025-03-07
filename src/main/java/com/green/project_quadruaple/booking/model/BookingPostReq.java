@@ -44,6 +44,9 @@ public class BookingPostReq {
     @Schema(title = "쿠폰 번호", type= "long", example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Long couponId;
 
+    @Schema(title = "사용 포인트", type= "int", example = "5000", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Integer point;
+
     @NotNull
     @JsonProperty("actual_paid")
     @Schema(title = "쿠폰 적용한 최종 결제 금액", type= "int", example = "60000", requiredMode = Schema.RequiredMode.REQUIRED)
