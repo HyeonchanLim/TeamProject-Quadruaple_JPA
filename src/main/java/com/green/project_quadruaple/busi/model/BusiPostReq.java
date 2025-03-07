@@ -40,7 +40,7 @@ public class BusiPostReq {
     private int state;
     @JsonIgnore
     private int verified;
-    @JsonIgnore
+
     private String busiNum;
 
     @JsonIgnore

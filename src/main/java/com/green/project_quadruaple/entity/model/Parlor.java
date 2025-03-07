@@ -13,7 +13,7 @@ public class Parlor {
     @Id
     private Long menuId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @MapsId
     @JoinColumn(name = "menu_id")
     private Menu menu;
