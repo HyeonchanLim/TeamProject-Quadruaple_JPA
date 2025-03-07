@@ -30,5 +30,10 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             """)
     List<ChatDto> findChatLimit30(Long chatRoomId, Long signedUserId, Pageable pageable);
 
-
+    @Query("""
+        select cr from ChatRoom cr
+        join Booking b on b.chatRoom.chatRoomId = cr.chatRoomId
+        where b.bookingId = :bookingId
+        """)
+    ChatRoom findByBookingId(Long bookingId);
 }

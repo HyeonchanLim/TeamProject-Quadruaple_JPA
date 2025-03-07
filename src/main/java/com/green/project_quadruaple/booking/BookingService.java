@@ -15,6 +15,7 @@ import com.green.project_quadruaple.entity.model.Menu;
 import com.green.project_quadruaple.entity.model.Room;
 import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.notice.NoticeService;
+import com.green.project_quadruaple.point.PointHistoryRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,7 @@ public class BookingService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final NoticeService noticeService;
+    private final PointHistoryRepository pointHistoryRepository;
 
     private KakaoReadyDto kakaoReadyDto;
 
@@ -62,6 +64,7 @@ public class BookingService {
                           RoomRepository roomRepository,
                           UserRepository userRepository,
                           NoticeService noticeService,
+                          PointHistoryRepository pointHistoryRepository,
                           @Value("${kakao-api-const.affiliate-code}") String affiliateCode,
                           @Value("${kakao-api-const.secret-key}") String secretKey,
                           @Value("${kakao-api-const.url}") String payUrl) {
@@ -74,6 +77,7 @@ public class BookingService {
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
         this.noticeService = noticeService;
+        this.pointHistoryRepository = pointHistoryRepository;
     }
 
     // 예약 확정시 알람보내기
@@ -124,13 +128,14 @@ public class BookingService {
 
     // 예약 변경 -> 결제 , 취소 내역 업데이트 필요
     // check in - out 날짜 체크 (일정의 날짜 , check in - out 날짜 겹침x)
-    // final_paymaent = 실제 결제 금액 맞는지 비교 필요
-    // strf id 가 실제 상품과 맞는지 체크
+    // total_payment = 실제 결제 금액 맞는지 비교 필요
+    // strfId 가 실제 상품과 맞는지 체크
     @Transactional
     public ResponseWrapper<String> postBooking(BookingPostReq req) {
         Long signedUserId = AuthenticationFacade.getSignedUserId();
         User signedUser = userRepository.findById(signedUserId).get();
         Long couponId = req.getCouponId();
+        Integer point = req.getPoint();
         Room room = null;
         Menu menu = null;
         try { // room, menu null 체크, 값 바인딩
@@ -158,8 +163,15 @@ public class BookingService {
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
             }
             discount = price / couponDto.getDiscountRate();
-
             req.setReceiveId(couponDto.getReceiveId());
+        }
+
+        if(point != null) { // 포인트가 담겨있을 경우
+            List<Integer> remainPoint = pointHistoryRepository.findRemainPointByUserId(signedUserId, PageRequest.of(0, 1));
+            if(point > remainPoint.get(0)) {
+                return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "포인트 금액이 부족합니다.");
+            }
+            discount += point;
         }
 
         int resultPrice = price - discount;
@@ -217,7 +229,7 @@ public class BookingService {
                         .num(req.getNum())
                         .checkIn(checkInDate)
                         .checkOut(checkOutDate)
-                        .finalPayment(req.getActualPaid())
+                        .totalPayment(req.getActualPaid())
                         .tid(kakaoReadyDto.getTid())
                         .state(0)
                         .build();
@@ -272,9 +284,11 @@ public class BookingService {
             BookingPostReq bookingPostReq = kakaoReadyDto.getBookingPostReq();
             bookingPostReq.setUserId(Long.parseLong(userId));
             bookingPostReq.setTid(kakaoReadyDto.getTid());
+
             if (bookingPostReq.getReceiveId() != null) {
                 bookingMapper.insUsedCoupon(bookingPostReq.getReceiveId(), bookingPostReq.getBookingId());
             }
+
             Booking booking = kakaoReadyDto.getBooking();
             bookingRepository.save(booking);
             bookingRepository.flush();

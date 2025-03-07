@@ -21,7 +21,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 , b.createdAt
                 , b.checkIn
                 , b.checkOut
-                , b.finalPayment
+                , b.totalPayment
                 , b.state
                 , b.chatRoom.chatRoomId
             ) from Booking b
