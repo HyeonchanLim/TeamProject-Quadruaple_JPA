@@ -8,21 +8,20 @@
         a.strf_id AS strfId , a.category , a.title AS strfTitle , n.user_id AS userId ,
         a.lat AS latit, a.lng AS longitude, a.address, a.post, a.tell, a.start_at AS startAt,
         a.end_at AS endAt, a.open_check_in as openCheck, a.close_check_out as closeCheck ,
-        a.detail, a.busi_num AS busiNum, f.detail_title AS locationName, a.state , a.cid ,
+        a.detail, a.busi_num AS busiNum, f.detail_title AS locationName, a.state ,
         e.pic_name AS strfPic , l.profile_pic AS hostProfilePic, l.name AS hostName ,
         n.inquired_at AS inquiredAt, COUNT(DISTINCT m.user_id) AS wishCnt, AVG(h.rating) AS ratingAvg ,
-        COUNT(DISTINCT h.review_id) AS reviewCnt , o.day_week AS restDate
+        COUNT(DISTINCT h.review_id) AS reviewCnt ,
+        COALESCE(o.day_week, '') AS restDate
 
-        <if test="userId != null">
-            , IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
-        </if>
         <if test="userId == null">
             , 0 AS wishIn
         </if>
         <if test="userId != null">
-        , IF( EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 0 ), 0, 1 ) AS recentCheck,
-        CASE WHEN EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 1 ) THEN 0
-        WHEN EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} ) THEN 1
+            , IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
+            , IF( EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 0 ), 0, 1 ) AS recentCheck
+            , CASE WHEN EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 1 ) THEN 0
+            WHEN EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} ) THEN 1
             ELSE NULL END AS recentCheckStatus
         </if>
 
@@ -39,9 +38,9 @@
         LEFT JOIN rest_date o ON o.strf_id = a.strf_id
 
         WHERE a.strf_id = #{strfId}
-        GROUP BY a.strf_id,e.pic_name
+        GROUP BY a.strf_id
     </select>
-    <resultMap id="memberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelDto">
+    <resultMap id="memberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelRes">
         <id property="strfId" column="strfId" />
         <result property="category" column="category" />
         <result property="strfTitle" column="strfTitle" />
@@ -69,15 +68,14 @@
         <result property="inquiredAt" column="inquiredAt" />
         <result property="reviewCnt" column="reviewCnt" />
         <result property="state" column="state" />
-        <result property="cid" column="cid" />
 
-        <collection property="restDate">
+        <collection property="restDate" ofType="java.lang.Integer">
             <result property="restDate" column="restDate"/>
         </collection>
 
         <collection property="strfPics" ofType="com.green.project_quadruaple.strf.model.StrfPicSel">
             <id property="strfId" column="strfId" />
-            <result property="pic" column="strfPic" />
+            <result property="strfPic" column="strfPic" />
         </collection>
     </resultMap>
 
@@ -104,7 +102,7 @@
         WHERE <if test="category != 'Stay'">
             a.strf_id = #{strfId}
             </if>
-        GROUP BY a.strf_id , d.amenity_id
+        GROUP BY a.strf_id , b.amenity_id
     </select>
     <resultMap id="amenityResultMap" type="com.green.project_quadruaple.strf.model.StrfAmenity">
         <id property="strfId" column="strfId" />
@@ -112,31 +110,29 @@
         <result property="amenityTitle" column="amenityTitle" />
     </resultMap>
     <select id="strfParlor" resultMap="parlorResultMap">
-        SELECT c.max_capacity AS maxCapacity, c.recom_capacity AS recomCapacity,
-        c.surcharge , d.room_num AS roomNum , b.menu_id AS menuId , d.room_id AS roomId
+        SELECT a.strf_id AS strfId , b.menu_id AS menuId, c.max_capacity AS maxCapacity,
+        c.recom_capacity AS recomCapacity , c.surcharge , b.title ,
+        d.room_id AS roomId , d.room_num AS roomNum
         FROM stay_tour_restaur_fest a
         JOIN menu b ON a.strf_id = b.strf_id
         JOIN parlor c ON b.menu_id = c.menu_id
-        JOIN room d ON b.menu_id = d.menu_id
-        <where>
+        LEFT JOIN room d ON b.menu_id = d.menu_id
+        WHERE
             <if test="category != null and category == 'STAY'">
-                a.strf_id = #{strfId}
+               a.strf_id = #{strfId} AND a.category = #{category}
             </if>
-        </where>
+<!--        </where>-->
+        GROUP BY a.strf_id , b.menu_id
     </select>
 
     <resultMap id="parlorResultMap" type="com.green.project_quadruaple.strf.model.StrfParlorDto">
-        <collection property="parlors" ofType="com.green.project_quadruaple.strf.model.StrfParlor">
             <id property="menuId" column="menuId" />
             <result property="maxCapacity" column="maxCapacity" />
             <result property="recomCapacity" column="recomCapacity" />
             <result property="surcharge" column="surcharge" />
-        </collection>
 
-        <collection property="rooms" ofType="com.green.project_quadruaple.strf.model.StrfRooms">
-            <id property="roomId" column="roomId" />
+            <result property="roomId" column="roomId" />
             <result property="roomNum" column="roomNum" />
-        </collection>
     </resultMap>
 
 

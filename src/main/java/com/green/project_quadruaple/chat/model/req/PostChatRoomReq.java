@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PostChatRoomReq {
+    private Long bookingId;
     private Long strfId;
     private String title;
 }

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Booking extends CreatedAt {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_id")
@@ -43,13 +44,10 @@ public class Booking extends CreatedAt {
     @Column(name = "used_point")
     private int usedPoint;
 
-    @Column(name = "total_payment")
-    private int totalPayment;
+    @Column(name = "total_payment", nullable = false)
+    private Integer totalPayment;
 
-    @Column(name = "final_payment")
-    private int finalPayment;
-
-    @Column
+    @Column(nullable = false)
     private String tid;
 
     @Column(nullable = false, columnDefinition = "TINYINT(4) default 0")
