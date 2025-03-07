@@ -37,7 +37,6 @@
             SELECT cr.chat_room_id FROM chat_room cr
             JOIN chat_join cj2 ON cj2.chat_room_id = cr.chat_room_id
             AND cj2.user_id = #{signedUserId}
-            AND cj2.`role` = #{role}
         )
         ORDER BY latest_at.max_at DESC
         limit #{page}, 30
@@ -51,7 +50,6 @@
         WHERE cr.chat_room_id IN (
             SELECT chat_room_id FROM chat_join cj
             WHERE user_id = #{signedUserId}
-            AND `role` = #{role}
         )
     </select>
 </mapper>

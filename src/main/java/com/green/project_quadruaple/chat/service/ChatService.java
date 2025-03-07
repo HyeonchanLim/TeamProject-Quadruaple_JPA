@@ -98,7 +98,7 @@ public class ChatService {
             }
 
             return MessageRes.builder()
-                    .sender(signedUserchatJoin.getRole().getUser().getName())
+                    .sender(signedUserchatJoin.getUser().getName())
                     .message(req.getMessage())
                     .createdAt(chat.getCreatedAt())
                     .build();

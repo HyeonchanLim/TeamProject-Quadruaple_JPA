@@ -25,4 +25,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u.name from User u where u.userId = :id")
     String findNameById(Long id);
+
+    @Query("""
+        select u from User u
+        join BusinessNum bn on u.userId = bn.user.userId
+        join StayTourRestaurFest strf on bn.busiNum = strf.busiNum.busiNum
+        where strf.strfId = :strfId
+        """)
+    User findByStrfId(Long strfId);
 }
