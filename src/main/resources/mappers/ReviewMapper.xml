@@ -130,7 +130,8 @@
     <select id="selectBusinessReview" parameterType="map" resultType="com.green.project_quadruaple.review.model.BusinessDto">
         WITH UserBusiness AS (
         SELECT busi_num FROM business_num WHERE user_id = #{userId}
-        ), ReviewData AS (
+        ),
+        ReviewData AS (
         SELECT
         r.review_id,
         r.strf_id,
@@ -143,9 +144,11 @@
         SELECT s.strf_id FROM stay_tour_restaur_fest s
         WHERE s.busi_num IN (SELECT busi_num FROM UserBusiness)
         )
-        ), ReviewReplyData AS (
+        ),
+        ReviewReplyData AS (
         SELECT
         rr.review_id,
+        rr.reply_id AS reviewReplyId,  -- ✅ reviewReplyId 추가
         rr.content AS reviewReply,
         DATE(rr.created_at) AS reviewReplyCreatedAt
         FROM review_reply rr
@@ -154,7 +157,8 @@
         FROM review_reply rr2
         WHERE rr2.review_id = rr.review_id
         )
-        ), ReviewPicData AS (
+        ),
+        ReviewPicData AS (
         SELECT
         rp.review_id,
         rp.title AS title
@@ -180,6 +184,7 @@
         u.profile_pic AS writerUserProfilePic,
         u.provider_type AS providerType,
 
+        IFNULL(rr.reviewReplyId, NULL) AS reviewReplyId,  -- ✅ reviewReplyId 추가
         IFNULL(rr.reviewReply, '') AS reviewReply,
         IFNULL(rr.reviewReplyCreatedAt, NULL) AS reviewReplyCreatedAt
 
@@ -192,8 +197,12 @@
         WHERE bn.user_id = #{userId}
         ORDER BY s.strf_id ASC, r.review_id DESC
         LIMIT #{pageSize} OFFSET #{offset};
-
     </select>
+
+
+
+
+
 
 
 

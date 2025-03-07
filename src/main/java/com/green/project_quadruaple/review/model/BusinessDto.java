@@ -31,5 +31,7 @@ public class BusinessDto {
     private String reviewReply;
     private String reviewReplyCreatedAt;
     private List<ReviewPicDto> reviewPicList;
+    private Long reviewReplyId;
+
 
 }

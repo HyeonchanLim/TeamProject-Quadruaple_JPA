@@ -8,7 +8,7 @@
         a.strf_id AS strfId , a.category , a.title AS strfTitle , n.user_id AS userId ,
         a.lat AS latit, a.lng AS longitude, a.address, a.post, a.tell, a.start_at AS startAt,
         a.end_at AS endAt, a.open_check_in as openCheck, a.close_check_out as closeCheck ,
-        , a.detail, a.busi_num AS busiNum, f.detail_title AS locationName, a.state , a.cid ,
+        a.detail, a.busi_num AS busiNum, f.detail_title AS locationName, a.state , a.cid ,
         e.pic_name AS strfPic , l.profile_pic AS hostProfilePic, l.name AS hostName ,
         n.inquired_at AS inquiredAt, COUNT(DISTINCT m.user_id) AS wishCnt, AVG(h.rating) AS ratingAvg ,
         COUNT(DISTINCT h.review_id) AS reviewCnt , o.day_week AS restDate
@@ -38,10 +38,10 @@
         LEFT JOIN recent n ON n.strf_id = a.strf_id
         LEFT JOIN rest_date o ON o.strf_id = a.strf_id
 
-        WHERE a.strf_id = #{strfId} AND a.state = 0
+        WHERE a.strf_id = #{strfId}
         GROUP BY a.strf_id,e.pic_name
     </select>
-    <resultMap id="memberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelRes">
+    <resultMap id="memberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelDto">
         <id property="strfId" column="strfId" />
         <result property="category" column="category" />
         <result property="strfTitle" column="strfTitle" />
@@ -54,7 +54,6 @@
         <result property="endAt" column="endAt" />
         <result property="openCheck" column="openCheck" />
         <result property="closeCheck" column="closeCheck" />
-        <result property="restDate" column="restDate" />
         <result property="detail" column="detail" />
         <result property="busiNum" column="busiNum" />
         <result property="locationName" column="locationName" />
@@ -71,6 +70,10 @@
         <result property="reviewCnt" column="reviewCnt" />
         <result property="state" column="state" />
         <result property="cid" column="cid" />
+
+        <collection property="restDate">
+            <result property="restDate" column="restDate"/>
+        </collection>
 
         <collection property="strfPics" ofType="com.green.project_quadruaple.strf.model.StrfPicSel">
             <id property="strfId" column="strfId" />
@@ -98,7 +101,7 @@
         FROM amenipoint a
         JOIN amenity b
         ON a.amenity_id = b.amenity_id
-        WHERE <if test="category != Stay">
+        WHERE <if test="category != 'Stay'">
             a.strf_id = #{strfId}
             </if>
         GROUP BY a.strf_id , d.amenity_id
@@ -108,26 +111,33 @@
         <result property="amenityId" column="amenityId" />
         <result property="amenityTitle" column="amenityTitle" />
     </resultMap>
-<!--    <select id="strfParlor" resultMap="parlorResultMap">-->
-<!--        SELECT a.max_capacity AS maxCapacity, a.recom_capacity AS recomCapacity, a.surcharge , b.room_num AS roomNum-->
-<!--        FROM parlor a-->
-<!--        JOIN room b-->
-<!--        ON a.menu_id = b.menu_id-->
-<!--        WHERE <if test="category != Stay">-->
-<!--            a.menu_id = #{menuId}-->
-<!--            </if>-->
-<!--    </select>-->
-<!--    <resultMap id="parlorResultMap" type="com.green.project_quadruaple.strf.model.StrfParlor">-->
-<!--        <id property="menuId" column="menuId" />-->
-<!--        <result property="maxCapacity" column="maxCapacity" />-->
-<!--        <result property="recomCapacity" column="recomCapacity" />-->
-<!--        <result property="surcharge" column="surcharge" />-->
+    <select id="strfParlor" resultMap="parlorResultMap">
+        SELECT c.max_capacity AS maxCapacity, c.recom_capacity AS recomCapacity,
+        c.surcharge , d.room_num AS roomNum , b.menu_id AS menuId , d.room_id AS roomId
+        FROM stay_tour_restaur_fest a
+        JOIN menu b ON a.strf_id = b.strf_id
+        JOIN parlor c ON b.menu_id = c.menu_id
+        JOIN room d ON b.menu_id = d.menu_id
+        <where>
+            <if test="category != null and category == 'STAY'">
+                a.strf_id = #{strfId}
+            </if>
+        </where>
+    </select>
 
-<!--        <collection property="rooms" ofType="com.green.project_quadruaple.strf.model.StrfRooms">-->
-<!--            <id property="roomId" column="roomId" />-->
-<!--            <result property="roomNum" column="roomNum" />-->
-<!--        </collection>-->
-<!--    </resultMap>-->
+    <resultMap id="parlorResultMap" type="com.green.project_quadruaple.strf.model.StrfParlorDto">
+        <collection property="parlors" ofType="com.green.project_quadruaple.strf.model.StrfParlor">
+            <id property="menuId" column="menuId" />
+            <result property="maxCapacity" column="maxCapacity" />
+            <result property="recomCapacity" column="recomCapacity" />
+            <result property="surcharge" column="surcharge" />
+        </collection>
+
+        <collection property="rooms" ofType="com.green.project_quadruaple.strf.model.StrfRooms">
+            <id property="roomId" column="roomId" />
+            <result property="roomNum" column="roomNum" />
+        </collection>
+    </resultMap>
 
 
     <insert id="strfUpsert">
