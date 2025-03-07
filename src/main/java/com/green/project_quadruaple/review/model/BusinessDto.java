@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.review.model;
 
+import com.green.project_quadruaple.review.reviewReply.ReviewReplyDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
