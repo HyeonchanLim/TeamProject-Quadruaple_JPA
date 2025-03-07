@@ -4,15 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @ToString
 @Getter
 @Setter
 public class BusinessMyPagePointList {
-    private int amount;
-    private LocalDateTime usedAt;
-    private boolean refund; //(0 = false, 1 = true)
-    private String title;
     private long totalAmount;
+    private List<BusinessMyPagePointDetail> pointDetails;
 }
