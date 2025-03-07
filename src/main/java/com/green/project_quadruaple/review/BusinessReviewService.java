@@ -32,27 +32,23 @@ public class BusinessReviewService {
     private final ReviewMapper reviewMapper;
     private final ReviewRepository reviewRepository;
 
-
-            // 사용자의 사업자 번호 조회
+    /**
+     * 전체 리뷰 조회 (페이징 적용)
+     */
     public List<BusinessDto> getBusinessReview(int page, int pageSize) {
-        // 로그인 사용자 ID 가져오기
         Long signedUserId = authenticationFacade.getSignedUserId();
         System.out.println("Signed User ID: " + signedUserId);
 
-        // 사장님 권한 체크
         String userRole = reviewMapper.findUserRoleByUserId(signedUserId);
         if (!"BUSI".equalsIgnoreCase(userRole)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "사업자 권한이 없음.");
         }
 
-        // ✅ 페이징 처리를 위한 offset 계산
-        int offset = (page - 1) * pageSize;  // 페이지 시작 인덱스 계산
-
-        // 전체 리뷰 조회 (페이징 적용)
+        int offset = (page - 1) * pageSize;
         List<BusinessDto> reviews = reviewMapper.selectBusinessReview(signedUserId, page, pageSize, offset);
 
-        // ✅ 추가: 리뷰마다 reviewPicList 데이터 매핑
         for (BusinessDto review : reviews) {
+            System.out.println("ReviewReplyId: " + review.getReviewReplyId()); // ✅ 로그 추가
             List<ReviewPicDto> pics = reviewMapper.selectReviewPics(review.getReviewId());
             review.setReviewPicList(pics);
         }
