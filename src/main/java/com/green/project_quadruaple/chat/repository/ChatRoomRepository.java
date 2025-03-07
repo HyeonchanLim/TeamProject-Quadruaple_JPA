@@ -24,7 +24,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
                 , c.createdAt
             ) FROM Chat c
             JOIN c.chatJoin cj
-            JOIN cj.role.user u
+            JOIN cj.user u
             WHERE cj.chatRoom.chatRoomId = :chatRoomId
             ORDER BY c.chatId DESC
             """)
