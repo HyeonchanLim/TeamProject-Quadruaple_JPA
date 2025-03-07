@@ -30,7 +30,6 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -87,7 +86,6 @@ public class ChatRoomService {
         return null;
     }
 
-    // 채팅방 불러오기
     @Transactional
     public ResponseWrapper<List<ChatDto>> getChatList(Long roomId, GetChatRoomReq req) {
         long signedUserId = AuthenticationFacade.getSignedUserId();
@@ -109,7 +107,9 @@ public class ChatRoomService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatLimit30);
     }
 
+    // 채팅방 불러오기
     public ResponseWrapper<List<ChatRoomDto>> getChatRoomList(int page, String roleReq) {
+
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
         UserRole role = UserRole.getByValue(roleReq);
@@ -118,15 +118,31 @@ public class ChatRoomService {
         }
         int startIdx = page * 10;
         List<ChatRoomDto> chatRoomDtoList = chatRoomMapper.selChatRoomList(signedUserId, role.getValue(), startIdx);
+        List<ChatRoomDto> allChatRoomDtoList = chatRoomMapper.selAllChatRoomList(signedUserId, role.getValue(), startIdx);
+
+        for (ChatRoomDto allChatRoomDto : allChatRoomDtoList) {
+            boolean flag = false;
+            for (ChatRoomDto chatRoomDto : chatRoomDtoList) {
+                if(chatRoomDto.getRoomId() == allChatRoomDto.getRoomId()) {
+                    flag = true;
+                    break;
+                }
+            }
+            if(!flag) {
+                chatRoomDtoList.add(allChatRoomDto);
+            }
+        }
+
         LocalDateTime now = LocalDateTime.now();
         for (ChatRoomDto chatRoomDto : chatRoomDtoList) {
-            LocalDateTime latestChatDLT = chatRoomDto.getLatestChatDLT();
+            LocalDateTime latestChatDLT = chatRoomDto.getLatestChatLDT();
             chatRoomDto.setLastChatTime(formatDate(latestChatDLT, now));
         }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoomDtoList);
     }
 
     private String formatDate(LocalDateTime time, LocalDateTime now) {
+        if(time == null) return null;
         Period diffYMD = Period.between(time.toLocalDate(), now.toLocalDate());
 
         String StringAt;
