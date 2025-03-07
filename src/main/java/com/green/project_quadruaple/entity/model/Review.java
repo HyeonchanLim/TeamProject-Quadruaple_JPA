@@ -18,7 +18,7 @@ public class Review extends UpdatedAt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reviewId;
 
-    @Column(nullable = false,length = 500)
+    @Column(nullable = false, length = 500)
     private String content;
 
     @Column(nullable = false, columnDefinition = "TINYINT(4) default 0")
@@ -31,5 +31,9 @@ public class Review extends UpdatedAt {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public Long getStrfId() {
+        return stayTourRestaurFest != null ? stayTourRestaurFest.getStrfId() : null;
+    }
 
 }

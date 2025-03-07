@@ -11,6 +11,8 @@ import com.green.project_quadruaple.review.reviewReply.ReviewReplyUpdateDto;
 import com.green.project_quadruaple.strf.BusinessNumRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -31,7 +33,7 @@ public class BusinessReviewService {
     private final ReviewRepository reviewRepository;
 
 
-
+            // 사용자의 사업자 번호 조회
     public List<BusinessDto> getBusinessReview(int page, int pageSize) {
         // 로그인 사용자 ID 가져오기
         Long signedUserId = authenticationFacade.getSignedUserId();
@@ -58,28 +60,35 @@ public class BusinessReviewService {
         return reviews;
     }
 
+
+
     @Transactional
     public Long createReviewReply(ReviewReplyPostDto requestDto) {
         Long userId = authenticationFacade.getSignedUserId(); // 로그인한 사용자 ID
 
-        // 사용자의 사업자 번호 조회
+        // 로그인한 사용자의 사업자 번호 조회
         List<String> businessNums = businessNumRepository.findBusiNumByUserId(userId);
         if (businessNums.isEmpty()) {
             throw new AccessDeniedException("사업자 정보가 존재하지 않습니다.");
         }
-        String businessNum = businessNums.get(0); // 첫 번째 사업자 번호 사용
 
         // 리뷰 조회
         Review review = reviewRepository.findById(requestDto.getReviewId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 존재하지 않습니다."));
 
-        // 리뷰 작성자의 사업자 번호 조회 (User -> BusinessNum)
-        List<String> reviewOwnerBusiNums = businessNumRepository.findBusiNumByUserId(review.getUser().getUserId());
-        if (reviewOwnerBusiNums.isEmpty() || !reviewOwnerBusiNums.contains(businessNum)) {
+        // 리뷰가 속한 사업장의 strfId 조회
+        Long strfId = review.getStayTourRestaurFest().getStrfId();
+
+        // 해당 리뷰가 속한 사업자 번호 조회
+        String reviewBusiNum = businessNumRepository.findBusiNumByStrfId(strfId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 속한 사업자 정보가 없습니다."));
+
+        // 로그인한 사용자의 사업자 번호와 비교하여 권한 체크
+        if (!businessNums.contains(reviewBusiNum)) {
             throw new AccessDeniedException("해당 리뷰 대댓글을 작성할 권한이 없습니다.");
         }
 
-        // 리뷰 대댓글 저장
+        // 대댓글 저장
         ReviewReply reviewReply = ReviewReply.builder()
                 .review(review)
                 .content(requestDto.getContent())
@@ -87,14 +96,18 @@ public class BusinessReviewService {
                 .build();
 
         reviewReplyRepository.save(reviewReply);
-        return reviewReply.getReplyId(); // 엔티티에 ID 필드 확인 필요
+        return reviewReply.getReplyId();
     }
+
+
+
+
 
     @Transactional
     public void updateReviewReply(ReviewReplyUpdateDto requestDto) {
         Long userId = authenticationFacade.getSignedUserId();
 
-        // 사용자의 사업자 번호 조회
+        // 로그인한 사용자의 사업자 번호 조회
         List<String> businessNums = businessNumRepository.findBusiNumByUserId(userId);
         if (businessNums.isEmpty()) {
             throw new AccessDeniedException("사업자 정보가 존재하지 않습니다.");
@@ -106,33 +119,42 @@ public class BusinessReviewService {
 
         // 대댓글이 속한 리뷰 조회
         Review review = reviewReply.getReview();
-        User reviewUser = review.getUser();  // Review에 user_id 컬럼이 존재함
 
-        // 해당 리뷰의 사업자 번호 조회
-        List<String> reviewBusinessNums = businessNumRepository.findBusiNumByUserId(reviewUser.getUserId());
+        // 리뷰가 속한 사업장의 strfId 조회
+        Long strfId = review.getStayTourRestaurFest().getStrfId();
 
-        // 리뷰가 로그인한 사업자와 연결된 것인지 검증
-        if (reviewBusinessNums.isEmpty() || !businessNums.stream().anyMatch(reviewBusinessNums::contains)) {
+        // 해당 리뷰가 속한 사업자 번호 조회
+        String reviewBusiNum = businessNumRepository.findBusiNumByStrfId(strfId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 속한 사업자 정보가 없습니다."));
+
+        // 로그인한 사용자의 사업자 번호와 비교하여 권한 체크
+        if (!businessNums.contains(reviewBusiNum)) {
             throw new AccessDeniedException("해당 리뷰 대댓글을 수정할 권한이 없습니다.");
         }
 
-        // 내용 수정
+        // 대댓글 내용 수정
         reviewReply.setContent(requestDto.getContent());
         reviewReply.setUpdatedAt(LocalDateTime.now());
 
+        // 리뷰의 updatedAt 필드 업데이트
+        review.setUpdatedAt(LocalDateTime.now());
+
         reviewReplyRepository.save(reviewReply);
+        reviewRepository.save(review);
     }
+
+
+
 
     @Transactional
     public void deleteReviewReply(Long reviewReplyId) {
-        Long userId = authenticationFacade.getSignedUserId(); // 로그인한 사용자 ID
+        Long userId = authenticationFacade.getSignedUserId();
 
-        // 사용자의 사업자 번호 조회
+        // 로그인한 사용자의 사업자 번호 조회
         List<String> businessNums = businessNumRepository.findBusiNumByUserId(userId);
         if (businessNums.isEmpty()) {
             throw new AccessDeniedException("사업자 정보가 존재하지 않습니다.");
         }
-        String businessNum = businessNums.get(0); // 첫 번째 사업자 번호 사용
 
         // 삭제할 대댓글 조회
         ReviewReply reviewReply = reviewReplyRepository.findById(reviewReplyId)
@@ -141,19 +163,29 @@ public class BusinessReviewService {
         // 대댓글이 속한 리뷰 조회
         Review review = reviewReply.getReview();
 
-        // 리뷰 작성자의 사업자 번호 조회 (User -> BusinessNum)
-        List<String> reviewOwnerBusiNums = businessNumRepository.findBusiNumByUserId(review.getUser().getUserId());
-        if (reviewOwnerBusiNums.isEmpty() || !reviewOwnerBusiNums.contains(businessNum)) {
+        // 리뷰가 속한 사업장의 strfId 조회
+        Long strfId = review.getStayTourRestaurFest().getStrfId();
+
+        // 해당 리뷰가 속한 사업자 번호 조회
+        String reviewBusiNum = businessNumRepository.findBusiNumByStrfId(strfId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 리뷰가 속한 사업자 정보가 없습니다."));
+
+        // 로그인한 사용자의 사업자 번호와 비교하여 권한 체크
+        if (!businessNums.contains(reviewBusiNum)) {
             throw new AccessDeniedException("해당 리뷰 대댓글을 삭제할 권한이 없습니다.");
         }
 
+        // 대댓글 삭제
         reviewReplyRepository.delete(reviewReply);
     }
 
 
 
 
+
 }
+
+
 
 
 
