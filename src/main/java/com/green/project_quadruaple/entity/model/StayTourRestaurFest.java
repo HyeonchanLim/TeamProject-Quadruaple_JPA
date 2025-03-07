@@ -74,7 +74,4 @@ public class StayTourRestaurFest extends UpdatedAt {
 
     @Column(nullable = false, columnDefinition = "TINYINT")
     private Integer state;
-
-    @Column(nullable = false, columnDefinition = "CHAR(10)")
-    private String cid;
 }
