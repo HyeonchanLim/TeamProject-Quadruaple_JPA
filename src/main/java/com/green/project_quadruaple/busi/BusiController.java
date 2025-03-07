@@ -4,7 +4,6 @@ import com.green.project_quadruaple.busi.model.BusiPostReq;
 import com.green.project_quadruaple.busi.model.BusiUserInfoDto;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.user.model.UserInfoDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -42,8 +41,8 @@ public class BusiController {
     //프로필 및 계정 조회
     @GetMapping("userInfo")
     @Operation(summary = "프로필 및 계정 조회")
-    public ResponseEntity<?> getUserInfo() {
-        BusiUserInfoDto userInfo = busiService.infoUser();
+    public ResponseEntity<?> BusiUserInfo() {
+        BusiUserInfoDto userInfo = busiService.BusiUserInfo();
 
         if (userInfo == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

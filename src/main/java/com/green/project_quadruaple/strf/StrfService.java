@@ -84,19 +84,23 @@ public class StrfService {
     public ResponseWrapper<Integer> strfInfoIns(List<MultipartFile> strfPic, StrfInsReq p) {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+
         BusinessNum businessNum = businessNumRepository.findByBusiNum(p.getBusiNum());
+        if (businessNum.getBusiNum().equals(p.getBusiNum())) {
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+        }
 
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
         boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
-
         if (!isBusi) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
+        // 프론트에서 받은 locationTitle 이름이 맞는 지역이 있는지 확인 ->
+        // 있다면 해당 지역의 location_detail_id 가져와서 매핑
         Long locationDetailId = locationDetailRepository.findByTitle(p.getLocationTitle())
                 .map(LocationDetail::getLocationDetailId)
                 .orElseThrow(() -> new RuntimeException("Location title not found in DB"));
-
         LocationDetail locationDetail = locationDetailRepository.findById(locationDetailId)
                 .orElseThrow(() -> new RuntimeException("LocationDetail not found for ID: " + locationDetailId));
 
@@ -166,6 +170,9 @@ public class StrfService {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
         BusinessNum businessNum = businessNumRepository.findByBusiNum(p.getBusiNum());
+        if (!businessNum.getBusiNum().equals(p.getBusiNum())) {
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+        }
 
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
         boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
@@ -219,15 +226,15 @@ public class StrfService {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
         BusinessNum businessNum = businessNumRepository.findByBusiNum(p.getBusiNum());
+
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
-
-        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId())
-                .orElseThrow(() -> new RuntimeException("StayTourRestaurFest not found"));
-
         boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
         if (!isBusi) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
+
+        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId())
+                .orElseThrow(() -> new RuntimeException("StayTourRestaurFest not found"));
 
         Category categoryValue = null;
         if (p.getCategory() != null && Category.getKeyByName(p.getCategory()) != null) {
@@ -237,7 +244,6 @@ public class StrfService {
         List<Menu> menus = new ArrayList<>();
 
         if (categoryValue == Category.RESTAUR || categoryValue == Category.STAY) {
-            // 메뉴 저장 로직
             for (MenuIns strfMenu : p.getMenus()) {
                 Menu newMenu = Menu.builder()
                         .stayTourRestaurFest(strf)
