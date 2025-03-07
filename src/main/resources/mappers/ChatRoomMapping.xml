@@ -7,43 +7,51 @@
         SELECT
             cr.chat_room_id as roomId
             , cr.title as title
-            , latest_chat.content as latestChat
-            , latest_chat.latest_created_at as latestChatDLT
-            , latest_chat.crc_cnt as unreadChat
+            , c.speaker_id as speakerId
+            , c.content as latestChat
+            , latest_at.max_at as latestChatLDT
+            , crc_cnt.cnt as unreadChat
             , u.profile_pic as pic
-        FROM chat_room cr
-        JOIN chat_join cj
-            ON cr.chat_room_id = cj.chat_room_id
+        FROM chat_join cj1
+        JOIN chat_room cr ON cr.chat_room_id = cj1.chat_room_id
+        JOIN chat c ON c.speaker_id = cj1.cj_id
         JOIN (
-            SELECT
-                c.speaker_id
-                , c.content
-                , c.created_at
-                , latest.crc_cnt
-                , latest.latest_created_at
-            FROM chat c
-            JOIN chat_join cj ON c.speaker_id = cj.cj_id
-            JOIN (
-                SELECT cj2.chat_room_id, MAX(c2.created_at) AS latest_created_at, count(crc.chat_id) AS crc_cnt
-                FROM chat c2
-                JOIN chat_join cj2
-                    ON c2.speaker_id = cj2.cj_id
-                LEFT JOIN chat_receive crc
-                    ON crc.chat_id = c2.chat_id
-                GROUP BY cj2.chat_room_id
-            ) latest
-                ON cj.chat_room_id = latest.chat_room_id
-                AND c.created_at = latest.latest_created_at
-            WHERE cj.chat_room_id IN (
-                SELECT cj3.chat_room_id FROM chat_join cj3
-                WHERE cj3.user_id = #{signedUserId}
-                AND cj3.`role` = #{role}
-            )
-            GROUP BY c.created_at
-        ) latest_chat
-            ON latest_chat.speaker_id = cj.cj_id
-        JOIN USER u
-            ON u.user_id = cj.user_id
-        ORDER BY latestChatDLT DESC
+        SELECT cj3.chat_room_id, max(c1.created_at) AS max_at FROM chat c1
+        JOIN chat_join cj3 ON cj3.cj_id = c1.speaker_id
+        GROUP BY cj3.chat_room_id
+        ) latest_at ON cj1.chat_room_id = latest_at.chat_room_id
+        AND c.created_at = latest_at.max_at
+        LEFT JOIN(
+        SELECT
+            cj.chat_room_id
+            , count(crc.listener_id) AS cnt
+        FROM chat_join cj
+        JOIN `user` u ON u.user_id = cj.user_id
+            AND u.user_id = #{signedUserId}
+        JOIN chat_receive crc ON crc.listener_id = cj.cj_id
+        GROUP BY cj.chat_room_id
+        ) crc_cnt
+        ON crc_cnt.chat_room_id = cj1.chat_room_id
+        JOIN `user` u ON u.user_id = cj1.user_id
+        WHERE cj1.chat_room_id IN (
+            SELECT cr.chat_room_id FROM chat_room cr
+            JOIN chat_join cj2 ON cj2.chat_room_id = cr.chat_room_id
+            AND cj2.user_id = #{signedUserId}
+            AND cj2.`role` = #{role}
+        )
+        ORDER BY latest_at.max_at DESC
+        limit #{page}, 30
+    </select>
+
+    <select id="selAllChatRoomList">
+        SELECT
+            cr.chat_room_id as roomId
+            , cr.title as title
+        FROM chat_room cr
+        WHERE cr.chat_room_id IN (
+            SELECT chat_room_id FROM chat_join cj
+            WHERE user_id = #{signedUserId}
+            AND `role` = #{role}
+        )
     </select>
 </mapper>

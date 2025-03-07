@@ -9,4 +9,6 @@ import java.util.List;
 public interface ChatRoomMapper {
 
     List<ChatRoomDto> selChatRoomList(Long signedUserId, String role, int page);
+
+    List<ChatRoomDto> selAllChatRoomList(Long signedUserId, String role, int page);
 }

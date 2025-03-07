@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -50,33 +51,63 @@ public class StrfService {
     private final RestDateRepository restDateRepository;
 
     public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
-        Long userId = 0L;
+
+        Long userId = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
             userId = authenticationFacade.getSignedUserId();
         }
-
         if (strfId == null) {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
-
         StrfSelRes res = strfMapper.getMemberDetail(userId, strfId);
-
         if (res == null) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
         }
-
         if (res.getRatingAvg() != null) {
             double roundedRating = Math.round(res.getRatingAvg() * 10) / 10.0;
             res.setRatingAvg(roundedRating);
         }
-
         if (userId > 0) {
             strfMapper.strfUpsert(userId, strfId);
         }
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
+    }
+    public ResponseWrapper<List<StrfAmenity>> getStrfAmenity(Long strfId , String category) {
+        String categoryValue = null;
+        if (category != null && Category.getKeyByName(category) != null) {
+            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
+        }
+        List<StrfAmenity> amenities = strfMapper.strfAmenity(strfId, categoryValue);
+        if (amenities == null || amenities.isEmpty()){
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), amenities);
+        }
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), amenities);
+    }
+
+    public ResponseWrapper<List<StrfMenu>> getStrfMenu(Long strfId , String category) {
+        String categoryValue = null;
+        if (category != null && Category.getKeyByName(category) != null) {
+            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
+        }
+        List<StrfMenu> menus = strfMapper.strfMenu(strfId);
+        if (menus == null || menus.isEmpty()){
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), menus);
+        }
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), menus);
+    }
+    public ResponseWrapper<List<StrfParlorDto>> getStrfParlor(Long strfId, String category) {
+        String categoryValue = null;
+        if (category != null && Category.getKeyByName(category) != null) {
+            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
+        }
+        List<StrfParlorDto> parlor = strfMapper.strfParlor(strfId , category);
+        if (parlor == null || parlor.isEmpty()){
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), parlor);
+        }
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), parlor);
     }
 
 

@@ -13,7 +13,7 @@ import java.util.List;
 @ToString
 @EqualsAndHashCode
 @Schema
-public class StrfSelRes {
+public class StrfSelDto {
     private Long strfId;
     private String category;
     private String strfTitle;
