@@ -13,6 +13,4 @@ public class MenuIns {
     private int menuPrice;
     @Schema(description = "메뉴 이름")
     private String menuTitle;
-    @Schema(description = "메뉴 사진")
-    private String menuPic;
 }
