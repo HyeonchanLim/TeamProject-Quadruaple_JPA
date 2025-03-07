@@ -10,7 +10,7 @@
         <result property="picName" column="pic_name"/>
         <result property="checkIn" column="check_in"/>
         <result property="checkOut" column="check_out"/>
-        <result property="finalPayment" column="final_payment"/>
+        <result property="totalPayment" column="total_payment"/>
         <result property="state" column="state"/>
     </resultMap>
 
@@ -19,7 +19,7 @@
         SELECT D.strf_id, D.pic_name, ROW_NUMBER() OVER (PARTITION BY D.strf_id ORDER BY D.pic_name) AS rn
           FROM strf_pic D
         )
-        SELECT A.booking_id, C.strf_id, C.title, RP.pic_name, A.check_in, A.check_out, A.final_payment, A.state
+        SELECT A.booking_id, C.strf_id, C.title, RP.pic_name, A.check_in, A.check_out, A.total_payment, A.state
           FROM booking A
           LEFT JOIN menu B
             ON A.menu_id = B.menu_id
@@ -36,8 +36,9 @@
 
     <!-- 예약 현황 상세 보기 -->
     <select id="selBookingDetails">
-        SELECT B.title AS menu_title, C.room_num, A.check_in, A.check_out, A.num AS booking_num, D.name, D.tell, E.email, A.final_payment,
-        H.title AS coupon_title, I.recom_capacity, I.max_capacity, COALESCE(L.amount, 0) AS usedPoint,
+        SELECT B.title AS menu_title, C.room_num, A.check_in, A.check_out, A.num AS booking_num, D.name, D.tell, E.email,
+        A.total_payment, H.title AS coupon_title, I.recom_capacity, I.max_capacity,
+        A.used_point,  <!-- booking 테이블에서 usedPoint를 바로 조회 -->
         CASE
         WHEN A.num > I.recom_capacity AND A.num <![CDATA[<=]]> I.max_capacity
         THEN A.num - I.recom_capacity
@@ -59,8 +60,6 @@
         LEFT JOIN parlor I ON A.menu_id = I.menu_id
         LEFT JOIN stay_tour_restaur_fest J ON B.strf_id = J.strf_id
         LEFT JOIN business_num K ON J.busi_num = K.busi_num
-        LEFT JOIN used_point L ON B.menu_id = L.menu_id AND L.refund = 0
-        AND TIMESTAMPDIFF(MINUTE, A.created_at, L.used_at) <![CDATA[<=]]> 5
         WHERE A.booking_id = #{bookingId}
         AND A.num <![CDATA[<=]]> I.max_capacity
         AND EXISTS (
@@ -71,6 +70,7 @@
         AND J.category = 'STAY'
         )
     </select>
+
 
     <!-- 매출 조회 -->
     <resultMap id="businessSalesResultMap" type="com.green.project_quadruaple.businessmypage.model.BusinessMyPageSales">
@@ -102,17 +102,8 @@
                 COALESCE(SUM(CASE
                 WHEN YEAR(A.created_at) = YEAR(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
                 AND MONTH(A.created_at) = MONTH(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
-                THEN A.final_payment ELSE 0 END), 0) +
-                COALESCE((
-                SELECT SUM(L.amount)
-                FROM used_point L
-                JOIN menu M ON L.menu_id = M.menu_id
-                JOIN stay_tour_restaur_fest S ON M.strf_id = S.strf_id
-                WHERE S.strf_id = C.strf_id
-                AND L.refund = 0
-                AND YEAR(L.used_at) = YEAR(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
-                AND MONTH(L.used_at) = MONTH(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
-                ), 0) AS sum_${monthOffset + 1}_month
+                THEN A.total_payment ELSE 0
+                END), 0) AS sum_${monthOffset + 1}_month
             </foreach>
         </trim>
         FROM booking A
@@ -126,33 +117,33 @@
     </select>
 
 
-
     <select id="selUsedPointsByBusinessRESTAUR" resultMap="businessSalesResultMap">
         SELECT
         <trim prefixOverrides=",">
             <foreach item="monthOffset" collection="monthOffsets" open="" separator="," close="">
                 COALESCE(SUM(CASE
-                WHEN YEAR(A.used_at) = YEAR(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
-                AND MONTH(A.used_at) = MONTH(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
-                THEN A.amount ELSE 0 END), 0) AS sum_${monthOffset + 1}_month
+                WHEN YEAR(A.created_at) = YEAR(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
+                AND MONTH(A.created_at) = MONTH(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
+                THEN A.amount ELSE 0
+                END), 0) AS sum_${monthOffset + 1}_month
             </foreach>
         </trim>
-        FROM used_point A
-        LEFT JOIN menu B ON A.menu_id = B.menu_id
+        FROM point_history A
+        LEFT JOIN menu B ON A.related_id = B.menu_id
         LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
         LEFT JOIN business_num D ON C.busi_num = D.busi_num
         LEFT JOIN user E ON D.user_id = E.user_id
         WHERE E.user_id = #{userId}
-        AND refund = 0
+        AND A.category = 0
         AND C.category = 'RESTAUR'
     </select>
 
-    <!-- 포인트 조회 -->
+
     <!-- 전체 포인트 합계 조회 -->
     <select id="selTotalPointAmount">
-        SELECT SUM(CASE WHEN A.refund = 0 THEN A.amount ELSE 0 END)
-        FROM used_point A
-        LEFT JOIN menu B ON A.menu_id = B.menu_id
+        SELECT SUM(CASE WHEN A.category = 0 THEN A.amount ELSE 0 END)
+        FROM point_history A
+        LEFT JOIN menu B ON A.related_id = B.menu_id
         LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
         LEFT JOIN business_num D ON C.busi_num = D.busi_num
         LEFT JOIN user E ON D.user_id = E.user_id
@@ -162,15 +153,15 @@
 
     <!-- 개별 포인트 내역 조회 -->
     <select id="selPointDetailList">
-        SELECT C.strf_id, B.menu_id, A.amount, A.used_at, A.refund, B.title
-        FROM used_point A
-        LEFT JOIN menu B ON A.menu_id = B.menu_id
-        LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
-        LEFT JOIN business_num D ON C.busi_num = D.busi_num
-        LEFT JOIN user E ON D.user_id = E.user_id
-        WHERE E.user_id = #{userId}
-        AND C.category IN ('STAY', 'RESTAUR')
+        SELECT B.strf_id, M.menu_id, M.title, A.amount, A.created_at
+        FROM point_history A
+        LEFT JOIN menu M ON A.related_id = M.menu_id
+        LEFT JOIN stay_tour_restaur_fest B ON M.strf_id = B.strf_id
+        LEFT JOIN business_num C ON B.busi_num = C.busi_num
+        LEFT JOIN user D ON C.user_id = D.user_id
+        WHERE D.user_id = #{userId}
+        AND A.category = 0
+        AND B.category IN ('STAY', 'RESTAUR')
     </select>
-
 
 </mapper>
