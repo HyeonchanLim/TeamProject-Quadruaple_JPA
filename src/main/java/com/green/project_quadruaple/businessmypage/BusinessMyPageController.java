@@ -1,16 +1,12 @@
 package com.green.project_quadruaple.businessmypage;
 
-import com.green.project_quadruaple.businessmypage.model.BusinessMyPageBooking;
-import com.green.project_quadruaple.businessmypage.model.BusinessMyPageBookingDetails;
-import com.green.project_quadruaple.businessmypage.model.BusinessMyPagePointList;
-import com.green.project_quadruaple.businessmypage.model.BusinessMyPageSales;
+import com.green.project_quadruaple.businessmypage.model.*;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -64,9 +59,9 @@ public class BusinessMyPageController {
     @GetMapping("used-point")
     @Operation(summary = "결제된 포인트 사용 list 조회", description = "환불 안 함 = false, 환불 함 = true/totalAmount : 환불 한 포인트는 합계x")
     public ResponseEntity<?> getBusinessMyPageUsedPoint() {
-        List<BusinessMyPagePointList> result = businessMyPageService.selBusinessMyPagePointList();
+        BusinessMyPagePointList result = businessMyPageService.selBusinessMyPagePointList();
 
-        if (result.isEmpty()) {
+        if (result == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
 

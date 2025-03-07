@@ -31,4 +31,6 @@ public interface RoleRepository extends JpaRepository<Role, RoleId> {
                 and r.role = :role
             """)
     Role findByStrfIdAndRoleName(Long strfId, UserRole role);
+
+    Role findByRole(UserRole role);
 }
