@@ -5,36 +5,53 @@
 
     <select id="selChatRoomList">
         SELECT
-            cr.chat_room_id
-            , cr.title AS title
-            , latest_chat.speaker_id as
-            , max(latest_chat.max_at) AS lastChatTimeLDT
-            , count(crc.chat_id) AS unreadChat
+            cr.chat_room_id as roomId
+            , cr.title as title
+            , c.speaker_id as speakerId
+            , c.content as latestChat
+            , latest_at.max_at as latestChatLDT
+            , crc_cnt.cnt as unreadChat
+            , u.profile_pic as pic
+        FROM chat_join cj1
+        JOIN chat_room cr ON cr.chat_room_id = cj1.chat_room_id
+        JOIN chat c ON c.speaker_id = cj1.cj_id
+        JOIN (
+        SELECT cj3.chat_room_id, max(c1.created_at) AS max_at FROM chat c1
+        JOIN chat_join cj3 ON cj3.cj_id = c1.speaker_id
+        GROUP BY cj3.chat_room_id
+        ) latest_at ON cj1.chat_room_id = latest_at.chat_room_id
+        AND c.created_at = latest_at.max_at
+        LEFT JOIN(
+        SELECT
+            cj.chat_room_id
+            , count(crc.listener_id) AS cnt
+        FROM chat_join cj
+        JOIN `user` u ON u.user_id = cj.user_id
+            AND u.user_id = #{signedUserId}
+        JOIN chat_receive crc ON crc.listener_id = cj.cj_id
+        GROUP BY cj.chat_room_id
+        ) crc_cnt
+        ON crc_cnt.chat_room_id = cj1.chat_room_id
+        JOIN `user` u ON u.user_id = cj1.user_id
+        WHERE cj1.chat_room_id IN (
+            SELECT cr.chat_room_id FROM chat_room cr
+            JOIN chat_join cj2 ON cj2.chat_room_id = cr.chat_room_id
+            AND cj2.user_id = #{signedUserId}
+            AND cj2.`role` = #{role}
+        )
+        ORDER BY latest_at.max_at DESC
+        limit #{page}, 30
+    </select>
+
+    <select id="selAllChatRoomList">
+        SELECT
+            cr.chat_room_id as roomId
+            , cr.title as title
         FROM chat_room cr
-        JOIN chat_join cj
-            ON cr.chat_room_id = cj.chat_room_id
-        LEFT JOIN (
-                SELECT
-                c1.speaker_id
-                , c1.content
-                , c1.chat_id
-                , c1.created_at AS max_at
-            FROM chat c1
-            JOIN (
-            SELECT
-                speaker_id
-                , max(created_at) AS max_at
-            FROM chat
-            GROUP BY speaker_id
-        ) latest_at
-            ON latest_at.speaker_id = c1.speaker_id
-            AND latest_at.max_at = c1.created_at
-        ) latest_chat
-            ON latest_chat.speaker_id = cj.cj_id
-        LEFT JOIN chat_receive crc
-            ON crc.listener_id = latest_chat.speaker_id
-        WHERE cj.user_id = #{signedUserId}
-        GROUP BY cr.chat_room_id
-        ORDER BY latest_chat.max_at DESC
+        WHERE cr.chat_room_id IN (
+            SELECT chat_room_id FROM chat_join cj
+            WHERE user_id = #{signedUserId}
+            AND `role` = #{role}
+        )
     </select>
 </mapper>
