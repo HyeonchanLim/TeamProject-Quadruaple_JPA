@@ -4,10 +4,10 @@ import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.entity.model.PointCard;
 import com.green.project_quadruaple.entity.model.Role;
-import com.green.project_quadruaple.point.model.PointCardGetDto;
-import com.green.project_quadruaple.point.model.PointCardNonMemberGetDto;
-import com.green.project_quadruaple.point.model.PointCardPostDto;
-import com.green.project_quadruaple.point.model.PointCardUpdateDto;
+import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
+import com.green.project_quadruaple.point.model.res.PointCardProductRes;
+import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
+import com.green.project_quadruaple.point.model.dto.PointCardUpdateDto;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +22,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PointCardService {
     private final PointCardRepository pointCardRepository;
+    private final PointHistoryRepository pointHistoryRepository;
     private final AuthenticationFacade authenticationFacade;
     private final RoleRepository roleRepository;
 
+    //관리자 포인트 상품 추가
     public int intPointCard(PointCardPostDto dto) {
         long userId = authenticationFacade.getSignedUserId();
 
@@ -52,15 +54,17 @@ public class PointCardService {
         return 1;
     }
 
-    public List<PointCardNonMemberGetDto> getPointCardNonMember() {
-        return pointCardRepository.findAll().stream()
-                .map(pointCard -> new PointCardNonMemberGetDto(
-                        pointCard.getPointCardId(),
-                        pointCard.getAvailable(),
-                        pointCard.getFinalPayment()
-                ))
-                .collect(Collectors.toList());
+    // 회원 or 비회원 포인트 카드 조회
+    public PointCardProductRes getPointCardProduct() {
+        Long userId = authenticationFacade.getSignedUserId();
+        Integer remainPoints=null;
+        if(userId!=null){
+            remainPoints=pointHistoryRepository.findRemainPointByUserId(userId);
+        }
+        return new PointCardProductRes(remainPoints,pointCardRepository.findAll());
     }
+
+
 
     public List<PointCardGetDto> getPointCard() {
         long userId = authenticationFacade.getSignedUserId();
@@ -122,4 +126,7 @@ public class PointCardService {
 
         return 1;
     }
+
+    // 보유 포인트 확인화면
+    //public
 }

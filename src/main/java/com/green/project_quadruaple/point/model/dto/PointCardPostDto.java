@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.point.model;
+package com.green.project_quadruaple.point.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
