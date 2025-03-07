@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class UpdatedAt extends CreatedAt {
 
     @Column(name = "updated_at")
-//    @CreationTimestamp
     @UpdateTimestamp
     @Setter
     private LocalDateTime updatedAt;

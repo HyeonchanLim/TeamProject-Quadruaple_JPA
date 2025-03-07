@@ -40,10 +40,10 @@ public class Report extends CreatedAt {
     @Column(nullable = false, length = 800)
     private String reason;
 
-    @Column(name = "processed", length = 800, nullable = false)
+    @Column(name = "processed", length = 800)
     private String processed;
 
-    @Column(name = "processed_at" , nullable = false)
+    @Column(name = "processed_at")
     private LocalDateTime processedAt;
 
 }

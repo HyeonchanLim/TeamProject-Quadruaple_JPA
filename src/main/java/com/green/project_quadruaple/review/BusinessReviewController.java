@@ -32,6 +32,7 @@ public class BusinessReviewController {
      * 리뷰 댓글 생성 (사업자만 가능)
      */
     @GetMapping("/all")
+    @Operation(summary = "리뷰전체조회")
     public ResponseEntity<List<BusinessDto>> getBusinessReviews(
             @RequestParam(name = "start_idx", defaultValue = "0") int startIdx,
             @RequestParam(name = "page_size", defaultValue = "10") int pageSize) {
@@ -44,6 +45,7 @@ public class BusinessReviewController {
      * 리뷰 댓글 생성
      */
     @PostMapping("/create")
+    @Operation(summary = "대댓글 생성")
     public ResponseEntity<String> createReviewReply(@RequestBody ReviewReplyPostDto dto) {
         try {
             Long replyId = businessReviewService.createReviewReply(dto);
@@ -57,7 +59,11 @@ public class BusinessReviewController {
         }
     }
 
+
+
+
     @PutMapping("/update")
+    @Operation(summary = "대댓글 수정")
     public ResponseEntity<String> updateReviewReply(@RequestBody ReviewReplyUpdateDto dto) {
         try {
             businessReviewService.updateReviewReply(dto);
@@ -71,7 +77,11 @@ public class BusinessReviewController {
         }
     }
 
+
+
+
     @DeleteMapping("/delete")
+    @Operation(summary = "대댓글 삭제")
     public ResponseEntity<String> deleteReviewReply(@RequestParam Long replyId) {
         try {
             businessReviewService.deleteReviewReply(replyId);

@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
+import com.green.project_quadruaple.review.reviewReply.ReviewReplyDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,17 @@ public class ReviewReply extends CreatedAt {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    public ReviewReplyDto toDto() {
+        return ReviewReplyDto.builder()
+                .replyId(this.replyId)
+                .reviewId(this.review.getReviewId())
+                .content(this.content)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt) // ✅ updatedAt 추가
+                .build();
+    }
+
 
 
 
