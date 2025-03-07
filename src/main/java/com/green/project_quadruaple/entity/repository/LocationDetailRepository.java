@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface LocationDetailRepository extends JpaRepository<LocationDetail , Long> {
-    @Query("SELECT a.locationDetailId , a.detailTitle , a.location.locationId FROM LocationDetail a WHERE a.detailTitle = :detailTitle ")
-    Optional<LocationDetail> findByTitle(@Param("detail_title") String detailTitle);
+    @Query("SELECT a FROM LocationDetail a WHERE a.detailTitle = :detailTitle ")
+    Optional<LocationDetail> findByTitle(@Param("detailTitle") String detailTitle);
 }

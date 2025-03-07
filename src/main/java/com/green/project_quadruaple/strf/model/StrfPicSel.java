@@ -8,6 +8,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class StrfPicSel {
-    private long strfId;
-    private String pic;
+    private Long strfId;
+    private String strfPic;
 }

@@ -1,1 +1,0 @@
-import{u as t,j as s}from"./index-Cwx4I7Vi.js";const a=()=>{const e=t();return s.jsxs("div",{children:["사장님 메인페이지",s.jsx("ul",{className:"flex gap-4",children:s.jsx("button",{type:"button",onClick:()=>e("/business/mypage"),children:"마이페이지"})})]})};export{a as default};
