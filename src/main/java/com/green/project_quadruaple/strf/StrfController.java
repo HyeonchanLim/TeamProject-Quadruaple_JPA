@@ -22,24 +22,30 @@ public class StrfController {
 
     @GetMapping("member")
     @Operation(summary = "상품 조회")
-    public ResponseWrapper<StrfSelRes> getMemberDetail(@RequestParam("strf_id") Long strfId) {
+    public ResponseWrapper<StrfSelRes> getMemberDetail(@RequestParam("strf_id") Long strfId ) {
 
         return strfService.getMemberDetail(strfId);
     }
 
-    // 상품 조회 api 분류
-//    @GetMapping("member")
-//    @Operation(summary = "회원 상품 조회")
-//    public ResponseWrapper<StrfSelRes> getMemberDetail(@RequestParam("strf_id") Long strfId) {
-//
-//        return strfService.getMemberDetail(strfId);
-//    }
-//    @GetMapping("member")
-//    @Operation(summary = "회원 상품 조회")
-//    public ResponseWrapper<StrfSelRes> getMemberDetail(@RequestParam("strf_id") Long strfId) {
-//
-//        return strfService.getMemberDetail(strfId);
-//    }
+//     상품 조회 api 분류
+    @GetMapping("menu")
+    @Operation(summary = "상품 메뉴 조회 ")
+    public ResponseWrapper<?> getStrfMenu(@RequestParam("strf_id") Long strfId,String category) {
+
+        return strfService.getStrfMenu(strfId, category);
+    }
+    @GetMapping("amenity")
+    @Operation(summary = "상품 편의 조회")
+    public ResponseWrapper<?> getStrfAmenity(@RequestParam("strf_id") Long strfId,String category) {
+
+        return strfService.getStrfAmenity(strfId, category);
+    }
+    @GetMapping("parlor")
+    @Operation(summary = "상품 객실 , 호실 조회")
+    public ResponseWrapper<?> getStrfParlor(@RequestParam("strf_id") Long strfId, String category) {
+
+        return strfService.getStrfParlor(strfId, category);
+    }
 
 
     @PostMapping("info")
