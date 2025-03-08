@@ -37,6 +37,6 @@ public class PointHistory extends CreatedAt {
     private Integer amount;
 
     @Column(name = "remain_point",nullable = false)
-    private int remainPoint;
+    private Integer remainPoint;
 
 }

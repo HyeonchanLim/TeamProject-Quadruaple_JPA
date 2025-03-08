@@ -13,7 +13,7 @@ public interface PointHistoryRepository extends JpaRepository<PointHistory, Long
     Integer findRemainPointByUserId(Long userId);
 
     @Query("""
-        select p from PointHistory p
+        select p.remainPoint from PointHistory p
         where p.user.userId = :signedUserId
         order by p.pointHistoryId desc
         """)

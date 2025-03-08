@@ -25,7 +25,7 @@ public class Booking extends CreatedAt {
     private Menu menu;
 
     @Column(nullable = false)
-    private int num;
+    private Integer num;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
@@ -42,7 +42,7 @@ public class Booking extends CreatedAt {
     private LocalDateTime checkOut;
 
     @Column(name = "used_point")
-    private int usedPoint;
+    private Integer usedPoint;
 
     @Column(name = "total_payment", nullable = false)
     private Integer totalPayment;

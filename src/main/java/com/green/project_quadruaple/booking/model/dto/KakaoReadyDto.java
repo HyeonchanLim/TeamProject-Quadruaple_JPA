@@ -32,4 +32,7 @@ public class KakaoReadyDto {
 
     @JsonIgnore
     private Booking booking;
+
+    @JsonIgnore
+    private Integer remainPoint;
 }
