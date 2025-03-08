@@ -107,8 +107,7 @@
             </foreach>
         </trim>
         FROM booking A
-        LEFT JOIN menu B ON A.menu_id = B.menu_id
-        LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
+        LEFT JOIN stay_tour_restaur_fest C ON A.strf_id = C.strf_id
         LEFT JOIN business_num E ON C.busi_num = E.busi_num
         LEFT JOIN user F ON E.user_id = F.user_id
         WHERE F.user_id = #{userId}
@@ -129,8 +128,7 @@
             </foreach>
         </trim>
         FROM point_history A
-        LEFT JOIN menu B ON A.related_id = B.menu_id
-        LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
+        LEFT JOIN stay_tour_restaur_fest C ON A.related_id = C.strf_id
         LEFT JOIN business_num D ON C.busi_num = D.busi_num
         LEFT JOIN user E ON D.user_id = E.user_id
         WHERE E.user_id = #{userId}
@@ -143,20 +141,18 @@
     <select id="selTotalPointAmount">
         SELECT SUM(CASE WHEN A.category = 0 THEN A.amount ELSE 0 END)
         FROM point_history A
-        LEFT JOIN menu B ON A.related_id = B.menu_id
-        LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
-        LEFT JOIN business_num D ON C.busi_num = D.busi_num
-        LEFT JOIN user E ON D.user_id = E.user_id
-        WHERE E.user_id = #{userId}
-        AND C.category IN ('STAY', 'RESTAUR')
+        LEFT JOIN stay_tour_restaur_fest B ON A.related_id = B.strf_id
+        LEFT JOIN business_num C ON B.busi_num = C.busi_num
+        LEFT JOIN user D ON C.user_id = D.user_id
+        WHERE D.user_id = #{userId}
+        AND B.category IN ('STAY', 'RESTAUR')
     </select>
 
     <!-- 개별 포인트 내역 조회 -->
     <select id="selPointDetailList">
-        SELECT B.strf_id, M.menu_id, M.title, A.amount, A.created_at
+        SELECT B.strf_id, B.title, A.amount, A.created_at
         FROM point_history A
-        LEFT JOIN menu M ON A.related_id = M.menu_id
-        LEFT JOIN stay_tour_restaur_fest B ON M.strf_id = B.strf_id
+        LEFT JOIN stay_tour_restaur_fest B ON A.related_id = B.strf_id
         LEFT JOIN business_num C ON B.busi_num = C.busi_num
         LEFT JOIN user D ON C.user_id = D.user_id
         WHERE D.user_id = #{userId}
