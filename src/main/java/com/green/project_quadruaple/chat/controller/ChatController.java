@@ -39,12 +39,6 @@ public class ChatController {
         messagingTemplate.convertAndSend("/sub/chat/" + req.getRoomId(), res);
     }
 
-    @MessageMapping("/chat.setStatus")
-    public void setStatus(@Payload ChatStatus req) {
-        log.info("req : {}", req);
-        messagingTemplate.convertAndSend("/sub/chat/status", req);
-    }
-
     @SubscribeMapping("/chat/{roomId}")
     public void subChat(@DestinationVariable Long roomId, Principal principal) {
         log.info("roomId : {}", roomId);

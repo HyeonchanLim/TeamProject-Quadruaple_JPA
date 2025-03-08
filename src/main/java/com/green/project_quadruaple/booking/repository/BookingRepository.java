@@ -44,13 +44,20 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
 
     @Query("""
-        SELECT DISTINCT b 
+        SELECT DISTINCT b
         FROM Booking b
-        LEFT JOIN FETCH b.menu m 
+        LEFT JOIN FETCH b.menu m
         LEFT join fetch b.user u
         LEFT JOIN FETCH m.stayTourRestaurFest s
-        WHERE DATEDIFF(b.checkIn, NOW()) = 1 
+        WHERE DATEDIFF(b.checkIn, NOW()) = 1
         AND b.state = 1
     """)
     List<Booking> findBookingBeforeExpired();
+
+    @Query("""
+    select b from Booking b
+    left join fetch b.chatRoom
+    where b.bookingId = :bookingId
+    """)
+    Booking findBookingAndChatRoomById(Long bookingId);
 }

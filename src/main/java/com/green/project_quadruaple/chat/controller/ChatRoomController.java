@@ -34,8 +34,9 @@ public class ChatRoomController {
 
     @GetMapping("{room_id}")
     @Operation(summary = "채팅 30개씩 불러오기")
-    public ResponseWrapper<List<ChatDto>> getChatList(@Parameter @PathVariable("room_id") Long roomId, GetChatRoomReq req) {
-        return chatRoomService.getChatList(roomId, req);
+    public ResponseWrapper<List<ChatDto>> getChatList(@Parameter @PathVariable("room_id") Long roomId,
+                                                      @Parameter @RequestParam int page) {
+        return chatRoomService.getChatList(roomId, page);
     }
 
     @GetMapping()

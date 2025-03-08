@@ -31,10 +31,9 @@
 
     <!-- 예약 등록 -->
     <select id="selExistUserCoupon">
-
         SELECT
             rc.receive_id
-            , c.discountper AS discountRate
+            , c.discount_per AS discountRate
             , uc.receive_id AS usedCouponId
         FROM receive_coupon rc
         JOIN coupon c
