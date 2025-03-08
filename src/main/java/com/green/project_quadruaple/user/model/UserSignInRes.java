@@ -3,6 +3,7 @@ package com.green.project_quadruaple.user.model;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.model.ResultResponse;
 
+import com.green.project_quadruaple.entity.model.BusinessNum;
 import lombok.*;
 
 import java.util.List;
@@ -15,4 +16,8 @@ public class UserSignInRes {
     private final String name;
     private final String accessToken;
     private final List<UserRole> roles;
+    private final long strfId;
+    private final String title;
+    private final String category;
+    private final String busiNum;
 }
