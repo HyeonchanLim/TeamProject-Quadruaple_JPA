@@ -59,9 +59,9 @@ public class StrfController {
         return strfService.strfMenuIns(menuPic,p);
     }
 
-    @PostMapping("stay")
+    @PostMapping("/stay")
     @Operation(summary = "사업자 상품 객실,숙소 생성")
-    public ResponseWrapper<?> strfStayIns (@Valid @RequestPart StrfStayInsReq p){
+    public ResponseWrapper<?> strfStayIns (@Valid @RequestBody StrfStayInsReq p){
         return strfService.strfStayIns(p);
     }
 

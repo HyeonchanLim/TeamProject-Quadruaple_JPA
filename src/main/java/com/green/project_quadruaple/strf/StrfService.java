@@ -11,7 +11,6 @@ import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.entity.repository.LocationDetailRepository;
-import com.green.project_quadruaple.strf.model.GetNonDetail;
 import com.green.project_quadruaple.strf.model.*;
 import com.green.project_quadruaple.strf.model.StrfMenu;
 import com.green.project_quadruaple.trip.model.Category;
@@ -26,9 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -49,6 +46,7 @@ public class StrfService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final RestDateRepository restDateRepository;
+    private final AmenityRepository amenityRepository;
 
     public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
 
@@ -116,15 +114,21 @@ public class StrfService {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
 
-        BusinessNum businessNum = businessNumRepository.findByBusiNum(p.getBusiNum());
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
 
-        if (businessNum != null) {
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-        } else {
+        if (businessNum == null) {
             businessNum = new BusinessNum();
             businessNum.setBusiNum(p.getBusiNum());
             businessNumRepository.save(businessNum);
         }
+//        // 비즈니스 번호가 없으면 에러 처리
+//        if (businessNum == null) {
+//            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), 0); // 404 Not Found
+//        } else {
+//            businessNum = new BusinessNum();
+//            businessNum.setBusiNum(p.getBusiNum());
+//            businessNumRepository.save(businessNum);
+//        }
 
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
         boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
@@ -161,7 +165,12 @@ public class StrfService {
                 .busiNum(businessNum)
                 .state(p.getState())
                 .build();
-        strfRepository.save(strf);
+        try {
+            strfRepository.save(strf);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+        }
 
         if (p.getRestdates() != null && !p.getRestdates().isEmpty()) {
             StrfRestDate restDateHandler = new StrfRestDate();
@@ -169,10 +178,15 @@ public class StrfService {
 
             List<Integer> restDays = restDateHandler.getRestDays();
             for (Integer day : restDays) {
+                RestDateId id = new RestDateId();
+                id.setDayWeek(day);
+                id.setStrfId(strf.getStrfId());
+
                 // RestDate 엔티티 저장
                 RestDate restDate = RestDate.builder()
+                        .id(id)
                         .strfId(strf)
-                        .dayWeek(day)  // "sun" -> 0, "wed" -> 3 등
+//                        .dayWeek(day)  // "sun" -> 0, "wed" -> 3 등
                         .build();
                 restDateRepository.save(restDate);  // 휴무일 저장
             }
@@ -265,7 +279,7 @@ public class StrfService {
     public ResponseWrapper<Integer> strfStayIns(StrfStayInsReq p) {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusiNum(p.getBusiNum());
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
 
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
         boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
@@ -273,8 +287,8 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
-        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId())
-                .orElseThrow(() -> new RuntimeException("StayTourRestaurFest not found"));
+        StayTourRestaurFest strf = strfRepository.findByStrfId(businessNum.getBusiNum())
+                .orElseThrow( () -> new RuntimeException("businessNum not found"));
 
         Category categoryValue = null;
         if (p.getCategory() != null && Category.getKeyByName(p.getCategory()) != null) {
@@ -283,28 +297,41 @@ public class StrfService {
 
         List<Menu> menus = new ArrayList<>();
 
-        if (categoryValue == Category.RESTAUR || categoryValue == Category.STAY) {
-            for (MenuIns strfMenu : p.getMenus()) {
-                Menu newMenu = Menu.builder()
-                        .stayTourRestaurFest(strf)
-                        .title(strfMenu.getMenuTitle())
-                        .price(strfMenu.getMenuPrice())
-//                        .menuPic(strfMenu.getMenuPic())
-                        .build();
-                menus.add(newMenu);
-            }
-            menuRepository.saveAll(menus);
-        }
+//        if (categoryValue == Category.RESTAUR || categoryValue == Category.STAY) {
+//            for (MenuIns strfMenu : p.getMenus()) {
+//                Menu newMenu = Menu.builder()
+//                        .stayTourRestaurFest(strf)
+//                        .title(strfMenu.getMenuTitle())
+//                        .price(strfMenu.getMenuPrice())
+////                        .menuPic(strfMenu.getMenuPic())
+//                        .build();
+//                menus.add(newMenu);
+//            }
+//            menuRepository.saveAll(menus);
+//        }
 
+//        Menu menu = menuRepository.findById(strf.getStrfId()).orElseThrow( () -> new RuntimeException("strf id not found"));
         if (categoryValue == Category.STAY) {
             List<Parlor> parlors = new ArrayList<>();
             List<Room> rooms = new ArrayList<>();
-            List<Amenipoint> amenipoints = new ArrayList<>();
+
+            List<Amenipoint> amenipoints = Optional.ofNullable(p.getAmeniPoints())
+                    .orElse(Collections.emptyList())
+                    .stream()
+                    .map(amenityId -> {
+                        Amenity amenity = amenityRepository.findById(amenityId)
+                                .orElseThrow(() -> new RuntimeException("Amenity not found"));
+
+                        return Amenipoint.builder()
+                                .id(new AmenipointId(amenityId, strf.getStrfId()))
+                                .amenity(amenity)  // 여기서 실제 엔티티 세팅
+                                .stayTourRestaurFest(strf)
+                                .build();
+                    })
+                    .collect(Collectors.toList());
 
             for (StrfParlor strfParlor : p.getParlors()) {
-                Menu menu = menus.stream()
-                        .filter(m -> m.getMenuId().equals(strfParlor.getMenuId()))
-                        .findFirst()
+                Menu menu = menuRepository.findById(p.getMenuId())
                         .orElseThrow(() -> new RuntimeException("Menu not found"));
 
                 Parlor newParlor = Parlor.builder()
@@ -316,17 +343,9 @@ public class StrfService {
                 parlors.add(newParlor);
             }
 
-            amenipoints = p.getAmenipoints().stream()
-                    .map(amenityId -> Amenipoint.builder()
-                            .id(new AmenipointId(amenityId, strf.getStrfId()))
-                            .build())
-                    .collect(Collectors.toList());
-
             for (Long roomId : p.getRooms()) {
-                Menu menu = menus.stream()
-                        .filter(m -> m.getMenuId().equals(roomId))
-                        .findFirst()
-                        .orElseThrow(() -> new RuntimeException("Room menu not found"));
+                Menu menu = menuRepository.findById(p.getMenuId())
+                        .orElseThrow(() -> new RuntimeException("Menu not found"));
 
                 Room newRoom = Room.builder()
                         .menu(menu)
@@ -403,10 +422,13 @@ public class StrfService {
     private void updateRestDays(StayTourRestaurFest strf, List<String> restdates) {
         if (restdates != null && !restdates.isEmpty()) {
             List<RestDate> restDates = restdates.stream()
-                    .map(day -> RestDate.builder()
-                            .strfId(strf)  // StayTourRestaurFest 객체 설정
-                            .dayWeek(Integer.parseInt(day))  // dayWeek 필드를 Integer로 변환하여 설정
-                            .build())
+                    .map(day -> {
+                        RestDateId id = new RestDateId(Integer.parseInt(day), strf.getStrfId());  // 복합 키 생성
+                        return RestDate.builder()
+                                .id(id)               // 복합 키 설정
+                                .strfId(strf)        // 연관된 엔티티 설정
+                                .build();
+                    })
                     .collect(Collectors.toList());
 
             restDateRepository.saveAll(restDates);  // RestDate 객체들을 DB에 저장
@@ -454,15 +476,15 @@ public class StrfService {
                 .collect(Collectors.toList());
 
         // Amenity 저장
-        List<Amenipoint> amenipoints = stayReq.getAmenipoints().stream()
-                .map(amenityId -> Amenipoint.builder()
-                        .id(new AmenipointId(amenityId, strf.getStrfId()))
-                        .build())
-                .collect(Collectors.toList());
+//        List<Amenipoint> amenipoints = stayReq.getAmenipoints().stream()
+//                .map(amenityId -> Amenipoint.builder()
+//                        .id(new AmenipointId(amenityId, strf.getStrfId()))
+//                        .build())
+//                .collect(Collectors.toList());
 
         parlorRepository.saveAll(parlors);
         roomRepository.saveAll(rooms);
-        amenipointRepository.saveAll(amenipoints);
+//        amenipointRepository.saveAll(amenipoints);
     }
 
     private boolean isRestaurantOrStay(StayTourRestaurFest strf) {
