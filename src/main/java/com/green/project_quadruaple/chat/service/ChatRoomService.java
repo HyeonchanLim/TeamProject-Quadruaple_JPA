@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.chat.service;
 
+import com.green.project_quadruaple.booking.repository.BookingRepository;
 import com.green.project_quadruaple.chat.model.dto.ChatDto;
 import com.green.project_quadruaple.chat.model.dto.ChatRoomDto;
 import com.green.project_quadruaple.chat.model.req.GetChatRoomReq;
@@ -13,10 +14,7 @@ import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 //import com.green.project_quadruaple.entity.model.ChatJoin;
-import com.green.project_quadruaple.entity.model.ChatJoin;
-import com.green.project_quadruaple.entity.model.ChatRoom;
-import com.green.project_quadruaple.entity.model.Role;
-import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.strf.StrfRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
@@ -43,6 +41,7 @@ public class ChatRoomService {
     private final StrfRepository strfRepository;
     private final RoleRepository roleRepository;
     private final ChatRoomMapper chatRoomMapper;
+    private final BookingRepository bookingRepository;
     private final ChatReceiveRepository chatReceiveRepository;
 
     @Transactional
@@ -53,14 +52,17 @@ public class ChatRoomService {
         User hostUser = userRepository.findById(signedUserId).orElse(null);
         User inviteUser = userRepository.findByStrfId(req.getStrfId());
 
+        Long bookingId = req.getBookingId();
         if(hostUser == null || inviteUser == null) {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND_USER.getCode(), null);
         }
 
-        ChatRoom chatRoom = chatRoomRepository.findByBookingId(req.getBookingId());
+        Booking booking = bookingRepository.findBookingAndChatRoomById(bookingId);
+        ChatRoom chatRoom = booking.getChatRoom();
         if(chatRoom != null) { // 이미 존재하는 채팅방
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoom.getChatRoomId());
         }
+
         chatRoom = ChatRoom.builder()
                 .title(req.getTitle())
                 .build();

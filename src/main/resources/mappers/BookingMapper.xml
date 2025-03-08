@@ -31,7 +31,6 @@
 
     <!-- 예약 등록 -->
     <select id="selExistUserCoupon">
-
         SELECT
             rc.receive_id
             , c.discount_per AS discountRate

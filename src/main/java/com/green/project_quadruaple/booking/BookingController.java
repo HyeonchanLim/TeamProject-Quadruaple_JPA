@@ -1,9 +1,6 @@
 package com.green.project_quadruaple.booking;
 
-import com.green.project_quadruaple.booking.model.BookingListGetRes;
 import com.green.project_quadruaple.booking.model.BookingPostReq;
-import com.green.project_quadruaple.booking.model.BookingPostRes;
-import com.green.project_quadruaple.booking.model.dto.ApproveData;
 import com.green.project_quadruaple.booking.model.dto.BookingRes;
 import com.green.project_quadruaple.booking.repository.BookingMapper;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
@@ -12,13 +9,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 //@RestController
 @Slf4j
@@ -52,7 +46,7 @@ public class BookingController {
 
     @Hidden
     @GetMapping("/pay-approve")
-    public String getBookingList(@RequestParam("pg_token") String pgToken) {
+    public String approve(@RequestParam("pg_token") String pgToken) {
         return "redirect:" + bookingService.approve(pgToken);
     }
 }

@@ -101,7 +101,7 @@ odsay-api-const:
 kakao-api-const:
   auth-key: ${AUTH_KEY}
   secret-key : ${SECRET_KEY}
-  affiliate-code : ${CID}
+  affiliate-code : ${AFFILIATE_CODE}
   url: https://open-api.kakaopay.com
 add-user-link: "http://localhost:8080/api/trip/user"
 #MyBatis ??
