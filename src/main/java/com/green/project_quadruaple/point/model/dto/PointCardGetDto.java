@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.point.model;
+package com.green.project_quadruaple.point.model.dto;
 
 import lombok.*;
 
@@ -8,8 +8,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class PointCardNonMemberGetDto {
+public class PointCardGetDto {
     private Long pointCardId;
     private int available;
+    private int discountPer;
     private int finalPayment;
 }
