@@ -4,18 +4,21 @@ import com.green.project_quadruaple.busi.model.BusiPostReq;
 import com.green.project_quadruaple.busi.model.BusiUserInfoDto;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.user.model.UserSignInReq;
+import com.green.project_quadruaple.user.model.UserSignInRes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -49,5 +52,29 @@ public class BusiController {
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userInfo));
+    }
+
+    //로그인
+    @PostMapping("sign-in")
+    @Operation(summary = "로그인")
+    public ResponseEntity<?> signInUser(@RequestBody UserSignInReq req, HttpServletResponse response) {
+        UserSignInRes res = busiService.signIn(req, response);
+        if (res == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ResponseCode.NOT_FOUND.getCode());
+        }
+
+        // 로그인 성공 시 반환할 데이터 생성
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("code", ResponseCode.OK.getCode());
+        responseBody.put("userId", res.getUserId());
+        responseBody.put("accessToken", res.getAccessToken());
+        responseBody.put("role", res.getRoles());
+        responseBody.put("strfId", res.getStrfId());
+        responseBody.put("title", res.getTitle());
+        responseBody.put("category", res.getCategory());
+        responseBody.put("busiNum", res.getBusiNum());
+
+        return ResponseEntity.ok(responseBody);
     }
 }

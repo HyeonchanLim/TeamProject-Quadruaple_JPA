@@ -23,4 +23,11 @@ public interface StrfRepository extends JpaRepository<StayTourRestaurFest, Long>
             "WHERE u.userId = :userId")
     List<String> findCategoryByUserId(Long userId);
 
+    @Query("SELECT s FROM StayTourRestaurFest s " +
+            "JOIN s.busiNum b " +
+            "JOIN b.user u " +
+            "WHERE u.userId = :userId")
+    Optional<StayTourRestaurFest> findByUserId(Long userId);
+
+
 }
