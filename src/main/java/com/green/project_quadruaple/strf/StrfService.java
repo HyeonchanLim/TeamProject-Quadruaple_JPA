@@ -215,7 +215,7 @@ public class StrfService {
     }
 
     @Transactional
-    public ResponseWrapper<Integer> strfMenuIns(List<MultipartFile> menuPic, StrfMenuInsReq p) {
+    public ResponseWrapper<Long> strfMenuIns(List<MultipartFile> menuPic, StrfMenuInsReq p) {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
 
@@ -224,14 +224,14 @@ public class StrfService {
 
         // 비즈니스 번호가 없으면 에러 처리
         if (businessNum == null) {
-            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), 0); // 404 Not Found
+            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), 0L); // 404 Not Found
         }
 
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
         boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
 
         if (!isBusi) {
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0L);
         }
 
         StayTourRestaurFest strf = strfRepository.findById(p.getStrfId()).orElseThrow(() -> new RuntimeException("StayTourRestaurFest not found"));
@@ -241,8 +241,8 @@ public class StrfService {
             categoryValue = Category.getKeyByName(p.getCategory());
         }
 
+        List<Menu> menus = new ArrayList<>();
         if (categoryValue == Category.RESTAUR || categoryValue == Category.STAY) {
-            List<Menu> menus = new ArrayList<>();
 
             String middlePathMenu = String.format("strf/%d/menu", strf.getStrfId());
             myFileUtils.makeFolders(middlePathMenu);
@@ -270,9 +270,15 @@ public class StrfService {
             }
             menuRepository.saveAll(menus);
             menuRepository.flush();
+            // 첫 번째 메뉴의 ID를 반환
+            if (!menus.isEmpty()) {
+                return new ResponseWrapper<>(ResponseCode.OK.getCode(), menus.get(0).getMenuId());
+            } else {
+                throw new RuntimeException("No menus were saved.");
+            }
         }
 
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+        return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0L); // If no valid category
     }
 
     @Transactional
