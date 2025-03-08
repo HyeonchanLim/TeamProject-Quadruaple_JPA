@@ -3,6 +3,7 @@ package com.green.project_quadruaple.strf.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.green.project_quadruaple.entity.model.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -15,29 +16,28 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 public class StrfInsReq {
-    private String cid;
     private String category;
     private String title;
     private double lat;
     private double lng;
     private String address;
-    private long locationDetailId;
+    private String locationTitle;
     private String post;
     private String tell;
     private LocalDate startAt;
     private LocalDate endAt;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    @Schema(description = "오픈 체크인 시간 (HH:mm 형식)", example = "09:00")
+    @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime openCheckIn;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+
+    @Schema(description = "클로즈 체크아웃 시간 (HH:mm 형식)", example = "18:00")
+    @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime closeCheckOut;
     private String detail;
     private String busiNum;
     private int state;
-    private List<Long> amenipoints;
+
     private List<String> restdates;
-    private List<StrfMenu> menus;
-    private List<StrfParlor> parlors;
-    private List<Long> rooms;
 }
 
 

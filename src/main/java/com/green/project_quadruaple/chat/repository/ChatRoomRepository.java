@@ -23,11 +23,16 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
                 , c.createdAt
             ) FROM Chat c
             JOIN c.chatJoin cj
-            JOIN cj.role.user u
+            JOIN cj.user u
             WHERE cj.chatRoom.chatRoomId = :chatRoomId
             ORDER BY c.chatId DESC
             """)
     List<ChatDto> findChatLimit30(Long chatRoomId, Long signedUserId, Pageable pageable);
 
-
+    @Query("""
+        select cr from ChatRoom cr
+        join Booking b on b.chatRoom.chatRoomId = cr.chatRoomId
+        where b.bookingId = :bookingId
+        """)
+    ChatRoom findByBookingId(Long bookingId);
 }

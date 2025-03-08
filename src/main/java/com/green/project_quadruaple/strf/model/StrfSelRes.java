@@ -14,7 +14,6 @@ import java.util.List;
 @EqualsAndHashCode
 @Schema
 public class StrfSelRes {
-
     private Long strfId;
     private String category;
     private String strfTitle;
@@ -27,28 +26,22 @@ public class StrfSelRes {
     private String endAt;
     private String openCheck;
     private String closeCheck;
-    private String restDate; // 테이블 분리함
     private String detail;
     private String busiNum;
     private String locationName;
-    private Double ratingAvg;
-    private String reviewWriterName;
+    private int state;
+    private String cid;
     private String hostProfilePic;
-    private String reviewWriterUserPic;
     private String hostName;
+    private String inquiredAt;
     private int wishCnt;
+    private Double ratingAvg;
+    private String reviewCnt;
     private int wishIn;
     private int recentCheck;
     private int recentCheckStatus;
-    private int state;
-    private String inquiredAt;
-    private String reviewCnt;
-    private String cid;
 
-    private List<StrfAmenity> amenities;
     private List<StrfPicSel> strfPics;
-    private List<StrfMenu> menu;
-    private List<StrfParlor> parlors;
-    private List<StrfRooms> rooms;
+    private List<Integer> restDate;
 
 }

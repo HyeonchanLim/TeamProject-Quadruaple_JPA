@@ -16,6 +16,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.entity.model.ChatJoin;
 import com.green.project_quadruaple.entity.model.ChatRoom;
 import com.green.project_quadruaple.entity.model.Role;
+import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.strf.StrfRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
@@ -30,7 +31,6 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -50,27 +50,31 @@ public class ChatRoomService {
 
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
-        Role hostUserRole = roleRepository.findByUserIdAndRoleName(signedUserId, UserRole.USER);
-        Role inviteUserRole = roleRepository.findByStrfIdAndRoleName(req.getStrfId(), UserRole.BUSI);
+        User hostUser = userRepository.findById(signedUserId).orElse(null);
+        User inviteUser = userRepository.findByStrfId(req.getStrfId());
 
-        if(hostUserRole == null || inviteUserRole == null) {
+        if(hostUser == null || inviteUser == null) {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND_USER.getCode(), null);
         }
 
-        ChatRoom chatRoom = ChatRoom.builder()
+        ChatRoom chatRoom = chatRoomRepository.findByBookingId(req.getBookingId());
+        if(chatRoom != null) { // 이미 존재하는 채팅방
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoom.getChatRoomId());
+        }
+        chatRoom = ChatRoom.builder()
                 .title(req.getTitle())
                 .build();
         chatRoomRepository.save(chatRoom);
         chatRoomRepository.flush();
 
         ChatJoin hostUserJoin = ChatJoin.builder()
-                .role(hostUserRole)
+                .user(hostUser)
                 .chatRoom(chatRoom)
                 .build();
         chatJoinRepository.save(hostUserJoin);
 
         ChatJoin inviteUserJoin = ChatJoin.builder()
-                .role(inviteUserRole)
+                .user(inviteUser)
                 .chatRoom(chatRoom)
                 .build();
         chatJoinRepository.save(inviteUserJoin);
@@ -110,6 +114,7 @@ public class ChatRoomService {
 
     // 채팅방 불러오기
     public ResponseWrapper<List<ChatRoomDto>> getChatRoomList(int page, String roleReq) {
+
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
         UserRole role = UserRole.getByValue(roleReq);
@@ -118,15 +123,31 @@ public class ChatRoomService {
         }
         int startIdx = page * 10;
         List<ChatRoomDto> chatRoomDtoList = chatRoomMapper.selChatRoomList(signedUserId, role.getValue(), startIdx);
+        List<ChatRoomDto> allChatRoomDtoList = chatRoomMapper.selAllChatRoomList(signedUserId, role.getValue(), startIdx);
+
+        for (ChatRoomDto allChatRoomDto : allChatRoomDtoList) {
+            boolean flag = false;
+            for (ChatRoomDto chatRoomDto : chatRoomDtoList) {
+                if(chatRoomDto.getRoomId() == allChatRoomDto.getRoomId()) {
+                    flag = true;
+                    break;
+                }
+            }
+            if(!flag) {
+                chatRoomDtoList.add(allChatRoomDto);
+            }
+        }
+
         LocalDateTime now = LocalDateTime.now();
         for (ChatRoomDto chatRoomDto : chatRoomDtoList) {
-            LocalDateTime latestChatDLT = chatRoomDto.getLatestChatDLT();
+            LocalDateTime latestChatDLT = chatRoomDto.getLatestChatLDT();
             chatRoomDto.setLastChatTime(formatDate(latestChatDLT, now));
         }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoomDtoList);
     }
 
     private String formatDate(LocalDateTime time, LocalDateTime now) {
+        if(time == null) return null;
         Period diffYMD = Period.between(time.toLocalDate(), now.toLocalDate());
 
         String StringAt;

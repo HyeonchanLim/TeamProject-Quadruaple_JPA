@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Booking extends CreatedAt {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_id")
@@ -24,7 +25,7 @@ public class Booking extends CreatedAt {
     private Menu menu;
 
     @Column(nullable = false)
-    private int num;
+    private Integer num;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
@@ -40,8 +41,11 @@ public class Booking extends CreatedAt {
     @Column(name = "check_out", nullable = false)
     private LocalDateTime checkOut;
 
-    @Column(name = "final_payment", nullable = false)
-    private int finalPayment;
+    @Column(name = "used_point")
+    private Integer usedPoint;
+
+    @Column(name = "total_payment", nullable = false)
+    private Integer totalPayment;
 
     @Column(nullable = false)
     private String tid;

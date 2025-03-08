@@ -22,17 +22,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,59 +55,70 @@ public class NoticeService {
     private final StrfRepository strfRepository;
     private final MenuRepository menuRepository;
 
+    // 타임아웃 시간 설정
+    private static final long NOTICE_TIME_OUT = 60 * 1000L;
+    // 마지막 신규 알람 조회
+    private LocalDateTime lastCheckedTime = LocalDateTime.now();
     // SSE 연결을 관리하는 저장소 (여러 유저 지원 가능)
-    private final ConcurrentHashMap<Long, CopyOnWriteArrayList<SseEmitter>> emitters = new ConcurrentHashMap<>();
+    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
 
-    //미열람 알람 개수를 실시간으로 전송하는 SSE
-    public SseEmitter noticeCnt() {
-        long userId = 116L;
-        //long userId = authenticationFacade.getSignedUserId();
-        SseEmitter sseEmitter = new SseEmitter(30 * 1000L); // 60초 타임아웃 설정
-        // 유저별 SseEmitter 리스트 저장
-        emitters.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>()).add(sseEmitter);
-        // 연결 종료 시 리스트에서 제거
-        sseEmitter.onCompletion(() -> removeEmitter(userId, sseEmitter));
-        sseEmitter.onTimeout(() -> removeEmitter(userId, sseEmitter));
-        // 현재 미열람 알람 개수를 즉시 전송
-        sendNoticeCount(userId);
-        return sseEmitter;
+    public SseEmitter subscribe() {
+        Long userId=authenticationFacade.getSignedUserId();
+        SseEmitter emitter = new SseEmitter(NOTICE_TIME_OUT);
+
+        if(userId!=null){ emitters.put(userId, emitter); }
+        try {
+            emitter.send(SseEmitter.event().name("INIT").data("연결 성공!"));
+        } catch (IOException e) {
+            emitter.complete();
+        }
+
+        emitter.onCompletion(() -> emitters.remove(userId));
+        emitter.onTimeout(() -> emitters.remove(userId));
+
+        return emitter;
     }
 
-    // 30초마다 알림 갯수 전송
-    public void sendNoticeCount(long userId) {
-        boolean noticeCnt = noticeReceiveRepository.existsUnreadNoticesByUserId(userId);
-        if (emitters.containsKey(userId)) {
-            for (SseEmitter emitter : emitters.get(userId)) {
-                try {
-                    emitter.send(SseEmitter.event()
-                            .name("notice-count")
-                            .data(noticeCnt));
-                } catch (IOException e) {
-                    removeEmitter(userId, emitter);
-                }
+    public void sendNotification(Long userId) {
+        SseEmitter emitter = emitters.get(userId);
+        if (emitter != null) {
+            try {
+                emitter.send(SseEmitter.event()
+                            .name("exist unread notice")
+                            .data(true));
+            } catch (IOException e) {
+                emitters.remove(userId);
             }
         }
     }
 
-    //SSE 연결 제거
-    private void removeEmitter(long userId, SseEmitter emitter) {
-        if (emitters.containsKey(userId)) {
-            emitters.get(userId).remove(emitter);
+    @Scheduled(fixedDelay = 3000) // 3초마다 새 알림 확인
+    public void checkNewNotifications() {
+        if(emitters.size()==0) { return; }
+        List<Long> userIds = noticeRepository.getUsersWithNewNotices(lastCheckedTime);
+        for (Long userId : userIds) {
+            sendNotification(userId);
+            //발송 후 event table 정리
+            noticeRepository.clearProcessedNotifications(userId);
         }
+        lastCheckedTime = LocalDateTime.now();
     }
 
+
+
+
     //테스트 알람 추가
-    public void testInsNotice() {
+    public void testInsNotice(Long userId) {
         Notice notice = new Notice();
         notice.setContent("테스트 알람입니다.");
         notice.setTitle("테스트 제목입니다.");
         notice.setNoticeCategory(NoticeCategory.SERVICE);
         noticeRepository.save(notice);
-        NoticeReceiveId noticeReceiveId = new NoticeReceiveId(116L, notice.getNoticeId());
+        NoticeReceiveId noticeReceiveId = new NoticeReceiveId(userId, notice.getNoticeId());
         NoticeReceive noticeReceive = NoticeReceive.builder()
                 .id(noticeReceiveId)
                 .notice(notice)
-                .user(userRepository.findById(116L).orElseThrow(() -> new RuntimeException("User not found")))
+                .user(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found")))
                 .opened(false)
                 .build();
         noticeReceiveRepository.save(noticeReceive);
@@ -272,15 +282,15 @@ public class NoticeService {
             StringBuilder content = new StringBuilder();
             content.append("익일").append(booking.getCreatedAt().toLocalDate()).append("에 예약한 ")
                     .append(strf.getTitle()).append(" 숙박 예정이 있습니다.")
-                    .append("\n")
+                    .append(" \n")
                     .append("숙박 장소 : ").append(strf.getAddress())
-                    .append("\n")
+                    .append(" \n")
                     .append("tel : ").append(strf.getTell())
-                    .append("\n")
+                    .append(" \n")
                     .append("입실 예정 시각 : ").append(booking.getCheckIn().toLocalTime().format(DateTimeFormatter.ofPattern("HH시 mm분")))
-                    .append("\n")
+                    .append(" \n")
                     .append("퇴실 시각 : ").append(strf.getCloseCheckOut().format(DateTimeFormatter.ofPattern("HH시 mm분")))
-                    .append("\n")
+                    .append(" \n")
                     .append("예약 객실 : ").append(menu.getTitle());
             Notice notice=Notice.builder()
                     .noticeCategory(NoticeCategory.BOOKING)

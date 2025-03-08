@@ -12,14 +12,14 @@ public interface ChatReceiveRepository extends JpaRepository<ChatReceive, Long> 
     @Query("""
         select case when count(cr) > 0 then true else false
             end from ChatReceive cr
-        where cr.listenerId.role.user.userId = :signedUserId
+        where cr.listenerId.user.userId = :signedUserId
         """)
     boolean findByUserId(Long signedUserId);
 
     @Modifying
     @Query("""
         delete from ChatReceive cr
-        where cr.listenerId.role.user.userId = :signedUserId
+        where cr.listenerId.user.userId = :signedUserId
             and cr.chat.chatJoin.chatRoom.chatRoomId = :roomId
         """)
     void deleteByUserId(Long signedUserId, Long roomId);

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.green.project_quadruaple.businessmypage.BusinessMyPageMapper">
+
+    <!-- 예약 현황 -->
+    <resultMap id="bookingResultMap" type="com.green.project_quadruaple.businessmypage.model.BusinessMyPageBooking">
+        <result property="bookingId" column="booking_id"/>
+        <result property="title" column="title"/>
+        <result property="strfId" column="strf_id"/>
+        <result property="picName" column="pic_name"/>
+        <result property="checkIn" column="check_in"/>
+        <result property="checkOut" column="check_out"/>
+        <result property="totalPayment" column="total_payment"/>
+        <result property="state" column="state"/>
+    </resultMap>
+
+    <select id="selBookingByBusiness" resultMap="bookingResultMap">
+          WITH RankedPhotos AS (
+        SELECT D.strf_id, D.pic_name, ROW_NUMBER() OVER (PARTITION BY D.strf_id ORDER BY D.pic_name) AS rn
+          FROM strf_pic D
+        )
+        SELECT A.booking_id, C.strf_id, C.title, RP.pic_name, A.check_in, A.check_out, A.total_payment, A.state
+          FROM booking A
+          LEFT JOIN menu B
+            ON A.menu_id = B.menu_id
+          LEFT JOIN stay_tour_restaur_fest C
+            ON B.strf_id = C.strf_id
+          LEFT JOIN RankedPhotos RP
+            ON C.strf_id = RP.strf_id AND RP.rn = 1
+          LEFT JOIN business_num E
+            ON C.busi_num = E.busi_num
+          LEFT JOIN user F
+            ON E.user_id = F.user_id
+         WHERE F.user_id = #{userId} AND C.category = 'STAY'
+    </select>
+
+    <!-- 예약 현황 상세 보기 -->
+    <select id="selBookingDetails">
+        SELECT B.title AS menu_title, C.room_num, A.check_in, A.check_out, A.num AS booking_num, D.name, D.tell, E.email,
+        A.total_payment, H.title AS coupon_title, I.recom_capacity, I.max_capacity,
+        A.used_point,  <!-- booking 테이블에서 usedPoint를 바로 조회 -->
+        CASE
+        WHEN A.num > I.recom_capacity AND A.num <![CDATA[<=]]> I.max_capacity
+        THEN A.num - I.recom_capacity
+        ELSE 0
+        END AS extra_person_count,
+        CASE
+        WHEN A.num > I.recom_capacity AND A.num <![CDATA[<=]]> I.max_capacity
+        THEN (A.num - I.recom_capacity) * I.surcharge
+        ELSE 0
+        END AS extra_fee
+        FROM booking A
+        LEFT JOIN menu B ON A.menu_id = B.menu_id
+        LEFT JOIN room C ON A.room_id = C.room_id
+        LEFT JOIN user D ON A.user_id = D.user_id
+        LEFT JOIN authentication_code E ON D.authenticated_id = E.authenticated_id
+        LEFT JOIN used_coupon F ON A.booking_id = F.booking_id
+        LEFT JOIN receive_coupon G ON F.receive_id = G.receive_id
+        LEFT JOIN coupon H ON G.coupon_id = H.coupon_id
+        LEFT JOIN parlor I ON A.menu_id = I.menu_id
+        LEFT JOIN stay_tour_restaur_fest J ON B.strf_id = J.strf_id
+        LEFT JOIN business_num K ON J.busi_num = K.busi_num
+        WHERE A.booking_id = #{bookingId}
+        AND A.num <![CDATA[<=]]> I.max_capacity
+        AND EXISTS (
+        SELECT 1
+        FROM business_num BN
+        WHERE BN.user_id = #{userId}
+        AND BN.busi_num = K.busi_num
+        AND J.category = 'STAY'
+        )
+    </select>
+
+
+    <!-- 매출 조회 -->
+    <resultMap id="businessSalesResultMap" type="com.green.project_quadruaple.businessmypage.model.BusinessMyPageSales">
+        <!-- 각 월별 합계 -->
+        <result property="sumMonth1" column="sum_1_month"/>
+        <result property="sumMonth2" column="sum_2_month"/>
+        <result property="sumMonth3" column="sum_3_month"/>
+        <result property="sumMonth4" column="sum_4_month"/>
+        <result property="sumMonth5" column="sum_5_month"/>
+        <result property="sumMonth6" column="sum_6_month"/>
+        <result property="sumMonth7" column="sum_7_month"/>
+        <result property="sumMonth8" column="sum_8_month"/>
+        <result property="sumMonth9" column="sum_9_month"/>
+        <result property="sumMonth10" column="sum_10_month"/>
+        <result property="sumMonth11" column="sum_11_month"/>
+        <result property="sumMonth12" column="sum_12_month"/>
+    </resultMap>
+
+
+    <select id="selBusinessSTAYSales" resultMap="businessSalesResultMap">
+        WITH RankedPhotos AS (
+        SELECT D.strf_id, D.pic_name,
+        ROW_NUMBER() OVER (PARTITION BY D.strf_id ORDER BY D.pic_name) AS rn
+        FROM strf_pic D
+        )
+        SELECT
+        <trim prefixOverrides=",">
+            <foreach item="monthOffset" collection="monthOffsets" open="" separator="," close="">
+                COALESCE(SUM(CASE
+                WHEN YEAR(A.created_at) = YEAR(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
+                AND MONTH(A.created_at) = MONTH(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
+                THEN A.total_payment ELSE 0
+                END), 0) AS sum_${monthOffset + 1}_month
+            </foreach>
+        </trim>
+        FROM booking A
+        LEFT JOIN menu B ON A.menu_id = B.menu_id
+        LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
+        LEFT JOIN business_num E ON C.busi_num = E.busi_num
+        LEFT JOIN user F ON E.user_id = F.user_id
+        WHERE F.user_id = #{userId}
+        AND C.category IN ('STAY', 'RESTAUR')
+        AND A.state = 2
+    </select>
+
+
+    <select id="selUsedPointsByBusinessRESTAUR" resultMap="businessSalesResultMap">
+        SELECT
+        <trim prefixOverrides=",">
+            <foreach item="monthOffset" collection="monthOffsets" open="" separator="," close="">
+                COALESCE(SUM(CASE
+                WHEN YEAR(A.created_at) = YEAR(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
+                AND MONTH(A.created_at) = MONTH(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
+                THEN A.amount ELSE 0
+                END), 0) AS sum_${monthOffset + 1}_month
+            </foreach>
+        </trim>
+        FROM point_history A
+        LEFT JOIN menu B ON A.related_id = B.menu_id
+        LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
+        LEFT JOIN business_num D ON C.busi_num = D.busi_num
+        LEFT JOIN user E ON D.user_id = E.user_id
+        WHERE E.user_id = #{userId}
+        AND A.category = 0
+        AND C.category = 'RESTAUR'
+    </select>
+
+
+    <!-- 전체 포인트 합계 조회 -->
+    <select id="selTotalPointAmount">
+        SELECT SUM(CASE WHEN A.category = 0 THEN A.amount ELSE 0 END)
+        FROM point_history A
+        LEFT JOIN menu B ON A.related_id = B.menu_id
+        LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
+        LEFT JOIN business_num D ON C.busi_num = D.busi_num
+        LEFT JOIN user E ON D.user_id = E.user_id
+        WHERE E.user_id = #{userId}
+        AND C.category IN ('STAY', 'RESTAUR')
+    </select>
+
+    <!-- 개별 포인트 내역 조회 -->
+    <select id="selPointDetailList">
+        SELECT B.strf_id, M.menu_id, M.title, A.amount, A.created_at
+        FROM point_history A
+        LEFT JOIN menu M ON A.related_id = M.menu_id
+        LEFT JOIN stay_tour_restaur_fest B ON M.strf_id = B.strf_id
+        LEFT JOIN business_num C ON B.busi_num = C.busi_num
+        LEFT JOIN user D ON C.user_id = D.user_id
+        WHERE D.user_id = #{userId}
+        AND A.category = 0
+        AND B.category IN ('STAY', 'RESTAUR')
+    </select>
+
+</mapper>

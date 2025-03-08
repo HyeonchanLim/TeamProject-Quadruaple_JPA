@@ -10,10 +10,10 @@ import com.green.project_quadruaple.common.config.constant.KakaopayConst;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.entity.model.Booking;
-import com.green.project_quadruaple.entity.model.Menu;
-import com.green.project_quadruaple.entity.model.Room;
-import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.entity.base.NoticeCategory;
+import com.green.project_quadruaple.entity.model.*;
+import com.green.project_quadruaple.notice.NoticeService;
+import com.green.project_quadruaple.point.PointHistoryRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,10 +45,15 @@ import java.util.*;
 public class BookingService {
 
     private final BookingMapper bookingMapper;
+    private final String affiliateCode;
+    private final String secretKey;
+    private final String payUrl;
     private final BookingRepository bookingRepository;
     private final MenuRepository menuRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final NoticeService noticeService;
+    private final PointHistoryRepository pointHistoryRepository;
     private final KakaopayConst kakaopayConst;
 
     private KakaoReadyDto kakaoReadyDto;
@@ -94,13 +99,14 @@ public class BookingService {
 
     // 예약 변경 -> 결제 , 취소 내역 업데이트 필요
     // check in - out 날짜 체크 (일정의 날짜 , check in - out 날짜 겹침x)
-    // final_paymaent = 실제 결제 금액 맞는지 비교 필요
-    // strf id 가 실제 상품과 맞는지 체크
+    // total_payment = 실제 결제 금액 맞는지 비교 필요
+    // strfId 가 실제 상품과 맞는지 체크
     @Transactional
     public ResponseWrapper<String> postBooking(BookingPostReq req) {
         Long signedUserId = AuthenticationFacade.getSignedUserId();
         User signedUser = userRepository.findById(signedUserId).orElse(null);
         Long couponId = req.getCouponId();
+        Integer point = req.getPoint();
         Room room = null;
         Menu menu = null;
         try { // room, menu null 체크, 값 바인딩
@@ -127,9 +133,17 @@ public class BookingService {
             if(couponDto == null || couponDto.getUsedCouponId() != null) { // 쿠폰 미소지시, 사용시 에러
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
             }
-            discount = price / couponDto.getDiscountRate();
-
+            discount = price / 100 * couponDto.getDiscountRate();
             req.setReceiveId(couponDto.getReceiveId());
+        }
+
+        Integer remainPoint = pointHistoryRepository.findRemainPointByUserId(signedUserId, PageRequest.of(0, 1)).get(0);
+        if(point != null) { // 포인트가 담겨있을 경우
+            if(point > remainPoint) {
+                return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "포인트 금액이 부족합니다.");
+            }
+            remainPoint -= point;
+            discount += point;
         }
 
         int resultPrice = price - discount;
@@ -185,9 +199,10 @@ public class BookingService {
                         .room(room)
                         .user(signedUser)
                         .num(req.getNum())
+                        .usedPoint(point)
                         .checkIn(checkInDate)
                         .checkOut(checkOutDate)
-                        .finalPayment(req.getActualPaid())
+                        .totalPayment(req.getActualPaid())
                         .tid(kakaoReadyDto.getTid())
                         .state(0)
                         .build();
@@ -195,6 +210,7 @@ public class BookingService {
                 kakaoReadyDto.setPartnerUserId(String.valueOf(signedUserId));
                 kakaoReadyDto.setBookingPostReq(req);
                 kakaoReadyDto.setBooking(booking);
+                kakaoReadyDto.setRemainPoint(remainPoint);
 
                 return new ResponseWrapper<>(ResponseCode.OK.getCode(), kakaoReadyDto.getNextRedirectPcUrl());
             }
@@ -222,6 +238,7 @@ public class BookingService {
     public String approve(String pgToken) {
 
         String userId = kakaoReadyDto.getPartnerUserId();
+        String tid = kakaoReadyDto.getTid();
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -231,7 +248,7 @@ public class BookingService {
         HashMap<String, String> params = new HashMap<>();
 
         params.put("cid", kakaopayConst.getAffiliateCode()); // 가맹점 코드 - 테스트용
-        params.put("tid", kakaoReadyDto.getTid()); // 결제 고유 번호, 준비단계 응답에서 가져옴
+        params.put("tid", tid); // 결제 고유 번호, 준비단계 응답에서 가져옴
         params.put("partner_order_id", kakaoReadyDto.getPartnerOrderId()); // 주문 번호
         params.put("partner_user_id", String.valueOf(userId)); // 회원 아이디
         params.put("pg_token", pgToken); // 준비 단계에서 리다이렉트떄 받은 param 값
@@ -241,22 +258,39 @@ public class BookingService {
         try {
             BookingPostReq bookingPostReq = kakaoReadyDto.getBookingPostReq();
             bookingPostReq.setUserId(Long.parseLong(userId));
-            bookingPostReq.setTid(kakaoReadyDto.getTid());
+            bookingPostReq.setTid(tid);
+
             if (bookingPostReq.getReceiveId() != null) {
                 bookingMapper.insUsedCoupon(bookingPostReq.getReceiveId(), bookingPostReq.getBookingId());
             }
             Booking booking = kakaoReadyDto.getBooking();
             bookingRepository.save(booking);
-            bookingRepository.flush();
             KakaoApproveDto approveDto = restTemplate.postForObject(new URI(kakaopayConst.getUrl() + "/online/v1/payment/approve"), body, KakaoApproveDto.class);
             log.info("approveDto = {}", approveDto);
             if(approveDto == null) {
                 throw new RuntimeException();
             }
 
+            // 예약완료 알람발송
+//            User noticeUser = userRepository.findById(bookingPostReq.getUserId()).orElse(null);
+//            postConfirmBookingNotice(booking, noticeUser);
+
             int quantity = 1;
 
+            bookingRepository.flush();
             BookingApproveInfoDto bookingApproveInfoDto = bookingMapper.selApproveBookingInfo(booking.getBookingId());
+            Integer remainPoint = kakaoReadyDto.getRemainPoint();
+            if(remainPoint != null) {
+                PointHistory pointHistory = PointHistory.builder()
+                        .user(booking.getUser())
+                        .category(0)
+                        .relatedId(booking.getMenu().getMenuId())
+                        .tid(tid)
+                        .amount(booking.getUsedPoint())
+                        .remainPoint(remainPoint)
+                        .build();
+                pointHistoryRepository.save(pointHistory);
+            }
             String redirectParams = "?user_name=" + URLEncoder.encode(bookingApproveInfoDto.getUserName(), StandardCharsets.UTF_8) + "&"
                     + "title=" + URLEncoder.encode(bookingApproveInfoDto.getTitle(), StandardCharsets.UTF_8) + "&"
                     + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
