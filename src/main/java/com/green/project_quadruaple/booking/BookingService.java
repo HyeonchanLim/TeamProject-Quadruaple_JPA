@@ -6,6 +6,7 @@ import com.green.project_quadruaple.booking.repository.BookingMapper;
 import com.green.project_quadruaple.booking.repository.BookingRepository;
 import com.green.project_quadruaple.booking.repository.MenuRepository;
 import com.green.project_quadruaple.booking.repository.RoomRepository;
+import com.green.project_quadruaple.common.config.constant.KakaopayConst;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
@@ -39,37 +40,19 @@ import java.util.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 @Transactional(rollbackFor = Exception.class)
 public class BookingService {
 
     private final BookingMapper bookingMapper;
-    private final String affiliateCode;
-    private final String secretKey;
-    private final String payUrl;
     private final BookingRepository bookingRepository;
     private final MenuRepository menuRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final KakaopayConst kakaopayConst;
 
     private KakaoReadyDto kakaoReadyDto;
 
-    public BookingService(BookingMapper bookingMapper,
-                          BookingRepository bookingRepository,
-                          MenuRepository menuRepository,
-                          RoomRepository roomRepository,
-                          UserRepository userRepository,
-                          @Value("${kakao-api-const.affiliate-code}") String affiliateCode,
-                          @Value("${kakao-api-const.secret-key}") String secretKey,
-                          @Value("${kakao-api-const.url}") String payUrl) {
-        this.bookingMapper = bookingMapper;
-        this.affiliateCode = affiliateCode;
-        this.secretKey = secretKey;
-        this.payUrl = payUrl;
-        this.bookingRepository = bookingRepository;
-        this.menuRepository = menuRepository;
-        this.roomRepository = roomRepository;
-        this.userRepository = userRepository;
-    }
 
     public ResponseWrapper<List<BookingRes>> getBooking(Integer page) {
 
@@ -116,7 +99,7 @@ public class BookingService {
     @Transactional
     public ResponseWrapper<String> postBooking(BookingPostReq req) {
         Long signedUserId = AuthenticationFacade.getSignedUserId();
-        User signedUser = userRepository.findById(signedUserId).get();
+        User signedUser = userRepository.findById(signedUserId).orElse(null);
         Long couponId = req.getCouponId();
         Room room = null;
         Menu menu = null;
@@ -166,7 +149,7 @@ public class BookingService {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", secretKey);
+        headers.add("Authorization", kakaopayConst.getSecretKey());
         headers.add("Content-Type", "application/json");
 
         HashMap<String, String> params = new HashMap<>();
@@ -177,7 +160,7 @@ public class BookingService {
         String totalAmount = String.valueOf(req.getActualPaid());
         String taxFreeAmount = String.valueOf((req.getActualPaid()/10));
 
-        params.put("cid", affiliateCode); // 가맹점 코드 - 테스트용
+        params.put("cid", kakaopayConst.getAffiliateCode()); // 가맹점 코드 - 테스트용
         params.put("partner_order_id", orderNo); // 주문 번호
         params.put("partner_user_id", String.valueOf(signedUserId)); // 회원 아이디
         params.put("item_name", "테스트 상품1"); // 상품 명
@@ -194,7 +177,7 @@ public class BookingService {
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
         try {
-            kakaoReadyDto = restTemplate.postForObject(new URI(payUrl + "/online/v1/payment/ready"), body, KakaoReadyDto.class);
+            kakaoReadyDto = restTemplate.postForObject(new URI(kakaopayConst.getUrl() + "/online/v1/payment/ready"), body, KakaoReadyDto.class);
             log.info("kakaoDto = {}", kakaoReadyDto);
             if(kakaoReadyDto != null) {
                 Booking booking = Booking.builder()
@@ -242,12 +225,12 @@ public class BookingService {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", secretKey);
+        headers.add("Authorization", kakaopayConst.getSecretKey());
         headers.add("Content-Type", "application/json");
 
         HashMap<String, String> params = new HashMap<>();
 
-        params.put("cid", affiliateCode); // 가맹점 코드 - 테스트용
+        params.put("cid", kakaopayConst.getAffiliateCode()); // 가맹점 코드 - 테스트용
         params.put("tid", kakaoReadyDto.getTid()); // 결제 고유 번호, 준비단계 응답에서 가져옴
         params.put("partner_order_id", kakaoReadyDto.getPartnerOrderId()); // 주문 번호
         params.put("partner_user_id", String.valueOf(userId)); // 회원 아이디
@@ -265,7 +248,7 @@ public class BookingService {
             Booking booking = kakaoReadyDto.getBooking();
             bookingRepository.save(booking);
             bookingRepository.flush();
-            KakaoApproveDto approveDto = restTemplate.postForObject(new URI(payUrl + "/online/v1/payment/approve"), body, KakaoApproveDto.class);
+            KakaoApproveDto approveDto = restTemplate.postForObject(new URI(kakaopayConst.getUrl() + "/online/v1/payment/approve"), body, KakaoApproveDto.class);
             log.info("approveDto = {}", approveDto);
             if(approveDto == null) {
                 throw new RuntimeException();
