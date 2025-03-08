@@ -1,18 +1,25 @@
 package com.green.project_quadruaple.point;
 
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
-import com.green.project_quadruaple.entity.model.PointCard;
-import com.green.project_quadruaple.entity.model.Role;
-import com.green.project_quadruaple.point.model.PointCardGetDto;
-import com.green.project_quadruaple.point.model.PointCardNonMemberGetDto;
-import com.green.project_quadruaple.point.model.PointCardPostDto;
-import com.green.project_quadruaple.point.model.PointCardUpdateDto;
+import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.common.model.SizeConstants;
+import com.green.project_quadruaple.entity.model.*;
+import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
+import com.green.project_quadruaple.point.model.req.PointUseOrUnUseReq;
+import com.green.project_quadruaple.point.model.res.PointCardProductRes;
+import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
+import com.green.project_quadruaple.point.model.dto.PointCardUpdateDto;
+import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,9 +29,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PointCardService {
     private final PointCardRepository pointCardRepository;
+    private final PointHistoryRepository pointHistoryRepository;
     private final AuthenticationFacade authenticationFacade;
     private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
 
+    //관리자 포인트 상품 추가
     public int intPointCard(PointCardPostDto dto) {
         long userId = authenticationFacade.getSignedUserId();
 
@@ -52,15 +62,17 @@ public class PointCardService {
         return 1;
     }
 
-    public List<PointCardNonMemberGetDto> getPointCardNonMember() {
-        return pointCardRepository.findAll().stream()
-                .map(pointCard -> new PointCardNonMemberGetDto(
-                        pointCard.getPointCardId(),
-                        pointCard.getAvailable(),
-                        pointCard.getFinalPayment()
-                ))
-                .collect(Collectors.toList());
+    // 회원 or 비회원 포인트 카드 조회
+    public PointCardProductRes getPointCardProduct() {
+        Long userId = authenticationFacade.getSignedUserId();
+        Integer remainPoints=null;
+        if(userId!=null){
+            remainPoints=pointHistoryRepository.findRemainPointByUserId(userId);
+        }
+        return new PointCardProductRes(remainPoints,pointCardRepository.findAll());
     }
+
+
 
     public List<PointCardGetDto> getPointCard() {
         long userId = authenticationFacade.getSignedUserId();
@@ -121,5 +133,42 @@ public class PointCardService {
         pointCardRepository.save(pointCard);
 
         return 1;
+    }
+
+    // point 사용 혹은 사용취소
+    public ResponseEntity<ResponseWrapper<Integer>> useOrUnUsePoint(PointUseOrUnUseReq p){
+        long userId = authenticationFacade.getSignedUserId();
+        int remainPoint =pointHistoryRepository.findRemainPointByUserId(userId);
+        remainPoint = p.getCategory()==0? remainPoint+p.getAmount():remainPoint-p.getAmount();
+        if(remainPoint<0){ return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ResponseWrapper<>(ResponseCode.NOT_Acceptable.getCode(), null)); }
+        PointHistory pointHistory = PointHistory.builder()
+                .amount(p.getAmount())
+                .category(p.getCategory())
+                .relatedId(p.getRelatedId())
+                .user(userRepository.findById(userId).get())
+                .remainPoint(remainPoint)
+                .build();
+        pointHistoryRepository.save(pointHistory);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),pointHistory.getRemainPoint()));
+    }
+
+    // 보유 포인트 확인화면
+    public void checkMyRemainPoint (LocalDate startAt, LocalDate endAt, Integer category, boolean isDesc){
+        /*
+            response 내용
+            로그인 유저 닉네임+보유포인트
+            포인트 내역(구매, 사용, 취소) 사용처 이름, 시간, 얼마가 들었고 얼마가 남았나.
+         */
+        long userId = authenticationFacade.getSignedUserId();
+
+
+
+        String sort=isDesc?"desc":"asc";
+
+
+        for(int i=0; i< SizeConstants.getDefault_page_size(); i++){
+
+        }
     }
 }

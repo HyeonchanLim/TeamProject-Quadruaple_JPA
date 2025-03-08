@@ -2,10 +2,10 @@ package com.green.project_quadruaple.point;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.point.model.PointCardGetDto;
-import com.green.project_quadruaple.point.model.PointCardNonMemberGetDto;
-import com.green.project_quadruaple.point.model.PointCardPostDto;
-import com.green.project_quadruaple.point.model.PointCardUpdateDto;
+import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
+import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
+import com.green.project_quadruaple.point.model.res.PointCardProductRes;
+import com.green.project_quadruaple.point.model.dto.PointCardUpdateDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -35,12 +35,12 @@ public class PointCardController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
-    @GetMapping("non-member")
-    @Operation(summary = "포인트 상품권 조회/비회원")
-    public ResponseEntity<?> getPointCardNonMember() {
-        List<PointCardNonMemberGetDto> result = pointCardService.getPointCardNonMember();
+    @GetMapping("product")
+    @Operation(summary = "포인트 상품권 조회, 회원이면 잔여포인트도 같이 전달")
+    public ResponseEntity<?> getPointCardProduct() {
+        PointCardProductRes result = pointCardService.getPointCardProduct();
 
-        if (result == null || result.isEmpty()) {
+        if (result.getPointCards() == null || result.getPointCards().isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), 0));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));

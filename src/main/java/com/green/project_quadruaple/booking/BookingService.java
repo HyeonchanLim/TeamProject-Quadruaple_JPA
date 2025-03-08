@@ -9,7 +9,6 @@ import com.green.project_quadruaple.booking.repository.RoomRepository;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.model.Booking;
 import com.green.project_quadruaple.entity.model.Menu;
 import com.green.project_quadruaple.entity.model.Room;
@@ -17,14 +16,12 @@ import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.point.PointHistoryRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.annotation.Schedules;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -32,8 +29,6 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -67,7 +62,7 @@ public class BookingService {
                           PointHistoryRepository pointHistoryRepository,
                           @Value("${kakao-api-const.affiliate-code}") String affiliateCode,
                           @Value("${kakao-api-const.secret-key}") String secretKey,
-                          @Value("${kakao-api-const.url}") String payUrl) {
+                          @Value("${kakao-api-const.url}") String payUrl, PointHistoryRepository pointViewRepository) {
         this.bookingMapper = bookingMapper;
         this.affiliateCode = affiliateCode;
         this.secretKey = secretKey;

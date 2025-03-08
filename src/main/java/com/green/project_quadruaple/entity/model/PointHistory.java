@@ -3,16 +3,14 @@ package com.green.project_quadruaple.entity.model;
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import com.green.project_quadruaple.entity.base.Refund;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class PointHistory extends CreatedAt {
