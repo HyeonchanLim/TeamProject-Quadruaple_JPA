@@ -67,6 +67,7 @@ public class ChatRoomService {
                 .title(req.getTitle())
                 .build();
         chatRoomRepository.save(chatRoom);
+        booking.setChatRoom(chatRoom);
         chatRoomRepository.flush();
 
         ChatJoin hostUserJoin = ChatJoin.builder()

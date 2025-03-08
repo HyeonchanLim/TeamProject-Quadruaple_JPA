@@ -45,9 +45,6 @@ import java.util.*;
 public class BookingService {
 
     private final BookingMapper bookingMapper;
-    private final String affiliateCode;
-    private final String secretKey;
-    private final String payUrl;
     private final BookingRepository bookingRepository;
     private final MenuRepository menuRepository;
     private final RoomRepository roomRepository;
@@ -192,12 +189,12 @@ public class BookingService {
         params.put("quantity", quantity); // 상품 수량
         params.put("total_amount", totalAmount); // 상품 가격
         params.put("tax_free_amount", taxFreeAmount); // 상품 비과세 금액
-        params.put("approval_url", "http://112.222.157.157:5231/api/booking/pay-approve"); // 성공시 url
-        params.put("cancel_url", "http://112.222.157.157:5231/api/booking/kakaoPayCancle"); // 실패시 url
-        params.put("fail_url", "http://112.222.157.157:5231/api/booking/kakaoPayFail");
-//        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
-//        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
-//        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
+//        params.put("approval_url", "http://112.222.157.157:5231/api/booking/pay-approve"); // 성공시 url
+//        params.put("cancel_url", "http://112.222.157.157:5231/api/booking/kakaoPayCancle"); // 실패시 url
+//        params.put("fail_url", "http://112.222.157.157:5231/api/booking/kakaoPayFail");
+        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
+        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
+        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
 
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
@@ -307,8 +304,8 @@ public class BookingService {
                     + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
                     + "check_out=" + URLEncoder.encode(bookingApproveInfoDto.getCheckOut(), StandardCharsets.UTF_8) + "&"
                     + "personnel=" + quantity;
-            String url = "http://112.222.157.157:5231/booking/complete" + redirectParams;
-//            String url = "http://localhost:8080/booking/complete" + redirectParams;
+//            String url = "http://112.222.157.157:5231/booking/complete" + redirectParams;
+            String url = "http://localhost:8080/booking/complete" + redirectParams;
             return url;
         } catch (Exception e) {
             e.printStackTrace();

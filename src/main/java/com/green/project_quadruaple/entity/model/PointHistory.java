@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class PointHistory extends CreatedAt {
 
     @Id
