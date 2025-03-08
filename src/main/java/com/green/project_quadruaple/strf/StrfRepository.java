@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.strf;
 
+import com.green.project_quadruaple.entity.model.BusinessNum;
 import com.green.project_quadruaple.entity.model.StayTourRestaurFest;
 import com.green.project_quadruaple.entity.model.User;
 import org.apache.ibatis.annotations.Param;
@@ -28,6 +29,10 @@ public interface StrfRepository extends JpaRepository<StayTourRestaurFest, Long>
             "JOIN b.user u " +
             "WHERE u.userId = :userId")
     Optional<StayTourRestaurFest> findByUserId(Long userId);
+
+    @Query("SELECT a FROM StayTourRestaurFest a WHERE a.busiNum.busiNum = :busiNum")
+    Optional<StayTourRestaurFest> findByStrfId (String busiNum);
+
 
 
 }

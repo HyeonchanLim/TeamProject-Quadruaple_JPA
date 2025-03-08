@@ -2,6 +2,7 @@ package com.green.project_quadruaple.busi;
 
 import com.green.project_quadruaple.busi.model.BusiPostReq;
 import com.green.project_quadruaple.busi.model.BusiUserInfoDto;
+import com.green.project_quadruaple.busi.model.BusiUserSignIn;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.CookieUtils;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
@@ -196,7 +197,7 @@ public class BusiService {
     }
 
     @Transactional
-    public UserSignInRes signIn(UserSignInReq req, HttpServletResponse response) {
+    public UserSignInRes signIn(BusiUserSignIn req, HttpServletResponse response) {
         User user = userRepository.findByAuthenticationCode_EmailAndProviderType(req.getEmail(), SignInProviderType.LOCAL);
 
         if (user == null) {

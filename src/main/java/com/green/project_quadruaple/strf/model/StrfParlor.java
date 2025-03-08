@@ -12,6 +12,6 @@ public class StrfParlor {
     private int maxCapacity;  // 최대 수용 인원
     private int recomCapacity; // 추천 수용 인원
     private int surcharge; // 추가 요금
-    @JsonIgnore
+//    @JsonIgnore
     private Long menuId;  // 추가된 menuId 필드
 }

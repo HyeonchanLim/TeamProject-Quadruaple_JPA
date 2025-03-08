@@ -55,7 +55,14 @@ public class BookingService {
 
     private KakaoReadyDto kakaoReadyDto;
 
-
+    // 예약 확정시 알람보내기
+//    private void postConfirmBookingNotice (Booking booking, User user) {
+//
+//        StringBuilder content = new StringBuilder();
+//
+//        noticeService.postNotice(NoticeCategory.BOOKING,title,content.toString(), user, booking.getBookingId());
+//    }
+//
     public ResponseWrapper<List<BookingRes>> getBooking(Integer page) {
 
         long signedUserId = AuthenticationFacade.getSignedUserId();
@@ -101,7 +108,7 @@ public class BookingService {
     @Transactional
     public ResponseWrapper<String> postBooking(BookingPostReq req) {
         Long signedUserId = AuthenticationFacade.getSignedUserId();
-        User signedUser = userRepository.findById(signedUserId).orElse(null);
+        User signedUser = userRepository.findById(signedUserId).get();
         Long couponId = req.getCouponId();
         Integer point = req.getPoint();
         Room room = null;
@@ -182,12 +189,12 @@ public class BookingService {
         params.put("quantity", quantity); // 상품 수량
         params.put("total_amount", totalAmount); // 상품 가격
         params.put("tax_free_amount", taxFreeAmount); // 상품 비과세 금액
-//        params.put("approval_url", "http://112.222.157.157:5231/api/booking/pay-approve"); // 성공시 url
-//        params.put("cancel_url", "http://112.222.157.157:5231/api/booking/kakaoPayCancle"); // 실패시 url
-//        params.put("fail_url", "http://112.222.157.157:5231/api/booking/kakaoPayFail");
-        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
-        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
-        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
+        params.put("approval_url", "http://112.222.157.157:5231/api/booking/pay-approve"); // 성공시 url
+        params.put("cancel_url", "http://112.222.157.157:5231/api/booking/kakaoPayCancle"); // 실패시 url
+        params.put("fail_url", "http://112.222.157.157:5231/api/booking/kakaoPayFail");
+//        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
+//        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
+//        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
 
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
@@ -297,8 +304,8 @@ public class BookingService {
                     + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
                     + "check_out=" + URLEncoder.encode(bookingApproveInfoDto.getCheckOut(), StandardCharsets.UTF_8) + "&"
                     + "personnel=" + quantity;
-//            String url = "http://112.222.157.157:5231/booking/complete" + redirectParams;
-            String url = "http://localhost:8080/booking/complete" + redirectParams;
+            String url = "http://112.222.157.157:5231/booking/complete" + redirectParams;
+//            String url = "http://localhost:8080/booking/complete" + redirectParams;
             return url;
         } catch (Exception e) {
             e.printStackTrace();
