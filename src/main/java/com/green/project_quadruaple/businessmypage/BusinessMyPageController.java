@@ -25,7 +25,8 @@ public class BusinessMyPageController {
     private final BusinessMyPageService businessMyPageService;
 
     @GetMapping("booking")
-    @Operation(summary = "예약 현황")
+    @Operation(summary = "예약 현황(only STAY category)"
+              ,description = "state 상태 = 0 : 대기중, 1 : 확정, 2 : 완료, 3 : 취소")
     public ResponseEntity<?> getBusinessMyPageBooking() {
         List<BusinessMyPageBooking> result = businessMyPageService.selBusinessMyPageBooking();
 
@@ -37,8 +38,8 @@ public class BusinessMyPageController {
     }
 
     @GetMapping("booking/details")
-    @Operation(summary = "예약 현황 상세 보기"
-            , description = "bookingNum: 예약 인원/recomCapacity: 권장 인원/maxCapacity: 최대 인원/extraPersonCount: 초과 인원(예약 인원 - 권장 인원)/extraFee: 초과 인원당 금액")
+    @Operation(summary = "예약 현황 상세 보기(only STAY category)"
+              ,description = "bookingNum: 예약 인원/recomCapacity: 권장 인원/maxCapacity: 최대 인원/extraPersonCount: 초과 인원(예약 인원 - 권장 인원)/extraFee: 초과 인원당 금액")
     public ResponseEntity<?> getBusinessMyPageBookingDetails(Long bookingId) {
         BusinessMyPageBookingDetails result = businessMyPageService.selBusinessMyPageBookingDetails(bookingId);
 
