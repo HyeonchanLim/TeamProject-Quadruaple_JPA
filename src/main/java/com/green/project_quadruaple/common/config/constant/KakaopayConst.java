@@ -14,4 +14,9 @@ public class KakaopayConst {
     private final String secretKey;
     private final String affiliateCode;
     private final String url;
+    private final String approvalUrl;
+    private final String cancelUrl;
+    private final String failUrl;
+    private final String completeUrl;
+
 }
