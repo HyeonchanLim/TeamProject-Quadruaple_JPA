@@ -270,7 +270,6 @@ public class StrfService {
             }
             menuRepository.saveAll(menus);
             menuRepository.flush();
-
             // 첫 번째 메뉴의 ID를 반환
             if (!menus.isEmpty()) {
                 return new ResponseWrapper<>(ResponseCode.OK.getCode(), menus.get(0).getMenuId());
