@@ -11,10 +11,14 @@ import com.green.project_quadruaple.point.model.req.PointUseOrUnUseReq;
 import com.green.project_quadruaple.point.model.res.PointCardProductRes;
 import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
 import com.green.project_quadruaple.point.model.dto.PointCardUpdateDto;
+import com.green.project_quadruaple.point.model.res.PointHistoryListReq;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,6 +34,7 @@ import java.util.stream.Collectors;
 public class PointCardService {
     private final PointCardRepository pointCardRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final PointViewRepository pointViewRepository;
     private final AuthenticationFacade authenticationFacade;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
@@ -154,21 +159,28 @@ public class PointCardService {
     }
 
     // 보유 포인트 확인화면
-    public void checkMyRemainPoint (LocalDate startAt, LocalDate endAt, Integer category, boolean isDesc){
+    public void checkMyRemainPoint (LocalDate startAt, LocalDate endAt, Integer category, boolean isDesc, int page){
         /*
             response 내용
             로그인 유저 닉네임+보유포인트
             포인트 내역(구매, 사용, 취소) 사용처 이름, 시간, 얼마가 들었고 얼마가 남았나.
          */
         long userId = authenticationFacade.getSignedUserId();
+        User user=userRepository.findById(userId).get();
 
+        Sort sort = Sort.by("pointHistoryId");
+        sort=isDesc?sort.descending():sort.ascending();
+        Pageable pageable= PageRequest.of(page, SizeConstants.getDefault_page_size(), sort);
 
+        List<PointView> pointViews= category!=null?
+                pointViewRepository.findByUserIdAndCategoryAndCreatedAtBetween(userId, category, startAt, endAt, pageable)
+                : pointViewRepository.findByUserIdAndCreatedAtBetween(userId, startAt, endAt, pageable);
 
-        String sort=isDesc?"desc":"asc";
-
-
-        for(int i=0; i< SizeConstants.getDefault_page_size(); i++){
+        for(PointView pointView:pointViews){
 
         }
+
+        PointHistoryListReq result=new PointHistoryListReq();
+        result.setUserName(user.getName());
     }
 }
