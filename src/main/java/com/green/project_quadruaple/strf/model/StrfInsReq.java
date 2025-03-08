@@ -26,15 +26,15 @@ public class StrfInsReq {
     private String tell;
     private LocalDate startAt;
     private LocalDate endAt;
+    private String busiNum;
     @Schema(description = "오픈 체크인 시간 (HH:mm 형식)", example = "09:00")
-    @JsonFormat(pattern = "HH:mm:ss")
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime openCheckIn;
 
     @Schema(description = "클로즈 체크아웃 시간 (HH:mm 형식)", example = "18:00")
-    @JsonFormat(pattern = "HH:mm:ss")
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime closeCheckOut;
     private String detail;
-    private String busiNum;
     private int state;
 
     private List<String> restdates;

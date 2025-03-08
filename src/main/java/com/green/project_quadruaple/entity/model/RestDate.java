@@ -12,12 +12,15 @@ import org.hibernate.annotations.OnDeleteAction;
 @AllArgsConstructor
 @Builder
 public class RestDate {
-    @Id
-    @Column(nullable = false, columnDefinition = "TINYINT(4) default 0")
-    private Integer dayWeek;
+    @EmbeddedId
+    private RestDateId id;
+
+//    @Column(nullable = false, columnDefinition = "TINYINT(4) default 0", insertable = false, updatable = false)  // 중복 매핑을 방지
+//    private Integer dayWeek;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "strf_id", nullable = false)
+    @MapsId("strfId")
+    @JoinColumn(name = "strf_id", referencedColumnName = "strf_id", nullable = false)  // 외래 키의 컬럼 이름을 정확히 명시
     private StayTourRestaurFest strfId;
 }
 

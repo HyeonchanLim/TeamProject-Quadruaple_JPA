@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BusinessNumRepository extends JpaRepository<BusinessNum , String> {
-    @Query("SELECT a.busiNum FROM BusinessNum a WHERE a.busiNum = :BusiNum")
-    BusinessNum findByBusiNum(@Param("BusiNum") String BusiNum);
+    @Query("SELECT a.busiNum FROM BusinessNum a WHERE a.busiNum = :busiNum")
+    BusinessNum findByBusiNum(@Param("busiNum") String busiNum);
 
 
     @Query("SELECT bn.busiNum FROM BusinessNum bn WHERE bn.user.userId = :userId")
