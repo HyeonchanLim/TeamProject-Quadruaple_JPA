@@ -45,6 +45,9 @@ import java.util.*;
 public class BookingService {
 
     private final BookingMapper bookingMapper;
+    private final String affiliateCode;
+    private final String secretKey;
+    private final String payUrl;
     private final BookingRepository bookingRepository;
     private final MenuRepository menuRepository;
     private final RoomRepository roomRepository;
