@@ -18,7 +18,7 @@ public class BusinessMyPageBookingDetails {
     private String name;
     private String tell;
     private String email;
-    private int finalPayment;
+    private int totalPayment;
     private String couponTitle;
     private int recomCapacity;
     private int maxCapacity;

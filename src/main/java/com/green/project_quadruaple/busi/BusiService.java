@@ -194,9 +194,11 @@ public class BusiService {
             throw new CustomException(UserErrorCode.INVALID_TOKEN);
         }
     }
+
     @Transactional
     public UserSignInRes signIn(UserSignInReq req, HttpServletResponse response) {
         User user = userRepository.findByAuthenticationCode_EmailAndProviderType(req.getEmail(), SignInProviderType.LOCAL);
+
         if (user == null) {
             throw new RuntimeException("아이디를 확인해 주세요.");
         }
@@ -207,23 +209,35 @@ public class BusiService {
         if (authCode.isEmpty() || user.getVerified() == 0) {
             throw new RuntimeException("이메일 인증이 필요합니다.");
         }
+
+        // 사용자 역할 조회
         List<Role> roleEntities = roleRepository.findByUserUserId(user.getUserId());
         List<UserRole> roles = roleEntities.stream()
                 .map(role -> UserRole.getKeyByName(role.getRole().getName()))
                 .collect(Collectors.toList());
 
+        // StayTourRestaurFest에서 userId로 사업자 정보 조회
+        StayTourRestaurFest strf = strfRepository.findByUserId(user.getUserId()).orElse(null);
+
+        // JWT 토큰 생성
         JwtUser jwtUser = new JwtUser(user.getUserId(), roles);
         String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofHours(6));
         String refreshToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofDays(15));
 
+        // RefreshToken 쿠키 설정
         int maxAge = 1_296_000;
         cookieUtils.setCookie(response, "refreshToken", refreshToken, maxAge, "/api/user/access-token");
 
+        // UserSignInRes에 사업자 정보 포함
         return UserSignInRes.builder()
                 .accessToken(accessToken)
                 .userId(user.getUserId())
                 .name(user.getName())
                 .roles(roles)
+                .busiNum(strf != null ? strf.getBusiNum().getBusiNum(): null)  // 사업자 번호
+                .strfId(strf != null ? strf.getStrfId() : null)  // strf_id
+                .title(strf != null ? strf.getTitle() : null)  // title
+                .category(strf != null ? strf.getCategory().getName() : null) // category
                 .build();
     }
 
