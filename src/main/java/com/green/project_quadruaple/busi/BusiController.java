@@ -2,6 +2,7 @@ package com.green.project_quadruaple.busi;
 
 import com.green.project_quadruaple.busi.model.BusiPostReq;
 import com.green.project_quadruaple.busi.model.BusiUserInfoDto;
+import com.green.project_quadruaple.busi.model.BusiUserSignIn;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.user.model.UserSignInReq;
@@ -57,7 +58,7 @@ public class BusiController {
     //로그인
     @PostMapping("sign-in")
     @Operation(summary = "로그인")
-    public ResponseEntity<?> signInUser(@RequestBody UserSignInReq req, HttpServletResponse response) {
+    public ResponseEntity<?> signInUser(@RequestBody BusiUserSignIn req, HttpServletResponse response) {
         UserSignInRes res = busiService.signIn(req, response);
         if (res == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
