@@ -2,11 +2,11 @@ package com.green.project_quadruaple.booking.repository;
 
 import com.green.project_quadruaple.booking.model.dto.BookingRes;
 import com.green.project_quadruaple.entity.model.Booking;
+import com.green.project_quadruaple.entity.model.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -60,4 +60,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     where b.bookingId = :bookingId
     """)
     Booking findBookingAndChatRoomById(Long bookingId);
+
+    @Query("""
+        select bn.user from Booking b
+        join b.menu m
+        join m.stayTourRestaurFest strf
+        join strf.busiNum bn
+        where b.bookingId = :bookingId
+        """)
+    User findBusiUserIdByBookingId(Long bookingId);
 }
