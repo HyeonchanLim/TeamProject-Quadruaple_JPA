@@ -160,7 +160,8 @@ public class PointCardService {
     }
 
     // 보유 포인트 확인화면
-    public void checkMyRemainPoint (LocalDate startAt, LocalDate endAt, Integer category, boolean isDesc, int page){
+    public ResponseEntity<ResponseWrapper<PointHistoryListReq>> checkMyRemainPoint
+    (LocalDate startAt, LocalDate endAt, Integer category, boolean isDesc, int page){
         /*
             response 내용
             로그인 유저 닉네임+보유포인트
@@ -196,5 +197,6 @@ public class PointCardService {
         result.setUserName(user.getName());
         result.setRemainPoint(pointHistoryRepository.findLastRemainPointByUserId(userId));
         result.setPointList(historys);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
     }
 }
