@@ -10,7 +10,7 @@ import java.util.List;
 public interface PointHistoryRepository extends JpaRepository<PointHistory, Long> {
 
     @Query("select ph.remainPoint from PointHistory ph where ph.user.userId=:userId order by ph.pointHistoryId desc limit 1")
-    Integer findRemainPointByUserId(Long userId);
+    Integer findLastRemainPointByUserId(Long userId);
 
     @Query("""
         select p.remainPoint from PointHistory p

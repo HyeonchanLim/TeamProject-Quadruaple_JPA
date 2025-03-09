@@ -7,6 +7,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.SizeConstants;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
+import com.green.project_quadruaple.point.model.dto.PointHistoryListDto;
 import com.green.project_quadruaple.point.model.req.PointUseOrUnUseReq;
 import com.green.project_quadruaple.point.model.res.PointCardProductRes;
 import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
@@ -72,7 +73,7 @@ public class PointCardService {
         Long userId = authenticationFacade.getSignedUserId();
         Integer remainPoints=null;
         if(userId!=null){
-            remainPoints=pointHistoryRepository.findRemainPointByUserId(userId);
+            remainPoints=pointHistoryRepository.findLastRemainPointByUserId(userId);
         }
         return new PointCardProductRes(remainPoints,pointCardRepository.findAll());
     }
@@ -143,7 +144,7 @@ public class PointCardService {
     // point 사용 혹은 사용취소
     public ResponseEntity<ResponseWrapper<Integer>> useOrUnUsePoint(PointUseOrUnUseReq p){
         long userId = authenticationFacade.getSignedUserId();
-        int remainPoint =pointHistoryRepository.findRemainPointByUserId(userId);
+        int remainPoint =pointHistoryRepository.findLastRemainPointByUserId(userId);
         remainPoint = p.getCategory()==0? remainPoint+p.getAmount():remainPoint-p.getAmount();
         if(remainPoint<0){ return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ResponseWrapper<>(ResponseCode.NOT_Acceptable.getCode(), null)); }
@@ -176,11 +177,24 @@ public class PointCardService {
                 pointViewRepository.findByUserIdAndCategoryAndCreatedAtBetween(userId, category, startAt, endAt, pageable)
                 : pointViewRepository.findByUserIdAndCreatedAtBetween(userId, startAt, endAt, pageable);
 
-        for(PointView pointView:pointViews){
+        List<PointHistoryListDto> historys=new ArrayList<>(pointViews.size());
+        for(PointView h:pointViews){
+            String usedAt = switch (h.getCategory()){
+                case 0: yield h.getTitle();
+                case 1: yield "포인트 충전";
+                case 2: yield "취소(환불)";
+                default: yield "";
+            };
 
+            PointHistoryListDto dto=new PointHistoryListDto(
+                    h.getPointHistoryId(), usedAt , h.getCategory(), h.getCreatedAt(), h.getAmount(), h.getRemainPoint()
+            );
+            historys.add(dto);
         }
 
         PointHistoryListReq result=new PointHistoryListReq();
         result.setUserName(user.getName());
+        result.setRemainPoint(pointHistoryRepository.findLastRemainPointByUserId(userId));
+        result.setPointList(historys);
     }
 }
