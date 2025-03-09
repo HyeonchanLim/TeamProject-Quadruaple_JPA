@@ -23,17 +23,17 @@ public class BookingPostReq {
 
     @NotNull
     @JsonProperty("strf_id")
-    @Schema(title = "상품 ID", type= "long", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "상품 ID", type= "long", example = "61", requiredMode = Schema.RequiredMode.REQUIRED)
     private long strfId;
 
     @NotBlank
     @JsonProperty("check_in")
-    @Schema(title = "체크인 시각", type= "string", example = "2025-02-11 14:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "체크인 시각", type= "string", example = "2025-05-11 14:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     private String checkIn;
 
     @NotBlank
     @JsonProperty("check_out")
-    @Schema(title = "체크아웃 시각", type= "string", example = "2025-02-15 21:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "체크아웃 시각", type= "string", example = "2025-05-15 21:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     private String checkOut;
 
     @NotBlank
@@ -49,17 +49,17 @@ public class BookingPostReq {
 
     @NotNull
     @JsonProperty("actual_paid")
-    @Schema(title = "쿠폰 적용한 최종 결제 금액", type= "int", example = "60000", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "쿠폰 적용한 최종 결제 금액", type= "int", example = "52000", requiredMode = Schema.RequiredMode.REQUIRED)
     private int actualPaid;
 
     @NotNull
     @JsonProperty("menu_id")
-    @Schema(title = "메뉴 PK", type= "long", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "메뉴 PK", type= "long", example = "22", requiredMode = Schema.RequiredMode.REQUIRED)
     private Long menuId;
 
     @NotNull
     @JsonProperty("room_id")
-    @Schema(title = "호실 PK", type= "long", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "호실 PK", type= "long", example = "201", requiredMode = Schema.RequiredMode.REQUIRED)
     private Long roomId;
 
     @JsonIgnore

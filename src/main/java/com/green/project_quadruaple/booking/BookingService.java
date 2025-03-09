@@ -10,10 +10,13 @@ import com.green.project_quadruaple.common.config.constant.KakaopayConst;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.coupon.repository.CouponRepository;
+import com.green.project_quadruaple.coupon.repository.UsedCouponRepository;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.point.PointHistoryRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
+import io.netty.handler.codec.Headers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -47,6 +50,8 @@ public class BookingService {
     private final NoticeService noticeService;
     private final PointHistoryRepository pointHistoryRepository;
     private final KakaopayConst kakaopayConst;
+    private final CouponRepository couponRepository;
+    private final UsedCouponRepository usedCouponRepository;
 
     private KakaoReadyDto kakaoReadyDto;
 
@@ -106,6 +111,7 @@ public class BookingService {
         User signedUser = userRepository.findById(signedUserId).get();
         Long couponId = req.getCouponId();
         Integer point = req.getPoint();
+        int actualPaid = req.getActualPaid();
         Room room = null;
         Menu menu = null;
         try { // room, menu null 체크, 값 바인딩
@@ -132,15 +138,15 @@ public class BookingService {
             if(couponDto == null || couponDto.getUsedCouponId() != null) { // 쿠폰 미소지시, 사용시 에러
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
             }
-            discount = price / 100 * couponDto.getDiscountRate();
+            discount = discountAmount(price, couponDto.getDiscountRate());
             req.setReceiveId(couponDto.getReceiveId());
         }
 
         Integer remainPoint = null;
         if(point != null) { // 포인트가 담겨있을 경우
-            List<Integer> remainPoints = pointHistoryRepository.findRemainPointByUserId(signedUserId, PageRequest.of(0, 1));
+            List<PointHistory> remainPoints = pointHistoryRepository.findPointHistoriesByUserId(signedUserId, PageRequest.of(0, 1));
             if(remainPoints != null && !remainPoints.isEmpty()) {
-                remainPoint = remainPoints.get(0);
+                remainPoint = remainPoints.get(0).getRemainPoint();
             }
             if(remainPoint == null || point > remainPoint) {
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "포인트 금액이 부족합니다.");
@@ -151,7 +157,7 @@ public class BookingService {
 
         int resultPrice = price - discount;
 
-        if(resultPrice != req.getActualPaid()) {
+        if(resultPrice != actualPaid) {
             return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "금액이 맞지 않습니다.");
         }
 
@@ -165,17 +171,15 @@ public class BookingService {
 
 
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", kakaopayConst.getSecretKey());
-        headers.add("Content-Type", "application/json");
+        HttpHeaders headers = setHeaders();
 
         HashMap<String, String> params = new HashMap<>();
 
         LocalDateTime localDateTime = LocalDateTime.now();
         String orderNo = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + (int)(Math.random()*1000);
         String quantity = "1";
-        String totalAmount = String.valueOf(req.getActualPaid());
-        String taxFreeAmount = String.valueOf((req.getActualPaid()/10));
+        String totalAmount = String.valueOf(actualPaid);
+        String taxFreeAmount = getTaxFreeAmount(actualPaid);
 
         params.put("cid", kakaopayConst.getAffiliateCode()); // 가맹점 코드 - 테스트용
         params.put("partner_order_id", orderNo); // 주문 번호
@@ -187,9 +191,6 @@ public class BookingService {
         params.put("approval_url", kakaopayConst.getApprovalUrl()); // 성공시 url
         params.put("cancel_url", kakaopayConst.getCancelUrl()); // 실패시 url
         params.put("fail_url", kakaopayConst.getFailUrl());
-//        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
-//        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
-//        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
 
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
@@ -205,7 +206,7 @@ public class BookingService {
                         .usedPoint(point)
                         .checkIn(checkInDate)
                         .checkOut(checkOutDate)
-                        .totalPayment(req.getActualPaid())
+                        .totalPayment(actualPaid)
                         .tid(kakaoReadyDto.getTid())
                         .state(0)
                         .build();
@@ -244,9 +245,7 @@ public class BookingService {
         String tid = kakaoReadyDto.getTid();
 
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", kakaopayConst.getSecretKey());
-        headers.add("Content-Type", "application/json");
+        HttpHeaders headers = setHeaders();
 
         HashMap<String, String> params = new HashMap<>();
 
@@ -299,9 +298,70 @@ public class BookingService {
                     + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
                     + "check_out=" + URLEncoder.encode(bookingApproveInfoDto.getCheckOut(), StandardCharsets.UTF_8) + "&"
                     + "personnel=" + quantity;
-            String url = kakaopayConst.getCompleteUrl() + redirectParams;
-//            String url = "http://localhost:8080/booking/complete" + redirectParams;
-            return url;
+            return kakaopayConst.getCompleteUrl() + redirectParams;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
+    }
+
+    /*
+    * booking_id 받음
+    * 로그인 유저가 해당 예약의 사업자인지 확인
+    * */
+    @Transactional
+    public ResponseWrapper<String> refundBooking(BookingRefundReq req) {
+
+        long signedUserId = AuthenticationFacade.getSignedUserId();
+        User signedUser = userRepository.findById(signedUserId).orElse(null);
+        Long bookingId = req.getBookingId();
+        Booking booking = bookingRepository.findById(bookingId).get();
+        User busiUserId = bookingRepository.findBusiUserIdByBookingId(bookingId);
+        String tid = booking.getTid();
+        if(busiUserId.getUserId() != signedUserId) {
+            return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), "해당 예약의 사업자가 아닙니다.");
+        }
+
+        Integer usedPoint = booking.getUsedPoint();
+        try {
+            if(usedPoint != null && usedPoint > 0) { // 사용한 포인트가 있다면
+                List<PointHistory> pointHistories = pointHistoryRepository.findPointHistoriesByUserId(booking.getUser().getUserId(), PageRequest.of(0, 1));
+                if (pointHistories == null || pointHistories.isEmpty()) {
+                    throw new RuntimeException();
+                }
+                PointHistory pointHistory = pointHistories.get(0);
+                PointHistory refundPointHistory = PointHistory.builder()
+                        .user(busiUserId)
+                        .category(2)
+                        .relatedId(pointHistory.getPointHistoryId())
+                        .tid(tid)
+                        .amount(usedPoint)
+                        .remainPoint(pointHistory.getRemainPoint() + usedPoint)
+                        .build();
+                pointHistoryRepository.save(refundPointHistory); // 포인트 되돌리기
+            }
+
+            List<UsedCoupon> usedCouponList = usedCouponRepository.findByBookingId(bookingId);
+            usedCouponRepository.deleteAll(usedCouponList); // 사용 쿠폰 되돌리기
+
+            booking.setState(3); // 예약 상태 변경
+
+            String refundUrl = "/online/v1/payment/cancel";
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = setHeaders();
+
+            HashMap<String, Object> params = new HashMap<>();
+
+            params.put("cid", kakaopayConst.getAffiliateCode());
+            params.put("tid", tid);
+            params.put("cancel_amount", booking.getTotalPayment());
+            params.put("cancel_tax_free_amount", getTaxFreeAmount(booking.getTotalPayment()));
+
+            HttpEntity<HashMap<String, Object>> body = new HttpEntity<>(params, headers);
+            KakaoRefundDto refundDto = restTemplate.postForObject(kakaopayConst.getUrl() + refundUrl, body, KakaoRefundDto.class);
+            log.info("refundDto = {}", refundDto);
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), "환불 완료");
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();
@@ -312,5 +372,20 @@ public class BookingService {
     @Scheduled(cron = "0 0 6 * * ?")
     public void updateState() {
         bookingMapper.updateAllStateAfterCheckOut(LocalDateTime.now());
+    }
+
+    private HttpHeaders setHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", kakaopayConst.getSecretKey());
+        headers.add("Content-Type", "application/json");
+        return headers;
+    }
+
+    private String getTaxFreeAmount(int actualPaid) {
+        return String.valueOf((actualPaid/10));
+    }
+
+    private int discountAmount(int menuAmount, int discountPer) {
+        return (menuAmount / 100) * discountPer;
     }
 }
