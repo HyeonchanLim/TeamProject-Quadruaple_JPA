@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.booking;
 
 import com.green.project_quadruaple.booking.model.BookingPostReq;
+import com.green.project_quadruaple.booking.model.BookingRefundReq;
 import com.green.project_quadruaple.booking.model.dto.BookingRes;
 import com.green.project_quadruaple.booking.repository.BookingMapper;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
@@ -38,6 +39,12 @@ public class BookingController {
         return bookingService.postBooking(req);
     }
 
+    @PatchMapping
+    @ResponseBody
+    @Operation(summary = "예약 환불")
+    public ResponseWrapper<String> refundBooking(@RequestBody BookingRefundReq req) {
+        return bookingService.refundBooking(req);
+    }
 //    @PatchMapping
 //    @Operation(summary = "예약 취소", description = "예약 취소를 누르면 사업자에게 예약 취소 접수됨.")
 //    public ResponseWrapper<String> cancelBooking(@RequestBody ) {
