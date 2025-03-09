@@ -1,5 +1,7 @@
 package com.green.project_quadruaple.point;
 
+import com.green.project_quadruaple.booking.model.dto.KakaoReadyDto;
+import com.green.project_quadruaple.common.config.constant.KakaopayConst;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
@@ -8,6 +10,7 @@ import com.green.project_quadruaple.common.model.SizeConstants;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
 import com.green.project_quadruaple.point.model.dto.PointHistoryListDto;
+import com.green.project_quadruaple.point.model.payModel.req.PointBuyReadyReq;
 import com.green.project_quadruaple.point.model.req.PointUseOrUnUseReq;
 import com.green.project_quadruaple.point.model.res.PointCardProductRes;
 import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
@@ -20,13 +23,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,6 +50,9 @@ public class PointCardService {
     private final AuthenticationFacade authenticationFacade;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+
+    private final KakaopayConst kakaopayConst;
+    private KakaoReadyDto kakaoReadyDto;
 
     //관리자 포인트 상품 추가
     public int intPointCard(PointCardPostDto dto) {
@@ -198,5 +212,74 @@ public class PointCardService {
         result.setRemainPoint(pointHistoryRepository.findLastRemainPointByUserId(userId));
         result.setPointList(historys);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
+    }
+
+    // 포인트 카드 구매 (결제 준비->요청->승인(approve)
+    public void ReadyToBuyPointCard(PointBuyReadyReq p){
+        long userId = authenticationFacade.getSignedUserId();
+        User user=userRepository.findById(userId).get();
+
+        PointCard pointCard=pointCardRepository.findById(p.getPointCardId()).get();
+        int charge=pointCard.getFinalPayment();
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", kakaopayConst.getSecretKey());
+        headers.add("Content-Type", "application/json");
+
+        HashMap<String, String> parameters = new HashMap<>();
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+        String orderNo = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + (int)(Math.random()*1000);
+        String quantity = "1";
+        String totalAmount = String.valueOf(charge);
+        String taxFreeAmount = String.valueOf((charge/10));;
+
+        parameters.put("cid", kakaopayConst.getAffiliateCode()); // 가맹점 코드 - 테스트용
+        parameters.put("partner_order_id", orderNo); // 주문 번호
+        parameters.put("partner_user_id", String.valueOf(userId)); // 회원 아이디
+        parameters.put("item_name", "테스트 상품1"); // 상품 명
+        parameters.put("quantity", quantity); // 상품 수량
+        parameters.put("total_amount", totalAmount); // 상품 가격
+        parameters.put("tax_free_amount", taxFreeAmount); // 상품 비과세 금액
+        parameters.put("approval_url", kakaopayConst.getApprovalUrl()); // 성공시 url
+        parameters.put("cancel_url", kakaopayConst.getCancelUrl()); // 실패시 url
+        parameters.put("fail_url", kakaopayConst.getFailUrl());
+
+        HttpEntity<HashMap<String, String>> body = new HttpEntity<>(parameters, headers);
+
+//        try {
+//            kakaoReadyDto = restTemplate.postForObject(new URI(kakaopayConst.getUrl() + "/online/v1/payment/ready"), body, KakaoReadyDto.class);
+//            log.info("kakaoDto = {}", kakaoReadyDto);
+//            if(kakaoReadyDto != null) {
+//                Booking booking = Booking.builder()
+//                        .menu(menu)
+//                        .room(room)
+//                        .user(signedUser)
+//                        .num(req.getNum())
+//                        .usedPoint(point)
+//                        .checkIn(checkInDate)
+//                        .checkOut(checkOutDate)
+//                        .totalPayment(actualPaid)
+//                        .tid(kakaoReadyDto.getTid())
+//                        .state(0)
+//                        .build();
+//                kakaoReadyDto.setPartnerOrderId(orderNo);
+//                kakaoReadyDto.setPartnerUserId(String.valueOf(userId));
+//                kakaoReadyDto.setBookingPostReq(req);
+//                kakaoReadyDto.setBooking(booking);
+//                kakaoReadyDto.setRemainPoint(remainPoint);
+//
+//                return new ResponseWrapper<>(ResponseCode.OK.getCode(), kakaoReadyDto.getNextRedirectPcUrl());
+//            }
+
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+    }
+
+    public void approveBuy(){
+
     }
 }
