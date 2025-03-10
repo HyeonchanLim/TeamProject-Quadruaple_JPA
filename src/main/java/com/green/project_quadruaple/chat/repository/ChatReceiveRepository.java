@@ -16,6 +16,12 @@ public interface ChatReceiveRepository extends JpaRepository<ChatReceive, Long> 
         """)
     boolean findByUserId(Long signedUserId);
 
+    @Query("""
+        select cr from ChatReceive cr
+        where cr.listenerId.cjId = :listenerId
+        """)
+    List<ChatReceive> findByListenerId(Long listenerId);
+
     @Modifying
     @Query("""
         delete from ChatReceive cr

@@ -30,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -129,18 +130,19 @@ public class BookingService {
             return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
         }
 
-        int discount = 0;
         int price = menu.getPrice();
-
+        int resultPrice = price;
         if(couponId != null) { // 쿠폰이 요청에 담겨 있을 경우
 
             CouponDto couponDto = bookingMapper.selExistUserCoupon(signedUserId, couponId);
             if(couponDto == null || couponDto.getUsedCouponId() != null) { // 쿠폰 미소지시, 사용시 에러
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
             }
-            discount = discountAmount(price, couponDto.getDiscountRate());
             req.setReceiveId(couponDto.getReceiveId());
+            resultPrice -= discountAmount(price, couponDto.getDiscountRate());
         }
+
+         // 쿠폰 할인 적용
 
         Integer remainPoint = null;
         if(point != null) { // 포인트가 담겨있을 경우
@@ -151,11 +153,14 @@ public class BookingService {
             if(remainPoint == null || point > remainPoint) {
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "포인트 금액이 부족합니다.");
             }
+
+            if(point > resultPrice) {
+                return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "포인트 금액이 잘못되었습니다.");
+            }
             remainPoint -= point;
-            discount += point;
+            resultPrice = resultPrice - point; // 포인트 할인 적용
         }
 
-        int resultPrice = price - discount;
 
         if(resultPrice != actualPaid) {
             return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "금액이 맞지 않습니다.");
@@ -307,19 +312,23 @@ public class BookingService {
 
     /*
     * booking_id 받음
-    * 로그인 유저가 해당 예약의 사업자인지 확인
+    * 로그인 유저가 해당 예약의 사용자인지 확인
     * */
     @Transactional
     public ResponseWrapper<String> refundBooking(BookingRefundReq req) {
 
         long signedUserId = AuthenticationFacade.getSignedUserId();
-        User signedUser = userRepository.findById(signedUserId).orElse(null);
         Long bookingId = req.getBookingId();
         Booking booking = bookingRepository.findById(bookingId).get();
-        User busiUserId = bookingRepository.findBusiUserIdByBookingId(bookingId);
         String tid = booking.getTid();
-        if(busiUserId.getUserId() != signedUserId) {
-            return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), "해당 예약의 사업자가 아닙니다.");
+        if(booking.getUser().getUserId() != signedUserId) {
+            return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), "해당 예약의 사용자가 아닙니다.");
+        }
+
+        LocalDate now = LocalDate.now();
+        LocalDate checkIn = booking.getCheckIn().toLocalDate();
+        if(now.isAfter(checkIn) || now.equals(checkIn)) {
+            return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "환불 가능 기간이 아닙니다.");
         }
 
         Integer usedPoint = booking.getUsedPoint();
@@ -330,6 +339,7 @@ public class BookingService {
                     throw new RuntimeException();
                 }
                 PointHistory pointHistory = pointHistories.get(0);
+                User busiUserId = bookingRepository.findBusiUserIdByBookingId(bookingId);
                 PointHistory refundPointHistory = PointHistory.builder()
                         .user(busiUserId)
                         .category(2)
@@ -346,6 +356,14 @@ public class BookingService {
 
             booking.setState(3); // 예약 상태 변경
 
+            int refundAmount = booking.getTotalPayment();
+            if(now.isAfter(checkIn.minusDays(3))) {
+                refundAmount = discountAmount(refundAmount, RefundRate.TWO_DAYS_AGO.getPercent()); // 50 퍼 환불
+            }
+            if(now.isAfter(checkIn.minusDays(7))) {
+                refundAmount = discountAmount(refundAmount, RefundRate.SIX_DAYS_AGO.getPercent()); // 70 퍼 환불
+            }
+
             String refundUrl = "/online/v1/payment/cancel";
 
             RestTemplate restTemplate = new RestTemplate();
@@ -355,10 +373,11 @@ public class BookingService {
 
             params.put("cid", kakaopayConst.getAffiliateCode());
             params.put("tid", tid);
-            params.put("cancel_amount", booking.getTotalPayment());
+            params.put("cancel_amount", refundAmount);
             params.put("cancel_tax_free_amount", getTaxFreeAmount(booking.getTotalPayment()));
 
             HttpEntity<HashMap<String, Object>> body = new HttpEntity<>(params, headers);
+
             KakaoRefundDto refundDto = restTemplate.postForObject(kakaopayConst.getUrl() + refundUrl, body, KakaoRefundDto.class);
             log.info("refundDto = {}", refundDto);
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), "환불 완료");
