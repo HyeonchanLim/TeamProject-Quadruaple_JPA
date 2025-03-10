@@ -261,7 +261,7 @@ public class StrfService {
                                 .build();
                         menus.add(newMenu);
                     }
-                    myFileUtils.transferTo(pic, filePath);
+                    myFileUtils.transferToUser(pic, filePath);
                 } catch (IOException e) {
                     e.printStackTrace();
                     myFileUtils.deleteFolder(middlePathMenu, true);
