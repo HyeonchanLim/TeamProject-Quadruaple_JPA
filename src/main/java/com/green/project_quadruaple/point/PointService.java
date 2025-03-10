@@ -1,6 +1,8 @@
 package com.green.project_quadruaple.point;
 
-import com.green.project_quadruaple.booking.model.dto.KakaoReadyDto;
+import com.green.project_quadruaple.booking.model.BookingPostReq;
+import com.green.project_quadruaple.booking.model.dto.KakaoApproveDto;
+import com.green.project_quadruaple.point.model.payModel.dto.KakaoReadyDto;
 import com.green.project_quadruaple.common.config.constant.KakaopayConst;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
@@ -11,7 +13,7 @@ import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
 import com.green.project_quadruaple.point.model.dto.PointHistoryListDto;
 import com.green.project_quadruaple.point.model.payModel.req.PointBuyReadyReq;
-import com.green.project_quadruaple.point.model.req.PointUseOrUnUseReq;
+import com.green.project_quadruaple.point.model.req.PointHistoryPostReq;
 import com.green.project_quadruaple.point.model.res.PointCardProductRes;
 import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
 import com.green.project_quadruaple.point.model.dto.PointCardUpdateDto;
@@ -31,19 +33,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PointCardService {
+public class PointService {
     private final PointCardRepository pointCardRepository;
     private final PointHistoryRepository pointHistoryRepository;
     private final PointViewRepository pointViewRepository;
@@ -87,7 +91,7 @@ public class PointCardService {
         Long userId = authenticationFacade.getSignedUserId();
         Integer remainPoints=null;
         if(userId!=null){
-            remainPoints=pointHistoryRepository.findLastRemainPointByUserId(userId);
+            remainPoints=pointViewRepository.findLastRemainPointByUserId(userId);
         }
         return new PointCardProductRes(remainPoints,pointCardRepository.findAll());
     }
@@ -156,10 +160,10 @@ public class PointCardService {
     }
 
     // point 사용 혹은 사용취소
-    public ResponseEntity<ResponseWrapper<Integer>> useOrUnUsePoint(PointUseOrUnUseReq p){
+    public ResponseEntity<ResponseWrapper<Integer>> useOrUnUsePoint(PointHistoryPostReq p){
         long userId = authenticationFacade.getSignedUserId();
-        int remainPoint =pointHistoryRepository.findLastRemainPointByUserId(userId);
-        remainPoint = p.getCategory()==0? remainPoint+p.getAmount():remainPoint-p.getAmount();
+        int remainPoint =pointViewRepository.findLastRemainPointByUserId(userId);
+        remainPoint = p.getCategory()==0? remainPoint-p.getAmount():remainPoint+p.getAmount();
         if(remainPoint<0){ return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ResponseWrapper<>(ResponseCode.NOT_Acceptable.getCode(), null)); }
         PointHistory pointHistory = PointHistory.builder()
@@ -184,13 +188,16 @@ public class PointCardService {
         long userId = authenticationFacade.getSignedUserId();
         User user=userRepository.findById(userId).get();
 
+        LocalDateTime durationStart=startAt.atStartOfDay();
+        LocalDateTime durationEnd=endAt.atTime(LocalTime.MAX);
+
         Sort sort = Sort.by("pointHistoryId");
         sort=isDesc?sort.descending():sort.ascending();
         Pageable pageable= PageRequest.of(page, SizeConstants.getDefault_page_size(), sort);
 
         List<PointView> pointViews= category!=null?
-                pointViewRepository.findByUserIdAndCategoryAndCreatedAtBetween(userId, category, startAt, endAt, pageable)
-                : pointViewRepository.findByUserIdAndCreatedAtBetween(userId, startAt, endAt, pageable);
+                pointViewRepository.findByUserIdAndCategoryAndCreatedAtBetween(userId, category, durationStart, durationEnd, pageable)
+                : pointViewRepository.findByUserIdAndCreatedAtBetween(userId, durationStart, durationEnd, pageable);
 
         List<PointHistoryListDto> historys=new ArrayList<>(pointViews.size());
         for(PointView h:pointViews){
@@ -209,13 +216,13 @@ public class PointCardService {
 
         PointHistoryListReq result=new PointHistoryListReq();
         result.setUserName(user.getName());
-        result.setRemainPoint(pointHistoryRepository.findLastRemainPointByUserId(userId));
+        result.setRemainPoint(pointViewRepository.findLastRemainPointByUserId(userId));
         result.setPointList(historys);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
     }
 
     // 포인트 카드 구매 (결제 준비->요청->승인(approve)
-    public void ReadyToBuyPointCard(PointBuyReadyReq p){
+    public ResponseWrapper<String> ReadyToBuyPointCard(PointBuyReadyReq p){
         long userId = authenticationFacade.getSignedUserId();
         User user=userRepository.findById(userId).get();
 
@@ -231,15 +238,14 @@ public class PointCardService {
 
         LocalDateTime localDateTime = LocalDateTime.now();
         String orderNo = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + (int)(Math.random()*1000);
-        String quantity = "1";
         String totalAmount = String.valueOf(charge);
         String taxFreeAmount = String.valueOf((charge/10));;
 
         parameters.put("cid", kakaopayConst.getAffiliateCode()); // 가맹점 코드 - 테스트용
         parameters.put("partner_order_id", orderNo); // 주문 번호
         parameters.put("partner_user_id", String.valueOf(userId)); // 회원 아이디
-        parameters.put("item_name", "테스트 상품1"); // 상품 명
-        parameters.put("quantity", quantity); // 상품 수량
+        parameters.put("item_name", pointCard.getAvailable()+" point"); // 상품 명
+        parameters.put("quantity", "1"); // 상품 수량
         parameters.put("total_amount", totalAmount); // 상품 가격
         parameters.put("tax_free_amount", taxFreeAmount); // 상품 비과세 금액
         parameters.put("approval_url", kakaopayConst.getApprovalUrl()); // 성공시 url
@@ -248,38 +254,79 @@ public class PointCardService {
 
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(parameters, headers);
 
-//        try {
-//            kakaoReadyDto = restTemplate.postForObject(new URI(kakaopayConst.getUrl() + "/online/v1/payment/ready"), body, KakaoReadyDto.class);
-//            log.info("kakaoDto = {}", kakaoReadyDto);
-//            if(kakaoReadyDto != null) {
-//                Booking booking = Booking.builder()
-//                        .menu(menu)
-//                        .room(room)
-//                        .user(signedUser)
-//                        .num(req.getNum())
-//                        .usedPoint(point)
-//                        .checkIn(checkInDate)
-//                        .checkOut(checkOutDate)
-//                        .totalPayment(actualPaid)
-//                        .tid(kakaoReadyDto.getTid())
-//                        .state(0)
-//                        .build();
-//                kakaoReadyDto.setPartnerOrderId(orderNo);
-//                kakaoReadyDto.setPartnerUserId(String.valueOf(userId));
-//                kakaoReadyDto.setBookingPostReq(req);
-//                kakaoReadyDto.setBooking(booking);
-//                kakaoReadyDto.setRemainPoint(remainPoint);
-//
-//                return new ResponseWrapper<>(ResponseCode.OK.getCode(), kakaoReadyDto.getNextRedirectPcUrl());
-//            }
+        try {
+            kakaoReadyDto = restTemplate.postForObject(new URI(kakaopayConst.getUrl() + "/online/v1/payment/ready"), body, KakaoReadyDto.class);
+            log.info("kakaoDto = {}", kakaoReadyDto);
+            if(kakaoReadyDto != null) {
+                int remainPoint=pointViewRepository.findLastRemainPointByUserId(userId);
+                int amount=p.getAmount();
+                PointHistoryPostReq req=new PointHistoryPostReq(1,amount,p.getPointCardId());
+                PointHistory pointHistory=PointHistory.builder()
+                        .tid(p.getTid())
+                        .remainPoint(remainPoint+amount)
+                        .amount(amount)
+                        .user(user)
+                        .relatedId(p.getPointCardId())
+                        .category(1)
+                        .build();
+                kakaoReadyDto.setPartnerOrderId(orderNo);
+                kakaoReadyDto.setPartnerUserId(String.valueOf(userId));
+                kakaoReadyDto.setReq(req);
+                kakaoReadyDto.setPointHistory(pointHistory);
+                kakaoReadyDto.setRemainPoint(remainPoint);
 
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+                return new ResponseWrapper<>(ResponseCode.OK.getCode(), kakaoReadyDto.getNextRedirectPcUrl());
+            }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), null);
     }
 
-    public void approveBuy(){
+    public String approveBuy(String pgToken){
+        String userId=kakaoReadyDto.getPartnerUserId();
+        User user=userRepository.findById(Long.parseLong(userId)).get();
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", kakaopayConst.getSecretKey());
+        headers.add("Content-Type", "application/json");
+
+        //카카오 요청
+        HashMap<String, String> parameters = new HashMap<>();
+        parameters.put("cid", kakaopayConst.getAffiliateCode()); // 가맹점 코드 - 테스트용
+        parameters.put("tid", kakaoReadyDto.getTid()); // 결제 고유 번호, 준비단계 응답에서 가져옴
+        parameters.put("partner_order_id", kakaoReadyDto.getPartnerOrderId()); // 주문 번호
+        parameters.put("partner_user_id", userId); // 회원 아이디
+        parameters.put("pg_token", pgToken); // 준비 단계에서 리다이렉트떄 받은 param 값
+
+        HttpEntity<HashMap<String, String>> body = new HttpEntity<>(parameters, headers);
+
+        try {
+            PointHistory pointHistory=kakaoReadyDto.getPointHistory();
+            pointHistoryRepository.saveAndFlush(pointHistory);
+            KakaoApproveDto approveDto = restTemplate.postForObject(new URI(kakaopayConst.getUrl() + "/online/v1/payment/approve"), body, KakaoApproveDto.class);
+            log.info("approveDto = {}", approveDto);
+            if(approveDto == null) {
+                throw new RuntimeException();
+            }
+
+            StringBuilder redirectParams=new StringBuilder("?user_name=").append(user.getName()).append("&")
+                    .append("remain_point=").append(pointHistory.getRemainPoint());
+
+            return kakaopayConst.getCompleteUrl() + redirectParams.toString();
+
+//            String redirectParams = "?user_name=" + URLEncoder.encode(user.getName(), StandardCharsets.UTF_8) + "&"
+//                    + "title=" + URLEncoder.encode(bookingApproveInfoDto.getTitle(), StandardCharsets.UTF_8) + "&"
+//                    + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
+//                    + "check_out=" + URLEncoder.encode(bookingApproveInfoDto.getCheckOut(), StandardCharsets.UTF_8) + "&"
+//                    + "personnel=" + quantity;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
 
     }
 }
