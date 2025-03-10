@@ -4,7 +4,7 @@ import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.CookieUtils;
 import com.green.project_quadruaple.common.config.jwt.TokenProvider;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
-import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.user.mail.MailService;
 import com.green.project_quadruaple.user.model.DuplicateEmailResult;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +18,7 @@ public class UserServiceParentTest {
     @Mock protected UserMapper userMapper;
     @Mock protected PasswordEncoder passwordEncoder;
     @Mock protected MyFileUtils myFileUtils;
-    @Mock protected DuplicateEmailResult duplicateEmailResult;
+    @Mock protected MailService mailService;
     @Mock protected TokenProvider tokenProvider;
     @Mock protected CookieUtils cookieUtils;
     @Mock protected AuthenticationFacade authenticationFacade;
@@ -29,4 +29,5 @@ public class UserServiceParentTest {
 
     protected final String FROM_ADDRESS = "quadrupleart@gmail.com";
     protected final long SIGNED_USER_ID = 113L;
+    protected final String EMAIL = "test@gmail.com";
 }
