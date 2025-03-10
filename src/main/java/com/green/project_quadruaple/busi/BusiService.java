@@ -102,6 +102,8 @@ public class BusiService {
 
             String email = authCode.getEmail();
 
+            BusinessNum businessNum = new BusinessNum();
+
             User user = new User();
             user.setAuthenticationCode(authCode);
             user.setName(p.getName());
@@ -112,7 +114,12 @@ public class BusiService {
             user.setProviderType(SignInProviderType.LOCAL);
             user.setVerified(1);
 
+            businessNum.setBusiNum(p.getBusiNum());
+            businessNum.setUser(user);
+
             userRepository.save(user);
+
+            busiRepository.save(businessNum);
 
             if (user != null) {
                 long userId = user.getUserId();
