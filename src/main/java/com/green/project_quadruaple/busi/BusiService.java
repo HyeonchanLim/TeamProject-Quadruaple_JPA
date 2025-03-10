@@ -43,6 +43,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -220,9 +221,23 @@ public class BusiService {
 
         // 사용자 역할 조회
         List<Role> roleEntities = roleRepository.findByUserUserId(user.getUserId());
+
+        // BUSI 역할이 없으면 예외 발생
+        boolean hasBusiRole = roleEntities.stream()
+                .anyMatch(role -> role.getRole().getName().equals("사업자"));
+
+        if (!hasBusiRole) {
+            throw new RuntimeException("BUSI 역할을 가진 사용자만 로그인할 수 있습니다.");
+        }
+
+        // BUSI 역할만 필터링
         List<UserRole> roles = roleEntities.stream()
                 .map(role -> UserRole.getKeyByName(role.getRole().getName()))
+                .filter(userRole -> userRole == UserRole.BUSI)
                 .collect(Collectors.toList());
+
+        // Business_num 조회
+        List<String> businessNum = businessNumRepository.findBusinessNumsByUserId(user.getUserId());
 
         // StayTourRestaurFest에서 userId로 사업자 정보 조회
         StayTourRestaurFest strf = strfRepository.findByUserId(user.getUserId()).orElse(null);
@@ -242,10 +257,10 @@ public class BusiService {
                 .userId(user.getUserId())
                 .name(user.getName())
                 .roles(roles)
-                .busiNum(strf != null ? strf.getBusiNum().getBusiNum(): null)  // 사업자 번호
-                .strfId(strf != null ? strf.getStrfId() : null)  // strf_id
-                .title(strf != null ? strf.getTitle() : null)  // title
-                .category(strf != null ? strf.getCategory().getName() : null) // category
+                .busiNum(businessNum)  // 사업자 번호
+                .strfId(strf == null ? null : strf.getStrfId())  // strf가 null일 때 null 반환
+                .title(strf == null ? null : strf.getTitle())  // title이 null일 때 null 반환
+                .category(strf != null && strf.getCategory() != null ? strf.getCategory().getName() : null) // category가 null일 때 null 반환
                 .build();
     }
 
