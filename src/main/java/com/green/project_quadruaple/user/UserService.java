@@ -203,10 +203,20 @@ public class UserService {
 
         // 사용자의 역할(Role) 조회
         List<Role> roleEntities = roleRepository.findByUserUserId(user.getUserId());
+
+        // BUSI 역할이 있는지 확인
+        boolean hasBusiRole = roleEntities.stream()
+                .anyMatch(role -> role.getRole().getName().equals("사업자"));
+
+        if (hasBusiRole) {
+            throw new RuntimeException("BUSI 역할을 가진 사용자는 로그인할 수 없습니다.");
+        }
+
+        // USER, ADMIN 역할만 필터링
         List<UserRole> roles = roleEntities.stream()
                 .map(role -> UserRole.getKeyByName(role.getRole().getName()))
+                .filter(userRole -> userRole == UserRole.USER || userRole == UserRole.ADMIN)
                 .collect(Collectors.toList());
-
 
         // AT, RT
         JwtUser jwtUser = new JwtUser(user.getUserId(), roles);
