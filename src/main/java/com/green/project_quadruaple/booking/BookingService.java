@@ -322,14 +322,18 @@ public class BookingService {
         Long bookingId = req.getBookingId();
         Booking booking = bookingRepository.findById(bookingId).get();
         String tid = booking.getTid();
+
+        String message = null;
         if(booking.getUser().getUserId() != signedUserId) {
-            return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), "해당 예약의 사용자가 아닙니다.");
+            message = "해당 예약의 사용자가 아닙니다.";
+            return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), message);
         }
 
         LocalDate now = LocalDate.now();
         LocalDate checkIn = booking.getCheckIn().toLocalDate();
         if(now.isAfter(checkIn) || now.equals(checkIn)) {
-            return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "환불 가능 기간이 아닙니다.");
+            message = "환불 가능 기간이 아닙니다.";
+            return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), message);
         }
 
         Integer usedPoint = booking.getUsedPoint();
@@ -359,10 +363,13 @@ public class BookingService {
 
             int refundAmount = booking.getTotalPayment();
             if(now.isAfter(checkIn.minusDays(3))) {
+                message = "50퍼센트 환불 완료";
                 refundAmount = discountAmount(refundAmount, RefundRate.TWO_DAYS_AGO.getPercent()); // 50 퍼 환불
-            }
-            if(now.isAfter(checkIn.minusDays(7))) {
+            }else if(now.isAfter(checkIn.minusDays(7))) {
+                message = "70퍼센트 환불 완료";
                 refundAmount = discountAmount(refundAmount, RefundRate.SIX_DAYS_AGO.getPercent()); // 70 퍼 환불
+            } else {
+                message = "100퍼센트 환불 완료";
             }
 
             String refundUrl = "/online/v1/payment/cancel";
@@ -380,8 +387,7 @@ public class BookingService {
             HttpEntity<HashMap<String, Object>> body = new HttpEntity<>(params, headers);
 
             KakaoRefundDto refundDto = restTemplate.postForObject(kakaopayConst.getUrl() + refundUrl, body, KakaoRefundDto.class);
-            log.info("refundDto = {}", refundDto);
-            return new ResponseWrapper<>(ResponseCode.OK.getCode(), "환불 완료");
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), message);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();
