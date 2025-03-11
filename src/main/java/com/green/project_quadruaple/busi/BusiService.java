@@ -1,8 +1,6 @@
 package com.green.project_quadruaple.busi;
 
-import com.green.project_quadruaple.busi.model.BusiPostReq;
-import com.green.project_quadruaple.busi.model.BusiUserInfoDto;
-import com.green.project_quadruaple.busi.model.BusiUserSignIn;
+import com.green.project_quadruaple.busi.model.*;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.CookieUtils;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
@@ -205,7 +203,7 @@ public class BusiService {
     }
 
     @Transactional
-    public UserSignInRes signIn(BusiUserSignIn req, HttpServletResponse response) {
+    public BusiUserSignInRes signIn(BusiUserSignIn req, HttpServletResponse response) {
         User user = userRepository.findByAuthenticationCode_EmailAndProviderType(req.getEmail(), SignInProviderType.LOCAL);
 
         if (user == null) {
@@ -240,7 +238,7 @@ public class BusiService {
         List<String> businessNum = businessNumRepository.findBusinessNumsByUserId(user.getUserId());
 
         // StayTourRestaurFest에서 userId로 사업자 정보 조회
-        StayTourRestaurFest strf = strfRepository.findByUserId(user.getUserId()).orElse(null);
+        List<StayTourRestaurFest> strfList = strfRepository.findByStrfIdList(user.getUserId());
 
         // JWT 토큰 생성
         JwtUser jwtUser = new JwtUser(user.getUserId(), roles);
@@ -251,16 +249,26 @@ public class BusiService {
         int maxAge = 1_296_000;
         cookieUtils.setCookie(response, "refreshToken", refreshToken, maxAge, "/api/user/access-token");
 
+        List<BusiStrfDto> dtos = new ArrayList<>();
+
+        if (strfList != null) {
+            for (StayTourRestaurFest strf : strfList) {
+                BusiStrfDto dto = BusiStrfDto.builder()
+                        .strfId(strf.getStrfId())
+                        .title(strf.getTitle())
+                        .category(strf.getCategory() != null ? strf.getCategory().getName() : null)
+                        .busiNum(strf.getBusiNum() != null ? strf.getBusiNum().getBusiNum() : null)
+                        .build();
+                dtos.add(dto);
+            }
+        }
         // UserSignInRes에 사업자 정보 포함
-        return UserSignInRes.builder()
+        return BusiUserSignInRes.builder()
                 .accessToken(accessToken)
                 .userId(user.getUserId())
                 .name(user.getName())
                 .roles(roles)
-                .busiNum(businessNum)  // 사업자 번호
-                .strfId(strf == null ? null : strf.getStrfId())  // strf가 null일 때 null 반환
-                .title(strf == null ? null : strf.getTitle())  // title이 null일 때 null 반환
-                .category(strf != null && strf.getCategory() != null ? strf.getCategory().getName() : null) // category가 null일 때 null 반환
+                .dtos(dtos)
                 .build();
     }
 

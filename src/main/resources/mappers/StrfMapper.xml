@@ -146,7 +146,11 @@
 
 </mapper>
 
-<!--
+
+
+
+
+<!-
 <select id="getMemberDetail" resultMap="memberResultMap">
         SELECT
         a.strf_id AS strfId , a.category , a.title AS strfTitle , n.user_id AS userId ,
@@ -241,7 +245,7 @@
             <result property="menuPrice" column="menuPrice" />
             <result property="menuPic" column="menuPic" />
         </collection>
-
+ㅊ
         <collection property="strfPics" ofType="com.green.project_quadruaple.strf.model.StrfPicSel">
             <id property="strfId" column="strfId" />
             <result property="pic" column="strfPic" />
