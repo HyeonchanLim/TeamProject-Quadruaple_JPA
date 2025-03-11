@@ -364,7 +364,7 @@ public class BookingService {
             if(now.isAfter(checkIn.minusDays(3))) {
                 message = "50퍼센트 환불 완료";
                 refundAmount = discountAmount(refundAmount, RefundRate.TWO_DAYS_AGO.getPercent()); // 50 퍼 환불
-            }else if(now.isAfter(checkIn.minusDays(7))) {
+            } else if(now.isAfter(checkIn.minusDays(7))) {
                 message = "70퍼센트 환불 완료";
                 refundAmount = discountAmount(refundAmount, RefundRate.SIX_DAYS_AGO.getPercent()); // 70 퍼 환불
             } else {

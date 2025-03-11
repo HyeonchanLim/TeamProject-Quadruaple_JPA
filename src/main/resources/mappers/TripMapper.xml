@@ -357,7 +357,7 @@
 
     <select id="selScheduleAndScheMemoByScheduleId"> <!-- 삭제할 일정 정보가져오기 -->
         SELECT
-            s.schedule_id AS scheduleId
+            s.schedule_id AS scheduleMemoId
             , s.distance AS distance
             , s.duration AS duration
             , sm.category AS scheOrMemo

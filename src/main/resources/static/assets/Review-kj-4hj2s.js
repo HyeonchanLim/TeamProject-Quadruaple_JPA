@@ -1,0 +1,1 @@
+import{f as r,u as c,h as u,j as s,T as d,O as m}from"./index-C92yST0r.js";const f=()=>{const[t]=r(),a=Number(t.get("strfId")),e=c(),n=()=>{e("/business")},i=()=>{e(`/business/review?strfId=${a}`)},o=u().pathname;return s.jsxs("div",{children:[s.jsx(d,{title:"리뷰 관리",onClick:o==="/business/review/edit"?i:n}),s.jsx(m,{})]})};export{f as default};
