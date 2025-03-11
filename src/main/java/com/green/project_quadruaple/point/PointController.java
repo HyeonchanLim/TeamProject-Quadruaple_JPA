@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.point;
 
+import com.green.project_quadruaple.booking.model.BookingRefundReq;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
@@ -102,5 +103,11 @@ public class PointController {
     @GetMapping("/pay-approve")
     public String approve(@RequestParam("pg_token") String pgToken){
         return "redirect:" + pointService.approveBuy(pgToken);
+    }
+
+    @PostMapping("card/refund")
+    @Operation(summary = "포인트 구매취소")
+    public ResponseWrapper<String> refundPoint(@RequestParam long pointHistoryId) {
+        return pointService.refundPoint(pointHistoryId);
     }
 }
