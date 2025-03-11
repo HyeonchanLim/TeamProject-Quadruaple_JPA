@@ -371,6 +371,7 @@ public class PointService {
 
             HttpEntity<HashMap<String, Object>> body = new HttpEntity<>(params, headers);
 
+            //kakaoAPI 요청 보내기
             KakaoRefundDto refundDto = restTemplate.postForObject(kakaopayConst.getUrl() + refundUrl, body, KakaoRefundDto.class);
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), "환불성공");
         } catch (RestClientException e) {
