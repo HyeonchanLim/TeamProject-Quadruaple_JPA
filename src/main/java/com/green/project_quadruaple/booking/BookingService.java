@@ -15,9 +15,7 @@ import com.green.project_quadruaple.coupon.repository.UsedCouponRepository;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.point.PointHistoryRepository;
-import com.green.project_quadruaple.point.PointViewRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
-import io.netty.handler.codec.Headers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -194,9 +192,9 @@ public class BookingService {
         params.put("quantity", quantity); // 상품 수량
         params.put("total_amount", totalAmount); // 상품 가격
         params.put("tax_free_amount", taxFreeAmount); // 상품 비과세 금액
-        params.put("approval_url", kakaopayConst.getApprovalUrl()); // 성공시 url
-        params.put("cancel_url", kakaopayConst.getCancelUrl()); // 실패시 url
-        params.put("fail_url", kakaopayConst.getFailUrl());
+        params.put("approval_url", kakaopayConst.getBookingApprovalUrl()); // 성공시 url
+        params.put("cancel_url", kakaopayConst.getBookingCancelUrl()); // 실패시 url
+        params.put("fail_url", kakaopayConst.getBookingFailUrl());
 
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
@@ -304,7 +302,7 @@ public class BookingService {
                     + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
                     + "check_out=" + URLEncoder.encode(bookingApproveInfoDto.getCheckOut(), StandardCharsets.UTF_8) + "&"
                     + "personnel=" + quantity;
-            return kakaopayConst.getCompleteUrl() + redirectParams;
+            return kakaopayConst.getBookingCompleteUrl() + redirectParams;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();

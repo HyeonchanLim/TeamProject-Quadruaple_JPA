@@ -148,7 +148,7 @@
         ReviewReplyData AS (
         SELECT
         rr.review_id,
-        rr.reply_id AS reviewReplyId,  -- ✅ reviewReplyId 추가
+        rr.reply_id AS reviewReplyId,
         rr.content AS reviewReply,
         DATE(rr.created_at) AS reviewReplyCreatedAt
         FROM review_reply rr
@@ -184,8 +184,8 @@
         u.profile_pic AS writerUserProfilePic,
         u.provider_type AS providerType,
 
-        IFNULL(rr.reviewReplyId, NULL) AS reviewReplyId,  -- ✅ reviewReplyId 추가
-        IFNULL(rr.reviewReply, '') AS reviewReply,
+        IFNULL(rr.reviewReplyId, NULL) AS reviewReplyId,
+        IFNULL(rr.reviewReply, NULL) AS reviewReply,
         IFNULL(rr.reviewReplyCreatedAt, NULL) AS reviewReplyCreatedAt
 
         FROM stay_tour_restaur_fest s
@@ -195,9 +195,11 @@
         LEFT JOIN ReviewReplyData rr ON r.review_id = rr.review_id
 
         WHERE bn.user_id = #{userId}
+        AND r.review_id IS NOT NULL
         ORDER BY s.strf_id ASC, r.review_id DESC
         LIMIT #{pageSize} OFFSET #{offset};
     </select>
+
 
 
 
