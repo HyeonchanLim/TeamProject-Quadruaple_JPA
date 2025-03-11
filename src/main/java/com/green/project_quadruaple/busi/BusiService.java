@@ -127,7 +127,7 @@ public class BusiService {
                 p.setUserId(userId);
 
                 Role role = Role.builder()
-                        .id(new RoleId(UserRole.BUSI.getValue(), userId))
+                        .id(new RoleId(UserRole.BUSI, userId))
                         .user(user)
                         .role(UserRole.BUSI)
                         .grantedAt(LocalDateTime.now())
