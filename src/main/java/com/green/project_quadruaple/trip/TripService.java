@@ -117,10 +117,9 @@ public class TripService {
     }
 
     private void sendNoticeJoin (Trip trip, User user){
-        List<NoticeReceive> noticeReceives=new ArrayList<>();
         StringBuilder title=new StringBuilder(user.getName());
         title.append("님이 ").append(trip.getTitle()).append("에 참석하셨습니다.");
-        String content=title.toString()+" 환영해주세요!";
+        String content=title+" 환영해주세요!";
         Notice notice = Notice.builder()
                 .foreignNum(trip.getTripId())
                 .title(title.toString())
@@ -130,15 +129,14 @@ public class TripService {
         noticeRepository.save(notice);
         List<User> users=tripUserRepository.findUserByTrip(trip).stream().filter(u-> u != user).collect(Collectors.toList());
         for(User u:users){
-            NoticeReceive noticeReceive=NoticeReceive.builder()
+            noticeReceiveRepository.save(NoticeReceive.builder()
                     .id(new NoticeReceiveId(u.getUserId(),notice.getNoticeId()))
                     .user(u)
                     .notice(notice)
                     .opened(false)
-                    .build();
-            noticeReceives.add(noticeReceive);
+                    .build());
         }
-        noticeReceiveRepository.saveAll(noticeReceives);
+        noticeReceiveRepository.flush();
     }
 
 

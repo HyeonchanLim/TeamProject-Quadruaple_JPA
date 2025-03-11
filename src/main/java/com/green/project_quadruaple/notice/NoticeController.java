@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.notice;
 
+import com.green.project_quadruaple.notice.model.req.NoticeAdminSendReq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,6 @@ public class NoticeController {
         noticeService.testInsNotice(userId);
     }
 
-    //알람 리스트 확인
     @GetMapping("check")
     @Operation(summary = "알람리스트확인하기")
     public ResponseEntity<?> checkNotice(@RequestParam("start_idx") int startIdx){
@@ -49,5 +49,11 @@ public class NoticeController {
     @Operation(summary = "알람 일괄 읽음처리")
     public ResponseEntity<?> readAllNotice(){
         return noticeService.readAllNotice();
+    }
+
+    @PostMapping("admin")
+    @Operation(summary = "관리자 service 알림 추가", description = "role은 유저 or 사업자 or Null 값 있으면 걔네한테만. null이면 전체")
+    public void noticeAdmin(@RequestBody NoticeAdminSendReq p){
+        noticeService.noticeAdmin(p);
     }
 }

@@ -23,8 +23,7 @@ public class Role {
     @JoinColumn(name = "user_id", insertable = false, nullable = false)
     private User user;
 
-//    @Enumerated(EnumType.STRING)
-//    @MapsId("role")
+    @Enumerated(EnumType.STRING)
     @Convert(converter = UserRoleConverter.class)
     @Column(name = "role", insertable = false, updatable = false)
     private UserRole role;

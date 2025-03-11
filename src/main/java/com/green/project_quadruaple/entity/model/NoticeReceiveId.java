@@ -12,4 +12,5 @@ import lombok.*;
 public class NoticeReceiveId implements java.io.Serializable {
     private Long userId;
     private Long noticeId;
+
 }

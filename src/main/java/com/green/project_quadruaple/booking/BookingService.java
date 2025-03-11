@@ -15,6 +15,7 @@ import com.green.project_quadruaple.coupon.repository.UsedCouponRepository;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.point.PointHistoryRepository;
+import com.green.project_quadruaple.point.PointViewRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import io.netty.handler.codec.Headers;
 import lombok.RequiredArgsConstructor;

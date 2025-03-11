@@ -12,7 +12,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class KakaopayConst {
     private final String authKey;
     private final String secretKey;
-    private final String affiliateCode;
+    private final String affiliateCode; //cid
     private final String url;
     private final String approvalUrl;
     private final String cancelUrl;

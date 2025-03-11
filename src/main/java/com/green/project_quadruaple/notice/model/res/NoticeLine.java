@@ -12,17 +12,17 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 public class NoticeLine {
     private Long noticeId;
+    private String category;
     private String txt;
     private boolean opened;
     private String noticedAt;
 
     @ConstructorProperties({"noticeId", "category", "title", "opened", "createdAt"})
     public NoticeLine(Long noticeId, String category, String title, boolean opened, LocalDateTime createdAt) {
-        StringBuilder sb=new StringBuilder("[");
-        sb.append(NoticeCategory.getNameByValue(category)).append("] ").append(title);
         this.noticeId = noticeId;
+        this.category = NoticeCategory.getNameByValue(category);
         this.opened = opened;
-        this.txt = sb.toString();
+        this.txt = title;
         this.noticedAt = createdAt.toLocalDate().isEqual(LocalDate.now())?
                 createdAt.toLocalTime().toString():createdAt.toLocalDate().toString();
     }

@@ -91,11 +91,6 @@
 
 
     <select id="selBusinessSTAYSales" resultMap="businessSalesResultMap">
-        WITH RankedPhotos AS (
-        SELECT D.strf_id, D.pic_name,
-        ROW_NUMBER() OVER (PARTITION BY D.strf_id ORDER BY D.pic_name) AS rn
-        FROM strf_pic D
-        )
         SELECT
         <trim prefixOverrides=",">
             <foreach item="monthOffset" collection="monthOffsets" open="" separator="," close="">
@@ -107,11 +102,12 @@
             </foreach>
         </trim>
         FROM booking A
-        LEFT JOIN stay_tour_restaur_fest C ON A.strf_id = C.strf_id
+        LEFT JOIN menu B ON A.menu_id = B.menu_id
+        LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
         LEFT JOIN business_num E ON C.busi_num = E.busi_num
         LEFT JOIN user F ON E.user_id = F.user_id
         WHERE F.user_id = #{userId}
-        AND C.category IN ('STAY', 'RESTAUR')
+        AND C.category IN ('STAY')
         AND A.state = 2
     </select>
 
