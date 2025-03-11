@@ -13,14 +13,17 @@ import lombok.*;
 public class NoticeReceive extends CreatedAt {
     @EmbeddedId
     private NoticeReceiveId id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
     private User user;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("noticeId")
-    @JoinColumn(name = "notice_id", nullable = false)
+    @JoinColumn(name = "notice_id", nullable = false, insertable = false, updatable = false)
     private Notice notice;
+
     @Column(columnDefinition = "TINYINT(4) DEFAULT 0",nullable = false)
     private boolean opened;
 }

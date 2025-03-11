@@ -1,9 +1,9 @@
 package com.green.project_quadruaple.notice;
 
 import com.green.project_quadruaple.booking.repository.BookingRepository;
-import com.green.project_quadruaple.booking.repository.MenuRepository;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
+import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.SizeConstants;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
@@ -11,12 +11,13 @@ import com.green.project_quadruaple.coupon.repository.CouponRepository;
 import com.green.project_quadruaple.coupon.repository.ReceiveCouponRepository;
 import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.model.*;
+import com.green.project_quadruaple.notice.model.req.NoticeAdminSendReq;
 import com.green.project_quadruaple.notice.model.res.NoticeLine;
 import com.green.project_quadruaple.notice.model.res.NoticeOne;
-import com.green.project_quadruaple.strf.StrfRepository;
 import com.green.project_quadruaple.trip.TripRepository;
 import com.green.project_quadruaple.trip.TripUserRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -52,8 +52,7 @@ public class NoticeService {
     private final CouponRepository couponRepository;
     private final ReceiveCouponRepository receiveCouponRepository;
     private final TripUserRepository tripUserRepository;
-    private final StrfRepository strfRepository;
-    private final MenuRepository menuRepository;
+    private final RoleRepository roleRepository;
 
     // 타임아웃 시간 설정
     private static final long NOTICE_TIME_OUT = 60 * 1000L;
@@ -188,6 +187,40 @@ public class NoticeService {
         noticeReceiveRepository.save(noticeReceive);
     }
 
+    //관리자 알람 발송
+    public void noticeAdmin(NoticeAdminSendReq p){
+        long userId = authenticationFacade.getSignedUserId();
+
+        // 사용자 권한 확인 (ADMIN 권한이 있는지 확인)
+        List<Role> roles = roleRepository.findByUserUserId(userId);
+        boolean isAdmin = roles.stream().anyMatch(role -> role.getRole() == UserRole.ADMIN);
+        if (!isAdmin) {
+            log.error("권한이 없습니다. 사용자 권한: {}", roles.isEmpty() ? "없음" : roles.get(0).getRole());
+        }
+
+        Notice notice = Notice.builder()
+                .noticeCategory(NoticeCategory.SERVICE)
+                .title(p.getTitle())
+                .content(p.getContent())
+                .build();
+        noticeRepository.saveAndFlush(notice);
+
+        long noticeId=notice.getNoticeId();
+
+        List<User> users =p.getRole()!=null?userRepository.findByRole(p.getRole()):userRepository.findNotInRole(UserRole.ADMIN);
+        for (User u : users) {
+            noticeReceiveRepository.save(
+                NoticeReceive.builder()
+                        .id(new NoticeReceiveId(u.getUserId(), noticeId))
+                        .notice(notice)
+                        .user(u)
+                        .opened(false)
+                        .build()
+            );
+        }
+        noticeReceiveRepository.flush();
+    }
+
     //자동 시간계산 알람 발송
     @Scheduled(cron = "0 0 5 * * *")
     public void autoSendNotice() {
@@ -199,7 +232,6 @@ public class NoticeService {
     //일주일 앞으로 다가온 여행
     public void dDayTripNotice() {
         List<Trip> trips = tripRepository.findTripBefore7days();
-        List<NoticeReceive> noticeReceives = new ArrayList<>();
         for (Trip trip : trips) {
             String title = String.format("%s 여행이 일주일 앞으로 다가왔습니다!", trip.getTitle());
             List<User> users = tripUserRepository.findUserByTrip(trip);
@@ -225,22 +257,20 @@ public class NoticeService {
             noticeRepository.saveAndFlush(notice);
 
             for(User user : users) {
-                NoticeReceive noticeReceive=NoticeReceive.builder()
+                noticeReceiveRepository.save(NoticeReceive.builder()
                         .id(new NoticeReceiveId(user.getUserId(), notice.getNoticeId()))
                         .user(user)
                         .notice(notice)
                         .opened(false)
-                        .build();
-                noticeReceives.add(noticeReceive);
+                        .build());
             }
         }
-        noticeReceiveRepository.saveAll(noticeReceives);
+        noticeReceiveRepository.flush();
     }
 
     //쿠폰이 만료되기 사흘 전
     public void dDayExpireCouponNotice() {
         List<Coupon> coupons = couponRepository.findExpireBeforeCoupon();
-        List<NoticeReceive> noticeReceives = new ArrayList<>();
         for(Coupon coupon : coupons) {
             StringBuilder content = new StringBuilder();
             String title = coupon.getTitle()+"이 곧 만료됩니다.";
@@ -259,22 +289,20 @@ public class NoticeService {
             List<User> users=receiveCouponRepository.findByCoupon(coupon)
                     .stream().map(ReceiveCoupon::getUser).collect(Collectors.toList());
             for(User user : users) {
-                NoticeReceive noticeReceive=NoticeReceive.builder()
+                noticeReceiveRepository.save(NoticeReceive.builder()
                         .id(new NoticeReceiveId(user.getUserId(), notice.getNoticeId()))
                         .user(user)
                         .notice(notice)
                         .opened(false)
-                        .build();
-                noticeReceives.add(noticeReceive);
+                        .build());
             }
         }
-        noticeReceiveRepository.saveAll(noticeReceives);
+        noticeReceiveRepository.flush();
     }
 
     //예약된 숙소 하루 전
     public void dDayBookingNotice() {
         List<Booking> bookings = bookingRepository.findBookingBeforeExpired();
-        List<NoticeReceive> noticeReceives = new ArrayList<>();
         for(Booking booking : bookings) {
             Menu menu = booking.getMenu();
             StayTourRestaurFest strf=menu.getStayTourRestaurFest();
@@ -300,15 +328,14 @@ public class NoticeService {
                     .build();
             noticeRepository.saveAndFlush(notice);
 
-            NoticeReceive noticeReceive=NoticeReceive.builder()
+            noticeReceiveRepository.save(NoticeReceive.builder()
                     .id(new NoticeReceiveId(booking.getUser().getUserId(), notice.getNoticeId()))
                     .user(booking.getUser())
                     .notice(notice)
                     .opened(false)
-                    .build();
-            noticeReceives.add(noticeReceive);
+                    .build());
         }
-        noticeReceiveRepository.saveAll(noticeReceives);
+        noticeRepository.flush();
     }
 
 }
