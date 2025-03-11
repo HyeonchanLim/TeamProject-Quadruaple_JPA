@@ -30,12 +30,14 @@ public class ReviewController {
 
         return reviewService.getReviewWithPics(strfId,startIdx);
     }
+
     @GetMapping("my")
     @Operation(summary = "나의 리뷰 조회")
     public List<MyReviewSelRes> getMyReviews(@RequestParam("start_idx") int startIdx) {
 
         return reviewService.getMyReviews(startIdx);
     }
+
 
     @PostMapping
     @Operation(summary = "리뷰 등록")

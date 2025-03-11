@@ -3,6 +3,7 @@ package com.green.project_quadruaple.busi;
 import com.green.project_quadruaple.busi.model.BusiPostReq;
 import com.green.project_quadruaple.busi.model.BusiUserInfoDto;
 import com.green.project_quadruaple.busi.model.BusiUserSignIn;
+import com.green.project_quadruaple.busi.model.BusiUserSignInRes;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.user.model.UserSignInReq;
@@ -24,13 +25,14 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("busi")
 @Tag(name = "사업자")
 public class BusiController {
     private final BusiService busiService;
 
 
     // 회원가입 요청
-    @PostMapping("sign-up")
+    @PostMapping("/sign-up")
     @Operation(summary = "사업자 회원가입", description = "사진 파일 때문에 postman 사용")
     public ResponseEntity<?> signUpUser(@RequestPart(required = false) MultipartFile profilePic, @Valid @RequestPart BusiPostReq p) {
 
@@ -43,7 +45,7 @@ public class BusiController {
     }
 
     //프로필 및 계정 조회
-    @GetMapping("userInfo")
+    @GetMapping("/userInfo")
     @Operation(summary = "프로필 및 계정 조회")
     public ResponseEntity<?> BusiUserInfo() {
         BusiUserInfoDto userInfo = busiService.BusiUserInfo();
@@ -56,10 +58,10 @@ public class BusiController {
     }
 
     //로그인
-    @PostMapping("sign-in")
-    @Operation(summary = "사업자 로그인")
+    @PostMapping("/sign-in")
+    @Operation(summary = "로그인")
     public ResponseEntity<?> signInUser(@RequestBody BusiUserSignIn req, HttpServletResponse response) {
-        UserSignInRes res = busiService.signIn(req, response);
+        BusiUserSignInRes res = busiService.signIn(req, response);
         if (res == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResponseCode.NOT_FOUND.getCode());
@@ -71,10 +73,7 @@ public class BusiController {
         responseBody.put("userId", res.getUserId());
         responseBody.put("accessToken", res.getAccessToken());
         responseBody.put("role", res.getRoles());
-        responseBody.put("strfId", res.getStrfId());
-        responseBody.put("title", res.getTitle());
-        responseBody.put("category", res.getCategory());
-        responseBody.put("busiNum", res.getBusiNum());
+        responseBody.put("strfDtos" , res.getDtos());
 
         return ResponseEntity.ok(responseBody);
     }

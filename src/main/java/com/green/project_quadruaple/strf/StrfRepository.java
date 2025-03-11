@@ -33,6 +33,12 @@ public interface StrfRepository extends JpaRepository<StayTourRestaurFest, Long>
     @Query("SELECT a FROM StayTourRestaurFest a WHERE a.busiNum.busiNum = :busiNum")
     Optional<StayTourRestaurFest> findByStrfId (String busiNum);
 
+    @Query("SELECT s FROM StayTourRestaurFest s " +
+            "JOIN s.busiNum b " +
+            "JOIN b.user u " +
+            "WHERE u.userId = :userId")
+    List<StayTourRestaurFest> findByStrfIdList (Long userId);
 
-
+    boolean existsByTitle(String title);
+    boolean existsByTell(String title);
 }
