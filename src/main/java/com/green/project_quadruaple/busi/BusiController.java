@@ -57,7 +57,7 @@ public class BusiController {
 
     //로그인
     @PostMapping("sign-in")
-    @Operation(summary = "로그인")
+    @Operation(summary = "사업자 로그인")
     public ResponseEntity<?> signInUser(@RequestBody BusiUserSignIn req, HttpServletResponse response) {
         UserSignInRes res = busiService.signIn(req, response);
         if (res == null) {

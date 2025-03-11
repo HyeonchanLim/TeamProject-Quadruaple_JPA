@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.point.model.res;
 
-import com.green.project_quadruaple.point.model.dto.PointListDto;
+import com.green.project_quadruaple.point.model.dto.PointHistoryListDto;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,5 +13,5 @@ import java.util.List;
 public class PointHistoryListReq {
     private String userName;
     private int remainPoint;
-    private List<PointListDto> pointList;
+    private List<PointHistoryListDto> pointList;
 }

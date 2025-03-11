@@ -118,7 +118,7 @@ public class UserService {
 
                 // Role 설정 추가
                 Role role = Role.builder()
-                        .id(new RoleId(UserRole.USER.getValue(), userId))
+                        .id(new RoleId(UserRole.USER, userId))
                         .user(user)
                         .role(UserRole.USER)
                         .grantedAt(LocalDateTime.now())
