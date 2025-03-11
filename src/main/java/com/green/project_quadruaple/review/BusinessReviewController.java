@@ -34,7 +34,7 @@ public class BusinessReviewController {
     @GetMapping("/all")
     @Operation(summary = "리뷰전체조회")
     public ResponseEntity<List<BusinessDto>> getBusinessReviews(
-            @RequestParam(name = "start_idx", defaultValue = "0") int startIdx,
+            @RequestParam(name = "start_idx", defaultValue = "1") int startIdx,
             @RequestParam(name = "page_size", defaultValue = "10") int pageSize) {
 
        List<BusinessDto> reviews = businessReviewService.getBusinessReview(startIdx, pageSize);
