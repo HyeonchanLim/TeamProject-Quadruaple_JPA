@@ -38,7 +38,7 @@ public class ReviewReply extends CreatedAt {
                 .reviewId(this.review.getReviewId())
                 .content(this.content)
                 .createdAt(this.createdAt)
-                .updatedAt(this.updatedAt) // ✅ updatedAt 추가
+                .updatedAt(this.updatedAt)
                 .build();
     }
 
