@@ -8,6 +8,7 @@ import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.config.security.SignInProviderType;
 import com.green.project_quadruaple.entity.model.*;
+import com.green.project_quadruaple.notice.NoticeReceiveRepository;
 import com.green.project_quadruaple.user.Repository.AuthenticationCodeRepository;
 import com.green.project_quadruaple.user.Repository.TemporaryPwRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
@@ -57,6 +58,8 @@ public class UserService {
     private final AuthenticationCodeRepository authenticationCodeRepository;
     private final RoleRepository roleRepository;
     private final TemporaryPwRepository temporaryPwRepository;
+
+    private final NoticeReceiveRepository noticeReceiveRepository;
 
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
@@ -233,6 +236,7 @@ public class UserService {
                 .userId(user.getUserId())
                 .name(user.getName())
                 .roles(roles)
+                .hasUnReadNotice(noticeReceiveRepository.existsUnreadNoticesByUserId(user.getUserId()))
                 .build();
     }
 
