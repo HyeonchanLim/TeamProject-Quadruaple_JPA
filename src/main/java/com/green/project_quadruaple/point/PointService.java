@@ -1,7 +1,6 @@
 package com.green.project_quadruaple.point;
 
-import com.green.project_quadruaple.booking.model.BookingPostReq;
-import com.green.project_quadruaple.booking.model.dto.KakaoApproveDto;
+import com.green.project_quadruaple.point.model.payModel.dto.KakaoApproveDto;
 import com.green.project_quadruaple.point.model.payModel.dto.KakaoReadyDto;
 import com.green.project_quadruaple.common.config.constant.KakaopayConst;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
@@ -227,7 +226,6 @@ public class PointService {
         User user=userRepository.findById(userId).get();
 
         PointCard pointCard=pointCardRepository.findById(p.getPointCardId()).get();
-        int charge=pointCard.getFinalPayment();
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -238,8 +236,10 @@ public class PointService {
 
         LocalDateTime localDateTime = LocalDateTime.now();
         String orderNo = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + (int)(Math.random()*1000);
+
+        int charge=pointCard.getFinalPayment();
         String totalAmount = String.valueOf(charge);
-        String taxFreeAmount = String.valueOf((charge/10));;
+        String taxFreeAmount = String.valueOf((charge/10));
 
         parameters.put("cid", kakaopayConst.getAffiliateCode()); // 가맹점 코드 - 테스트용
         parameters.put("partner_order_id", orderNo); // 주문 번호
@@ -327,6 +327,5 @@ public class PointService {
             e.printStackTrace();
             throw new RuntimeException();
         }
-
     }
 }
