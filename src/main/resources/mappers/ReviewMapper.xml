@@ -103,6 +103,7 @@
         ) T1
         LEFT JOIN review_pic T2 ON T1.reviewId = T2.review_id
     </select>
+
     <resultMap id="myReviewResultMap" type="com.green.project_quadruaple.review.model.MyReviewSelRes">
         <id property="reviewId" column="reviewId"/>
         <result property="strfId" column="strfId"/>
@@ -119,6 +120,10 @@
     <resultMap id="myReviewPic" type="com.green.project_quadruaple.review.model.ReviewPicBatis">
         <result property="pic" column="pic"/>
     </resultMap>
+
+
+
+
 
 
 

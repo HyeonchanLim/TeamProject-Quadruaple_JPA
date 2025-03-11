@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -108,7 +110,6 @@ public class StrfService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), parlor);
     }
 
-
     @Transactional
     public ResponseWrapper<Integer> strfInfoIns(List<MultipartFile> strfPic, StrfInsReq p) {
         long userId = authenticationFacade.getSignedUserId();
@@ -121,14 +122,6 @@ public class StrfService {
             businessNum.setBusiNum(p.getBusiNum());
             businessNumRepository.save(businessNum);
         }
-//        // 비즈니스 번호가 없으면 에러 처리
-//        if (businessNum == null) {
-//            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), 0); // 404 Not Found
-//        } else {
-//            businessNum = new BusinessNum();
-//            businessNum.setBusiNum(p.getBusiNum());
-//            businessNumRepository.save(businessNum);
-//        }
 
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
         boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
@@ -236,49 +229,40 @@ public class StrfService {
 
         StayTourRestaurFest strf = strfRepository.findById(p.getStrfId()).orElseThrow(() -> new RuntimeException("StayTourRestaurFest not found"));
 
-        Category categoryValue = null;
-        if (p.getCategory() != null && Category.getKeyByName(p.getCategory()) != null) {
-            categoryValue = Category.getKeyByName(p.getCategory());
-        }
-
         List<Menu> menus = new ArrayList<>();
-        if (categoryValue == Category.RESTAUR || categoryValue == Category.STAY) {
 
-            String middlePathMenu = String.format("strf/%d/menu", strf.getStrfId());
-            myFileUtils.makeFolders(middlePathMenu);
+        String middlePathMenu = String.format("strf/%d/menu", strf.getStrfId());
+        myFileUtils.makeFolders(middlePathMenu);
 
-            for (MultipartFile pic : menuPic) {
-                String savedPicName = myFileUtils.makeRandomFileName(pic);
-                String filePath = String.format("%s/%s", middlePathMenu, savedPicName);
+        for (MultipartFile pic : menuPic) {
+            String savedPicName = myFileUtils.makeRandomFileName(pic);
+            String filePath = String.format("%s/%s", middlePathMenu, savedPicName);
 
-                try {
-                    for (MenuIns strfMenu : p.getMenus()) {
-                        Menu newMenu = Menu.builder()
-                                .stayTourRestaurFest(strf)
-                                .title(strfMenu.getMenuTitle())
-                                .price(strfMenu.getMenuPrice())
-                                .menuPic(savedPicName)
-                                .build();
-                        menus.add(newMenu);
-                    }
-                    myFileUtils.transferToUser(pic, filePath);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    myFileUtils.deleteFolder(middlePathMenu, true);
-                    throw new RuntimeException("메뉴 이미지 저장 실패", e);
+            try {
+                for (MenuIns strfMenu : p.getMenus()) {
+                    Menu newMenu = Menu.builder()
+                            .stayTourRestaurFest(strf)
+                            .title(strfMenu.getMenuTitle())
+                            .price(strfMenu.getMenuPrice())
+                            .menuPic(savedPicName)
+                            .build();
+                    menus.add(newMenu);
                 }
-            }
-            menuRepository.saveAll(menus);
-            menuRepository.flush();
-            // 첫 번째 메뉴의 ID를 반환
-            if (!menus.isEmpty()) {
-                return new ResponseWrapper<>(ResponseCode.OK.getCode(), menus.get(0).getMenuId());
-            } else {
-                throw new RuntimeException("No menus were saved.");
+                myFileUtils.transferTo(pic, filePath);
+            } catch (IOException e) {
+                e.printStackTrace();
+                myFileUtils.deleteFolder(middlePathMenu, true);
+                throw new RuntimeException("메뉴 이미지 저장 실패", e);
             }
         }
-
-        return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0L); // If no valid category
+        menuRepository.saveAll(menus);
+        menuRepository.flush();
+        // 첫 번째 메뉴의 ID를 반환
+        if (!menus.isEmpty()) {
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), menus.get(0).getMenuId());
+        } else {
+            throw new RuntimeException("No menus were saved.");
+        }
     }
 
     @Transactional
@@ -301,40 +285,9 @@ public class StrfService {
             categoryValue = Category.getKeyByName(p.getCategory());
         }
 
-        List<Menu> menus = new ArrayList<>();
-
-//        if (categoryValue == Category.RESTAUR || categoryValue == Category.STAY) {
-//            for (MenuIns strfMenu : p.getMenus()) {
-//                Menu newMenu = Menu.builder()
-//                        .stayTourRestaurFest(strf)
-//                        .title(strfMenu.getMenuTitle())
-//                        .price(strfMenu.getMenuPrice())
-////                        .menuPic(strfMenu.getMenuPic())
-//                        .build();
-//                menus.add(newMenu);
-//            }
-//            menuRepository.saveAll(menus);
-//        }
-
-//        Menu menu = menuRepository.findById(strf.getStrfId()).orElseThrow( () -> new RuntimeException("strf id not found"));
         if (categoryValue == Category.STAY) {
             List<Parlor> parlors = new ArrayList<>();
             List<Room> rooms = new ArrayList<>();
-
-            List<Amenipoint> amenipoints = Optional.ofNullable(p.getAmeniPoints())
-                    .orElse(Collections.emptyList())
-                    .stream()
-                    .map(amenityId -> {
-                        Amenity amenity = amenityRepository.findById(amenityId)
-                                .orElseThrow(() -> new RuntimeException("Amenity not found"));
-
-                        return Amenipoint.builder()
-                                .id(new AmenipointId(amenityId, strf.getStrfId()))
-                                .amenity(amenity)  // 여기서 실제 엔티티 세팅
-                                .stayTourRestaurFest(strf)
-                                .build();
-                    })
-                    .collect(Collectors.toList());
 
             for (StrfParlor strfParlor : p.getParlors()) {
                 Menu menu = menuRepository.findById(p.getMenuId())
@@ -363,154 +316,283 @@ public class StrfService {
 
             parlorRepository.saveAll(parlors);
             roomRepository.saveAll(rooms);
-            amenipointRepository.saveAll(amenipoints);
         }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
     @Transactional
-    public ResponseWrapper<Integer> updateStrf(Long strfId,
-                                               List<MultipartFile> strfPic,
-                                               List<MultipartFile> menuPic,
-                                               StrfUpdInfo p,
-                                               StrfMenuInsReq menuReq,
-                                               StrfStayInsReq stayReq) {
+    public ResponseWrapper<Integer> updateStrf(Long strfId, StrfUpdInfo p) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
         StayTourRestaurFest strf = strfRepository.findById(strfId)
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
 
         updateStrfBasicInfo(strf, p);
 
-        updateStrfPics(strfPic, strf);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+    }
 
-        updateRestDays(strf, p.getRestdates());
+    @Transactional
+    public ResponseWrapper<Integer> updState(Long strfId, int state , String busiNum) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        StayTourRestaurFest strf = strfRepository.findById(strfId)
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
 
-        if (isRestaurantOrStay(strf)) {
-            List<Menu> savedMenus = saveMenusWithPics(menuPic, strf, menuReq);
-            if (strf.getCategory().equals("STAY")) {
-                updateStayDetails(savedMenus, strf, menuReq, stayReq);
-            }
-        }
+        updateStrfState(strf, state);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
-    // STRF 기본 정보 업데이트
-    private void updateStrfBasicInfo(StayTourRestaurFest strf, StrfUpdInfo p) {
-        LocationDetail locationDetail = locationDetailRepository.findById(p.getLocationDetailId())
-                .orElseThrow(() -> new RuntimeException("LocationDetail not found"));
-        BusinessNum busiNum = businessNumRepository.findByBusiNum(p.getBusiNum());
+    @Transactional
+    public ResponseWrapper<Integer> updDetail(Long strfId, String detail,String busiNum) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        StayTourRestaurFest strf = strfRepository.findById(strfId)
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+        updateStrfDetail(strf, detail);
 
-        strf.setBusiNum(busiNum);
-        strf.setLocationDetail(locationDetail);
-        strf.setTitle(p.getTitle());
-        strf.setLat(p.getLat());
-        strf.setLng(p.getLng());
-        strf.setAddress(p.getAddress());
-        strf.setPost(p.getPost());
-        strf.setTell(p.getTell());
-        strf.setStartAt(p.getStartAt());
-        strf.setEndAt(p.getEndAt());
-        strf.setOpenCheckIn(p.getOpenCheckIn());
-        strf.setCloseCheckOut(p.getCloseCheckOut());
-        strf.setDetail(p.getDetail());
-        strf.setState(p.getState());
-        strfRepository.save(strf);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
-    // 이미지 업데이트
-    private void updateStrfPics(List<MultipartFile> strfPic, StayTourRestaurFest strf) {
-        if (strfPic != null && !strfPic.isEmpty()) {
-            strfPicRepository.deleteAllByStrfId(strf);
-            saveStrfPics(strfPic, strf);
+    @Transactional
+    public ResponseWrapper<Integer> updFestTime(Long strfId, StrfFestTime p) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        StayTourRestaurFest strf = strfRepository.findById(strfId)
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
+//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+        updateStrfFestTime(strf, p);
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+    }
+
+    @Transactional
+    public ResponseWrapper<Integer> updTime(Long strfId, StrfTime p) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        StayTourRestaurFest strf = strfRepository.findById(strfId)
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
+//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+
+        updateStrfTime(strf, p);
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+    }
+
+    @Transactional
+    public ResponseWrapper<Integer> updTell(Long strfId, String tell,String busiNum) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        StayTourRestaurFest strf = strfRepository.findById(strfId)
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+
+        if (strfRepository.existsByTell(tell)) {
+            throw new RuntimeException("Title already exists");
         }
+        updateStrfTell(strf, tell);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
-    private void updateRestDays(StayTourRestaurFest strf, List<String> restdates) {
-        if (restdates != null && !restdates.isEmpty()) {
-            List<RestDate> restDates = restdates.stream()
-                    .map(day -> {
-                        RestDateId id = new RestDateId(Integer.parseInt(day), strf.getStrfId());  // 복합 키 생성
-                        return RestDate.builder()
-                                .id(id)               // 복합 키 설정
-                                .strfId(strf)        // 연관된 엔티티 설정
-                                .build();
-                    })
-                    .collect(Collectors.toList());
+    @Transactional
+    public ResponseWrapper<Integer> updTitle(Long strfId, String title,String busiNum) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        StayTourRestaurFest strf = strfRepository.findById(strfId)
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
 
-            restDateRepository.saveAll(restDates);  // RestDate 객체들을 DB에 저장
+//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+
+        if (strfRepository.existsByTitle(title)) {
+            throw new RuntimeException("Title already exists");
         }
+        updateStrfTitle(strf, title);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
-    // 메뉴 저장 (사진 포함)
-    private List<Menu> saveMenusWithPics(List<MultipartFile> menuPic, StayTourRestaurFest strf, StrfMenuInsReq menuReq) {
-        List<Menu> menus = new ArrayList<>();
-
-        for (int i = 0; i < menuReq.getMenus().size(); i++) {
-            MenuIns menuIns = menuReq.getMenus().get(i);
-            Menu menu = Menu.builder()
-                    .stayTourRestaurFest(strf)
-                    .title(menuIns.getMenuTitle())
-                    .price(menuIns.getMenuPrice())
-                    .menuPic(saveMenuPic(menuPic.get(i)))
-                    .build();
-            menus.add(menu);
+    @Transactional
+    public ResponseWrapper<Integer> updAddress(Long strfId, StrfUpdAddress p) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        StayTourRestaurFest strf = strfRepository.findById(strfId)
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
+//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+        if (!strf.getBusiNum().toString().equals(p.getBusiNum())){
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
-        return menuRepository.saveAll(menus);
+        updateStrfAddressInfo(strf, p);
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
-    // 숙박 세부 정보 업데이트
-    private void updateStayDetails(List<Menu> menus, StayTourRestaurFest strf,
-                                   StrfMenuInsReq menuReq, StrfStayInsReq stayReq) {
-        // Parlor 저장
-        List<Parlor> parlors = stayReq.getParlors().stream()
-                .map(parlorReq -> Parlor.builder()
-                        .menu(menus.get(0))
-                        .maxCapacity(parlorReq.getMaxCapacity())
-                        .recomCapacity(parlorReq.getRecomCapacity())
-                        .surcharge(parlorReq.getSurcharge())
-                        .build())
-                .collect(Collectors.toList());
+    @Transactional
+    public ResponseWrapper<Integer> updStrfPic(Long strfId, List<MultipartFile> strfPic,String busiNum) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        StayTourRestaurFest strf = strfRepository.findById(strfId)
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+        updateStrfPics(strfPic, strf);
 
-        // Room 저장
-        List<Room> rooms = stayReq.getRooms().stream()
-                .map(roomId -> Room.builder()
-                        .menu(menus.get(0))
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+    }
+
+    @Transactional
+    public ResponseWrapper<Integer> updRest(Long strfId, List<String> restDates , String busiNum) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        StayTourRestaurFest strf = strfRepository.findById(strfId)
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+        updateRestDays(strf,restDates);
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+    }
+
+    @Transactional
+    public ResponseWrapper<Integer> updStrfMenu(List<MultipartFile> menuPic, StrfMenuInsReq req) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+
+
+        Menu menu = menuRepository.findById(req.getMenuId()).orElseThrow( () -> new RuntimeException("menuId not found"));
+
+        List<Menu> savedMenus = saveMenusWithPics(menuPic, strf, req);
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+    }
+
+    @Transactional
+    public ResponseWrapper<Integer> updateStay(StrfStayUpdReq req) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+
+        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
+        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
+        if (!isBusi) {
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+        }
+
+        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+
+//        if (!strf.getBusiNum().toString().equals(req.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+
+        Category categoryValue = null;
+        if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
+            categoryValue = Category.getKeyByName(req.getCategory());
+        }
+        if (categoryValue == Category.STAY) {
+            List<Parlor> parlors = new ArrayList<>();
+            List<Room> rooms = new ArrayList<>();
+            for (StrfParlor strfParlor : req.getParlors()) {
+                Menu menu = menuRepository.findById(req.getMenuId())
+                        .orElseThrow(() -> new RuntimeException("Menu not found"));
+
+                Parlor newParlor = Parlor.builder()
+                        .menu(menu)
+                        .maxCapacity(strfParlor.getMaxCapacity())
+                        .recomCapacity(strfParlor.getRecomCapacity())
+                        .surcharge(strfParlor.getSurcharge())
+                        .build();
+                parlors.add(newParlor);
+            }
+
+            for (Long roomId : req.getRooms()) {
+                Menu menu = menuRepository.findById(req.getMenuId())
+                        .orElseThrow(() -> new RuntimeException("Menu not found"));
+
+                Room newRoom = Room.builder()
+                        .menu(menu)
                         .roomId(roomId)
                         .roomNum(1)
+                        .build();
+                rooms.add(newRoom);
+            }
+            parlorRepository.saveAll(parlors);
+            roomRepository.saveAll(rooms);
+        }
+            Menu menu = menuRepository.findById(req.getMenuId())
+                .orElseThrow( () -> new RuntimeException("menu id not found"));
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+    }
+
+    @Transactional
+    public ResponseWrapper<Integer> updateAmenity(StrfJpaAmenity req) {
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+
+        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
+        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
+        if (!isBusi) {
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+        }
+
+        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+
+//        if (!strf.getBusiNum().toString().equals(req.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+
+        Category categoryValue = null;
+        if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
+            categoryValue = Category.getKeyByName(req.getCategory());
+        }
+        if (categoryValue == Category.STAY) {
+//             Amenity 저장
+        List<Amenipoint> amenipoints = req.getAmeniPoints().stream()
+                .map(amenityId -> Amenipoint.builder()
+                        .id(new AmenipointId(amenityId, strf.getStrfId()))
                         .build())
-                .collect(Collectors.toList());
-
-        // Amenity 저장
-//        List<Amenipoint> amenipoints = stayReq.getAmenipoints().stream()
-//                .map(amenityId -> Amenipoint.builder()
-//                        .id(new AmenipointId(amenityId, strf.getStrfId()))
-//                        .build())
-//                .collect(Collectors.toList());
-
-        parlorRepository.saveAll(parlors);
-        roomRepository.saveAll(rooms);
-//        amenipointRepository.saveAll(amenipoints);
+                .toList();
+        amenipointRepository.saveAll(amenipoints);
+        }
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
-    private boolean isRestaurantOrStay(StayTourRestaurFest strf) {
-        return strf.getCategory().equals("RESTAUR") || strf.getCategory().equals("STAY");
-    }
-
-    private String saveMenuPic(MultipartFile file) {
-        // 이미지 저장 로직 (예: S3, 로컬 스토리지)
-        return file != null ? file.getOriginalFilename() : null;
-    }
-
-    private void saveStrfPics(List<MultipartFile> files, StayTourRestaurFest strf) {
-        files.forEach(file -> {
-            StrfPic pic = StrfPic.builder()
-                    .strfId(strf)  // strf 객체를 설정
-                    .picName(file.getOriginalFilename())
-                    .build();
-            strfPicRepository.save(pic);
-        });
-    }
 
     @Transactional
     public ResponseWrapper<Integer> deleteStrf(Long strfId) {
@@ -528,6 +610,7 @@ public class StrfService {
         if (!isBusi) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
+
         log.info("==========businessNum : {}" , businessNum);
         log.info("==========strf.getBusiNum : {}" , strf.getBusiNum());
 
@@ -550,72 +633,166 @@ public class StrfService {
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
+
+    private void updateStrfState(StayTourRestaurFest strf, int p) {
+        strf.setState(p);
+        strfRepository.save(strf);
+    }
+
+    private void updateStrfDetail(StayTourRestaurFest strf, String p) {
+        strf.setDetail(p);
+        strfRepository.save(strf);
+    }
+
+    private void updateStrfFestTime(StayTourRestaurFest strf, StrfFestTime p) {
+        strf.setStartAt(p.getStartAt());
+        strf.setEndAt(p.getEndAt());
+        strfRepository.save(strf);
+    }
+
+    private void updateStrfTime(StayTourRestaurFest strf, StrfTime p) {
+        strf.setCloseCheckOut(p.getCloseCheckOut());
+        strf.setOpenCheckIn(p.getOpenCheckIn());
+        strfRepository.save(strf);
+    }
+    private void updateStrfTell(StayTourRestaurFest strf, String tell) {
+
+        strf.setTell(tell);
+        strfRepository.save(strf);
+    }
+
+    private void updateStrfTitle(StayTourRestaurFest strf, String title) {
+
+        strf.setTitle(title);
+        strfRepository.save(strf);
+    }
+
+    // strf 주소 업데이트
+    private void updateStrfAddressInfo(StayTourRestaurFest strf, StrfUpdAddress p) {
+        LocationDetail locationDetail = locationDetailRepository.findById(p.getLocationDetailId())
+                .orElseThrow(() -> new RuntimeException("LocationDetail not found"));
+        BusinessNum busiNum = businessNumRepository.findByBusiNum(p.getBusiNum());
+
+        strf.setLocationDetail(locationDetail);
+        strf.setLat(p.getLat());
+        strf.setLng(p.getLng());
+        strf.setAddress(p.getAddress());
+        strf.setPost(p.getPost());
+        strfRepository.save(strf);
+    }
+    // STRF 기본 정보 업데이트
+    private void updateStrfBasicInfo(StayTourRestaurFest strf, StrfUpdInfo p) {
+        LocationDetail locationDetail = locationDetailRepository.findById(p.getLocationDetailId())
+                .orElseThrow(() -> new RuntimeException("LocationDetail not found"));
+        BusinessNum busiNum = businessNumRepository.findByBusiNum(p.getBusiNum());
+
+        strf.setBusiNum(busiNum);
+        strf.setLocationDetail(locationDetail);
+        strf.setTitle(p.getTitle());
+        strf.setLat(p.getLat());
+        strf.setLng(p.getLng());
+        strf.setAddress(p.getAddress());
+        strf.setPost(p.getPost());
+        strf.setTell(p.getTell());
+        strf.setStartAt(p.getStartAt());
+        strf.setEndAt(p.getEndAt());
+        strf.setOpenCheckIn(p.getOpenCheckIn());
+        strf.setCloseCheckOut(p.getCloseCheckOut());
+        strf.setDetail(p.getDetail());
+        strf.setState(p.getState());
+        strfRepository.save(strf);
+    }
+    // 이미지 업데이트
+    private void updateStrfPics(List<MultipartFile> strfPic, StayTourRestaurFest strf) {
+        if (strfPic != null && !strfPic.isEmpty()) {
+            strfPicRepository.deleteAllByStrfId(strf);
+            saveStrfPics(strfPic, strf);
+        }
+    }
+    private void updateRestDays(StayTourRestaurFest strf, List<String> restdates) {
+        if (restdates != null && !restdates.isEmpty()) {
+            List<RestDate> restDates = restdates.stream()
+                    .map(day -> {
+                        RestDateId id = new RestDateId(Integer.parseInt(day), strf.getStrfId());  // 복합 키 생성
+                        return RestDate.builder()
+                                .id(id)               // 복합 키 설정
+                                .strfId(strf)        // 연관된 엔티티 설정
+                                .build();
+                    })
+                    .collect(toList());
+
+            restDateRepository.saveAll(restDates);  // RestDate 객체들을 DB에 저장
+        }
+    }
+    // 메뉴 저장 (사진 포함)
+    private List<Menu> saveMenusWithPics(List<MultipartFile> menuPic, StayTourRestaurFest strf, StrfMenuInsReq menuReq) {
+        List<Menu> menus = new ArrayList<>();
+
+        for (int i = 0; i < menuReq.getMenus().size(); i++) {
+            MenuIns menuIns = menuReq.getMenus().get(i);
+            Menu menu = Menu.builder()
+                    .stayTourRestaurFest(strf)
+                    .title(menuIns.getMenuTitle())
+                    .price(menuIns.getMenuPrice())
+                    .menuPic(saveMenuPic(menuPic.get(i)))
+                    .build();
+            menus.add(menu);
+        }
+
+        return menuRepository.saveAll(menus);
+    }
+
+    private boolean isRestaurantOrStay(StayTourRestaurFest strf) {
+        return strf.getCategory().equals("RESTAUR") || strf.getCategory().equals("STAY");
+    }
+    private String saveMenuPic(MultipartFile file) {
+        // 이미지 저장 로직 (예: S3, 로컬 스토리지)
+        return file != null ? file.getOriginalFilename() : null;
+    }
+    private void saveStrfPics(List<MultipartFile> files, StayTourRestaurFest strf) {
+        files.forEach(file -> {
+            StrfPic pic = StrfPic.builder()
+                    .strfId(strf)  // strf 객체를 설정
+                    .picName(file.getOriginalFilename())
+                    .build();
+            strfPicRepository.save(pic);
+        });
+    }
+
 }
 
+//    // 숙박 세부 정보 업데이트
+//    private void updateStayDetails(List<Menu> menus, StayTourRestaurFest strf,
+//                                   StrfMenuInsReq menuReq, StrfStayInsReq stayReq) {
+//        // Parlor 저장
+//        List<Parlor> parlors = stayReq.getParlors().stream()
+//                .map(parlorReq -> Parlor.builder()
+//                        .menu(menus.get(0))
+//                        .maxCapacity(parlorReq.getMaxCapacity())
+//                        .recomCapacity(parlorReq.getRecomCapacity())
+//                        .surcharge(parlorReq.getSurcharge())
+//                        .build())
+//                .collect(toList());
+//
+//        // Room 저장
+//        List<Room> rooms = stayReq.getRooms().stream()
+//                .map(roomId -> Room.builder()
+//                        .menu(menus.get(0))
+//                        .roomId(roomId)
+//                        .roomNum(1)
+//                        .build())
+//                .collect(toList());
+//
+//        // Amenity 저장
+////        List<Amenipoint> amenipoints = stayReq.getAmenipoints().stream()
+////                .map(amenityId -> Amenipoint.builder()
+////                        .id(new AmenipointId(amenityId, strf.getStrfId()))
+////                        .build())
+////                .collect(Collectors.toList());
+//
+//        parlorRepository.saveAll(parlors);
+//        roomRepository.saveAll(rooms);
+////        amenipointRepository.saveAll(amenipoints);
+//    }
 
-
-/*
-String middlePathMenu = String.format("strf/%d/menu", strf.getStrfId());
-        myFileUtils.makeFolders(middlePathMenu);
-List<Menu> menus = new ArrayList<>();
-        List<Parlor> parlors = new ArrayList<>();
-        List<Room> rooms = new ArrayList<>();
-        List<RestDate> restDates = new ArrayList<>();
-        List<String> picNameList = new ArrayList<>(strfPic.size());
-
-        for (MultipartFile pic : menuPic) {
-            String savedPicName = myFileUtils.makeRandomFileName(pic);
-            picNameList.add(savedPicName);
-            String filePath = String.format("%s/%s", middlePathMenu, savedPicName);
-            try {
-                for (StrfMenu menu : p.getMenus()){
-                    Menu menu1 = new Menu();
-                }
-                    for (Menu menu : p.getMenus()) {
-                        Menu newMenu = new Menu();
-                        newMenu.setMenuId(menu.getMenuId());
-                        newMenu.setPrice(menu.getPrice());
-                        newMenu.setMenuPic(savedPicName);
-                        menus.add(newMenu);
-
-                        Parlor newParlor = new Parlor();
-                        newParlor.setMenuId(menu.getMenuId());
-                        newParlor.setMenu(newMenu);
-                        newParlor.setSurcharge(); // 필요한 값으로 설정
-                        newParlor.setRecomCapacity(); // 필요한 값으로 설정
-                        newParlor.setMaxCapacity(); // 필요한 값으로 설정
-                        parlors.add(newParlor);
-
-                        Room newRoom = new Room();
-                        newRoom.setMenu(newMenu);
-                        newRoom.setRoomId(); // 필요한 값으로 설정
-                        newRoom.setRoomNum(1); // 필요한 값으로 설정
-                        rooms.add(newRoom);
-                    }
-
-                    menuRepository.saveAll(menus);
-                    parlorRepository.saveAll(parlors);
-                    roomRepository.saveAll(rooms);
-
-                    myFileUtils.transferTo(pic, filePath);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePathMenu);
-                    myFileUtils.deleteFolder(delFolderPath, true);
-                    throw new RuntimeException(e);
-                }
-            }
-            return null;
-    }
- */
-
-
-
-
-
-
-
-
-
-
-
+//
