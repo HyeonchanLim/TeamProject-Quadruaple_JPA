@@ -88,7 +88,7 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
             userRepository.save(user);
 
             Role role = Role.builder()
-                    .id(new RoleId(UserRole.USER.getValue(), user.getUserId()))
+                    .id(new RoleId(UserRole.USER, user.getUserId()))
                     .user(user)
                     .role(UserRole.USER)
                     .grantedAt(LocalDateTime.now())

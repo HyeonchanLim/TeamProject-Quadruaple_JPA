@@ -1,11 +1,13 @@
 package com.green.project_quadruaple.user.Repository;
 
+import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.SignInProviderType;
 import com.green.project_quadruaple.entity.model.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -33,4 +35,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
         where strf.strfId = :strfId
         """)
     User findByStrfId(Long strfId);
+
+    @Query("select u from User u join Role r on r.user.userId=u.userId where r.role = :role")
+    List<User> findByRole(UserRole role);
+    @Query("select u from User u join Role r on r.user.userId=u.userId where r.role != :role")
+    List<User> findNotInRole(UserRole role);
 }

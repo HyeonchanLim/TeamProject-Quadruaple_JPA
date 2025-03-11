@@ -12,7 +12,7 @@ import lombok.*;
 @EqualsAndHashCode
 public class PointCardUpdateDto {
     @Schema(title="포인트 카드 PK")
-    private String pointCardId;
+    private Long pointCardId;
 
     @Schema(title="사용 가능 금액", example="50000")
     private int available;
