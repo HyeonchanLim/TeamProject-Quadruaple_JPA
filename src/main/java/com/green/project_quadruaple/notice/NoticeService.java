@@ -55,7 +55,7 @@ public class NoticeService {
     private final RoleRepository roleRepository;
 
     // 타임아웃 시간 설정
-    private static final long NOTICE_TIME_OUT = 60 * 1000L;
+    private static final long NOTICE_TIME_OUT = 3_600_000L; //1시간
     // 마지막 신규 알람 조회
     private LocalDateTime lastCheckedTime = LocalDateTime.now();
     // SSE 연결을 관리하는 저장소 (여러 유저 지원 가능)
@@ -92,6 +92,7 @@ public class NoticeService {
     }
 
     @Scheduled(fixedDelay = 3000) // 3초마다 새 알림 확인
+    @Transactional
     public void checkNewNotifications() {
         if(emitters.size()==0) { return; }
         List<Long> userIds = noticeRepository.getUsersWithNewNotices(lastCheckedTime);
@@ -102,8 +103,6 @@ public class NoticeService {
         }
         lastCheckedTime = LocalDateTime.now();
     }
-
-
 
 
     //테스트 알람 추가
