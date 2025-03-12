@@ -8,6 +8,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class Amenity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

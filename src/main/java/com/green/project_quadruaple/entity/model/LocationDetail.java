@@ -10,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@EqualsAndHashCode
 public class LocationDetail {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
