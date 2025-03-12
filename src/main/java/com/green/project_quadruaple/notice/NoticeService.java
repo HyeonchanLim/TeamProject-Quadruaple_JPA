@@ -55,7 +55,7 @@ public class NoticeService {
     private final RoleRepository roleRepository;
 
     // 타임아웃 시간 설정
-    private static final long NOTICE_TIME_OUT = 3_600_000L; //1시간
+    private static final long NOTICE_TIME_OUT = 45*1000L; //3_600_000L; //1시간
     // 마지막 신규 알람 조회
     private LocalDateTime lastCheckedTime = LocalDateTime.now();
     // SSE 연결을 관리하는 저장소 (여러 유저 지원 가능)
@@ -64,8 +64,9 @@ public class NoticeService {
     public SseEmitter subscribe() {
         Long userId=authenticationFacade.getSignedUserId();
         SseEmitter emitter = new SseEmitter(NOTICE_TIME_OUT);
-
-        if(userId!=null){ emitters.put(userId, emitter); }
+        log.info("subscribed userId: {}",userId);
+        if(userId!=null){ emitters.put(userId, emitter);
+            log.info("Stored in emitters: {}", emitters.containsKey(userId));}
         try {
             emitter.send(SseEmitter.event().name("INIT").data("연결 성공!"));
         } catch (IOException e) {
@@ -97,6 +98,7 @@ public class NoticeService {
         if(emitters.size()==0) { return; }
         List<Long> userIds = noticeRepository.getUsersWithNewNotices(lastCheckedTime);
         for (Long userId : userIds) {
+            log.info("noticed userId: {}",userId);
             sendNotification(userId);
             //발송 후 event table 정리
             noticeRepository.clearProcessedNotifications(userId);
