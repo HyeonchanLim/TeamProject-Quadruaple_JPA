@@ -46,9 +46,9 @@ public class RecentService {
         Long userId = authenticationFacade.getSignedUserId();
 
         User user = userRepository.findById(userId)
-                .orElseThrow( () -> new RuntimeException("user id not fount"));
+                .orElseThrow( () -> new RuntimeException("user id not found"));
         StayTourRestaurFest strf = strfRepository
-                .findById(strfId).orElseThrow( () -> new RuntimeException("strf id not fount"));
+                .findById(strfId).orElseThrow( () -> new RuntimeException("strf id not found"));
 
         int updatedRows = recentRepository.hideRecent(user.getUserId(),strf.getStrfId());
 
@@ -59,7 +59,7 @@ public class RecentService {
     public ResponseWrapper<Long> recentAllHide() {
         Long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId)
-                .orElseThrow( () -> new RuntimeException("user id not fount"));
+                .orElseThrow( () -> new RuntimeException("user id not found"));
         int updatedRows = recentRepository.hideAllRecent(user.getUserId());
         if (updatedRows == 0) {
             throw new RuntimeException("No recent records found for this user");

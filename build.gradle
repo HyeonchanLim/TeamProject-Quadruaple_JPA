@@ -24,6 +24,8 @@ repositories {
 }
 
 dependencies {
+    // api rate
+//    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:8.8.1'
     // .env
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
     // 유효성 검사 라이브러리 추가
