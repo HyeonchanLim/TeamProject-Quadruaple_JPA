@@ -1,0 +1,1 @@
+import{f as e,q as r}from"./index-LV_9s5-1.js";const i=e({key:"userAtom",default:{userId:0,email:"",name:"",profilePic:"",accessToken:"",providerType:r.LOCAL,role:[],tell:"",birth:""}});export{i as u};
