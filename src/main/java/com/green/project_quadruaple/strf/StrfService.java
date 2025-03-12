@@ -18,6 +18,7 @@ import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,7 @@ public class StrfService {
     private final UserRepository userRepository;
     private final RestDateRepository restDateRepository;
     private final AmenityRepository amenityRepository;
+    private final RedisTemplate redisTemplate;
 
     public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
 
@@ -128,6 +130,9 @@ public class StrfService {
         if (!isBusi) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
+
+        // Redis 를 이용해 location_detail_id 호출
+
 
         Long locationDetailId = locationDetailRepository.findByTitle(p.getLocationTitle())
                 .map(LocationDetail::getLocationDetailId)
