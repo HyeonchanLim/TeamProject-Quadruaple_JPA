@@ -44,8 +44,12 @@ public class BusinessReviewService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "사업자 권한이 없음.");
         }
 
-        int offset = (page - 1) * pageSize;
-        List<BusinessDto> reviews = reviewMapper.selectBusinessReview(signedUserId, page, pageSize, offset);
+        int startIdx = (page - 1) * pageSize;
+        if (startIdx < 0) startIdx = 0;
+
+        System.out.println("startIdx: " + startIdx + ", pageSize: " + pageSize); // 값 확인용
+
+        List<BusinessDto> reviews = reviewMapper.selectBusinessReview(signedUserId, page, pageSize, startIdx);
 
         for (BusinessDto review : reviews) {
             System.out.println("ReviewReplyId: " + review.getReviewReplyId()); // ✅ 로그 추가
@@ -88,12 +92,12 @@ public class BusinessReviewService {
         ReviewReply reviewReply = ReviewReply.builder()
                 .review(review)
                 .content(requestDto.getContent())
-                .createdAt(LocalDateTime.now())
                 .build();
 
         reviewReplyRepository.save(reviewReply);
         return reviewReply.getReplyId();
     }
+
 
 
 
@@ -116,7 +120,7 @@ public class BusinessReviewService {
         // 대댓글이 속한 리뷰 조회
         Review review = reviewReply.getReview();
 
-        // 리뷰가 속한 사업장의 strfId 조회
+        // 리뷰가 속한 사업장 strfId 조회
         Long strfId = review.getStayTourRestaurFest().getStrfId();
 
         // 해당 리뷰가 속한 사업자 번호 조회
@@ -130,14 +134,16 @@ public class BusinessReviewService {
 
         // 대댓글 내용 수정
         reviewReply.setContent(requestDto.getContent());
-        reviewReply.setUpdatedAt(LocalDateTime.now());
+        reviewReply.setUpdatedAt(LocalDateTime.now()); // UpdatedAt 상속 적용됨
 
         // 리뷰의 updatedAt 필드 업데이트
         review.setUpdatedAt(LocalDateTime.now());
 
+        // 변경 사항 저장
         reviewReplyRepository.save(reviewReply);
         reviewRepository.save(review);
     }
+
 
 
 
