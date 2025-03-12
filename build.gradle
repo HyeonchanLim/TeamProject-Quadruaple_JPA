@@ -24,8 +24,14 @@ repositories {
 }
 
 dependencies {
+//    // redis 설정
+//    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+//    // cache 설정
+//    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+
     // api rate
-//    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:8.8.1'
+    implementation 'com.bucket4j:bucket4j-core:8.10.1'
     // .env
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
     // 유효성 검사 라이브러리 추가

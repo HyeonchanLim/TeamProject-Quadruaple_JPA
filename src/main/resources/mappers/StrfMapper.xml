@@ -80,15 +80,23 @@
     </resultMap>
 
     <select id="strfMenu" resultMap="menuResultMap">
-        SELECT b.menu_id AS menuId , b.title AS menuTitle , b.price AS menuPrice , b.menu_pic AS menuPic
+        SELECT b.menu_id AS menuId , b.title AS menuTitle , b.price AS menuPrice , b.menu_pic AS menuPic ,
+        a.open_check_in AS openCheckIn , a.close_check_out AS closeCheckIn ,
+        c.max_capacity AS maxCapacity, c.recom_capacity AS recomCapacity
         FROM stay_tour_restaur_fest a
         LEFT JOIN menu b
         ON a.strf_id = b.strf_id
+        LEFT JOIN parlor c
+        ON b.menu_id = c.menu_id
         WHERE a.strf_id = #{strfId}
         GROUP BY a.strf_id , b.menu_id , b.title
     </select>
     <resultMap id="menuResultMap" type="com.green.project_quadruaple.strf.model.StrfMenu">
         <id property="strfId" column="strfId" />
+        <result property="openCheckIn" column="openCheckIn" />
+        <result property="closeCheckIn" column="closeCheckIn" />
+        <result property="maxCapacity" column="maxCapacity" />
+        <result property="recomCapacity" column="recomCapacity" />
         <result property="menuId" column="menuId" />
         <result property="menuTitle" column="menuTitle" />
         <result property="menuPrice" column="menuPrice" />

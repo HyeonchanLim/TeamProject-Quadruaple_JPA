@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class ReviewReply extends UpdatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

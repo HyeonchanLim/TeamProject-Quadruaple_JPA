@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class User extends CreatedAt {
 
     @Id

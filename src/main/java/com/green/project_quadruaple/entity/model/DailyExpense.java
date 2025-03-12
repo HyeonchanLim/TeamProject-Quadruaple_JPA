@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "daily_expense")
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class DailyExpense extends CreatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,7 +9,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class ReceiveCoupon extends CreatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

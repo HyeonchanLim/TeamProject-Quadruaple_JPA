@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 @Getter
 @Setter
 @ToString
@@ -20,5 +23,9 @@ public class StrfMenu {
     private String menuPic;
     @Schema(description = "상품 ID")
     private long strfId;
+    private LocalTime openCheckIn;
+    private LocalTime closeCheckIn;
+    private int maxCapacity;
+    private int recomCapacity;
 }
 

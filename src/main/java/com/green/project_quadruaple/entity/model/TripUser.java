@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class TripUser extends CreatedAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
