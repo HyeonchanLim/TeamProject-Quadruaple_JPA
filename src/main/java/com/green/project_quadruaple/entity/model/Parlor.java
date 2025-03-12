@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
+@EqualsAndHashCode
 public class Parlor {
     @Id
     private Long menuId;

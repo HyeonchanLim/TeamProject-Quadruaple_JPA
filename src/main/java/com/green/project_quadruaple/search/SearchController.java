@@ -8,6 +8,7 @@ import com.green.project_quadruaple.search.model.SearchCategoryRes;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -118,5 +119,11 @@ public class SearchController {
 
 //        ResponseWrapper<List<SearchStay>> list = searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
         return searchService.searchStayFilter(startIdx,category,searchWord,amenityId);
+    }
+
+    @GetMapping("/many")
+    public ResponseEntity<?> SearchManyOne (@Param("menu_id") long menuId){
+        ResponseWrapper<List<SearchManyOneDto>> many = searchService.SearchManyOne(menuId);
+        return ResponseEntity.ok(many);
     }
 }

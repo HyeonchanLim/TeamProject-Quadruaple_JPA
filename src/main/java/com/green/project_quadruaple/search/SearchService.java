@@ -244,4 +244,8 @@ public class SearchService {
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
     }
+    public ResponseWrapper<List<SearchManyOneDto>> SearchManyOne (long menuId){
+        List<SearchManyOneDto> many = searchMapper.SearchManyOne(menuId);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), many);
+    }
 }

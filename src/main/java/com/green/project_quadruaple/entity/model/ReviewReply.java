@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
+import com.green.project_quadruaple.entity.base.UpdatedAt;
 import com.green.project_quadruaple.review.reviewReply.ReviewReplyDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,7 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReviewReply extends CreatedAt {
+@EqualsAndHashCode(callSuper = true)
+public class ReviewReply extends UpdatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long replyId;
@@ -25,25 +27,6 @@ public class ReviewReply extends CreatedAt {
 
     @Column(nullable = false)
     private String content;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
-    public ReviewReplyDto toDto() {
-        return ReviewReplyDto.builder()
-                .replyId(this.replyId)
-                .reviewId(this.review.getReviewId())
-                .content(this.content)
-                .createdAt(this.createdAt)
-                .updatedAt(this.updatedAt) // ✅ updatedAt 추가
-                .build();
-    }
-
-
-
 
 
 }

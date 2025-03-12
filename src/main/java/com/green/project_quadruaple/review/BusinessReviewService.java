@@ -44,17 +44,39 @@ public class BusinessReviewService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "사업자 권한이 없음.");
         }
 
-        int offset = (page - 1) * pageSize;
-        List<BusinessDto> reviews = reviewMapper.selectBusinessReview(signedUserId, page, pageSize, offset);
+        int startIdx = (page - 1) * pageSize;
+        if (startIdx < 0) startIdx = 0;
+
+        System.out.println("startIdx: " + startIdx + ", pageSize: " + pageSize); // 값 확인용
+
+        // 전체 실행 시간 측정 시작
+        long startTime = System.currentTimeMillis();
+
+        // 쿼리 실행 시간 측정
+        long queryStartTime = System.currentTimeMillis();
+        List<BusinessDto> reviews = reviewMapper.selectBusinessReview(signedUserId, page, pageSize, startIdx);
+        long queryEndTime = System.currentTimeMillis();
+        System.out.println("쿼리 실행 시간: " + (queryEndTime - queryStartTime) + "ms");
 
         for (BusinessDto review : reviews) {
             System.out.println("ReviewReplyId: " + review.getReviewReplyId()); // ✅ 로그 추가
+
+            // 개별 리뷰에 대한 실행 시간 측정
+            long reviewStartTime = System.currentTimeMillis();
             List<ReviewPicDto> pics = reviewMapper.selectReviewPics(review.getReviewId());
+            long reviewEndTime = System.currentTimeMillis();
+            System.out.println("리뷰 ID " + review.getReviewId() + " 사진 로딩 시간: " + (reviewEndTime - reviewStartTime) + "ms");
+
             review.setReviewPicList(pics);
         }
 
+        // 전체 실행 시간 측정 종료
+        long endTime = System.currentTimeMillis();
+        System.out.println("전체 getBusinessReview 실행 시간: " + (endTime - startTime) + "ms");
+
         return reviews;
     }
+
 
 
 
@@ -88,12 +110,12 @@ public class BusinessReviewService {
         ReviewReply reviewReply = ReviewReply.builder()
                 .review(review)
                 .content(requestDto.getContent())
-                .createdAt(LocalDateTime.now())
                 .build();
 
         reviewReplyRepository.save(reviewReply);
         return reviewReply.getReplyId();
     }
+
 
 
 

@@ -73,17 +73,15 @@
 
     <resultMap id="RecentStrf" type="com.green.project_quadruaple.home.res.RecentStrf">
         <id property="category" column="category" />
-        <collection property="recent" resultMap="recent" />
-    </resultMap>
-
-    <resultMap id="recent" type="com.green.project_quadruaple.home.res.RecentDto">
-        <id property="strfId" column="strfId" />
-        <result property="strfTitle" column="strfTitle" />
-        <result property="strfPic" column="strfPic" />
-        <result property="locationName" column="locationName" />
-        <result property="wishIn" column="wishIn" />
-        <result property="averageRating" column="averageRating" />
-        <result property="wishCnt" column="wishCnt" />
+        <collection property="recent" ofType="com.green.project_quadruaple.home.res.RecentDto">
+            <id property="strfId" column="strfId" />
+            <result property="strfTitle" column="strfTitle" />
+            <result property="strfPic" column="strfPic" />
+            <result property="locationName" column="locationName" />
+            <result property="wishIn" column="wishIn" />
+            <result property="averageRating" column="averageRating" />
+            <result property="wishCnt" column="wishCnt" />
+        </collection>
     </resultMap>
 
     <select id="getRecent" resultMap="RecentStrf">
@@ -213,14 +211,12 @@
         <id property="name" column="name" />
         <result property="profilePic" column="profilePic" />
         <result property="couponCnt" column="couponCnt" />
-        <collection property="tripList" resultMap="tripList" />
-    </resultMap>
-
-    <resultMap id="tripList" type="com.green.project_quadruaple.home.res.UserTripDto">
-        <id property="tripId" column="tripId" />
-        <result property="locationPic" column="locationPic" />
-        <result property="title" column="title" />
-        <result property="dDay" column="dDay" />
+        <collection property="tripList" ofType="com.green.project_quadruaple.home.res.UserTripDto">
+            <id property="tripId" column="tripId" />
+            <result property="locationPic" column="locationPic" />
+            <result property="title" column="title" />
+            <result property="dDay" column="dDay" />
+        </collection>
     </resultMap>
 
     <select id="pushHamburger" resultMap="userInfo">

@@ -371,4 +371,23 @@
         <result property="createdAt" column="createdAt"/>
     </resultMap>
 
+    <select id="SearchManyOne" resultMap="manyOneResultMap">
+        SELECT a.menu_id AS menuId, b.max_capacity AS maxCapacity , b.recom_capacity AS recomCapacity ,
+        b.surcharge , c.room_id AS roomId , c.room_num AS roomNum
+        FROM menu a
+        JOIN parlor b
+        ON a.menu_id = b.menu_id
+        JOIN room c
+        ON a.menu_id = c.menu_id
+        WHERE a.menu_id = #{menuId}
+    </select>
+    <resultMap id="manyOneResultMap" type="com.green.project_quadruaple.search.model.SearchManyOneDto">
+        <id property="menuId" column="menuId"/>
+        <result property="maxCapacity" column="maxCapacity"/>
+        <result property="recomCapacity" column="recomCapacity"/>
+        <result property="surcharge" column="surcharge"/>
+        <result property="roomId" column="roomId"/>
+        <result property="roomNum" column="roomNum"/>
+    </resultMap>
+
 </mapper>

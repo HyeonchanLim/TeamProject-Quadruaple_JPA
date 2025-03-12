@@ -13,6 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Table(name = "sche_memo")
+@EqualsAndHashCode(callSuper = true)
 public class ScheduleMemo extends CreatedAt {
 
     @Id

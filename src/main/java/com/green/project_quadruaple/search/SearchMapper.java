@@ -41,5 +41,5 @@ public interface SearchMapper {
     int amenityCnt (List<Long> amenityId);
 //    List<SearchAmenity> searchAmenity(List<Long> amenityId);
 
-
+    List<SearchManyOneDto> SearchManyOne (long menuId);
 }

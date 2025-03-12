@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -35,41 +36,40 @@ public class ReviewService {
 
     @Value("${const.default-review-size}")
     private int size;
-    public List<ReviewSelRes> getReviewWithPics(Long strfId,int startIdx ) {
-        List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(strfId,startIdx, SizeConstants.getDefault_page_size());
+
+    public List<ReviewSelRes> getReviewWithPics(Long strfId, int startIdx) {
+        List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(strfId, startIdx, SizeConstants.getDefault_page_size());
         if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }
-//        boolean hasMore = dtoList.size() > size;
-//        if (hasMore) {
-//            dtoList.get(dtoList.size()-1).setMore(true);
-//            dtoList.remove(dtoList.size()-1);
-//        }
+
         Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
+
         for (ReviewSelRes item : dtoList) {
             ReviewSelRes review = reviewMap.get(item.getReviewId());
         }
         return dtoList;
     }
+
     public List<MyReviewSelRes> getMyReviews(int startIdx) {
         Long userId = authenticationFacade.getSignedUserId();
-//        int more = 1;
-        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(userId,startIdx,SizeConstants.getDefault_page_size());
+        long startTime = System.currentTimeMillis(); // 요청 시작
+        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(userId, startIdx, SizeConstants.getDefault_page_size());
         if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }
-//        boolean hasMore = dtoList.size() > size;
-//        if (hasMore) {
-//            dtoList.get(dtoList.size()-1).setMore(true);
-//            dtoList.remove(dtoList.size()-1);
-//        }
         Map<Long, MyReviewSelRes> reviewMap = new LinkedHashMap<>();
         for (MyReviewSelRes item : dtoList) {
-            // 기존 리뷰 ID로 저장된 객체가 있는지 확인
             MyReviewSelRes review = reviewMap.get(item.getReviewId());
         }
+        long endTime = System.currentTimeMillis(); // 요청값 전달 종료 시간
+        long executionTime = endTime - startTime; // 종료시간 - 시작 시간 = 최종 시간
+
+        System.out.println("쿼리 실행 시간: " + executionTime + "ms");
         return dtoList;
+
     }
+
 
 //    @Transactional
 //    public int postRating(List<MultipartFile> pics, ReviewPostReq p) {
@@ -158,10 +158,8 @@ public class ReviewService {
                 .reviewId(reviewId)
                 .pics(picNameList)
                 .build();
+
     }
-
-
-
 
 //    @Transactional
 //    public ResponseEntity<ResponseWrapper<Integer>> updateReview(List<MultipartFile> pics, ReviewUpdReq p) {

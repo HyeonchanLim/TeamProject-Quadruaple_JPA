@@ -2,10 +2,7 @@ package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
@@ -13,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "daily_expense")
+@EqualsAndHashCode(callSuper = true)
 public class DailyExpense extends CreatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

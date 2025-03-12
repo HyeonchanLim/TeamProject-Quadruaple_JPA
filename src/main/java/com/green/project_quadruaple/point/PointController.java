@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.point;
 
+import com.green.project_quadruaple.booking.model.BookingRefundReq;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
@@ -75,7 +76,13 @@ public class PointController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
-    @PostMapping
+    @GetMapping("use")
+    @Operation(summary = "QR코드 인증시 보일 화면")
+    public ResponseEntity<?> QRscanned(@RequestParam("strf_id") long strfId) {
+        return pointService.QRscanned(strfId);
+    }
+
+    @PostMapping("history")
     @Operation(summary = "포인트 사용 혹은 사용취소",
             description = "category가 0이면 사용(relatedId는 상품id), 2면 취소(relatedId는 pointHistoryId), amount는 얼마나 사용했나 혹은 취소되어 들어왔나")
     public ResponseEntity<?> useOrUnUsePoint(@RequestBody PointHistoryPostReq p) {
@@ -102,5 +109,11 @@ public class PointController {
     @GetMapping("/pay-approve")
     public String approve(@RequestParam("pg_token") String pgToken){
         return "redirect:" + pointService.approveBuy(pgToken);
+    }
+
+    @PostMapping("card/refund")
+    @Operation(summary = "포인트 구매취소")
+    public ResponseWrapper<String> refundPoint(@RequestParam long pointHistoryId) {
+        return pointService.refundPoint(pointHistoryId);
     }
 }

@@ -104,12 +104,16 @@ kakao-api-const:
   secret-key : ${SECRET_KEY}
   affiliate-code : ${AFFILIATE_CODE}
   url: https://open-api.kakaopay.com
-  approval_url: "http://localhost:8080/api/booking/pay-approve"
-  cancel_url: "http://localhost:8080/api/booking/kakaoPayCancle"
-  fail_url: "http://localhost:8080/api/booking/kakaoPayFail"
-  complete_url: "http://localhost:8080/booking/complete"
+  booking_approval_url: "http://localhost:8080/api/booking/pay-approve" #booking
+  booking_cancel_url: "http://localhost:8080/api/booking/kakaoPayCancle"
+  booking_fail_url: "http://localhost:8080/api/booking/kakaoPayFail"
+  booking_complete_url: "http://localhost:8080/booking/complete"
+  point_approval_url: "http://localhost:8080/api/point/pay-approve" #point
+  point_cancel_url: "http://localhost:8080/api/point/kakaoPayCancle"
+  point_fail_url: "http://localhost:8080/api/point/kakaoPayFail"
+  point_complete_url: "http://localhost:8080/point/complete"
 add-user-link: "http://localhost:8080/api/trip/user"
-#MyBatis ??
+#MyBatis
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
@@ -128,7 +132,6 @@ springdoc:
     tags-sorter: alpha
   cache:
     disabled: true
-
 
 
 weather-api-const:

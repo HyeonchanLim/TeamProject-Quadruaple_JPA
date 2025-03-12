@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Table(
         name = "chat_join"
 )
+@EqualsAndHashCode
 public class ChatJoin {
 
     @Id

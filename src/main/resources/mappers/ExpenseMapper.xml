@@ -80,12 +80,11 @@
         <result property="paidFor" column="paidFor" />
         <result property="totalPrice" column="totalPrice" />
         <result property="myPrice" column="myPrice" />
-        <collection property="paidUserInfoList" resultMap="InsedUserList" />
-    </resultMap>
-    <resultMap id="InsedUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUserInfo">
-        <id property="userId" column="userId" />
-        <result property="name" column="name" />
-        <result property="profilePic" column="profilePic"/>
+        <collection property="paidUserInfoList" ofType="com.green.project_quadruaple.expense.model.dto.PaidUserInfo">
+            <id property="userId" column="userId" />
+            <result property="name" column="name" />
+            <result property="profilePic" column="profilePic"/>
+        </collection>
     </resultMap>
 
 
@@ -108,14 +107,12 @@
         <id property="deId" column="deId" />
         <result property="paidFor" column="paidFor" />
         <result property="totalPrice" column="totalPrice" />
-        <collection property="payList" resultMap="payList" />
-    </resultMap>
-
-    <resultMap id="payList" type="com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto">
-        <id property="userId" column="userId" />
-        <result property="name" column="name" />
-        <result property="profilePic" column="profilePic" />
-        <result property="price" column="price" />
+        <collection property="payList" ofType="com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto">
+            <id property="userId" column="userId" />
+            <result property="name" column="name" />
+            <result property="profilePic" column="profilePic" />
+            <result property="price" column="price" />
+        </collection>
     </resultMap>
 
     <select id="selExpenseOne" resultMap="expenseOne">
