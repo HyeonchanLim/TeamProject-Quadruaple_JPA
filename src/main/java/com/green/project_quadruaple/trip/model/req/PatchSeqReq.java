@@ -15,24 +15,24 @@ public class PatchSeqReq {
 
     @NotNull
     @Schema(title = "여행 ID", type = "long", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    private long tripId;
+    private Long tripId;
 
     @NotNull
     @Schema(title = "일정 ID", type = "long", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    private long scheduleId;
+    private Long scheduleId;
 
     @NotNull
     @Schema(title = "기존 day", type = "int", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    private int originDay;
+    private Integer originDay;
 
     @Schema(title = "변경된 후의 day", type = "int", example = "2", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Integer destDay;
 
     @NotNull
     @Schema(title = "기존 seq", type = "int", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    private int originSeq;
+    private Integer originSeq;
 
     @NotNull
     @Schema(title = "변경된 후의 seq", type = "int", example = "3", requiredMode = Schema.RequiredMode.REQUIRED)
-    private int destSeq;
+    private Integer destSeq;
 }

@@ -4,6 +4,7 @@ import com.green.project_quadruaple.datamanager.model.ReviewRandomReq;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
 import com.green.project_quadruaple.datamanager.model.StrfReviewGetReq;
 import com.green.project_quadruaple.datamanager.model.UserProfile;
+import com.green.project_quadruaple.entity.model.Room;
 
 import java.util.List;
 import java.util.Map;

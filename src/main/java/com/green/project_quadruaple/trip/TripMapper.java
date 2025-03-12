@@ -36,7 +36,6 @@ public interface TripMapper {
     void delTripScheMemo(List<Long> scheduleIdList);
     void delTripLocation(long tripId, List<Long> locationList);
 
-
     // getIncomplete
     List<Long> selScheduleUserId(long tripId, List<Long> userIdList);
     long selStrfLocationId(long strfId);

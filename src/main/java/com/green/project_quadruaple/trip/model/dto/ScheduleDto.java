@@ -10,9 +10,9 @@ import lombok.ToString;
 @ToString
 public class ScheduleDto {
 
-    private long scheduleMemoId;
+    private Long scheduleMemoId;
     private String scheOrMemo;
-    private int seq;
+    private Integer seq;
     private Long distance;
     private Long duration;
     private Long strfId;
@@ -22,7 +22,7 @@ public class ScheduleDto {
     private String lat;
     private String lng;
     private Integer pathType;
-    private long tripId;
+    private Long tripId;
     private String title;
     private String content;
     private Long reviewed;
