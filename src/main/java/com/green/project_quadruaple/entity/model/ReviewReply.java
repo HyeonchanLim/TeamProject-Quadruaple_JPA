@@ -28,5 +28,4 @@ public class ReviewReply extends UpdatedAt {
     private String content;
 
 
-
 }
