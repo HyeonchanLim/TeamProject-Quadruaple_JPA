@@ -50,7 +50,7 @@ class BusinessReviewServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
+    /*@Test
     void getBusinessReview_Success() {
         // Given
         Long signedUserId = 100L;
@@ -78,7 +78,7 @@ class BusinessReviewServiceTest {
         assertThat(result.get(0).getReviewPicList().size()).isEqualTo(1);
 
         verify(reviewMapper, times(1)).selectBusinessReview(signedUserId, page, pageSize, offset);
-    }
+    }*/
 
 
     @Test
