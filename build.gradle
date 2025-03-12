@@ -24,10 +24,10 @@ repositories {
 }
 
 dependencies {
-//    // redis 설정
-//    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-//    // cache 설정
-//    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    // redis 설정
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    // cache 설정
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
 
 
     // api rate
