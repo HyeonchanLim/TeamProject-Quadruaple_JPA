@@ -49,16 +49,34 @@ public class BusinessReviewService {
 
         System.out.println("startIdx: " + startIdx + ", pageSize: " + pageSize); // 값 확인용
 
+        // 전체 실행 시간 측정 시작
+        long startTime = System.currentTimeMillis();
+
+        // 쿼리 실행 시간 측정
+        long queryStartTime = System.currentTimeMillis();
         List<BusinessDto> reviews = reviewMapper.selectBusinessReview(signedUserId, page, pageSize, startIdx);
+        long queryEndTime = System.currentTimeMillis();
+        System.out.println("쿼리 실행 시간: " + (queryEndTime - queryStartTime) + "ms");
 
         for (BusinessDto review : reviews) {
             System.out.println("ReviewReplyId: " + review.getReviewReplyId()); // ✅ 로그 추가
+
+            // 개별 리뷰에 대한 실행 시간 측정
+            long reviewStartTime = System.currentTimeMillis();
             List<ReviewPicDto> pics = reviewMapper.selectReviewPics(review.getReviewId());
+            long reviewEndTime = System.currentTimeMillis();
+            System.out.println("리뷰 ID " + review.getReviewId() + " 사진 로딩 시간: " + (reviewEndTime - reviewStartTime) + "ms");
+
             review.setReviewPicList(pics);
         }
 
+        // 전체 실행 시간 측정 종료
+        long endTime = System.currentTimeMillis();
+        System.out.println("전체 getBusinessReview 실행 시간: " + (endTime - startTime) + "ms");
+
         return reviews;
     }
+
 
 
 
@@ -120,7 +138,7 @@ public class BusinessReviewService {
         // 대댓글이 속한 리뷰 조회
         Review review = reviewReply.getReview();
 
-        // 리뷰가 속한 사업장 strfId 조회
+        // 리뷰가 속한 사업장의 strfId 조회
         Long strfId = review.getStayTourRestaurFest().getStrfId();
 
         // 해당 리뷰가 속한 사업자 번호 조회
@@ -134,16 +152,14 @@ public class BusinessReviewService {
 
         // 대댓글 내용 수정
         reviewReply.setContent(requestDto.getContent());
-        reviewReply.setUpdatedAt(LocalDateTime.now()); // UpdatedAt 상속 적용됨
+        reviewReply.setUpdatedAt(LocalDateTime.now());
 
         // 리뷰의 updatedAt 필드 업데이트
         review.setUpdatedAt(LocalDateTime.now());
 
-        // 변경 사항 저장
         reviewReplyRepository.save(reviewReply);
         reviewRepository.save(review);
     }
-
 
 
 
