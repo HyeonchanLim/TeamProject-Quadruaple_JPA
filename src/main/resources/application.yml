@@ -113,7 +113,7 @@ kakao-api-const:
   point_fail_url: "http://localhost:8080/api/point/kakaoPayFail"
   point_complete_url: "http://localhost:8080/point/complete"
 add-user-link: "http://localhost:8080/api/trip/user"
-#MyBatis ??
+#MyBatis
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
@@ -132,7 +132,6 @@ springdoc:
     tags-sorter: alpha
   cache:
     disabled: true
-
 
 
 weather-api-const:
