@@ -30,9 +30,6 @@ public class KakaoReadyDto {
     private String partnerUserId;
 
     @JsonIgnore
-    private PointHistoryPostReq req;
-
-    @JsonIgnore
     private PointHistory pointHistory;
 
     @JsonIgnore

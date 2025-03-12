@@ -10,4 +10,5 @@ public class QRPointRes {
     private String strfTitle;
     private double lat;
     private double lng;
+    private int amount;
 }

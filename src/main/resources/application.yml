@@ -21,6 +21,7 @@ file:
   directory: ${FILE_DIR}
 
 const:
+  point-qr-code-url: "http://localhost:8080/api/point/use?strf_id="
   default-review-size: 10
   default-search-size: 10
 
