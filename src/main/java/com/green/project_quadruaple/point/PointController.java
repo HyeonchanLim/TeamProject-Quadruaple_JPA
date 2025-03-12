@@ -76,7 +76,13 @@ public class PointController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
-    @PostMapping
+    @GetMapping("use")
+    @Operation(summary = "QR코드 인증시 보일 화면")
+    public ResponseEntity<?> QRscanned(@RequestParam("strf_id") long strfId) {
+        return pointService.QRscanned(strfId);
+    }
+
+    @PostMapping("history")
     @Operation(summary = "포인트 사용 혹은 사용취소",
             description = "category가 0이면 사용(relatedId는 상품id), 2면 취소(relatedId는 pointHistoryId), amount는 얼마나 사용했나 혹은 취소되어 들어왔나")
     public ResponseEntity<?> useOrUnUsePoint(@RequestBody PointHistoryPostReq p) {

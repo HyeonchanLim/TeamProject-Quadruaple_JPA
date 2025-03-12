@@ -20,8 +20,11 @@ import com.green.project_quadruaple.point.model.res.PointCardProductRes;
 import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
 import com.green.project_quadruaple.point.model.dto.PointCardUpdateDto;
 import com.green.project_quadruaple.point.model.res.PointHistoryListReq;
+import com.green.project_quadruaple.point.model.res.QRPointRes;
+import com.green.project_quadruaple.strf.StrfRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -55,6 +58,7 @@ public class PointService {
     private final PointHistoryRepository pointHistoryRepository;
     private final PointViewRepository pointViewRepository;
     private final AuthenticationFacade authenticationFacade;
+    private final StrfRepository strfRepository;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
 
@@ -162,10 +166,11 @@ public class PointService {
     }
 
     // point 사용 혹은 사용취소
+    @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> useOrUnUsePoint(PointHistoryPostReq p) {
         long userId = authenticationFacade.getSignedUserId();
         int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId);
-        remainPoint = p.getCategory() == 0 ? remainPoint - p.getAmount() : remainPoint + p.getAmount();
+        remainPoint = p.getCategory() == 2 ? remainPoint + p.getAmount() : remainPoint - p.getAmount();
         if (remainPoint < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_Acceptable.getCode(), null));
@@ -180,6 +185,16 @@ public class PointService {
         pointHistoryRepository.save(pointHistory);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), pointHistory.getRemainPoint()));
     }
+
+    //QR코드 확인시 보일 화면
+    public ResponseEntity<ResponseWrapper<QRPointRes>> QRscanned(long strfId){
+        long userId = authenticationFacade.getSignedUserId();
+        int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId);
+        StayTourRestaurFest strf=strfRepository.findById(strfId).get();
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode()
+                , new QRPointRes(remainPoint,strf.getTitle(),strf.getLat(),strf.getLng())));
+    }
+
 
     // 보유 포인트 확인화면
     public ResponseEntity<ResponseWrapper<PointHistoryListReq>> checkMyRemainPoint

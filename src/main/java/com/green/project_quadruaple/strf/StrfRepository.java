@@ -39,6 +39,8 @@ public interface StrfRepository extends JpaRepository<StayTourRestaurFest, Long>
             "WHERE u.userId = :userId")
     List<StayTourRestaurFest> findByStrfIdList (Long userId);
 
+    String findTitleById(Long id);
+
     boolean existsByTitle(String title);
     boolean existsByTell(String title);
 }
