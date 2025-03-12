@@ -11,6 +11,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class Notice extends CreatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

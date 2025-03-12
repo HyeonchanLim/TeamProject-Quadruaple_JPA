@@ -11,6 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class ReviewPic {
     @EmbeddedId
     private ReviewPicId id;
