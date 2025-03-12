@@ -284,7 +284,7 @@ public class PointService {
                 int amount = p.getAmount();
                 PointHistoryPostReq req = new PointHistoryPostReq(1, amount, p.getPointCardId());
                 PointHistory pointHistory = PointHistory.builder()
-                        .tid(p.getTid())
+                        .tid(kakaoReadyDto.getTid())
                         .remainPoint(remainPoint + amount)
                         .amount(amount)
                         .user(user)
@@ -365,10 +365,10 @@ public class PointService {
             int refundPrice = wasBought.getFinalPayment();
 
             PointHistory refundHistory=PointHistory.builder()
-                    .remainPoint(remainPoint-refundPrice)
+                    .remainPoint(remainPoint-pointHistory.getAmount())
                     .relatedId(pointHistoryId)
                     .amount(boughtPoint)
-                    .category(0)
+                    .category(2)
                     .user(userRepository.findById(userId).get())
                     .build();
             pointHistoryRepository.saveAndFlush(refundHistory);
