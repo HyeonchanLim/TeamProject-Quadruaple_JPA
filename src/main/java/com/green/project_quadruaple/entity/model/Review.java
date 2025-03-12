@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class Review extends UpdatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

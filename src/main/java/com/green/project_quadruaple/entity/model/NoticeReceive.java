@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class NoticeReceive extends CreatedAt {
     @EmbeddedId
     private NoticeReceiveId id;

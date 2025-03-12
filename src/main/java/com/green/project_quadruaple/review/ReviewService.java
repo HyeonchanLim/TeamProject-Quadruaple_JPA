@@ -42,12 +42,9 @@ public class ReviewService {
         if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }
-//        boolean hasMore = dtoList.size() > size;
-//        if (hasMore) {
-//            dtoList.get(dtoList.size()-1).setMore(true);
-//            dtoList.remove(dtoList.size()-1);
-//        }
+
         Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
+
         for (ReviewSelRes item : dtoList) {
             ReviewSelRes review = reviewMap.get(item.getReviewId());
         }
@@ -70,6 +67,7 @@ public class ReviewService {
 
         System.out.println("쿼리 실행 시간: " + executionTime + "ms");
         return dtoList;
+
     }
 
 
@@ -160,6 +158,7 @@ public class ReviewService {
                 .reviewId(reviewId)
                 .pics(picNameList)
                 .build();
+
     }
 
 //    @Transactional
