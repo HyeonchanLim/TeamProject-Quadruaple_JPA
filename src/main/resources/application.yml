@@ -24,7 +24,43 @@ const:
   default-review-size: 10
   default-search-size: 10
 
+#spring:
+#  cache:
+#    type: redis
+#    redis:
+#      time-to-live: 600000  # 캐시 데이터 기본 TTL (ms) -> 10분
+#      cache-null-values: false  # null 값 캐싱 방지 (권장)
+#      use-key-prefix: true  # 캐시 키에 prefix 추가 (Redis 네임스페이스 정리)
+#      key-prefix: "cache:"  # 캐시 키 Prefix 지정 (예: "cache:amenities")
+
 spring:
+  data:
+    redis:
+      host: localhost     # redis 서버 주소
+      port: 6379          # redis 포트
+      password:           # 필요하면 비번 추가
+      timeout: 6000       #연결 타임아웃 (ms)
+      lettuce:
+        pool:
+          max-active: 16   # 최대 활성 연결 수
+          max-idle: 8     # 최대 유효 연결 수
+          min-idle: 2     # 최소 유효 연결 수
+          max-wait: 5000    # 최대 대기 시간 (최대 5000ms 대기 후 요청이 지연되면 예외 발생)
+  cache:
+    type: redis
+  devtools:
+    livereload.enabled: true
+    restart.enabled: true
+  session:
+    store-type: redis #세션을 Redis 에 저장
+    redis:
+      namespace: session # Redis 에 저장할 세션 데이터의 네임스페이스
+      timeout: 1800 # 세션 타임아웃 (초 단위)
+      configure-action: NONE # store-type: redis 은 구 버전 , 최신 버전에서는 현재 코드 사용 , 이걸 사용하면 redis 설정이 자동 적용됨
+#      flush-mode: on_save  # 세션이 저장될 때만 Redis에 저장
+#      save-mode: on_set_attribute  # 세션 속성이 변경될 때만 Redis 저장
+
+
   profiles:
     active: secret
   application:
@@ -137,3 +173,6 @@ springdoc:
 weather-api-const:
   api-key: ${WEATHER_API_KEY}
   base-url: http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
+
+
+
