@@ -132,7 +132,7 @@
         SELECT role FROM role WHERE user_id = #{userId} AND role = 'BUSI' LIMIT 1
     </select>
 
-    <select id="selectBusinessReview" parameterType="map" resultType="com.green.project_quadruaple.review.model.BusinessDto">
+    <!--<select id="selectBusinessReview" parameterType="map" resultType="com.green.project_quadruaple.review.model.BusinessDto">
         WITH UserBusiness AS (
         SELECT busi_num FROM business_num WHERE user_id = #{userId}
         ),
@@ -203,7 +203,48 @@
         AND r.review_id IS NOT NULL
         ORDER BY s.strf_id ASC, r.review_id DESC
         LIMIT #{pageSize} OFFSET #{offset};
+    </select>-->
+
+    <select id="selectBusinessReview" parameterType="map" resultType="com.green.project_quadruaple.review.model.BusinessDto">
+        SELECT
+        T1.*,
+        T2.title AS pic
+        FROM (
+        SELECT
+        a.review_id AS reviewId,
+        a.strf_id AS strfId,
+        a.content,
+        a.rating,
+        a.user_id AS writerUserId,
+        a.created_at AS reviewCreatedAt,
+        COALESCE(a.updated_at, a.created_at) AS reviewWriteDate,
+        c.name AS writerUserName,
+        c.profile_pic AS writerUserPic,
+        b.title AS strfTitle,
+        COUNT(r2.review_id) AS userWriteReviewCnt,
+        COUNT(DISTINCT w.user_id) AS wishCnt,
+        ROUND(AVG(r3.rating), 1) AS ratingAvg,
+        rr.reply_id AS reviewReplyId,
+        rr.content AS reviewReply,
+        rr.created_at AS reviewReplyCreatedAt
+        FROM review a
+        LEFT JOIN user c ON a.user_id = c.user_id
+        LEFT JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        LEFT JOIN business_num bn ON b.busi_num = bn.busi_num
+        LEFT JOIN review r2 ON a.user_id = r2.user_id  -- 유저가 작성한 리뷰 개수
+        LEFT JOIN wishlist w ON a.strf_id = w.strf_id  -- 위시리스트 개수
+        LEFT JOIN review r3 ON a.strf_id = r3.strf_id  -- 리뷰 평균 평점
+        LEFT JOIN review_reply rr ON a.review_id = rr.review_id
+        WHERE bn.user_id = #{userId}
+        GROUP BY a.review_id, a.strf_id, a.content, a.rating, a.user_id,
+        a.created_at, a.updated_at, c.name, c.profile_pic, b.title,
+        rr.reply_id, rr.content, rr.created_at
+        ORDER BY a.review_id DESC, a.created_at DESC
+        LIMIT #{startIdx}, #{pageSize}
+        ) T1
+        LEFT JOIN review_pic T2 ON T1.reviewId = T2.review_id
     </select>
+
 
 
 
