@@ -240,10 +240,11 @@
         a.created_at, a.updated_at, c.name, c.profile_pic, b.title,
         rr.reply_id, rr.content, rr.created_at
         ORDER BY a.review_id DESC, a.created_at DESC
-        LIMIT #{startIdx}, #{pageSize}
+        LIMIT #{pageSize} OFFSET #{startIdx}
         ) T1
         LEFT JOIN review_pic T2 ON T1.reviewId = T2.review_id
     </select>
+
 
 
 
