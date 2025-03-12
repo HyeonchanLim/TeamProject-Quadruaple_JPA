@@ -72,10 +72,10 @@ public class DataController {
         return dataService.updateInvalidProfilePics();
     }
 
-    @PostMapping("ins-room-parlor")
-    public ResultResponse insRoom(@RequestBody String code) {
-        return dataService.insRoom(code);
-    }
+//    @PostMapping("ins-room-parlor")
+//    public ResultResponse insRoom(@RequestBody String code) {
+//        return dataService.insRoom(code);
+//    }
 
 //    @PostMapping("create-jpa-data")
 //    @Operation(summary = "JPA 엔티티를 이용한 더미 데이터 생성",
@@ -83,5 +83,15 @@ public class DataController {
 //    public ResultResponse createJpaData() {
 //        return dataService.createJpaData();
 //    }
+
+    @PostMapping("ins-parlor")
+    public ResultResponse insParlor(String code) {
+        return dataService.insParlor(code);
+    }
+
+    @PostMapping("ins-room")
+    public ResultResponse insRoom(String code) {
+        return dataService.insRoom(code);
+    }
 
 }
