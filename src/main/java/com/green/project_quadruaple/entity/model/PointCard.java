@@ -1,10 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Random;
 
@@ -13,6 +10,7 @@ import java.util.Random;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class PointCard {
 
     @Id

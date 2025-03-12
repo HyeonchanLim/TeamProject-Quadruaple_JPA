@@ -11,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@EqualsAndHashCode
 public class BusinessNum extends CreatedAt {
 
     @Id

@@ -20,6 +20,7 @@ import java.time.LocalTime;
 @Table(name = "stay_tour_restaur_fest")
 @Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@EqualsAndHashCode
 public class StayTourRestaurFest extends UpdatedAt {
 
     @Id

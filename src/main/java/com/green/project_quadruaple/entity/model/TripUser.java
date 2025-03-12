@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class TripUser extends CreatedAt {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
