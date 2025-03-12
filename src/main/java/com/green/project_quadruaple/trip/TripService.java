@@ -53,14 +53,10 @@ public class TripService {
     private final ObjectMapper objectMapper;
     private final WeatherApiCall weatherApiCall;
     private final NoticeService noticeService;
-    private final LocationRepository locationRepository;
     private final UserRepository userRepository;
     private final TripRepository tripRepository;
     private final TripLocationRepository tripLocationRepository;
     private final TripUserRepository tripUserRepository;
-
-
-    private final String ADD_USER_LINK;
 
     public static final Map<String, Long> addUserLinkMap = new HashMap<>();
     private final NoticeRepository noticeRepository;
@@ -70,10 +66,8 @@ public class TripService {
                        OdsayApiConst odsayApiConst,
                        WebClient webClient,
                        ObjectMapper objectMapper,
-                       @Value("${add-user-link}") String ADD_USER_LINK,
                        WeatherApiCall weatherApiCall,
                        NoticeService noticeService,
-                       LocationRepository locationRepository,
                        UserRepository userRepository,
                        TripRepository tripRepository,
                        TripLocationRepository tripLocationRepository,
@@ -83,10 +77,8 @@ public class TripService {
         this.odsayApiConst = odsayApiConst;
         this.webClient = webClient;
         this.objectMapper = objectMapper;
-        this.ADD_USER_LINK = ADD_USER_LINK;
         this.weatherApiCall = weatherApiCall;
         this.noticeService = noticeService;
-        this.locationRepository= locationRepository;
         this.userRepository = userRepository;
         this.tripRepository = tripRepository;
         this.tripLocationRepository = tripLocationRepository;
@@ -504,13 +496,16 @@ public class TripService {
     /*
     * 일정메모 순서 변경
     * */
+    @Transactional
     public ResultResponse patchSeq(PatchSeqReq req) {
         long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         long tripId = req.getTripId();
+
         Long managerId = tripMapper.selTripManagerId(tripId);
         if(signedUserId != managerId) {
             return ResultResponse.forbidden();
         }
+
         long scheduleId = req.getScheduleId();
         int originSeq = req.getOriginSeq();
         int destSeq = req.getDestSeq();
@@ -543,8 +538,8 @@ public class TripService {
 
             /*
             * 기본 로직
-            * 1. (완료)A의 원래 자리의 다음 일정 거리, 시간, 수단을 원래 자리의 이전 일정 위치로 계산.
-            * 2. A의 변경된 위치의 이전 일정과 거리, 시간, 수단을 재 계산
+            * 1. A의 원래 자리의 다음 일정 거리, 시간, 수단을 원래 자리의 이전 일정 위치로 계산.
+            * 2. A의 변경된 위치의 이전 일정과의 거리, 시간, 수단을 재 계산
             * 3. A의 변경된 위치의 다음 일정의 거리, 시간, 수단을 재 계산
             *
             * A의 원래 자리가 첫 일정이라면 (위치가 변동된 일정은 A)
@@ -562,20 +557,22 @@ public class TripService {
             if(!notFirst) { // 원래 자리가 첫 일정이라면
                 tripMapper.updateSchedule(false, scheduleDto.getNextScheduleId(), 0, 0, 0);
             } else if (scheduleDto.getNextScheduleStrfId() != null) { // 원래 자리가 마지막 일정이 아니라면
-                // 원래 자리의 다음 일정 거리, 시간, 수단을 원래 자리의 이전 일정 위치로 계산.
+                // 원래 자리의 다음 일정 거리, 시간, 수단을 원래 자리의 이전 일정 위치로 계산
                 setSchedulePath(true, scheduleDto.getPrevScheduleStrfId(), scheduleDto.getNextScheduleStrfId(), scheduleDto.getNextScheduleId());
             }
 
             // 여기서 부터는 목적지의 변경
             scheduleDto = tripMapper.selScheduleAndScheMemoByScheduleId(scheduleId, tripId); // 변경된 위치의 정보로 새로 불러옴
-            if(!scheduleDto.isNotFirst()) {
+            if(!scheduleDto.isNotFirst()) { // 목적지가 첫 일정이라면
                 tripMapper.updateSchedule(false, scheduleDto.getScheduleMemoId(), 0, 0, 0);
             } else if(scheduleDto.getNextScheduleStrfId() != null) {
-                // A의 변경된 위치의 다음 일정의 거리, 시간, 수단을 재 계산
-                setSchedulePath(true, scheduleDto.getStrfId(), scheduleDto.getNextScheduleStrfId(), scheduleDto.getNextScheduleId());
-
-                // A의 변경된 위치의 이전 일정과 거리, 시간, 수단을 재 계산
+                // A의 변경된 위치의 이전 일정과의 거리, 시간, 수단을 재 계산
                 setSchedulePath(true, scheduleDto.getPrevScheduleStrfId(), scheduleDto.getStrfId(), scheduleId);
+            }
+
+            // A의 변경된 위치의 다음 일정의 거리, 시간, 수단을 재 계산
+            if(scheduleDto.getNextScheduleId() != null) { //
+                setSchedulePath(true, scheduleDto.getStrfId(), scheduleDto.getNextScheduleStrfId(), scheduleDto.getNextScheduleId());
             }
         } catch (Exception e) {
             e.printStackTrace();

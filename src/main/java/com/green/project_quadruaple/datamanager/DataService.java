@@ -6,8 +6,6 @@ import com.green.project_quadruaple.booking.repository.ParlorRepository;
 import com.green.project_quadruaple.booking.repository.RoomRepository;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
-import com.green.project_quadruaple.common.config.jwt.UserRole;
-import com.green.project_quadruaple.common.config.security.SignInProviderType;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.datamanager.model.*;
@@ -20,9 +18,9 @@ import com.green.project_quadruaple.trip.ScheMemoRepository;
 import com.green.project_quadruaple.trip.ScheduleRepository;
 import com.green.project_quadruaple.trip.TripRepository;
 import com.green.project_quadruaple.trip.TripUserRepository;
+import com.green.project_quadruaple.trip.model.Category;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
-import com.green.project_quadruaple.user.model.UserSignUpReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -37,9 +35,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 
 @Log4j2
@@ -539,57 +534,136 @@ public class DataService {
     }
 
 
+//    @Transactional
+//    public ResultResponse insRoom(String code) {
+//
+//        if (!code.equals("wooks")) {
+//            return ResultResponse.forbidden();
+//        }
+//        long[] menuIds = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+//                21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+//                41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+//                61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+//                81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
+//                101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115,
+//                116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
+//                131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145,
+//                146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
+//                161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
+//                176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190,
+//                191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205,
+//                206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220,
+//                221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235,
+//                236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250,
+//                251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265,
+//                266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280,
+//                281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297};
+//
+//
+//        int[] roomNums = {101, 102, 103, 104, 105, 201, 202, 203, 204, 205, 206, 301, 302, 303, 304};
+//        for (long id : menuIds) {
+//            Menu menu = menuRepository.findById(id).orElse(null);
+//            if (menu == null) {
+//                return ResultResponse.severError();
+//            }
+//
+//            int recomCapacity = (int) (Math.random() * 10) + 1;
+//            int maxCapacity = recomCapacity + 3;
+//
+//            Parlor parlor = Parlor.builder()
+//                    .menu(menu)
+//                    .recomCapacity(recomCapacity)
+//                    .maxCapacity(maxCapacity)
+//                    .surcharge(30000)
+//                    .build();
+//            parlorRepository.save(parlor);
+//            parlorRepository.flush();
+//
+//            for (int roomNum : roomNums) {
+//                Room room = Room.builder()
+//                        .menu(menu)
+//                        .roomNum(roomNum)
+//                        .build();
+//                roomRepository.save(room);
+//            }
+//        }
+//        return ResultResponse.success();
+//    }
+
     @Transactional
-    public ResultResponse insRoom(String code) {
+    public ResultResponse insParlor(String code) {
 
         if (!code.equals("wooks")) {
             return ResultResponse.forbidden();
         }
-        long[] menuIds = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-                41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-                61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-                81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
-                101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115,
-                116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
-                131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145,
-                146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
-                161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
-                176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190,
-                191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205,
-                206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220,
-                221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235,
-                236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250,
-                251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265,
-                266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280,
-                281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297};
 
+        List<Menu> menus = menuRepository.findByCategory(Category.STAY);
+        List<Parlor> parlors = parlorRepository.findAll();
 
-        int[] roomNums = {101, 102, 103, 104, 105, 201, 202, 203, 204, 205, 206, 301, 302, 303, 304};
-        for (long id : menuIds) {
-            Menu menu = menuRepository.findById(id).orElse(null);
-            if (menu == null) {
-                return ResultResponse.severError();
+        for (Menu menu : menus) {
+            boolean flag = false;
+            Long menuId = menu.getMenuId();
+            for (Parlor parlor : parlors) {
+                if(parlor.getMenuId().equals(menuId)) {
+                    flag = true;
+                    break;
+                }
             }
+            if(!flag) {
+                String title = menu.getTitle();
+                int[] capacity = null;
+                if(title.equals("싱글룸")) {
+                    capacity = new int[]{2,3,4};
+                } else if(title.equals("트윈룸")) {
+                    capacity = new int[]{4,5,6};
+                } else if(title.equals("패밀리룸")) {
+                    capacity = new int[]{7,9,11};
+                }
+                if(capacity == null) {
+                    throw new RuntimeException("capacity is null");
+                }
+                int maxCapacity = capacity[(int)(Math.random()*3)];
 
-            int recomCapacity = (int) (Math.random() * 10) + 1;
-            int maxCapacity = recomCapacity + 3;
-
-            Parlor parlor = Parlor.builder()
-                    .menu(menu)
-                    .recomCapacity(recomCapacity)
-                    .maxCapacity(maxCapacity)
-                    .surcharge(30000)
-                    .build();
-            parlorRepository.save(parlor);
-            parlorRepository.flush();
-
-            for (int roomNum : roomNums) {
-                Room room = Room.builder()
+                Parlor parlor = Parlor.builder()
                         .menu(menu)
-                        .roomNum(roomNum)
+                        .maxCapacity(maxCapacity)
+                        .recomCapacity(maxCapacity - 1)
+                        .surcharge(30_000)
                         .build();
+                parlorRepository.save(parlor);
+            }
+        }
+
+        return null;
+    }
+
+    @Transactional
+    public ResultResponse insRoom(String code) {
+        if(!code.equals("wooks")) {
+            return ResultResponse.forbidden();
+        }
+
+        List<Parlor> parlors = parlorRepository.findAllWithFetchJoin();
+        List<Room> rooms = roomRepository.findAllRoomsWithDistinctMenu();
+        int[] roomNums = new int[]{101,102,103,201,202,301,302};
+        for (Parlor parlor : parlors) {
+            boolean flag = false;
+            Long menuId = parlor.getMenuId();
+            for (Room room : rooms) {
+                if(room.getMenu().getMenuId().equals(menuId)) {
+                    flag = true;
+                    break;
+                }
+            }
+            if(!flag) {
+                for (int roomNum : roomNums) {
+                    Room room = Room.builder()
+                            .menu(parlor.getMenu())
+                            .roomNum(roomNum)
+                            .build();
+                    log.info("room = {}", room);
                 roomRepository.save(room);
+                }
             }
         }
         return ResultResponse.success();

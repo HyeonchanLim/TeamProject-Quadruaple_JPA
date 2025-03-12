@@ -10,9 +10,12 @@ import java.util.List;
 
 public interface RoomRepository extends JpaRepository<Room, Long> {
 
-    @Query("SELECT m FROM Room m where m.menu.menuId = :menuId")
-    List<Room> findByMenuId(Long menuId);
-
     void deleteAllByMenuIn(List<Menu> menus);
     void deleteAllByMenuStayTourRestaurFest(StayTourRestaurFest strf);
+
+    @Query("""
+        select r from Room r
+        group by r.menu
+        """)
+    List<Room> findAllRoomsWithDistinctMenu();
 }
