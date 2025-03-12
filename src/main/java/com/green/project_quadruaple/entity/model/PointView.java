@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Immutable
 @Subselect("SELECT * FROM point_view")
+@EqualsAndHashCode
 public class PointView {
 
     @Id

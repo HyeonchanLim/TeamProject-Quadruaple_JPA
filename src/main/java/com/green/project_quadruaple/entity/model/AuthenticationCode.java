@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@EqualsAndHashCode
 public class AuthenticationCode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
