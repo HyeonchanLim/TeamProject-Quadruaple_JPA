@@ -32,7 +32,9 @@ public enum ResponseCode {
     //응답시간만료
     GATEWAY_TIMEOUT("503 응답시간만료"),
     //요청 횟수 초과
-    TOO_MANY_REQUESTS("429 요청 횟수 초과");
+    TOO_MANY_REQUESTS("429 요청 횟수 초과"),
+    //잘못된 비밀번호
+    UNAUTHORIZED_PASSWORD("401 잘못된 비밀번호");
 
 
     private final String code;
