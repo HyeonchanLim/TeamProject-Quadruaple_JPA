@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,7 +54,6 @@ public class StrfService {
     private final RedisTemplate redisTemplate;
 
     public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
-
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -87,6 +87,69 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), amenities);
         }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), amenities);
+    }
+
+
+    public List<AmenipointId> getAmeniIdList(List<Long> amenityId , Long strfId){
+        long startTime = System.currentTimeMillis();
+        String cachedkey = "amenityId:" + amenityId + ":strfId:" + strfId;
+        RedisTemplate<String , List<AmenipointId>> redisTemplate = new RedisTemplate<>();
+        List<AmenipointId> amenipointId = redisTemplate.opsForValue().get(cachedkey);
+
+
+//        List<AmenipointId> amenipointId = (List<AmenipointId>) redisTemplate.opsForValue().get(cachekey);
+        if (amenipointId != null) {
+            long endTime = System.currentTimeMillis();
+            long elapedTime = endTime - startTime;
+            log.info("cache retrieval time: {} ms" , elapedTime);
+            return amenipointId;
+        }
+
+        log.info("Cache miss: {}", cachedkey);
+
+        // 캐시 데이터가 없으면 DB에서 조회
+        long dbStartTime = System.currentTimeMillis();
+        List<AmenipointId> ameniPointIds = amenipointRepository.findAllByAmenityIdAndStrfId(amenityId, strfId);
+
+        // Redis에 저장 (TTL 설정: 10분)
+        redisTemplate.opsForValue().set(cachedkey, ameniPointIds, Duration.ofMinutes(10));
+
+        long dbElapsedTime = System.currentTimeMillis() - dbStartTime;
+        log.info("DB retrieval time: {} ms", dbElapsedTime);
+
+        return ameniPointIds;
+    }
+    public List<Amenipoint> getAmeniPointList(Long ameniPointId) {
+        long startTime = System.currentTimeMillis();
+
+        // Redis 캐시 키 생성
+        String cacheKey = "amenipoint:" + ameniPointId;
+
+        // Redis에서 캐시 데이터 조회
+        List<Amenipoint> cachedAmeniPoints = (List<Amenipoint>) redisTemplate.opsForValue().get(cacheKey);
+
+        if (cachedAmeniPoints != null) {
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            log.info("Cache hit: {} (retrieval time: {} ms)", cacheKey, elapsedTime);
+            return cachedAmeniPoints;
+        }
+
+        log.info("Cache miss: {}", cacheKey);
+
+        // 캐시 데이터가 없으면 DB에서 조회
+        long dbStartTime = System.currentTimeMillis();
+        List<Amenipoint> ameniPoints = amenipointRepository.findAllByAmeniPointId(ameniPointId);
+
+        // Redis에 저장 (TTL 설정: 10분)
+        redisTemplate.opsForValue().set(cacheKey, ameniPoints, Duration.ofMinutes(10));
+
+        long dbElapsedTime = System.currentTimeMillis() - dbStartTime;
+        log.info("DB retrieval time: {} ms", dbElapsedTime);
+
+        return ameniPoints;
+    }
+    public List<Amenity> getAmenityList(){
+        return null;
     }
 
     public ResponseWrapper<List<StrfMenu>> getStrfMenu(Long strfId) {
