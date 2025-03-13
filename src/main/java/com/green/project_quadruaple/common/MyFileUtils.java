@@ -94,7 +94,6 @@ public class MyFileUtils {
             outputFile.getParentFile().mkdirs();
         }
 
-
         // 🔥 MultipartFile → ImmutableImage 변환
         ImmutableImage image = ImmutableImage.loader().fromStream(mf.getInputStream());
 
