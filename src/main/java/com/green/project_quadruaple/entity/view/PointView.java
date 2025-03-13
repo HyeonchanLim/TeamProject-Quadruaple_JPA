@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.entity.model;
+package com.green.project_quadruaple.entity.view;
 
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;

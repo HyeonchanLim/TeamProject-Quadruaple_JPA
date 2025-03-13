@@ -1,6 +1,5 @@
 package com.green.project_quadruaple.point;
 
-import com.green.project_quadruaple.booking.model.BookingRefundReq;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
@@ -13,7 +12,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -78,15 +76,15 @@ public class PointController {
 
     @GetMapping("use")
     @Operation(summary = "QR코드 인증시 보일 화면")
-    public ResponseEntity<?> QRscanned(@RequestParam("strf_id") long strfId) {
-        return pointService.QRscanned(strfId);
+    public ResponseEntity<?> QRscanned(@RequestParam("strf_id") long strfId, @RequestParam int amount) {
+        return pointService.QRscanned(strfId, amount);
     }
 
     @PostMapping("history")
-    @Operation(summary = "포인트 사용 혹은 사용취소",
+    @Operation(summary = "포인트 사용",
             description = "category가 0이면 사용(relatedId는 상품id), 2면 취소(relatedId는 pointHistoryId), amount는 얼마나 사용했나 혹은 취소되어 들어왔나")
-    public ResponseEntity<?> useOrUnUsePoint(@RequestBody PointHistoryPostReq p) {
-        return pointService.useOrUnUsePoint(p);
+    public ResponseEntity<?> usePoint(@RequestBody PointHistoryPostReq p) {
+        return pointService.usePoint(p);
     }
 
     @GetMapping("history")
