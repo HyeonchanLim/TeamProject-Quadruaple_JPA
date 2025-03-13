@@ -9,10 +9,9 @@ import java.util.List;
 @ToString
 @EqualsAndHashCode
 @Builder
-public class StrfMenuInsReq {
-
+public class StrfUpdMenu {
     private long strfId;
-//    private long menuId;
+    private long menuId;
     private String busiNum;
 //    private String category;
 

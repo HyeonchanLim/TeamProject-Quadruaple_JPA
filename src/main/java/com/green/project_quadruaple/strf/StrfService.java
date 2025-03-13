@@ -1,5 +1,7 @@
 package com.green.project_quadruaple.strf;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.project_quadruaple.booking.repository.MenuRepository;
 import com.green.project_quadruaple.booking.repository.ParlorRepository;
 import com.green.project_quadruaple.booking.repository.RoomRepository;
@@ -51,7 +53,8 @@ public class StrfService {
     private final UserRepository userRepository;
     private final RestDateRepository restDateRepository;
     private final AmenityRepository amenityRepository;
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String,Object> redisTemplate;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
         Long userId = 0L;
@@ -93,22 +96,20 @@ public class StrfService {
 //    public List<AmenipointId> getAmeniIdList(List<Long> amenityIds, Long strfId) {
 //        long startTime = System.currentTimeMillis();
 //
-//        // Redis 캐시 키 생성
 //        String cacheKey = "amenity:" + amenityIds.toString() + ":strf:" + strfId;
-//        // redis 에서 캐시 데이터 조회
+//
 //        Object cachedKey = redisTemplate.opsForValue().get(cacheKey);
-////        // Redis에서 캐시 데이터 조회
-////        List<AmenipointId> cachedAmenipointIds = (List<AmenipointId>) redisTemplate.opsForValue().get(cacheKey);
-////        if (cachedAmenipointIds != null) {
-////            long elapsedTime = System.currentTimeMillis() - startTime;
-////            log.info("Cache hit: {} (retrieval time: {} ms)", cacheKey, elapsedTime);
-////            return cachedAmenipointIds;
-////        }
-//        if (cachedKey instanceof List<?>){
-//            List<AmenipointId> cachedAmeniPointIds = (List<AmenipointId>) cachedKey;
-//            long elapsedTime = System.currentTimeMillis() - startTime;
-//            log.info("Cache hit: {} (retrieval time: {} ms)", cacheKey, elapsedTime);
-//            return cachedAmeniPointIds;
+//
+//        if (cachedKey instanceof String) {
+//            try {
+//                List<AmenipointId> cachedList = objectMapper.readValue(
+//                        (String) cachedKey, new TypeReference<List<AmenipointId>>() {});
+//                long elapsedTime = System.currentTimeMillis() - startTime;
+//                log.info("Cache hit: {} (retrieval time: {} ms)", cacheKey, elapsedTime);
+//                return cachedList;
+//            } catch (Exception e) {
+//                log.error("Failed to parse cached data", e);
+//            }
 //        }
 //
 //        log.info("Cache miss: {}", cacheKey);
@@ -117,8 +118,15 @@ public class StrfService {
 //        long dbStartTime = System.currentTimeMillis();
 //        List<AmenipointId> ameniPointIds = amenipointRepository.findAllByAmenityIdInAndStrfId(amenityIds, strfId);
 //
-//        // Redis에 저장 (TTL 설정: 10분)
-//        redisTemplate.opsForValue().set(cacheKey, ameniPointIds, Duration.ofMinutes(10));
+//        if (!ameniPointIds.isEmpty()) {
+//            try {
+//                // Redis에 JSON으로 저장 (TTL: 10분)
+//                String jsonValue = objectMapper.writeValueAsString(ameniPointIds);
+//                redisTemplate.opsForValue().set(cacheKey, jsonValue, Duration.ofMinutes(10));
+//            } catch (Exception e) {
+//                log.error("Failed to serialize data for Redis", e);
+//            }
+//        }
 //
 //        long dbElapsedTime = System.currentTimeMillis() - dbStartTime;
 //        log.info("DB retrieval time: {} ms", dbElapsedTime);
@@ -310,8 +318,9 @@ public class StrfService {
         myFileUtils.makeFolders(middlePathMenu);
 
         for (MultipartFile pic : menuPic) {
+            // ✅ 서비스 로직에서 만든 파일명 가져오기
             String savedPicName = myFileUtils.makeRandomFileName(pic);
-            String filePath = String.format("%s/%s", middlePathMenu, savedPicName);
+            String filePath = String.format("%s/%s", middlePathMenu, savedPicName);  // 🔥 원본 확장자 포함된 경로
 
             try {
                 for (MenuIns strfMenu : p.getMenus()) {
@@ -319,11 +328,12 @@ public class StrfService {
                             .stayTourRestaurFest(strf)
                             .title(strfMenu.getMenuTitle())
                             .price(strfMenu.getMenuPrice())
-                            .menuPic(savedPicName)
+                            .menuPic(savedPicName.replace(".png", ".webp"))  // ✅ DB 저장 시 .webp 확장자로 저장
                             .build();
                     menus.add(newMenu);
                 }
-                myFileUtils.transferTo(pic, filePath);
+                // ✅ WebP 변환 시 기존 파일 확장자 제거 후 .webp로 변경하여 저장
+                myFileUtils.convertAndSaveToWebp(pic, filePath.replaceAll("\\.[^.]+$", ".webp"));
             } catch (IOException e) {
                 e.printStackTrace();
                 myFileUtils.deleteFolder(middlePathMenu, true);
@@ -454,10 +464,10 @@ public class StrfService {
     }
 
     @Transactional
-    public ResponseWrapper<Integer> updTime(Long strfId, StrfTime p) {
+    public ResponseWrapper<Integer> updTime(StrfTime p) {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(strfId)
+        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId())
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
         BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
 //        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
@@ -556,7 +566,7 @@ public class StrfService {
     }
 
     @Transactional
-    public ResponseWrapper<Integer> updStrfMenu(List<MultipartFile> menuPic, StrfMenuInsReq req) {
+    public ResponseWrapper<Integer> updStrfMenu(List<MultipartFile> menuPic, StrfUpdMenu req) {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
         StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
@@ -636,35 +646,50 @@ public class StrfService {
     @Transactional
     public ResponseWrapper<Integer> updateAmenity(StrfJpaAmenity req) {
         long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("user id not found"));
 
+        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
+
         boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
         if (!isBusi) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
+        if (req.getAmeniPoints() == null) {
+            throw new RuntimeException("Amenity가 null 상태입니다!");
+        }
+
         StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-
-//        if (!strf.getBusiNum().toString().equals(req.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
 
         Category categoryValue = null;
         if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
             categoryValue = Category.getKeyByName(req.getCategory());
         }
+
         if (categoryValue == Category.STAY) {
-//             Amenity 저장
-        List<Amenipoint> amenipoints = req.getAmeniPoints().stream()
-                .map(amenityId -> Amenipoint.builder()
-                        .id(new AmenipointId(amenityId, strf.getStrfId()))
-                        .build())
-                .toList();
-        amenipointRepository.saveAll(amenipoints);
+            List<Amenipoint> amenipoints = new ArrayList<>();
+
+            for (Long amenityId : req.getAmeniPoints()) {
+                // ✅ 1. `amenityId`를 기반으로 `Amenity` 조회
+                Amenity amenity = amenityRepository.findById(amenityId)
+                        .orElseThrow(() -> new RuntimeException("Amenity ID " + amenityId + "를 찾을 수 없습니다."));
+
+                // ✅ 2. `Amenipoint`에 `amenity_id` & `strf_id` 매핑해서 저장
+                Amenipoint amenipoint = Amenipoint.builder()
+                        .id(new AmenipointId(amenity.getAmenityId(), strf.getStrfId()))
+                        .amenity(amenity)  // 🔥 매핑 확실하게!!
+                        .stayTourRestaurFest(strf)  // 🔥 `strf`와 매핑!!
+                        .build();
+                amenipoints.add(amenipoint);
+            }
+
+            // ✅ 3. `Amenipoint` 저장
+            amenipointRepository.saveAll(amenipoints);
         }
+
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
@@ -726,8 +751,8 @@ public class StrfService {
     }
 
     private void updateStrfTime(StayTourRestaurFest strf, StrfTime p) {
-        strf.setCloseCheckOut(p.getCloseCheckOut());
         strf.setOpenCheckIn(p.getOpenCheckIn());
+        strf.setCloseCheckOut(p.getCloseCheckOut());
         strfRepository.save(strf);
     }
     private void updateStrfTell(StayTourRestaurFest strf, String tell) {
@@ -786,21 +811,38 @@ public class StrfService {
     }
     private void updateRestDays(StayTourRestaurFest strf, List<String> restdates) {
         if (restdates != null && !restdates.isEmpty()) {
-            List<RestDate> restDates = restdates.stream()
-                    .map(day -> {
-                        RestDateId id = new RestDateId(Integer.parseInt(day), strf.getStrfId());  // 복합 키 생성
-                        return RestDate.builder()
-                                .id(id)               // 복합 키 설정
-                                .strfId(strf)        // 연관된 엔티티 설정
-                                .build();
-                    })
-                    .collect(toList());
+            StrfRestDate restDateHandler = new StrfRestDate();
+            restDateHandler.addRestDays(restdates);
+            List<Integer> restDays = restDateHandler.getRestDays();
 
-            restDateRepository.saveAll(restDates);  // RestDate 객체들을 DB에 저장
+//            List<RestDate> restDates = restdates.stream()
+//                    .map(day -> {
+//                        RestDateId id = new RestDateId(Integer.parseInt(day), strf.getStrfId());  // 복합 키 생성
+//                        return RestDate.builder()
+//                                .id(id)               // 복합 키 설정
+//                                .strfId(strf)        // 연관된 엔티티 설정
+//                                .build();
+//                    })
+//                    .collect(toList());
+            for (Integer day : restDays) {
+                RestDateId id = new RestDateId();
+                id.setDayWeek(day);
+                id.setStrfId(strf.getStrfId());
+
+                // RestDate 엔티티 저장
+                RestDate restDate = RestDate.builder()
+                        .id(id)
+                        .strfId(strf)
+//                        .dayWeek(day)  // "sun" -> 0, "wed" -> 3 등
+                        .build();
+                restDateRepository.save(restDate);  // 휴무일 저장
+
+//            restDateRepository.saveAll(restDates);  // RestDate 객체들을 DB에 저장
+            }
         }
     }
     // 메뉴 저장 (사진 포함)
-    private List<Menu> saveMenusWithPics(List<MultipartFile> menuPic, StayTourRestaurFest strf, StrfMenuInsReq menuReq) {
+    private List<Menu> saveMenusWithPics(List<MultipartFile> menuPic, StayTourRestaurFest strf, StrfUpdMenu menuReq) {
         List<Menu> menus = new ArrayList<>();
 
         for (int i = 0; i < menuReq.getMenus().size(); i++) {
@@ -836,38 +878,3 @@ public class StrfService {
 
 }
 
-//    // 숙박 세부 정보 업데이트
-//    private void updateStayDetails(List<Menu> menus, StayTourRestaurFest strf,
-//                                   StrfMenuInsReq menuReq, StrfStayInsReq stayReq) {
-//        // Parlor 저장
-//        List<Parlor> parlors = stayReq.getParlors().stream()
-//                .map(parlorReq -> Parlor.builder()
-//                        .menu(menus.get(0))
-//                        .maxCapacity(parlorReq.getMaxCapacity())
-//                        .recomCapacity(parlorReq.getRecomCapacity())
-//                        .surcharge(parlorReq.getSurcharge())
-//                        .build())
-//                .collect(toList());
-//
-//        // Room 저장
-//        List<Room> rooms = stayReq.getRooms().stream()
-//                .map(roomId -> Room.builder()
-//                        .menu(menus.get(0))
-//                        .roomId(roomId)
-//                        .roomNum(1)
-//                        .build())
-//                .collect(toList());
-//
-//        // Amenity 저장
-////        List<Amenipoint> amenipoints = stayReq.getAmenipoints().stream()
-////                .map(amenityId -> Amenipoint.builder()
-////                        .id(new AmenipointId(amenityId, strf.getStrfId()))
-////                        .build())
-////                .collect(Collectors.toList());
-//
-//        parlorRepository.saveAll(parlors);
-//        roomRepository.saveAll(rooms);
-////        amenipointRepository.saveAll(amenipoints);
-//    }
-
-//

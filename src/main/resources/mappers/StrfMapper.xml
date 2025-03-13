@@ -81,7 +81,7 @@
 
     <select id="strfMenu" resultMap="menuResultMap">
         SELECT b.menu_id AS menuId , b.title AS menuTitle , b.price AS menuPrice , b.menu_pic AS menuPic ,
-        a.open_check_in AS openCheckIn , a.close_check_out AS closeCheckIn ,
+        a.open_check_in AS openCheckIn , a.close_check_out AS closeCheckIn , a.strf_id AS strfId ,
         c.max_capacity AS maxCapacity, c.recom_capacity AS recomCapacity
         FROM stay_tour_restaur_fest a
         LEFT JOIN menu b

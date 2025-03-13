@@ -261,15 +261,22 @@ public class BusiService {
                         .build();
                 dtos.add(dto);
             }
+        } else if (businessNum != null && !businessNum.isEmpty()) {
+            for (String busiNum : businessNum) {
+                BusiStrfDto dto = BusiStrfDto.builder()
+                        .busiNum(busiNum)
+                        .build();
+                dtos.add(dto);
+            }
         }
-        // UserSignInRes에 사업자 정보 포함
-        return BusiUserSignInRes.builder()
-                .accessToken(accessToken)
-                .userId(user.getUserId())
-                .name(user.getName())
-                .roles(roles)
-                .dtos(dtos)
-                .build();
+            // UserSignInRes에 사업자 정보 포함
+            return BusiUserSignInRes.builder()
+                    .accessToken(accessToken)
+                    .userId(user.getUserId())
+                    .name(user.getName())
+                    .roles(roles)
+                    .dtos(dtos)
+                    .build();
     }
 
     public String getAccessToken (HttpServletRequest req) {
