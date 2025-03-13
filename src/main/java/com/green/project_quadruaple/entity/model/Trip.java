@@ -14,6 +14,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@ToString
 @EqualsAndHashCode(callSuper = true)
 public class Trip extends CreatedAt {
 
