@@ -1,0 +1,1 @@
+import{F as a}from"./index-BDvp6vJ-.js";import{s as r}from"./searchAtom-DDR1b8k3.js";const c=a({key:"resetSearchData",get:({get:e})=>e(r),set:({set:e})=>{e(r,{searchWord:"",searchData:[],start_idx:0,category:0,amenityId:[],orderType:0,more:!0,count:0})}});export{c as r};
