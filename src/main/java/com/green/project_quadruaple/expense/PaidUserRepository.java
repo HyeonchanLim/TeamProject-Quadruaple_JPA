@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PaidUserRepository extends JpaRepository<PaidUser, PaidUserIds> {
-    Optional<List<PaidUser>> findAllByDailyExpense(DailyExpense dailyExpense);
     @Modifying
     @Query(value = "DELETE FROM paid_user WHERE de_id = :deId", nativeQuery = true)
     void deleteByDeId(@Param("deId") Long deId);
