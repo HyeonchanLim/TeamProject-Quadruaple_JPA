@@ -19,6 +19,7 @@ import com.green.project_quadruaple.point.model.res.PointCardProductRes;
 import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
 import com.green.project_quadruaple.point.model.dto.PointCardUpdateDto;
 import com.green.project_quadruaple.point.model.res.PointHistoryListReq;
+import com.green.project_quadruaple.point.model.res.PointUseRes;
 import com.green.project_quadruaple.point.model.res.QRPointRes;
 import com.green.project_quadruaple.strf.StrfRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
@@ -166,7 +167,7 @@ public class PointService {
 
     // point 사용
     @Transactional
-    public ResponseEntity<ResponseWrapper<Integer>> usePoint(PointHistoryPostReq p) {
+    public ResponseEntity<ResponseWrapper<PointUseRes>> usePoint(PointHistoryPostReq p) {
         long userId = authenticationFacade.getSignedUserId();
         int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId)- p.getAmount();
         if (remainPoint < 0) {
@@ -181,7 +182,7 @@ public class PointService {
                 .remainPoint(remainPoint)
                 .build();
         pointHistoryRepository.save(pointHistory);
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), remainPoint));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), new PointUseRes(remainPoint,p.getAmount())));
     }
 
     //QR코드 확인시 보일 화면
