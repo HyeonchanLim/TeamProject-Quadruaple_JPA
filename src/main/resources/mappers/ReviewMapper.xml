@@ -140,7 +140,7 @@
         r.review_id AS reviewId,
         r.content AS content,
         r.rating AS rating,
-        r.created_at AS createdAt,
+        DATE_FORMAT(r.created_at, '%Y-%m-%d') AS createdAt,
 
         u.user_id AS userId,
         u.name AS userName,
@@ -149,7 +149,7 @@
 
         rr.reviewReplyId AS reviewReplyId,
         rr.reviewReply AS reviewReply,
-        rr.reviewReplyCreatedAt AS reviewReplyCreatedAt,
+        DATE_FORMAT(rr.reviewReplyCreatedAt, '%Y-%m-%d') AS reviewReplyCreatedAt,
 
         rp.title AS reviewPicTitle
 
@@ -159,7 +159,8 @@
         LEFT JOIN user u ON r.user_id = u.user_id
         LEFT JOIN wishlist w ON s.strf_id = w.strf_id
         LEFT JOIN (
-        SELECT rr1.review_id, rr1.reply_id AS reviewReplyId, rr1.content AS reviewReply, rr1.created_at AS reviewReplyCreatedAt
+        SELECT rr1.review_id, rr1.reply_id AS reviewReplyId, rr1.content AS reviewReply,
+        DATE_FORMAT(rr1.created_at, '%Y-%m-%d') AS reviewReplyCreatedAt
         FROM review_reply rr1
         WHERE rr1.created_at = (
         SELECT MAX(rr2.created_at) FROM review_reply rr2 WHERE rr2.review_id = rr1.review_id
@@ -173,6 +174,7 @@
         ORDER BY r.review_id DESC, r.created_at DESC
         LIMIT #{pageSize} OFFSET #{startIdx};
     </select>
+
 
 
     <resultMap id="businessReviewResultMap" type="com.green.project_quadruaple.review.model.BusinessDto">

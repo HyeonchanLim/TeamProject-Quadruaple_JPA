@@ -73,7 +73,6 @@ public class BusinessReviewService {
         // 전체 실행 시간 측정 종료
         long endTime = System.currentTimeMillis();
         System.out.println("전체 getBusinessReview 실행 시간: " + (endTime - startTime) + "ms");
-
         return reviews;
     }
 
