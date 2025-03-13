@@ -25,6 +25,19 @@ const:
   default-search-size: 10
 
 spring:
+  cache:
+    type: redis
+    devtools:
+      livereload.enabled: true
+      restart.enabled: true
+    session:
+      store-type: redis #세션을 Redis 에 저장
+      redis:
+        namespace: session # Redis 에 저장할 세션 데이터의 네임스페이스
+        timeout: 1800 # 세션 타임아웃 (초 단위)
+        configure-action: NONE # store-type: redis 은 구 버전 , 최신 버전에서는 현재 코드 사용 , 이걸 사용하면 redis 설정이 자동 적용됨
+  #      flush-mode: on_save  # 세션이 저장될 때만 Redis에 저장
+  #      save-mode: on_set_attribute  # 세션 속성이 변경될 때만 Redis 저장
   profiles:
     active: secret
   application:
