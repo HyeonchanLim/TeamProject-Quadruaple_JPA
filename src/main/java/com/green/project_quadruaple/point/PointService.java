@@ -1,6 +1,5 @@
 package com.green.project_quadruaple.point;
 
-import com.green.project_quadruaple.booking.BookingService;
 import com.green.project_quadruaple.booking.model.dto.KakaoRefundDto;
 import com.green.project_quadruaple.point.model.payModel.dto.KakaoApproveDto;
 import com.green.project_quadruaple.point.model.payModel.dto.KakaoReadyDto;
@@ -14,7 +13,6 @@ import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
 import com.green.project_quadruaple.point.model.dto.PointHistoryListDto;
 import com.green.project_quadruaple.point.model.payModel.req.PointBuyReadyReq;
-import com.green.project_quadruaple.point.model.payModel.req.PointRefundReq;
 import com.green.project_quadruaple.point.model.req.PointHistoryPostReq;
 import com.green.project_quadruaple.point.model.res.PointCardProductRes;
 import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
@@ -165,34 +163,33 @@ public class PointService {
         return 1;
     }
 
-    // point 사용 혹은 사용취소
+    // point 사용
     @Transactional
-    public ResponseEntity<ResponseWrapper<Integer>> useOrUnUsePoint(PointHistoryPostReq p) {
+    public ResponseEntity<ResponseWrapper<Integer>> usePoint(PointHistoryPostReq p) {
         long userId = authenticationFacade.getSignedUserId();
-        int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId);
-        remainPoint = p.getCategory() == 2 ? remainPoint + p.getAmount() : remainPoint - p.getAmount();
+        int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId)- p.getAmount();
         if (remainPoint < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_Acceptable.getCode(), null));
         }
         PointHistory pointHistory = PointHistory.builder()
                 .amount(p.getAmount())
-                .category(p.getCategory())
+                .category(0)
                 .relatedId(p.getRelatedId())
                 .user(userRepository.findById(userId).get())
                 .remainPoint(remainPoint)
                 .build();
         pointHistoryRepository.save(pointHistory);
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), pointHistory.getRemainPoint()));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), remainPoint));
     }
 
     //QR코드 확인시 보일 화면
-    public ResponseEntity<ResponseWrapper<QRPointRes>> QRscanned(long strfId){
+    public ResponseEntity<ResponseWrapper<QRPointRes>> QRscanned(long strfId, int amount){
         long userId = authenticationFacade.getSignedUserId();
         int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId);
         StayTourRestaurFest strf=strfRepository.findById(strfId).get();
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode()
-                , new QRPointRes(remainPoint,strf.getTitle(),strf.getLat(),strf.getLng())));
+                , new QRPointRes(remainPoint,strf.getTitle(),strf.getLat(),strf.getLng(),amount)));
     }
 
 
@@ -282,9 +279,8 @@ public class PointService {
             if (kakaoReadyDto != null) {
                 int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId);
                 int amount = p.getAmount();
-                PointHistoryPostReq req = new PointHistoryPostReq(1, amount, p.getPointCardId());
                 PointHistory pointHistory = PointHistory.builder()
-                        .tid(p.getTid())
+                        .tid(kakaoReadyDto.getTid())
                         .remainPoint(remainPoint + amount)
                         .amount(amount)
                         .user(user)
@@ -293,7 +289,6 @@ public class PointService {
                         .build();
                 kakaoReadyDto.setPartnerOrderId(orderNo);
                 kakaoReadyDto.setPartnerUserId(String.valueOf(userId));
-                kakaoReadyDto.setReq(req);
                 kakaoReadyDto.setPointHistory(pointHistory);
                 kakaoReadyDto.setRemainPoint(remainPoint);
 
@@ -365,10 +360,10 @@ public class PointService {
             int refundPrice = wasBought.getFinalPayment();
 
             PointHistory refundHistory=PointHistory.builder()
-                    .remainPoint(remainPoint-refundPrice)
+                    .remainPoint(remainPoint-pointHistory.getAmount())
                     .relatedId(pointHistoryId)
                     .amount(boughtPoint)
-                    .category(0)
+                    .category(2)
                     .user(userRepository.findById(userId).get())
                     .build();
             pointHistoryRepository.saveAndFlush(refundHistory);
