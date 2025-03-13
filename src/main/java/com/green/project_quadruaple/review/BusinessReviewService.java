@@ -32,9 +32,8 @@ public class BusinessReviewService {
     private final ReviewMapper reviewMapper;
     private final ReviewRepository reviewRepository;
 
-    /**
-     * 전체 리뷰 조회 (페이징 적용)
-     */
+
+      //전체 리뷰 조회 (페이징 적용)
     public List<BusinessDto> getBusinessReview(int page, int pageSize) {
         Long signedUserId = authenticationFacade.getSignedUserId();
         System.out.println("Signed User ID: " + signedUserId);
@@ -59,7 +58,7 @@ public class BusinessReviewService {
         System.out.println("쿼리 실행 시간: " + (queryEndTime - queryStartTime) + "ms");
 
         for (BusinessDto review : reviews) {
-            System.out.println("ReviewReplyId: " + review.getReviewReplyId()); // ✅ 로그 추가
+            System.out.println("ReviewReplyId: " + review.getReviewReplyId());
 
             // 개별 리뷰에 대한 실행 시간 측정
             long reviewStartTime = System.currentTimeMillis();
