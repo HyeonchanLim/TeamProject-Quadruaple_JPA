@@ -64,21 +64,42 @@ public class UserController {
     @PostMapping("sign-in")
     @Operation(summary = "로그인")
     public ResponseEntity<?> signInUser(@RequestBody UserSignInReq req, HttpServletResponse response) {
-        UserSignInRes res = userService.signIn(req, response);
-        if (res == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ResponseCode.NOT_FOUND.getCode());
+        try {
+            UserSignInRes res = userService.signIn(req, response);
+            if (res == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ResponseCode.NOT_FOUND.getCode());
+            }
+
+            // 로그인 성공 시 반환할 데이터 생성
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("code", ResponseCode.OK.getCode());
+            responseBody.put("userId", res.getUserId());
+            responseBody.put("accessToken", res.getAccessToken());
+            responseBody.put("role", res.getRoles());
+            responseBody.put("hasUnReadNotice",res.getHasUnReadNotice());
+
+            return ResponseEntity.ok(responseBody);
+        } catch (RuntimeException e) {
+            // 예외 메시지에 따라 다른 응답을 반환
+            if (e.getMessage().contains("아이디를 확인해 주세요.")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ResponseCode.NOT_FOUND_USER.getCode());
+            } else if (e.getMessage().contains("비밀번호를 확인해 주세요.")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ResponseCode.UNAUTHORIZED_PASSWORD.getCode());
+            } else if (e.getMessage().contains("이메일 인증이 필요합니다.")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ResponseCode.BAD_REQUEST.getCode());
+            } else if (e.getMessage().contains("BUSI 역할을 가진 사용자는 로그인할 수 없습니다.")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(ResponseCode.Forbidden.getCode());
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(ResponseCode.SERVER_ERROR.getCode());
+            }
         }
 
-        // 로그인 성공 시 반환할 데이터 생성
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("code", ResponseCode.OK.getCode());
-        responseBody.put("userId", res.getUserId());
-        responseBody.put("accessToken", res.getAccessToken());
-        responseBody.put("role", res.getRoles());
-        responseBody.put("hasUnReadNotice",res.getHasUnReadNotice());
-
-        return ResponseEntity.ok(responseBody);
     }
 
     @GetMapping("access-token")

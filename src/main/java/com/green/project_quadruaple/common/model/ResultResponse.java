@@ -74,4 +74,10 @@ public class ResultResponse {
         return new ResultResponse(ResponseCode.TOO_MANY_REQUESTS.getCode());
     }
 
+    //잘못된 비밀번호
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public static ResultResponse badRequestPassword(String message) {
+        return new ResultResponse(ResponseCode.UNAUTHORIZED_PASSWORD.getCode());
+    }
+
 }
