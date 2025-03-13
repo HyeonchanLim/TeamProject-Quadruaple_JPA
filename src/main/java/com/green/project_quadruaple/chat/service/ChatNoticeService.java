@@ -29,10 +29,10 @@ public class ChatNoticeService {
         thread.scheduleAtFixedRate(() -> {
             try {
                 boolean exists = chatReceiveRepository.findByUserId(signedUserId);
-                emitter.send(exists);
-//                if(exists) {
-//                    emitter.send(true);
-//                }
+//                emitter.send(exists);
+                if(exists) {
+                    emitter.send(true);
+                }
             } catch (Exception e) {
                 emitter.complete();
                 e.printStackTrace();
