@@ -55,7 +55,8 @@ public class NoticeService {
     private final RoleRepository roleRepository;
 
     // 타임아웃 시간 설정
-    private static final long NOTICE_TIME_OUT = 3_600_000L; //1시간
+    //private static final long NOTICE_TIME_OUT = 3_600_000L; //1시간
+    private static final long NOTICE_TIME_OUT = 60_000L; //60초
     // 마지막 신규 알람 조회
     private LocalDateTime lastCheckedTime = LocalDateTime.now();
     // SSE 연결을 관리하는 저장소 (여러 유저 지원 가능)
@@ -70,6 +71,7 @@ public class NoticeService {
         try {
             emitter.send(SseEmitter.event().name("INIT").data("연결 성공!"));
         } catch (IOException e) {
+            log.warn("SSE 연결 중 오류 발생: {}", e.getMessage());
             emitter.complete();
         }
 
@@ -79,9 +81,26 @@ public class NoticeService {
         return emitter;
     }
 
+    @Scheduled(fixedDelay = 3000) // 3초마다 새 알림 확인
+    @Transactional
+    public void checkNewNotifications() {
+        if(emitters.size()==0) { return; } //연결 상대가 없다면 실행하지 않음
+
+        //신규 알림이 있는 유저 목록 불러오기
+        List<Long> userIds = noticeRepository.getUsersWithNewNotices(lastCheckedTime);
+        for (Long userId : userIds) {
+            //알람 발송 메서드 호출
+            sendNotification(userId);
+            //발송 후 event table 정리
+            noticeRepository.clearProcessedNotifications(userId);
+        }
+        lastCheckedTime = LocalDateTime.now();
+    }
+
+    //알람 발송
     public void sendNotification(Long userId) {
-        SseEmitter emitter = emitters.get(userId);
-        if (emitter != null) {
+        SseEmitter emitter = emitters.get(userId); //연결 상대에 userId가 있는지 확인
+        if (emitter != null) { //있다면 emitter send
             try {
                 emitter.send(SseEmitter.event()
                             .name("exist unread notice")
@@ -92,19 +111,7 @@ public class NoticeService {
         }
     }
 
-    @Scheduled(fixedDelay = 5000) // 5초마다 새 알림 확인
-    @Transactional
-    public void checkNewNotifications() {
-        if(emitters.size()==0) { return; }
-        List<Long> userIds = noticeRepository.getUsersWithNewNotices(lastCheckedTime);
-        for (Long userId : userIds) {
-            log.info("noticed userId: {}",userId);
-            sendNotification(userId);
-            //발송 후 event table 정리
-            noticeRepository.clearProcessedNotifications(userId);
-        }
-        lastCheckedTime = LocalDateTime.now();
-    }
+
 
 
     //테스트 알람 추가
