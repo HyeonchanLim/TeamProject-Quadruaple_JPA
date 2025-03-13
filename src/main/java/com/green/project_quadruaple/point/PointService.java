@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.point;
 
 import com.green.project_quadruaple.booking.model.dto.KakaoRefundDto;
+import com.green.project_quadruaple.entity.view.PointView;
 import com.green.project_quadruaple.point.model.payModel.dto.KakaoApproveDto;
 import com.green.project_quadruaple.point.model.payModel.dto.KakaoReadyDto;
 import com.green.project_quadruaple.common.config.constant.KakaopayConst;

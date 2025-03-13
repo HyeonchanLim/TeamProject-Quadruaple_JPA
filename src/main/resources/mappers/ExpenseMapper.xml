@@ -13,68 +13,6 @@
         ON tu.trip_id = temp.tripId AND tu.user_id = temp.userId
     </insert>
 
-    <resultMap id="expenses" type="com.green.project_quadruaple.expense.model.res.ExpensesRes">
-        <id property="title" column="title" />
-        <result property="tripPeriod" column="tripPeriod" />
-        <result property="myTotalPrice" column="myTotalPrice" />
-        <result property="tripTotalPrice" column="tripTotalPrice" />
-        <collection property="expensedList" resultMap="expensedList" />
-    </resultMap>
-
-    <resultMap id="expensedList" type="com.green.project_quadruaple.expense.model.dto.ExpenseDto">
-        <id property="deId" column="deId" />
-        <result property="paidFor" column="paidFor" />
-        <result property="totalPrice" column="totalPrice" />
-        <result property="myPrice" column="myPrice" />
-        <collection property="paidUserList" resultMap="paidUserList" />
-    </resultMap>
-
-    <resultMap id="paidUserList" type="com.green.project_quadruaple.expense.model.dto.PaidUserInfo">
-        <id property="userId" column="userId" />
-        <result property="name" column="name" />
-        <result property="profilePic" column="profilePic" />
-    </resultMap>
-
-    <select id="getExpenses" resultMap="expenses">
-        WITH trip_summary AS (
-        SELECT
-        trip_id,
-        SUM(price) AS tripTotalPrice,
-        SUM(CASE WHEN user_id = #{userId} THEN price ELSE 0 END) AS myTotalPrice
-        FROM depay
-        WHERE trip_id = #{tripId}
-        GROUP BY trip_id
-        ),
-        expense_summary AS (
-        SELECT
-        de_id,
-        `expense_for` AS paidFor,
-        SUM(price) AS totalPrice,
-        price AS myPrice
-        FROM depay
-        WHERE trip_id = #{tripId}
-        GROUP BY de_id, `expense_for`
-        )
-        SELECT
-        TW.title,
-        CONCAT(DATE_FORMAT(TW.start_at, '%Y.%m.%d'), '~', DATE_FORMAT(TW.end_at, '%m.%d')) AS tripPeriod,
-        COALESCE(TS.tripTotalPrice,0) AS tripTotalPrice,
-        COALESCE(TS.myTotalPrice,0) AS myTotalPrice,
-        ES.paidFor,
-        ES.totalPrice,
-        ES.myPrice,
-        T.de_id AS deId,
-        T.user_id AS userId,
-        T.name,
-        T.profile_pic AS profilePic
-        FROM depay T
-        JOIN trip_summary TS ON TS.trip_id = T.trip_id
-        JOIN expense_summary ES ON ES.de_id = T.de_id
-        right JOIN trip TW ON TW.trip_id=T.trip_id
-        WHERE TW.trip_id =#{tripId}
-        ORDER BY T.de_id
-    </select>
-
     <resultMap id="expenseInsOne" type="com.green.project_quadruaple.expense.model.dto.ExpenseDto">
         <id property="deId" column="deId"/>
         <result property="paidFor" column="paidFor" />
