@@ -147,33 +147,35 @@
         u.profile_pic AS writerUserProfilePic,
         u.provider_type AS providerType,
 
-        rr.reviewReplyId AS reviewReplyId,
-        rr.reviewReply AS reviewReply,
-        DATE_FORMAT(rr.reviewReplyCreatedAt, '%Y-%m-%d') AS reviewReplyCreatedAt,
+        lr.reviewReplyId AS reviewReplyId,
+        lr.reviewReply AS reviewReply,
+        DATE_FORMAT(lr.reviewReplyCreatedAt, '%Y-%m-%d') AS reviewReplyCreatedAt,
 
-        rp.title AS reviewPicTitle
+        GROUP_CONCAT(DISTINCT rp.title ORDER BY rp.title SEPARATOR ', ') AS reviewPicTitle
 
         FROM stay_tour_restaur_fest s
         LEFT JOIN UserBusiness ub ON s.busi_num = ub.busi_num
         LEFT JOIN review r ON s.strf_id = r.strf_id
         LEFT JOIN user u ON r.user_id = u.user_id
         LEFT JOIN wishlist w ON s.strf_id = w.strf_id
+
+
         LEFT JOIN (
         SELECT rr1.review_id, rr1.reply_id AS reviewReplyId, rr1.content AS reviewReply,
         DATE_FORMAT(rr1.created_at, '%Y-%m-%d') AS reviewReplyCreatedAt
         FROM review_reply rr1
-        WHERE rr1.created_at = (
-        SELECT MAX(rr2.created_at) FROM review_reply rr2 WHERE rr2.review_id = rr1.review_id
-        )
-        ) rr ON r.review_id = rr.review_id
+        WHERE rr1.reply_id = (SELECT MAX(rr2.reply_id) FROM review_reply rr2 WHERE rr2.review_id = rr1.review_id)
+        ) lr ON r.review_id = lr.review_id
+
+
         LEFT JOIN review_pic rp ON r.review_id = rp.review_id
 
         WHERE ub.busi_num IS NOT NULL
-        GROUP BY s.strf_id, s.title, s.state, r.review_id, u.user_id, u.name, u.profile_pic, u.provider_type,
-        rr.reviewReplyId, rr.reviewReply, rr.reviewReplyCreatedAt, rp.title
-        ORDER BY r.review_id DESC, r.created_at DESC
+        GROUP BY r.review_id
+        ORDER BY r.review_id DESC
         LIMIT #{pageSize} OFFSET #{startIdx};
     </select>
+
 
 
 
@@ -216,65 +218,6 @@
         SELECT role FROM role WHERE user_id = #{userId} AND role = 'BUSI' LIMIT 1
     </select>
 
-    <!--<select id="selectBusinessReview" parameterType="map" resultType="com.green.project_quadruaple.review.model.BusinessDto">
-        WITH UserBusiness AS (
-        SELECT busi_num FROM business_num WHERE user_id = #{userId}
-        )
 
-        SELECT
-        s.strf_id AS strfId,
-        s.title AS strfTitle,
-        s.state AS state,
-
-        COUNT(DISTINCT r.review_id) AS reviewCnt,
-        COUNT(DISTINCT w.user_id) AS wishCnt,
-        ROUND(IFNULL(AVG(r.rating), 0), 1) AS ratingAvg,
-
-        r.review_id AS reviewId,
-        r.content AS content,
-        r.rating AS rating,
-        r.created_at AS createdAt,
-
-        u.user_id AS userId,
-        u.name AS userName,
-        u.profile_pic AS writerUserProfilePic,
-        u.provider_type AS providerType,
-
-        rr.reviewReplyId AS reviewReplyId,
-        rr.reviewReply AS reviewReply,
-        rr.reviewReplyCreatedAt AS reviewReplyCreatedAt,
-
-        rp.title AS reviewPicTitle
-
-        FROM stay_tour_restaur_fest s
-        LEFT JOIN UserBusiness ub ON s.busi_num = ub.busi_num
-        LEFT JOIN review r ON s.strf_id = r.strf_id
-        LEFT JOIN user u ON r.user_id = u.user_id
-        LEFT JOIN wishlist w ON s.strf_id = w.strf_id
-        LEFT JOIN (
-        SELECT rr1.review_id, rr1.reply_id AS reviewReplyId, rr1.content AS reviewReply, rr1.created_at AS reviewReplyCreatedAt
-        FROM review_reply rr1
-        WHERE rr1.created_at = (
-        SELECT MAX(rr2.created_at)
-        FROM review_reply rr2
-        WHERE rr2.review_id = rr1.review_id
-        )
-        ) rr ON r.review_id = rr.review_id
-        LEFT JOIN review_pic rp ON r.review_id = rp.review_id
-
-        WHERE ub.busi_num IS NOT NULL
-        GROUP BY s.strf_id, s.title, s.state, r.review_id, u.user_id, u.name, u.profile_pic, u.provider_type, rr.reviewReplyId, rr.reviewReply, rr.reviewReplyCreatedAt, rp.title
-        ORDER BY r.review_id DESC, r.created_at DESC
-        LIMIT #{pageSize} OFFSET #{startIdx};
-    </select>
-
-    <select id="selectReviewPics" parameterType="long" resultType="com.green.project_quadruaple.review.reviewReply.ReviewPicsNoPicsDto">
-        SELECT
-        review_id,
-        title
-        FROM review_pic
-        WHERE review_id = #{reviewId}
-    </select>
--->
 
 </mapper>
