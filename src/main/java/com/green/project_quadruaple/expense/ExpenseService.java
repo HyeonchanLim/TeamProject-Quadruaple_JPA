@@ -5,7 +5,9 @@ import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.entity.model.DailyExpense;
+import com.green.project_quadruaple.entity.view.Depay;
 import com.green.project_quadruaple.expense.model.dto.ExpenseDto;
+import com.green.project_quadruaple.expense.model.dto.PaidUserInfo;
 import com.green.project_quadruaple.expense.model.req.*;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
 import com.green.project_quadruaple.expense.model.res.ExpensesRes;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,6 +34,7 @@ public class ExpenseService {
     private final AuthenticationFacade authenticationFacade;
     private final DailyExpenseRepository dailyExpenseRepository;
     private final PaidUserRepository paidUserRepository;
+    private final DepayRepository dePayRepository;
     private final TripUserRepository tripUserRepository;
     private final TripRepository tripRepository;
     private final UserRepository userRepository;
@@ -135,7 +139,56 @@ public class ExpenseService {
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
         long userId=authenticationFacade.getSignedUserId();
-        ExpensesRes result= expenseMapper.getExpenses(tripId,userId);
+        List<Depay> depays=dePayRepository.findByTripId(tripId);
+        int myTotalPrice=depays.stream()
+                .filter(depay -> depay.getUserId().equals(userId))
+                .mapToInt(Depay::getPrice)
+                .sum();
+        int tripTotalPrice=depays.stream()
+                .mapToInt(Depay::getPrice)
+                .sum();
+        //deId별로 Depay를 묶기
+        Map<Long, List<Depay>> groupedByDeId = depays.stream().collect(Collectors.groupingBy(Depay::getDeId));
+        List<ExpenseDto> expenseDtoList = groupedByDeId.entrySet().stream()
+                .map(entry -> {
+                    Long deId = entry.getKey();
+                    List<Depay> depayGroup = entry.getValue();
+
+                    // `totalPrice`: 같은 `deId`의 전체 `price` 합산
+                    int totalPrice = depayGroup.stream()
+                            .mapToInt(Depay::getPrice)
+                            .sum();
+
+                    // `myPrice`: 같은 `deId`에서 특정 `userId`의 `price` 합산
+                    int myPrice = depayGroup.stream()
+                            .filter(depay -> depay.getUserId().equals(userId))
+                            .mapToInt(Depay::getPrice)
+                            .sum();
+
+                    // `paidUserInfoList`: `deId`에 해당하는 모든 사용자 정보 리스트
+                    List<PaidUserInfo> paidUserInfoList = depayGroup.stream()
+                            .map(depay -> new PaidUserInfo(depay.getUserId(), depay.getName(), depay.getProfilePic()))
+                            .distinct()
+                            .collect(Collectors.toList());
+
+                    return ExpenseDto.builder()
+                            .deId(deId)
+                            .paidFor(depayGroup.get(0).getExpenseFor())
+                            .totalPrice(totalPrice)
+                            .myPrice(myPrice)
+                            .paidUserInfoList(paidUserInfoList)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        Depay dto=depays.get(0);
+        ExpensesRes result=ExpensesRes.builder()
+                .title(dto.getTitle())
+                .tripPeriod(dto.getStartAt()+"~"+dto.getEndAt())
+                .myTotalPrice(myTotalPrice)
+                .tripTotalPrice(tripTotalPrice)
+                .expensedList(expenseDtoList)
+                .build();
         if(result==null){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
