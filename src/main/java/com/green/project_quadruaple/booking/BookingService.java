@@ -12,6 +12,7 @@ import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.coupon.repository.CouponRepository;
 import com.green.project_quadruaple.coupon.repository.UsedCouponRepository;
+import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.point.PointHistoryRepository;
@@ -55,14 +56,6 @@ public class BookingService {
 
     private KakaoReadyDto kakaoReadyDto;
 
-    // 예약 확정시 알람보내기
-//    private void postConfirmBookingNotice (Booking booking, User user) {
-//
-//        StringBuilder content = new StringBuilder();
-//
-//        noticeService.postNotice(NoticeCategory.BOOKING,title,content.toString(), user, booking.getBookingId());
-//    }
-//
     public ResponseWrapper<List<BookingRes>> getBooking(Integer page) {
 
         long signedUserId = AuthenticationFacade.getSignedUserId();
@@ -274,10 +267,6 @@ public class BookingService {
                 throw new RuntimeException();
             }
 
-            // 예약완료 알람발송
-//            User noticeUser = userRepository.findById(bookingPostReq.getUserId()).orElse(null);
-//            postConfirmBookingNotice(booking, noticeUser);
-
             int quantity = 1;
 
             bookingRepository.flush();
@@ -290,13 +279,36 @@ public class BookingService {
                 PointHistory pointHistory = PointHistory.builder()
                         .user(booking.getUser())
                         .category(0)
-                        .relatedId(booking.getMenu().getMenuId())
+                        .relatedId(booking.getMenu().getStayTourRestaurFest().getStrfId())
                         .tid(tid)
                         .amount(booking.getUsedPoint())
                         .remainPoint(remainPoint)
                         .build();
                 pointHistoryRepository.save(pointHistory);
             }
+
+            // 예약완료 알람발송
+            StayTourRestaurFest strf=booking.getMenu().getStayTourRestaurFest();
+            if(strf==null){
+                booking=bookingRepository.findById(booking.getBookingId()).orElse(null);
+                strf=booking.getMenu().getStayTourRestaurFest();
+            }
+            Integer usedPoint=booking.getUsedPoint()==null?0:booking.getUsedPoint();
+            User noticeUser = userRepository.findById(bookingPostReq.getUserId()).orElse(null);
+            StringBuilder title=new StringBuilder(booking.getCheckIn().toLocalDate().toString()).append(" ")
+                    .append(strf.getTitle()).append(" 예약 완료되었습니다.");
+            StringBuilder content = new StringBuilder(booking.getCheckIn().toLocalDate().toString()).append("부터 ")
+                            .append(booking.getCheckOut().toLocalDate().toString()).append("까지 숙박하는 ")
+                            .append(strf.getTitle()).append(" ").append(booking.getMenu().getTitle()).append("예약 완료되었습니다.")
+                            .append("\n 숙박인원: ").append(booking.getNum())
+                            .append("\n 총 결제 금액: ").append(booking.getTotalPayment())
+                            .append("\n 사용한 포인트: ").append(usedPoint)
+                            .append("\n 예상 체크인: ").append(booking.getCheckIn().toLocalTime())
+                            .append("\n 체크아웃시간: ").append(strf.getCloseCheckOut())
+                            .append("\n 문의 전화: ").append(strf.getTell());
+
+            noticeService.postNotice(NoticeCategory.BOOKING,title.toString(),content.toString(),noticeUser, booking.getBookingId());
+
             String redirectParams = "?user_name=" + URLEncoder.encode(bookingApproveInfoDto.getUserName(), StandardCharsets.UTF_8) + "&"
                     + "title=" + URLEncoder.encode(bookingApproveInfoDto.getTitle(), StandardCharsets.UTF_8) + "&"
                     + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"

@@ -2,13 +2,16 @@ package com.green.project_quadruaple.booking.repository;
 
 import com.green.project_quadruaple.booking.model.dto.BookingRes;
 import com.green.project_quadruaple.entity.model.Booking;
+import com.green.project_quadruaple.entity.model.Room;
 import com.green.project_quadruaple.entity.model.User;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
@@ -69,4 +72,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         where b.bookingId = :bookingId
         """)
     User findBusiUserIdByBookingId(Long bookingId);
+
+    @EntityGraph(attributePaths = {"menu", "menu.stayTourRestaurFest"})
+    Optional<Booking> findById(Long id);
 }
