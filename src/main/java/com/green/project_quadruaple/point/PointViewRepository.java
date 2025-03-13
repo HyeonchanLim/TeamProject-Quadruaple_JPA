@@ -1,13 +1,11 @@
 package com.green.project_quadruaple.point;
 
 import com.green.project_quadruaple.entity.model.PointHistory;
-import com.green.project_quadruaple.entity.model.PointView;
+import com.green.project_quadruaple.entity.view.PointView;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 

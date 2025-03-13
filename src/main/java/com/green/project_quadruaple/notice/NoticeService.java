@@ -92,7 +92,7 @@ public class NoticeService {
         }
     }
 
-    @Scheduled(fixedDelay = 3000) // 3초마다 새 알림 확인
+    @Scheduled(fixedDelay = 5000) // 5초마다 새 알림 확인
     @Transactional
     public void checkNewNotifications() {
         if(emitters.size()==0) { return; }
