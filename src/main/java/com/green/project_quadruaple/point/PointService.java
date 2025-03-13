@@ -1,7 +1,9 @@
 package com.green.project_quadruaple.point;
 
 import com.green.project_quadruaple.booking.model.dto.KakaoRefundDto;
+import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.view.PointView;
+import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.point.model.payModel.dto.KakaoApproveDto;
 import com.green.project_quadruaple.point.model.payModel.dto.KakaoReadyDto;
 import com.green.project_quadruaple.common.config.constant.KakaopayConst;
@@ -61,6 +63,7 @@ public class PointService {
     private final StrfRepository strfRepository;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final NoticeService noticeService;
 
     private final KakaopayConst kakaopayConst;
     private KakaoReadyDto kakaoReadyDto;
@@ -169,6 +172,8 @@ public class PointService {
     @Transactional
     public ResponseEntity<ResponseWrapper<PointUseRes>> usePoint(PointHistoryPostReq p) {
         long userId = authenticationFacade.getSignedUserId();
+        User user=userRepository.findById(userId).get();
+        StayTourRestaurFest strf=strfRepository.findById(p.getRelatedId()).orElse(null);
         int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId)- p.getAmount();
         if (remainPoint < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -178,11 +183,18 @@ public class PointService {
                 .amount(p.getAmount())
                 .category(0)
                 .relatedId(p.getRelatedId())
-                .user(userRepository.findById(userId).get())
+                .user(user)
                 .remainPoint(remainPoint)
                 .build();
-        pointHistoryRepository.save(pointHistory);
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), new PointUseRes(remainPoint,p.getAmount())));
+        pointHistoryRepository.saveAndFlush(pointHistory);
+
+        //사용 알람 발송
+        String title= p.getAmount()+"P 사용!";
+        StringBuilder content = new StringBuilder(strf.getTitle()).append("에서 ")
+                .append(p.getAmount()).append("P 사용 정상처리 되었습니다. \n 남은 잔여 포인트: ").append(remainPoint);
+        noticeService.postNotice(NoticeCategory.POINT,title,content.toString(),user, pointHistory.getPointHistoryId());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), new PointUseRes(remainPoint,p.getAmount(),strf.getTitle())));
     }
 
     //QR코드 확인시 보일 화면
@@ -227,7 +239,7 @@ public class PointService {
                 case 2:
                     yield "취소(환불)";
                 default:
-                    yield "";
+                    yield null;
             };
 
             PointHistoryListDto dto = new PointHistoryListDto(
@@ -328,12 +340,14 @@ public class PointService {
             if (approveDto == null) {
                 throw new RuntimeException();
             }
+            String title=pointHistory.getAmount()+" point 구매완료!";
+            StringBuilder content = new StringBuilder(title).append(" 즐겁게 쇼핑해 볼까요? 제때 포인트를 충전하는 것을 잊지 마세요!");
+            noticeService.postNotice(NoticeCategory.POINT,title,content.toString(),user,pointHistory.getPointHistoryId());
 
             StringBuilder redirectParams = new StringBuilder("?user_name=")
                     .append(URLEncoder.encode(user.getName(), StandardCharsets.UTF_8)).append("&")
                     .append("remain_point=")
                     .append(URLEncoder.encode(pointHistory.getRemainPoint().toString(), StandardCharsets.UTF_8));
-
 
             return kakaopayConst.getPointCompleteUrl() + redirectParams;
 
