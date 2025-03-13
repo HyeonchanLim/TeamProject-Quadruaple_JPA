@@ -90,34 +90,41 @@ public class StrfService {
     }
 
 
-//    public List<Amenipoint> getAmeniIdList(List<Long> amenityId , Long strfId){
+//    public List<AmenipointId> getAmeniIdList(List<Long> amenityIds, Long strfId) {
 //        long startTime = System.currentTimeMillis();
-//        String cachedkey = "amenityId:" + amenityId + ":strfId:" + strfId;
-//        RedisTemplate<String , List<Amenipoint>> redisTemplate = new RedisTemplate<>();
-//        List<Amenipoint> amenipointId = redisTemplate.opsForValue().get(cachedkey);
 //
-//
-////        List<AmenipointId> amenipointIds = (List<AmenipointId>) redisTemplate.opsForValue().get(cachekey);
-//        if (amenipointId != null) {
-//            long endTime = System.currentTimeMillis();
-//            long elapedTime = endTime - startTime;
-//            log.info("cache retrieval time: {} ms" , elapedTime);
-//            return amenipointId;
+//        // Redis 캐시 키 생성
+//        String cacheKey = "amenity:" + amenityIds.toString() + ":strf:" + strfId;
+//        // redis 에서 캐시 데이터 조회
+//        Object cachedKey = redisTemplate.opsForValue().get(cacheKey);
+////        // Redis에서 캐시 데이터 조회
+////        List<AmenipointId> cachedAmenipointIds = (List<AmenipointId>) redisTemplate.opsForValue().get(cacheKey);
+////        if (cachedAmenipointIds != null) {
+////            long elapsedTime = System.currentTimeMillis() - startTime;
+////            log.info("Cache hit: {} (retrieval time: {} ms)", cacheKey, elapsedTime);
+////            return cachedAmenipointIds;
+////        }
+//        if (cachedKey instanceof List<?>){
+//            List<AmenipointId> cachedAmeniPointIds = (List<AmenipointId>) cachedKey;
+//            long elapsedTime = System.currentTimeMillis() - startTime;
+//            log.info("Cache hit: {} (retrieval time: {} ms)", cacheKey, elapsedTime);
+//            return cachedAmeniPointIds;
 //        }
 //
-//        log.info("Cache miss: {}", cachedkey);
+//        log.info("Cache miss: {}", cacheKey);
 //
 //        // 캐시 데이터가 없으면 DB에서 조회
 //        long dbStartTime = System.currentTimeMillis();
-//        List<Amenipoint> ameniPoints = amenipointRepository.findAllByAmenityIdAndStrfId(amenityId, strfId);
+//        List<AmenipointId> ameniPointIds = amenipointRepository.findAllByAmenityIdInAndStrfId(amenityIds, strfId);
 //
 //        // Redis에 저장 (TTL 설정: 10분)
-//        redisTemplate.opsForValue().set(cachedkey, ameniPoints, Duration.ofMinutes(10));
+//        redisTemplate.opsForValue().set(cacheKey, ameniPointIds, Duration.ofMinutes(10));
 //
 //        long dbElapsedTime = System.currentTimeMillis() - dbStartTime;
 //        log.info("DB retrieval time: {} ms", dbElapsedTime);
 //
-//        return ameniPoints;
+//        return ameniPointIds;
+//
 //    }
 //    public List<Amenipoint> getAmeniPointList(Long ameniPointId) {
 //        long startTime = System.currentTimeMillis();

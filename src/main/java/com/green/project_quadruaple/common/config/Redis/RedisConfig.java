@@ -32,14 +32,16 @@ public class RedisConfig {
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
-//        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+//        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         // redis 는 기본적으로 jdk 직렬화를 사용하여 저장
         // jackson 직렬화를 적용하면 json 형식으로 저장되며 메모리 사용량 절약 가능
 
-//        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-//        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
         // 직렬화 때문에 설정함, 확인 후 필요없으면 hash 는 없애도 됨
+
+        redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }
 }
