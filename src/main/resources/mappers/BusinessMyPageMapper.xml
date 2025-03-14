@@ -32,11 +32,18 @@
           LEFT JOIN user F
             ON E.user_id = F.user_id
          WHERE F.user_id = #{userId} AND C.category = 'STAY'
-        <if test='startDate != null and startDate != ""'>
-            AND A.check_in &gt;= #{startDate} <!-- &gt; → >, (greater than, 초과) -->
-        </if>
-        <if test='endDate != null and endDate != ""'>
-            AND A.check_out &lt;= #{endDate} <!-- &lt; → <, (less than, 미만) -->
+        <if test='startDate != null and startDate != "" or endDate != null and endDate != ""'>
+            AND (
+            <if test='startDate != null and startDate != ""'>
+                A.check_in &gt;= #{startDate}
+            </if>
+            <if test='startDate != null and startDate != "" and endDate != null and endDate != ""'>
+                OR
+            </if>
+            <if test='endDate != null and endDate != ""'>
+                A.check_out &lt;= #{endDate}
+            </if>
+            )
         </if>
     </select>
 
