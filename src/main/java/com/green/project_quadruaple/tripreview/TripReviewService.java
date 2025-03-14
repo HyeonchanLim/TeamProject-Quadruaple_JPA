@@ -71,6 +71,13 @@ public class TripReviewService {
             throw new RuntimeException("여행이 시작되기 전에 여행기를 등록할 수 없습니다.");
         }
 
+        tripReview.setUser(user);
+        tripReview.setTrip(trip);
+        tripReview.setTitle(req.getTitle());
+        tripReview.setContent(req.getContent());
+
+        tripReviewRepository.save(tripReview);
+
         // 파일 등록
         long tripReviewId = tripReview.getTripReviewId();
         String middlePath = String.format("tripReview/%d", tripReviewId);
@@ -83,10 +90,11 @@ public class TripReviewService {
 
             for (MultipartFile pic : tripReviewPic) {
                 String savedPicName = myFileUtils.makeRandomFileName(pic);
-                picNameList.add(savedPicName);
+                String getExt = myFileUtils.getExt(savedPicName);
+                picNameList.add(savedPicName.replace(getExt, ".webp"));
                 String filePath = String.format("%s/%s", middlePath, savedPicName);
                 try {
-                    myFileUtils.transferToUser(pic, filePath);
+                    myFileUtils.convertAndSaveToWebp(pic, filePath.replaceAll("\\.[^.]+$", ".webp"));
                 } catch (IOException e) {
                     // 업로드된 폴더 삭제
                     String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
@@ -100,13 +108,6 @@ public class TripReviewService {
                 tripReviewMapper.insTripReviewPic(tripReviewId, picNameList);
             }
         }
-
-        tripReview.setUser(user);
-        tripReview.setTrip(trip);
-        tripReview.setTitle(req.getTitle());
-        tripReview.setContent(req.getContent());
-
-        tripReviewRepository.save(tripReview);
 
 
         TripReviewPostRes tripReviewPostRes = new TripReviewPostRes();
