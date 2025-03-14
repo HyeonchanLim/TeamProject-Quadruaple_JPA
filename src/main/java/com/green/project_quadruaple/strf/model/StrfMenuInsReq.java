@@ -12,7 +12,7 @@ import java.util.List;
 public class StrfMenuInsReq {
 
     private long strfId;
-    private long menuId;
+//    private long menuId;
     private String busiNum;
 //    private String category;
 

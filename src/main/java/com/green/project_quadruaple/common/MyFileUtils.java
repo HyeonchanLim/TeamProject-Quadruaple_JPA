@@ -1,14 +1,23 @@
 package com.green.project_quadruaple.common;
 
+import com.sksamuel.scrimage.ImmutableImage;
+import com.sksamuel.scrimage.webp.WebpWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Iterator;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -64,13 +73,34 @@ public class MyFileUtils {
     //파일을 원하는 경로에 저장(이동)
     public void transferTo(MultipartFile mf, String path) throws IOException {
         Path targetPath = Paths.get(String.format("%s/%s", uploadPath, path)).toAbsolutePath();
-
 //        File file = new File(uploadPath, path);
 //        log.info("originFile: {}", file.getAbsolutePath());
 
         File pathFile = targetPath.toFile();
         log.info("PathFile: {}", pathFile.getAbsolutePath());
 //        mf.transferTo(pathFile);
+    }
+    public void convertAndSaveToWebp(MultipartFile mf, String path) throws IOException {
+        String webpFilePath = path.replaceAll("\\.[^.]+$", "") + ".webp";
+
+        Path targetPath = Paths.get(uploadPath, webpFilePath).toAbsolutePath();
+        File outputFile = targetPath.toFile();
+
+        if (!outputFile.getParentFile().exists()) {
+            outputFile.getParentFile().mkdirs();
+        }
+
+        ImmutableImage image = ImmutableImage.loader().fromStream(mf.getInputStream());
+
+        image.output(WebpWriter.DEFAULT, outputFile);
+
+//        double aspectRatio = (double) image.width / image.height;
+//        if (aspectRatio >= 0.5625 && aspectRatio <= 1.0) {
+//            image.scaleToWidth(800)
+//                    .output(WebpWriter.DEFAULT, outputFile);
+//        } else {
+//            throw new IOException("이미지 비율이 지원되지 않습니다: " + aspectRatio);
+//        }
     }
 
     public void transferToUser(MultipartFile mf, String path) throws IOException {

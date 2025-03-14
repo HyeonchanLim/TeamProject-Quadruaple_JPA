@@ -95,8 +95,8 @@ public class StrfController {
     }
 
     @PutMapping("/time")
-    public ResponseEntity<?> updTime(@Param("strf_id") Long strfId,@RequestPart StrfTime p) {
-        ResponseWrapper<Integer> response = strfService.updTime(strfId, p);
+    public ResponseEntity<?> updTime(@RequestBody StrfTime p) {
+        ResponseWrapper<Integer> response = strfService.updTime(p);
         return ResponseEntity.ok(response);
     }
 
@@ -124,14 +124,14 @@ public class StrfController {
     }
 
     @PutMapping("/rest")
-    public ResponseEntity<?> updRest(@Param("strf_id") Long strfId,@RequestPart List<String> restDates,@Param("busi_num") String busiNum) {
+    public ResponseEntity<?> updRest(@RequestParam("strf_id") Long strfId,@RequestBody List<String> restDates,@RequestParam("busi_num") String busiNum) {
         ResponseWrapper<Integer> response = strfService.updRest(strfId , restDates,busiNum);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/menu")
     public ResponseEntity<?> updStrfMenu(@RequestPart List<MultipartFile> menuPic,
-                                         @RequestPart StrfMenuInsReq menuReq) {
+                                         @RequestPart StrfUpdMenu menuReq) {
         ResponseWrapper<Integer> response = strfService.updStrfMenu(menuPic,menuReq);
         return ResponseEntity.ok(response);
     }
@@ -143,7 +143,7 @@ public class StrfController {
     }
 
     @PutMapping("/amenity")
-    public ResponseEntity<?> updateAmenity(@RequestPart StrfJpaAmenity req) {
+    public ResponseEntity<?> updateAmenity(@RequestBody StrfJpaAmenity req) {
         ResponseWrapper<Integer> response = strfService.updateAmenity(req);
         return ResponseEntity.ok(response);
     }
