@@ -11,8 +11,12 @@ import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.coupon.repository.CouponRepository;
+import com.green.project_quadruaple.coupon.repository.ReceiveCouponRepository;
+import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.entity.repository.LocationDetailRepository;
+import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.strf.model.*;
 import com.green.project_quadruaple.strf.model.StrfMenu;
 import com.green.project_quadruaple.trip.model.Category;
@@ -29,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,6 +60,9 @@ public class StrfService {
     private final AmenityRepository amenityRepository;
     private final RedisTemplate<String,Object> redisTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final CouponRepository couponRepository;
+    private final ReceiveCouponRepository receiveCouponRepository;
+    private final NoticeService noticeService;
 
     public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
         Long userId = 0L;
@@ -93,91 +101,22 @@ public class StrfService {
     }
 
 
-//    public List<AmenipointId> getAmeniIdList(List<Long> amenityIds, Long strfId) {
-//        long startTime = System.currentTimeMillis();
-//
-//        String cacheKey = "amenity:" + amenityIds.toString() + ":strf:" + strfId;
-//
-//        Object cachedKey = redisTemplate.opsForValue().get(cacheKey);
-//
-//        if (cachedKey instanceof String) {
-//            try {
-//                List<AmenipointId> cachedList = objectMapper.readValue(
-//                        (String) cachedKey, new TypeReference<List<AmenipointId>>() {});
-//                long elapsedTime = System.currentTimeMillis() - startTime;
-//                log.info("Cache hit: {} (retrieval time: {} ms)", cacheKey, elapsedTime);
-//                return cachedList;
-//            } catch (Exception e) {
-//                log.error("Failed to parse cached data", e);
-//            }
-//        }
-//
-//        log.info("Cache miss: {}", cacheKey);
-//
-//        // 캐시 데이터가 없으면 DB에서 조회
-//        long dbStartTime = System.currentTimeMillis();
-//        List<AmenipointId> ameniPointIds = amenipointRepository.findAllByAmenityIdInAndStrfId(amenityIds, strfId);
-//
-//        if (!ameniPointIds.isEmpty()) {
-//            try {
-//                // Redis에 JSON으로 저장 (TTL: 10분)
-//                String jsonValue = objectMapper.writeValueAsString(ameniPointIds);
-//                redisTemplate.opsForValue().set(cacheKey, jsonValue, Duration.ofMinutes(10));
-//            } catch (Exception e) {
-//                log.error("Failed to serialize data for Redis", e);
-//            }
-//        }
-//
-//        long dbElapsedTime = System.currentTimeMillis() - dbStartTime;
-//        log.info("DB retrieval time: {} ms", dbElapsedTime);
-//
-//        return ameniPointIds;
-//
-//    }
-//    public List<Amenipoint> getAmeniPointList(Long ameniPointId) {
-//        long startTime = System.currentTimeMillis();
-//
-//        // Redis 캐시 키 생성
-//        String cacheKey = "amenipoint:" + ameniPointId;
-//
-//        // Redis에서 캐시 데이터 조회
-//        List<Amenipoint> cachedAmeniPoints = (List<Amenipoint>) redisTemplate.opsForValue().get(cacheKey);
-//
-//        if (cachedAmeniPoints != null) {
-//            long elapsedTime = System.currentTimeMillis() - startTime;
-//            log.info("Cache hit: {} (retrieval time: {} ms)", cacheKey, elapsedTime);
-//            return cachedAmeniPoints;
-//        }
-//
-//        log.info("Cache miss: {}", cacheKey);
-//
-//        // 캐시 데이터가 없으면 DB에서 조회
-//        long dbStartTime = System.currentTimeMillis();
-//        List<Amenipoint> ameniPoints = amenipointRepository.findAllByAmeniPointId(ameniPointId);
-//
-//        // Redis에 저장 (TTL 설정: 10분)
-//        redisTemplate.opsForValue().set(cacheKey, ameniPoints, Duration.ofMinutes(10));
-//
-//        long dbElapsedTime = System.currentTimeMillis() - dbStartTime;
-//        log.info("DB retrieval time: {} ms", dbElapsedTime);
-//
-//        return ameniPoints;
-//    }
-//    public List<Amenity> getAmenityList(){
-//        return null;
-//    }
 
     public ResponseWrapper<List<StrfMenu>> getStrfMenu(Long strfId) {
-//        String categoryValue = null;
-//        if (category != null && Category.getKeyByName(category) != null) {
-//            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
-//        }
         List<StrfMenu> menus = strfMapper.strfMenu(strfId);
-        if (menus == null || menus.isEmpty()){
+
+        if (menus == null || menus.isEmpty()) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), menus);
         }
+
+        boolean hasValidMenuId = menus.stream().anyMatch(menu -> menu.getMenuId() != null);
+        if (!hasValidMenuId) {
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
+        }
+
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), menus);
     }
+
     public ResponseWrapper<List<StrfParlorDto>> getStrfParlor(Long strfId, String category) {
         String categoryValue = null;
         if (category != null && Category.getKeyByName(category) != null) {
@@ -424,9 +363,6 @@ public class StrfService {
         StayTourRestaurFest strf = strfRepository.findById(strfId)
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
         BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
 
         updateStrfState(strf, state);
 
@@ -440,9 +376,6 @@ public class StrfService {
         StayTourRestaurFest strf = strfRepository.findById(strfId)
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
         BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
         updateStrfDetail(strf, detail);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
@@ -455,9 +388,6 @@ public class StrfService {
         StayTourRestaurFest strf = strfRepository.findById(strfId)
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
         BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
-//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
         updateStrfFestTime(strf, p);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
@@ -486,10 +416,6 @@ public class StrfService {
         StayTourRestaurFest strf = strfRepository.findById(strfId)
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
         BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
-
         if (strfRepository.existsByTell(tell)) {
             throw new RuntimeException("Title already exists");
         }
@@ -505,10 +431,6 @@ public class StrfService {
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
         BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
 
-//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
-
         if (strfRepository.existsByTitle(title)) {
             throw new RuntimeException("Title already exists");
         }
@@ -523,9 +445,6 @@ public class StrfService {
         StayTourRestaurFest strf = strfRepository.findById(strfId)
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
         BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
-//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
         if (!strf.getBusiNum().toString().equals(p.getBusiNum())){
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
@@ -542,9 +461,6 @@ public class StrfService {
         StayTourRestaurFest strf = strfRepository.findById(strfId)
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
         BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
         updateStrfPics(strfPic, strf);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
@@ -557,9 +473,6 @@ public class StrfService {
         StayTourRestaurFest strf = strfRepository.findById(strfId)
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
         BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
         updateRestDays(strf,restDates);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
@@ -572,11 +485,6 @@ public class StrfService {
         StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
         BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
-//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
-
-
         Menu menu = menuRepository.findById(req.getMenuId()).orElseThrow( () -> new RuntimeException("menuId not found"));
 
         List<Menu> savedMenus = saveMenusWithPics(menuPic, strf, req);
@@ -599,9 +507,6 @@ public class StrfService {
         StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
                 .orElseThrow(() -> new RuntimeException("STRF ID not found"));
 
-//        if (!strf.getBusiNum().toString().equals(req.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
 
         Category categoryValue = null;
         if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
@@ -673,20 +578,17 @@ public class StrfService {
             List<Amenipoint> amenipoints = new ArrayList<>();
 
             for (Long amenityId : req.getAmeniPoints()) {
-                // ✅ 1. `amenityId`를 기반으로 `Amenity` 조회
                 Amenity amenity = amenityRepository.findById(amenityId)
                         .orElseThrow(() -> new RuntimeException("Amenity ID " + amenityId + "를 찾을 수 없습니다."));
 
-                // ✅ 2. `Amenipoint`에 `amenity_id` & `strf_id` 매핑해서 저장
                 Amenipoint amenipoint = Amenipoint.builder()
                         .id(new AmenipointId(amenity.getAmenityId(), strf.getStrfId()))
-                        .amenity(amenity)  // 🔥 매핑 확실하게!!
-                        .stayTourRestaurFest(strf)  // 🔥 `strf`와 매핑!!
+                        .amenity(amenity)
+                        .stayTourRestaurFest(strf)
                         .build();
                 amenipoints.add(amenipoint);
             }
 
-            // ✅ 3. `Amenipoint` 저장
             amenipointRepository.saveAll(amenipoints);
         }
 
@@ -887,10 +789,353 @@ public class StrfService {
     public int couponReceive (long couponId){
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+        Coupon coupon=couponRepository.findById(couponId).orElseThrow(() -> new RuntimeException("coupon id not found"));
+        receiveCouponRepository.save(ReceiveCoupon.builder().user(user).coupon(coupon).build());
+        String title=coupon.getTitle()+"을 받았습니다! ";
+        StringBuilder contents = new StringBuilder().append(coupon.getDiscountPer()).append("% 할인되는 ")
+                .append(title).append(coupon.getExpiredAt()).append("까지 ")
+                .append(coupon.getStrf().getTitle()!=null?coupon.getStrf().getTitle():
+                        strfRepository.findTitleByStrfId(coupon.getStrf().getStrfId()))
+                .append("에서 사용하여 더 저렴한 혜택을 놓치지 마세요!");
+        noticeService.postNotice(NoticeCategory.COUPON,title,contents.toString(),user,couponId);
 
-        strfMapper.couponReceive(userId , couponId);
         return 1;
     }
 
+    public boolean stayBookingExists(Long strfId, Long menuId, LocalDate checkIn, LocalDate checkOut) {
+        // ✅ 1. 예약 존재 여부 확인
+        boolean isBooked = strfMapper.stayBookingExists(menuId, checkIn.atStartOfDay(), checkOut.atTime(23, 59));
+        if (isBooked) {
+            return false;  // 이미 예약된 경우
+        }
+
+        // ✅ 2. 휴무일 확인
+        List<Integer> restDays = strfMapper.getRestDaysByStrfId(strfId);
+        if (restDays != null && !restDays.isEmpty()) {
+            for (LocalDate date = checkIn; !date.isAfter(checkOut); date = date.plusDays(1)) {
+                int dayOfWeek = date.getDayOfWeek().getValue() % 7; // Java의 요일(1=월~7=일) → DB 요일(0=일~6=토) 변환
+                if (restDays.contains(dayOfWeek)) {
+                    return false; // 해당 날짜가 휴무일이면 예약 불가능
+                }
+            }
+        }
+
+        return true; // 예약 가능
+    }
+
+//    @Transactional
+//    public ResponseWrapper<Integer> updateStrf(Long strfId, StrfUpdInfo p) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//
+//        updateStrfBasicInfo(strf, p);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updState(Long strfId, int state , String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        updateStrfState(strf, state);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updDetail(Long strfId, String detail,String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        updateStrfDetail(strf, detail);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updFestTime(Long strfId, StrfFestTime p) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
+//        updateStrfFestTime(strf, p);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updTime(StrfTime p) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId())
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
+////        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+////            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+////        }
+//
+//        updateStrfTime(strf, p);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updTell(Long strfId, String tell,String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//
+//        if (strfRepository.existsByTell(tell)) {
+//            throw new RuntimeException("Title already exists");
+//        }
+//        updateStrfTell(strf, tell);
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updTitle(Long strfId, String title,String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//
+//        if (strfRepository.existsByTitle(title)) {
+//            throw new RuntimeException("Title already exists");
+//        }
+//        updateStrfTitle(strf, title);
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updAddress(Long strfId, StrfUpdAddress p) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
+//        if (!strf.getBusiNum().toString().equals(p.getBusiNum())){
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+//
+//        updateStrfAddressInfo(strf, p);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updStrfPic(Long strfId, List<MultipartFile> strfPic,String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        updateStrfPics(strfPic, strf);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updRest(Long strfId, List<String> restDates , String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        updateRestDays(strf,restDates);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updStrfMenu(List<MultipartFile> menuPic, StrfUpdMenu req) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+//
+//        Menu menu = menuRepository.findById(req.getMenuId()).orElseThrow( () -> new RuntimeException("menuId not found"));
+//
+//        List<Menu> savedMenus = saveMenusWithPics(menuPic, strf, req);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updateStay(StrfStayUpdReq req) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+//
+//        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
+//        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
+//        if (!isBusi) {
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+//
+//        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//        Category categoryValue = null;
+//        if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
+//            categoryValue = Category.getKeyByName(req.getCategory());
+//        }
+//        if (categoryValue == Category.STAY) {
+//            List<Parlor> parlors = new ArrayList<>();
+//            List<Room> rooms = new ArrayList<>();
+//            for (StrfParlor strfParlor : req.getParlors()) {
+//                Menu menu = menuRepository.findById(req.getMenuId())
+//                        .orElseThrow(() -> new RuntimeException("Menu not found"));
+//
+//                Parlor newParlor = Parlor.builder()
+//                        .menu(menu)
+//                        .maxCapacity(strfParlor.getMaxCapacity())
+//                        .recomCapacity(strfParlor.getRecomCapacity())
+//                        .surcharge(strfParlor.getSurcharge())
+//                        .build();
+//                parlors.add(newParlor);
+//            }
+//
+//            for (Long roomId : req.getRooms()) {
+//                Menu menu = menuRepository.findById(req.getMenuId())
+//                        .orElseThrow(() -> new RuntimeException("Menu not found"));
+//
+//                Room newRoom = Room.builder()
+//                        .menu(menu)
+//                        .roomId(roomId)
+//                        .roomNum(1)
+//                        .build();
+//                rooms.add(newRoom);
+//            }
+//            parlorRepository.saveAll(parlors);
+//            roomRepository.saveAll(rooms);
+//        }
+//        Menu menu = menuRepository.findById(req.getMenuId())
+//                .orElseThrow( () -> new RuntimeException("menu id not found"));
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//    @Transactional
+//    public ResponseWrapper<Integer> updateAmenity(StrfJpaAmenity req) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("user id not found"));
+//
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+//        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
+//
+//        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
+//        if (!isBusi) {
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+//
+//        if (req.getAmeniPoints() == null) {
+//            throw new RuntimeException("Amenity가 null 상태입니다!");
+//        }
+//
+//        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//        Category categoryValue = null;
+//        if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
+//            categoryValue = Category.getKeyByName(req.getCategory());
+//        }
+//
+//        if (categoryValue == Category.STAY) {
+//            List<Amenipoint> amenipoints = new ArrayList<>();
+//
+//            for (Long amenityId : req.getAmeniPoints()) {
+//                Amenity amenity = amenityRepository.findById(amenityId)
+//                        .orElseThrow(() -> new RuntimeException("Amenity ID " + amenityId + "를 찾을 수 없습니다."));
+//
+//                Amenipoint amenipoint = Amenipoint.builder()
+//                        .id(new AmenipointId(amenity.getAmenityId(), strf.getStrfId()))
+//                        .amenity(amenity)
+//                        .stayTourRestaurFest(strf)
+//                        .build();
+//                amenipoints.add(amenipoint);
+//            }
+//
+//            amenipointRepository.saveAll(amenipoints);
+//        }
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
 }
 
+
+//    public List<AmenipointId> getAmeniIdList(List<Long> amenityIds, Long strfId) {
+//        long startTime = System.currentTimeMillis();
+//
+//        String cacheKey = "amenity:" + amenityIds.toString() + ":strf:" + strfId;
+//
+//        Object cachedKey = redisTemplate.opsForValue().get(cacheKey);
+//
+//        if (cachedKey instanceof String) {
+//            try {
+//                List<AmenipointId> cachedList = objectMapper.readValue(
+//                        (String) cachedKey, new TypeReference<List<AmenipointId>>() {});
+//                long elapsedTime = System.currentTimeMillis() - startTime;
+//                log.info("Cache hit: {} (retrieval time: {} ms)", cacheKey, elapsedTime);
+//                return cachedList;
+//            } catch (Exception e) {
+//                log.error("Failed to parse cached data", e);
+//            }
+//        }
+//
+//        log.info("Cache miss: {}", cacheKey);
+//
+//        // 캐시 데이터가 없으면 DB에서 조회
+//        long dbStartTime = System.currentTimeMillis();
+//        List<AmenipointId> ameniPointIds = amenipointRepository.findAllByAmenityIdInAndStrfId(amenityIds, strfId);
+//
+//        if (!ameniPointIds.isEmpty()) {
+//            try {
+//                // Redis에 JSON으로 저장 (TTL: 10분)
+//                String jsonValue = objectMapper.writeValueAsString(ameniPointIds);
+//                redisTemplate.opsForValue().set(cacheKey, jsonValue, Duration.ofMinutes(10));
+//            } catch (Exception e) {
+//                log.error("Failed to serialize data for Redis", e);
+//            }
+//        }
+//
+//        long dbElapsedTime = System.currentTimeMillis() - dbStartTime;
+//        log.info("DB retrieval time: {} ms", dbElapsedTime);
+//
+//        return ameniPointIds;
+//
+//    }
+//    public List<Amenipoint> getAmeniPointList(Long ameniPointId) {
+//        long startTime = System.currentTimeMillis();
+//
+//        // Redis 캐시 키 생성
+//        String cacheKey = "amenipoint:" + ameniPointId;
+//
+//        // Redis에서 캐시 데이터 조회
+//        List<Amenipoint> cachedAmeniPoints = (List<Amenipoint>) redisTemplate.opsForValue().get(cacheKey);
+//
+//        if (cachedAmeniPoints != null) {
+//            long elapsedTime = System.currentTimeMillis() - startTime;
+//            log.info("Cache hit: {} (retrieval time: {} ms)", cacheKey, elapsedTime);
+//            return cachedAmeniPoints;
+//        }
+//
+//        log.info("Cache miss: {}", cacheKey);
+//
+//        // 캐시 데이터가 없으면 DB에서 조회
+//        long dbStartTime = System.currentTimeMillis();
+//        List<Amenipoint> ameniPoints = amenipointRepository.findAllByAmeniPointId(ameniPointId);
+//
+//        // Redis에 저장 (TTL 설정: 10분)
+//        redisTemplate.opsForValue().set(cacheKey, ameniPoints, Duration.ofMinutes(10));
+//
+//        long dbElapsedTime = System.currentTimeMillis() - dbStartTime;
+//        log.info("DB retrieval time: {} ms", dbElapsedTime);
+//
+//        return ameniPoints;
+//    }
+//    public List<Amenity> getAmenityList(){
+//        return null;
+//    }
