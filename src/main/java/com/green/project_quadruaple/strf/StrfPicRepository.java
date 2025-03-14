@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StrfPicRepository extends JpaRepository<StrfPic, Long> {
     void deleteAllByStrfId(StayTourRestaurFest strf);
+//    void deleteByStrfId(Long strfId);
 }
 

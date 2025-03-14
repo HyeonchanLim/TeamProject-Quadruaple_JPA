@@ -22,6 +22,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> findAllRoomsWithDistinctMenu();
 
 
-    @EntityGraph(attributePaths = {"menu", "menu.stayTourRestaurFest"})
-    Optional<Room> findById(Long id);
+//    @EntityGraph(attributePaths = {"menu", "menu.stayTourRestaurFest"})
+//    Optional<Room> findById(Long id);
+//    void deleteByMenuId(Long menuId);
 }
