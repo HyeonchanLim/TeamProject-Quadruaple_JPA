@@ -2,6 +2,7 @@ package com.green.project_quadruaple.review;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.entity.model.User;
 import com.green.project_quadruaple.review.model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +39,11 @@ public class ReviewController {
         return reviewService.getMyReviews(startIdx);
     }
 
+    @GetMapping("/count")
+    @Operation(summary = "내 리뷰 개수 조회")
+    public int myReviewCount (){
+        return reviewService.myReviewCount();
+    }
 
     @PostMapping
     @Operation(summary = "리뷰 등록")

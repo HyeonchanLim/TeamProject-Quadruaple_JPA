@@ -23,6 +23,12 @@
         LIMIT 10
     </select>
 
+    <select id="recentCount">
+        SELECT COUNT(DISTINCT strf_id)
+        FROM recent
+        WHERE user_id = #{userId}
+    </select>
+
     <update id="recentHide">
     UPDATE recent
     SET undo_recent = 1
