@@ -55,8 +55,7 @@ public class NoticeService {
     private final RoleRepository roleRepository;
 
     // 타임아웃 시간 설정
-    //private static final long NOTICE_TIME_OUT = 3_600_000L; //1시간
-    private static final long NOTICE_TIME_OUT = 60_000L; //60초
+    private static final long NOTICE_TIME_OUT = 3_600_000L; //1시간
     // 마지막 신규 알람 조회
     private LocalDateTime lastCheckedTime = LocalDateTime.now();
     // SSE 연결을 관리하는 저장소 (여러 유저 지원 가능)

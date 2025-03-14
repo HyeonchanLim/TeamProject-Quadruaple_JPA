@@ -47,7 +47,16 @@ public class StrfController {
     public ResponseWrapper<?> getStrfParlor(@RequestParam("strf_id") Long strfId, String category) {
         return strfService.getStrfParlor(strfId, category);
     }
-
+    @GetMapping("/count")
+    @Operation(summary = "리뷰 개수 조회")
+    public int reviewCount (@RequestParam("strf_id") long strfId){
+        return strfService.reviewCount(strfId);
+    }
+    @GetMapping("/coupon")
+    @Operation(summary = "상품이 발행한 쿠폰 조회")
+    public List<StrfCouponGetRes> couponList(@RequestParam("strf_id") long strfId){
+        return strfService.couponList(strfId);
+    }
 
     @PostMapping("/info")
     @Operation(summary = "사업자 상품 생성")
@@ -67,6 +76,12 @@ public class StrfController {
     @Operation(summary = "사업자 상품 객실,숙소 생성")
     public ResponseWrapper<?> strfStayIns (@Valid @RequestBody StrfStayInsReq p){
         return strfService.strfStayIns(p);
+    }
+
+    @PutMapping("/receive")
+    @Operation(summary = "쿠폰 수령")
+    public int couponReceive (@RequestParam("coupon_id") long couponId){
+        return strfService.couponReceive(couponId);
     }
 
     @PutMapping("/strf")

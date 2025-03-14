@@ -21,7 +21,7 @@ public class BusinessMyPageService {
     private final StrfRepository strfRepository;
     private final RoleRepository roleRepository;
 
-    public List<BusinessMyPageBooking> selBusinessMyPageBooking() {
+    public List<BusinessMyPageBooking> selBusinessMyPageBooking(String startDate, String endDate) {
         long userId = authenticationFacade.getSignedUserId();
 
         // 사용자 권한 확인 (BUSI 권한이 있는지 확인)
@@ -32,7 +32,7 @@ public class BusinessMyPageService {
             return null;
         }
 
-        List<BusinessMyPageBooking> bookingList = businessMyPageMapper.selBookingByBusiness(userId);
+        List<BusinessMyPageBooking> bookingList = businessMyPageMapper.selBookingByBusiness(userId, startDate, endDate);
 
         return bookingList;
     }

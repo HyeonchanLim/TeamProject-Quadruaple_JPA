@@ -73,38 +73,33 @@ public class MyFileUtils {
     //파일을 원하는 경로에 저장(이동)
     public void transferTo(MultipartFile mf, String path) throws IOException {
         Path targetPath = Paths.get(String.format("%s/%s", uploadPath, path)).toAbsolutePath();
-
+//        File file = new File(uploadPath, path);
+//        log.info("originFile: {}", file.getAbsolutePath());
 
         File pathFile = targetPath.toFile();
         log.info("PathFile: {}", pathFile.getAbsolutePath());
-    }
-//        File file = new File(uploadPath, path);
-//        log.info("originFile: {}", file.getAbsolutePath());
 //        mf.transferTo(pathFile);
+    }
     public void convertAndSaveToWebp(MultipartFile mf, String path) throws IOException {
-        // 원본 파일에서 확장자를 변경한 WebP 파일명 생성
         String webpFilePath = path.replaceAll("\\.[^.]+$", "") + ".webp";
 
-        // 저장할 절대 경로 설정
         Path targetPath = Paths.get(uploadPath, webpFilePath).toAbsolutePath();
         File outputFile = targetPath.toFile();
 
-        // 디렉토리 생성
         if (!outputFile.getParentFile().exists()) {
             outputFile.getParentFile().mkdirs();
         }
 
-        // 🔥 MultipartFile → ImmutableImage 변환
         ImmutableImage image = ImmutableImage.loader().fromStream(mf.getInputStream());
 
-        // 🔥 비율 유지 + 크기 조정 (16:9 ~ 1:1 범위 체크 후 변환)
-        double aspectRatio = (double) image.width / image.height;
-        if (aspectRatio >= 0.5625 && aspectRatio <= 1.0) {  // 16:9 ~ 1:1 범위
-            image.scaleToWidth(800) // 원하는 크기로 조절 가능
-                    .output(WebpWriter.DEFAULT, outputFile);
-        } else {
-            throw new IOException("이미지 비율이 지원되지 않습니다: " + aspectRatio);
-        }
+        image.output(WebpWriter.DEFAULT, outputFile);
+//        double aspectRatio = (double) image.width / image.height;
+//        if (aspectRatio >= 0.5625 && aspectRatio <= 1.0) {
+//            image.scaleToWidth(800)
+//                    .output(WebpWriter.DEFAULT, outputFile);
+//        } else {
+//            throw new IOException("이미지 비율이 지원되지 않습니다: " + aspectRatio);
+//        }
     }
 
     public void transferToUser(MultipartFile mf, String path) throws IOException {

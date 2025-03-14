@@ -875,6 +875,22 @@ public class StrfService {
             strfPicRepository.save(pic);
         });
     }
+    public int reviewCount(long strfId){
+
+        return strfMapper.reviewCount(strfId);
+    }
+    public List<StrfCouponGetRes> couponList(long strfId){
+        List<StrfCouponGetRes> couponGetList = strfMapper.couponList(strfId);
+        return couponGetList;
+    }
+
+    public int couponReceive (long couponId){
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+
+        strfMapper.couponReceive(userId , couponId);
+        return 1;
+    }
 
 }
 
