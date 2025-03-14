@@ -21,6 +21,8 @@ public interface ReviewMapper {
 
     int deleteReview (Long reviewId,Long userId);
     int deleteReviewPic(Long reviewId);
+    int myReviewCount (long userId);
+
 
 
 

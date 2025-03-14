@@ -16,5 +16,9 @@ public interface StrfMapper {
     List<StrfMenu> strfMenu(Long strfId);
     List<StrfParlorDto> strfParlor (Long strfId , String category );
 
+    int reviewCount(long strfId);
+    List<StrfCouponGetRes> couponList(long strfId);
+    int couponReceive (long userId , long couponId);
+
 }
 

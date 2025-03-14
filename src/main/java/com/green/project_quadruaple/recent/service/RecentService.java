@@ -40,6 +40,13 @@ public class RecentService {
             return new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null);
         }
     }
+    public int recentCount(){
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+
+        return recentMapper.recentCount(userId);
+
+    }
 
     @Transactional
     public ResponseWrapper<Long> recentHide(Long strfId) {

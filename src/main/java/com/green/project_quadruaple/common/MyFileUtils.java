@@ -93,7 +93,6 @@ public class MyFileUtils {
         ImmutableImage image = ImmutableImage.loader().fromStream(mf.getInputStream());
 
         image.output(WebpWriter.DEFAULT, outputFile);
-
 //        double aspectRatio = (double) image.width / image.height;
 //        if (aspectRatio >= 0.5625 && aspectRatio <= 1.0) {
 //            image.scaleToWidth(800)

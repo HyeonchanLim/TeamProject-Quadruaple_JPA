@@ -121,6 +121,18 @@
         <result property="pic" column="pic"/>
     </resultMap>
 
+    <select id="myReviewCount">
+        SELECT COUNT(DISTINCT review_id)
+        FROM review
+        WHERE user_id = #{userId}
+    </select>
+
+
+
+
+
+
+
 
 
     <select id="selectBusinessReview" parameterType="map" resultMap="businessReviewResultMap">
@@ -159,7 +171,7 @@
         LEFT JOIN user u ON r.user_id = u.user_id
         LEFT JOIN wishlist w ON s.strf_id = w.strf_id
 
-        -- 대댓글 최신 수정 시간 반영
+
         LEFT JOIN (
         SELECT rr1.review_id, rr1.reply_id AS reviewReplyId, rr1.content AS reviewReply,
         DATE_FORMAT(rr1.updated_at, '%Y-%m-%d') AS reviewReplyUpdatedAt  -- updated_at 사용
@@ -176,10 +188,6 @@
         ORDER BY r.review_id DESC
         LIMIT #{pageSize} OFFSET #{startIdx};
     </select>
-
-
-
-
 
     <resultMap id="businessReviewResultMap" type="com.green.project_quadruaple.review.model.BusinessDto">
         <id property="reviewId" column="reviewId"/>
@@ -219,7 +227,6 @@
     <select id="findUserRoleByUserId" parameterType="long" resultType="string">
         SELECT role FROM role WHERE user_id = #{userId} AND role = 'BUSI' LIMIT 1
     </select>
-
 
 
 </mapper>

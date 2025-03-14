@@ -152,6 +152,28 @@
         inquired_at = NOW()
     </insert>
 
+    <select id="reviewCount">
+        SELECT COUNT(DISTINCT review_id)
+        FROM review
+        WHERE strf_id = #{strfId}
+    </select>
+    <select id="couponList" resultMap="couponResultMap">
+        SELECT coupon_id AS couponId , title AS couponName , expired_at AS expiredAt ,
+                discount_per AS discountPer , distribute_at AS distributeAt
+        FROM coupon
+        WHERE strf_id = #{strfId}
+    </select>
+    <resultMap id="couponResultMap" type="com.green.project_quadruaple.strf.model.StrfCouponGetRes">
+        <id column="couponId" property="couponId"/>
+        <result column="couponName" property="couponName"/>
+        <result column="expiredAt" property="expiredAt"/>
+        <result column="discountPer" property="discountPer"/>
+        <result column="distributeAt" property="distributeAt"/>
+    </resultMap>
+    <insert id="couponReceive">
+        INSERT INTO receive_coupon (user_id , coupon_id)
+        VALUES(#{userId}, #{couponId})
+    </insert>
 </mapper>
 
 
