@@ -2,6 +2,7 @@ package com.green.project_quadruaple.booking.repository;
 
 import com.green.project_quadruaple.booking.model.dto.BookingRes;
 import com.green.project_quadruaple.entity.model.Booking;
+import com.green.project_quadruaple.entity.model.ChatJoin;
 import com.green.project_quadruaple.entity.model.Room;
 import com.green.project_quadruaple.entity.model.User;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +64,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     where b.bookingId = :bookingId
     """)
     Booking findBookingAndChatRoomById(Long bookingId);
+
 
     @Query("""
         select bn.user from Booking b

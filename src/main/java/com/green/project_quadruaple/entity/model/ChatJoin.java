@@ -28,7 +28,7 @@ public class ChatJoin {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "chat_room_id", nullable = false)
     private ChatRoom chatRoom;
 
