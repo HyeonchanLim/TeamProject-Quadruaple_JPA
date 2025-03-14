@@ -10,6 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -51,7 +55,7 @@ public class BusinessMyPageService {
         return businessMyPageMapper.selBookingDetails(bookingId, userId);
     }
 
-    public BusinessMyPageSales selBusinessMyPageSales(Integer orderType) {
+    public List<BusinessMyPageSales> selBusinessMyPageSales(String startMonth, String endMonth) {
         long userId = authenticationFacade.getSignedUserId();
 
         // 사용자 권한 확인 (BUSI 권한이 있는지 확인)
@@ -65,19 +69,50 @@ public class BusinessMyPageService {
         // JPA를 사용하여 category 조회
         List<String> category = strfRepository.findCategoryByUserId(userId);
 
-        // orderType에 맞는 monthOffsets 계산
-        List<Integer> monthOffsets = businessMyPageMapper.calculateMonthOffsets(orderType);
+        // 날짜 형식 변환 (한 자리 월을 두 자리로 변환)
+        startMonth = formatMonth(startMonth);
+        endMonth = formatMonth(endMonth);
+
+        // 유효한 날짜 범위 계산
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        YearMonth now = YearMonth.now();
+        YearMonth oneYearAgo = now.minusMonths(12);
+
+        YearMonth start = YearMonth.parse(startMonth, formatter);
+        YearMonth end = YearMonth.parse(endMonth, formatter);
+
+        // 시작월이 1년 전보다 과거면 1년 전으로 조정
+        if (start.isBefore(oneYearAgo)) {
+            start = oneYearAgo;
+        }
+        // 종료월이 현재보다 미래면 현재 월로 조정
+        if (end.isAfter(now)) {
+            end = now;
+        }
 
         // category에 따라 적절한 메서드 호출
         if (category.contains("STAY")) {
-            return businessMyPageMapper.selBusinessSTAYSales(orderType, userId, monthOffsets);
+            return businessMyPageMapper.selBusinessSTAYSales(userId, start.format(formatter), end.format(formatter));
         } else if (category.contains("RESTAUR")) {
-            // monthOffsets도 함께 전달
-            return businessMyPageMapper.selUsedPointsByBusinessRESTAUR(orderType, userId, monthOffsets);
+            return businessMyPageMapper.selUsedPointsByBusinessRESTAUR(userId, start.format(formatter), end.format(formatter));
         }
 
         // 해당하는 category가 없을 경우 빈 객체 반환
-        return new BusinessMyPageSales();
+        return new ArrayList<>();
+    }
+
+    private String formatMonth(String month) {
+        try {
+            String[] parts = month.split("-");
+            if (parts.length == 2) {
+                int year = Integer.parseInt(parts[0]);
+                int monthNum = Integer.parseInt(parts[1]);
+                return String.format("%04d-%02d", year, monthNum); // yyyy-MM 형식으로 변환
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("올바른 날짜 형식이 아닙니다. (예: 2024-06)", e);
+        }
+        return month; // 기본 반환 (문제가 없을 경우)
     }
 
     public BusinessMyPagePointList selBusinessMyPagePointList() {

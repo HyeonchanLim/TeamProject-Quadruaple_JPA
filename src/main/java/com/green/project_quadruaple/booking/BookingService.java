@@ -189,6 +189,7 @@ public class BookingService {
         params.put("cancel_url", kakaopayConst.getBookingCancelUrl()); // 실패시 url
         params.put("fail_url", kakaopayConst.getBookingFailUrl());
 
+
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
         try {

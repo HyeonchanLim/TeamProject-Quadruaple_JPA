@@ -41,4 +41,6 @@ public interface StrfRepository extends JpaRepository<StayTourRestaurFest, Long>
 
     boolean existsByTitle(String title);
     boolean existsByTell(String title);
+    @Query("select s.title from StayTourRestaurFest s where s.strfId = :strfId")
+    String findTitleByStrfId(Long strfId);
 }

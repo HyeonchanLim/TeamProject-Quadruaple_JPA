@@ -18,4 +18,5 @@ public interface WishListMapper {
     List<WishListRes> wishListGet(Long userId, int startIdx , int size, String orderType,String category);
 
     List<WishlistFestRes> wishlistFestGet(Long userId , int startIdx , int size , String orderType , String category , String startAt);
+    int myWishListCount(@Param("userId") Long userId);
 }

@@ -32,9 +32,61 @@ public class BusinessReviewService {
     private final ReviewMapper reviewMapper;
     private final ReviewRepository reviewRepository;
 
+    //전체 리뷰 조회 (페이징 적용)
+    public List<BusinessDto> getBusinessReview(int page, int pageSize) {
+        Long signedUserId = authenticationFacade.getSignedUserId();
+        System.out.println("Signed User ID: " + signedUserId);
+
+        String userRole = reviewMapper.findUserRoleByUserId(signedUserId);
+        if (!"BUSI".equalsIgnoreCase(userRole)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "사업자 권한 없음.");
+        }
+
+        int startIdx = (page - 1) * pageSize;
+        if (startIdx < 0) startIdx = 0;
+
+        System.out.println("startIdx: " + startIdx + ", pageSize: " + pageSize);
+
+        long startTime = System.currentTimeMillis(); // 전체 실행 시간 측정 시작
+        long queryStartTime = System.currentTimeMillis();
+
+        List<BusinessDto> reviews = reviewMapper.selectBusinessReview(signedUserId, page, pageSize, startIdx);
+
+        long queryEndTime = System.currentTimeMillis();
+        System.out.println("쿼리 실행 시간: " + (queryEndTime - queryStartTime) + "ms");
+
+        // isMore 로직 추가: 데이터 개수가 페이지 크기보다 크면 true
+        boolean isMore = reviews.size() > pageSize;
+
+        // 리스트에서 최대 pageSize 개수만 유지
+        if (isMore) {
+            reviews = reviews.subList(0, pageSize);
+        }
+
+        for (int i = 0; i < reviews.size(); i++) {
+            reviews.get(i).setIsMore(isMore && i == reviews.size() - 1); // 마지막 요소에만 isMore 반영
+        }
+
+        for (BusinessDto review : reviews) {
+            System.out.println("queryReviewReplyId: " + review.getReviewReplyId());
+
+            long reviewStartTime = System.currentTimeMillis();
+            List<ReviewPicDto> pics = reviewMapper.selectReviewPics(review.getReviewId());
+            long reviewEndTime = System.currentTimeMillis();
+
+            System.out.println("리뷰 ID: " + review.getReviewId() + " 사진 로딩 시간: " + (reviewEndTime - reviewStartTime) + "ms");
+
+            review.setReviewPicList(pics);
+        }
+
+        long endTime = System.currentTimeMillis(); // 전체 실행 시간 종료
+        System.out.println("전체 getBusinessReview 실행 시간: " + (endTime - startTime) + "ms");
+
+        return reviews;
+    }
 
       //전체 리뷰 조회 (페이징 적용)
-    public List<BusinessDto> getBusinessReview(int page, int pageSize) {
+    /*public List<BusinessDto> getBusinessReview(int page, int pageSize) {
         Long signedUserId = authenticationFacade.getSignedUserId();
         System.out.println("Signed User ID: " + signedUserId);
 
@@ -73,7 +125,7 @@ public class BusinessReviewService {
         long endTime = System.currentTimeMillis();
         System.out.println("전체 getBusinessReview 실행 시간: " + (endTime - startTime) + "ms");
         return reviews;
-    }
+    }*/
 
 
 

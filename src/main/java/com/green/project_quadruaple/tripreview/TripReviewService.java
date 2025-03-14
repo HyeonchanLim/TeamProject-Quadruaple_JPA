@@ -3,6 +3,7 @@ package com.green.project_quadruaple.tripreview;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.entity.model.*;
+import com.green.project_quadruaple.trip.ScheMemoRepository;
 import com.green.project_quadruaple.trip.TripMapper;
 import com.green.project_quadruaple.trip.TripRepository;
 import com.green.project_quadruaple.trip.model.req.PostTripReq;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +44,7 @@ public class TripReviewService {
     private final ScrapRepository scrapRepository;
     private final TripReviewPicRepository tripReviewPicRepository;
     private final TripLikeRepository tripLikeRepository;
+    private final ScheMemoRepository scheMemoRepository;
 
     @Value("${const.default-review-size}")
     private int size;
@@ -58,12 +61,15 @@ public class TripReviewService {
         Trip trip = tripRepository.findById(req.getTripId())
                 .orElseThrow(() -> new RuntimeException("Trip not found"));
 
-        tripReview.setUser(user);
-        tripReview.setTrip(trip);
-        tripReview.setTitle(req.getTitle());
-        tripReview.setContent(req.getContent());
+        if (!scheMemoRepository.existsByTrip_TripId(trip.getTripId())) {
+            throw new RuntimeException("ScheMemo not fount");
+        }
 
-        tripReviewRepository.save(tripReview);
+        // 여행 시작일 이후인지 검증
+        LocalDate today = LocalDate.now();
+        if (today.isBefore(trip.getPeriod().getStartAt())) {
+            throw new RuntimeException("여행이 시작되기 전에 여행기를 등록할 수 없습니다.");
+        }
 
         // 파일 등록
         long tripReviewId = tripReview.getTripReviewId();
@@ -94,6 +100,14 @@ public class TripReviewService {
                 tripReviewMapper.insTripReviewPic(tripReviewId, picNameList);
             }
         }
+
+        tripReview.setUser(user);
+        tripReview.setTrip(trip);
+        tripReview.setTitle(req.getTitle());
+        tripReview.setContent(req.getContent());
+
+        tripReviewRepository.save(tripReview);
+
 
         TripReviewPostRes tripReviewPostRes = new TripReviewPostRes();
         tripReviewPostRes.setTripReviewId(tripReviewId);

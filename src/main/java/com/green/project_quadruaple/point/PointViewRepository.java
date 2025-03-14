@@ -3,6 +3,7 @@ package com.green.project_quadruaple.point;
 import com.green.project_quadruaple.entity.model.PointHistory;
 import com.green.project_quadruaple.entity.view.PointView;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -12,11 +13,11 @@ import java.util.List;
 public interface PointViewRepository extends JpaRepository<PointView, Long> {
 
     List<PointView> findByUserIdAndCategoryAndCreatedAtBetween(
-            Long userId, int category, LocalDateTime startAt, LocalDateTime endAt, Pageable pageable
+            Long userId, int category, LocalDateTime startAt, LocalDateTime endAt, Sort sort
     );
 
     List<PointView> findByUserIdAndCreatedAtBetween(
-            Long userId, LocalDateTime startAt, LocalDateTime endAt, Pageable pageable
+            Long userId, LocalDateTime startAt, LocalDateTime endAt,  Sort sort
     );
 
 

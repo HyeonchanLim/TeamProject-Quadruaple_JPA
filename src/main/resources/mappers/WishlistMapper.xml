@@ -72,4 +72,10 @@
         LIMIT #{startIdx}, #{size}
     </select>
 
+    <select id="myWishListCount" resultType="int">
+        SELECT COUNT(*)
+        FROM wishlist
+        WHERE user_id = #{userId}
+    </select>
+
 </mapper>

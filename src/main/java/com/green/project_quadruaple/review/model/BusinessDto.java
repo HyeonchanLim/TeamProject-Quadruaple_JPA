@@ -33,5 +33,7 @@ public class BusinessDto {
     private List<ReviewPicDto> reviewPicList;
     private Long reviewReplyId;
 
+    private Boolean isMore;
+
 
 }
