@@ -69,23 +69,27 @@
     
     <select id="selScheduleCntAndMemoCnt" resultMap="tripInfoResultMap">
         SELECT
-            (SELECT count(1) FROM sche_memo WHERE trip_id = #{tripId} AND category = 'SCHE') AS scheduleCnt
-            , (SELECT count(1) FROM sche_memo WHERE trip_id = #{tripId} AND category = 'MEMO') AS memoCnt
-            , t.trip_id AS tripId
-            , t.title AS title
-            , t.start_at AS startAt
-            , t.end_at AS endAt
-            , tl.location_id AS tripLocationList
+        (SELECT count(1) FROM sche_memo WHERE trip_id = #{tripId} AND category = 'SCHE') AS scheduleCnt
+        , (SELECT count(1) FROM sche_memo WHERE trip_id = #{tripId} AND category = 'MEMO') AS memoCnt
+        , t.trip_id AS tripId
+        , t.title AS title
+        , t.start_at AS startAt
+        , t.end_at AS endAt
+        , l.title AS tripLocationList
         FROM trip t
         JOIN trip_location tl
         ON tl.trip_id = t.trip_id
+        JOIN location l
+        ON tl.location_id = l.location_id
         WHERE t.trip_id = #{tripId}
     </select>
 
     <select id="selTripUserList">
         SELECT
-            user_id
-        FROM trip_user
+            u.name
+        FROM trip_user tu
+        JOIN `user` u
+        ON u.user_id = tu.user_id
         WHERE trip_id = #{tripId}
     </select>
 
@@ -94,7 +98,7 @@
         <result column="title" property="title"/>
         <result column="startAt" property="startAt"/>
         <result column="endAt" property="endAt"/>
-        <collection property="tripLocationList" ofType="java.lang.Long">
+        <collection property="tripLocationList" ofType="java.lang.String">
             <result column="tripLocationList"/>
         </collection>
     </resultMap>

@@ -35,18 +35,6 @@ const:
 #      key-prefix: "cache:"  # 캐시 키 Prefix 지정 (예: "cache:amenities")
 
 spring:
-#  data:
-#    redis:
-#      host: localhost     # redis 서버 주소
-#      port: 6379          # redis 포트
-#      password:           # 필요하면 비번 추가
-#      timeout: 6000       #연결 타임아웃 (ms)
-#      lettuce:
-#        pool:
-#          max-active: 16   # 최대 활성 연결 수
-#          max-idle: 8     # 최대 유효 연결 수
-#          min-idle: 2     # 최소 유효 연결 수
-#          max-wait: 5000    # 최대 대기 시간 (최대 5000ms 대기 후 요청이 지연되면 예외 발생)
   cache:
     type: redis
   devtools:
@@ -138,8 +126,8 @@ odsay-api-const:
 #kakao Api
 kakao-api-const:
   auth-key: ${AUTH_KEY}
-  secret-key : ${SECRET_KEY}
-  affiliate-code : ${AFFILIATE_CODE}
+  secret-key: ${SECRET_KEY}
+  affiliate-code: ${AFFILIATE_CODE}
   url: https://open-api.kakaopay.com
   booking_approval_url: "http://localhost:8080/api/booking/pay-approve" #booking
   booking_cancel_url: "http://localhost:8080/api/booking/kakaoPayCancle"
