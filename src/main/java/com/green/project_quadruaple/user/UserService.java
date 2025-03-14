@@ -91,7 +91,7 @@ public class UserService {
             savedPicName = myFileUtils.makeRandomFileName(pic);
         } else {
             // 프로필 사진이 없으면 기본 사진 사용
-            savedPicName = "user_profile.png";
+            savedPicName = "user_profile.webp";
             isDefaultPic = true;
         }
 
@@ -103,10 +103,12 @@ public class UserService {
             //이메일을 authCode에서 가져오도록 수정
             String email = authCode.getEmail();
 
+            String getExt = myFileUtils.getExt(savedPicName);
+
             User user = new User();
             user.setAuthenticationCode(authCode);
             user.setName(p.getName());
-            user.setProfilePic(savedPicName);
+            user.setProfilePic(savedPicName.replace(getExt, ".webp"));
             user.setPassword(hashedPassword);
             user.setBirth(p.getBirth());
             user.setTell(p.getTell());
@@ -137,7 +139,7 @@ public class UserService {
                 try {
                     if (isDefaultPic) {
                         // 기본 프로필 사진 복사
-                        Path source = Paths.get(fileDirectory, "common", "user_profile.png");
+                        Path source = Paths.get(fileDirectory, "common", "user_profile.webp");
 
                         // 디버깅용 로그 추가
                         System.out.println("Source Path: " + source.toAbsolutePath());
@@ -157,7 +159,7 @@ public class UserService {
                         Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
                         System.out.println("기본 프로필 사진 복사 완료!");
                     } else {
-                        myFileUtils.transferToUser(pic, filePath);
+                        myFileUtils.convertAndSaveToWebp(pic, filePath.replaceAll("\\.[^.]+$", ".webp"));
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
