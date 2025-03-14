@@ -86,34 +86,10 @@
 
 
     <!-- 매출 조회 -->
-    <resultMap id="businessSalesResultMap" type="com.green.project_quadruaple.businessmypage.model.BusinessMyPageSales">
-        <!-- 각 월별 합계 -->
-        <result property="sumMonth1" column="sum_1_month"/>
-        <result property="sumMonth2" column="sum_2_month"/>
-        <result property="sumMonth3" column="sum_3_month"/>
-        <result property="sumMonth4" column="sum_4_month"/>
-        <result property="sumMonth5" column="sum_5_month"/>
-        <result property="sumMonth6" column="sum_6_month"/>
-        <result property="sumMonth7" column="sum_7_month"/>
-        <result property="sumMonth8" column="sum_8_month"/>
-        <result property="sumMonth9" column="sum_9_month"/>
-        <result property="sumMonth10" column="sum_10_month"/>
-        <result property="sumMonth11" column="sum_11_month"/>
-        <result property="sumMonth12" column="sum_12_month"/>
-    </resultMap>
-
-
-    <select id="selBusinessSTAYSales" resultMap="businessSalesResultMap">
+    <select id="selBusinessSTAYSales">
         SELECT
-        <trim prefixOverrides=",">
-            <foreach item="monthOffset" collection="monthOffsets" open="" separator="," close="">
-                COALESCE(SUM(CASE
-                WHEN YEAR(A.created_at) = YEAR(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
-                AND MONTH(A.created_at) = MONTH(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
-                THEN A.total_payment ELSE 0
-                END), 0) AS sum_${monthOffset + 1}_month
-            </foreach>
-        </trim>
+        DATE_FORMAT(A.created_at, '%Y-%m') AS month,
+        COALESCE(SUM(A.total_payment), 0) AS total_sales
         FROM booking A
         LEFT JOIN menu B ON A.menu_id = B.menu_id
         LEFT JOIN stay_tour_restaur_fest C ON B.strf_id = C.strf_id
@@ -122,20 +98,17 @@
         WHERE F.user_id = #{userId}
         AND C.category IN ('STAY')
         AND A.state = 2
+        AND DATE_FORMAT(A.created_at, '%Y-%m') BETWEEN
+        GREATEST(#{startMonth}, DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 12 MONTH), '%Y-%m'))
+        AND LEAST(#{endMonth}, DATE_FORMAT(CURDATE(), '%Y-%m'))
+        GROUP BY month
+        ORDER BY month ASC
     </select>
 
-
-    <select id="selUsedPointsByBusinessRESTAUR" resultMap="businessSalesResultMap">
+    <select id="selUsedPointsByBusinessRESTAUR">
         SELECT
-        <trim prefixOverrides=",">
-            <foreach item="monthOffset" collection="monthOffsets" open="" separator="," close="">
-                COALESCE(SUM(CASE
-                WHEN YEAR(A.created_at) = YEAR(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
-                AND MONTH(A.created_at) = MONTH(DATE_SUB(CURDATE(), INTERVAL ${monthOffset} MONTH))
-                THEN A.amount ELSE 0
-                END), 0) AS sum_${monthOffset + 1}_month
-            </foreach>
-        </trim>
+        DATE_FORMAT(A.created_at, '%Y-%m') AS month,
+        COALESCE(SUM(A.amount), 0) AS total_sales
         FROM point_history A
         LEFT JOIN stay_tour_restaur_fest C ON A.related_id = C.strf_id
         LEFT JOIN business_num D ON C.busi_num = D.busi_num
@@ -143,8 +116,12 @@
         WHERE E.user_id = #{userId}
         AND A.category = 0
         AND C.category = 'RESTAUR'
+        AND DATE_FORMAT(A.created_at, '%Y-%m') BETWEEN
+        GREATEST(#{startMonth}, DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 12 MONTH), '%Y-%m'))
+        AND LEAST(#{endMonth}, DATE_FORMAT(CURDATE(), '%Y-%m'))
+        GROUP BY month
+        ORDER BY month ASC
     </select>
-
 
     <!-- 전체 포인트 합계 조회 -->
     <select id="selTotalPointAmount">
