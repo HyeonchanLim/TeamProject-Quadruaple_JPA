@@ -28,11 +28,22 @@ public class TripReviewController {
     @PostMapping
     @Operation(summary = "여행기 등록")
     public ResponseEntity<?> postTripReview(@RequestPart(required = false) List<MultipartFile> tripReviewPic, @RequestPart TripReviewPostReq req){
-        TripReviewPostRes res = tripReviewService.postTripReview(tripReviewPic, req);
-        if (res == null) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null));
+        try {
+            TripReviewPostRes res = tripReviewService.postTripReview(tripReviewPic, req);
+            if (res == null || tripReviewPic == null) {
+                return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null));
+            }
+            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), res));
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("여행이 시작되기 전에 여행기를 등록할 수 없습니다.")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null));
+            } else if (e.getMessage().contains("ScheMemo not fount")) {
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseWrapper<>(ResponseCode.NOT_Acceptable.getCode(), null));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(ResponseCode.SERVER_ERROR.getCode());
+            }
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), res));
     }
 
     //여행기 조회

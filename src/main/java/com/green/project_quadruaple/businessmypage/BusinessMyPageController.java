@@ -52,9 +52,12 @@ public class BusinessMyPageController {
     }
 
     @GetMapping("sales")
-    @Operation(summary = "매출 현황 조회", description = "orderType엔 1, 3, 6, 12 만 입력")
-    public ResponseEntity<?> getBusinessMyPageSales(@RequestParam(defaultValue = "1") Integer orderType) {
-        BusinessMyPageSales result = businessMyPageService.selBusinessMyPageSales(orderType);
+    @Operation(summary = "매출 현황 조회", description = "조회할 시작 월과 종료 월을 yyyy-MM 형식으로 입력 (최대 12개월)")
+    public ResponseEntity<?> getBusinessMyPageSales(
+            @RequestParam String startMonth,
+            @RequestParam String endMonth
+    ) {
+        List<BusinessMyPageSales> result = businessMyPageService.selBusinessMyPageSales(startMonth, endMonth);
         return ResponseEntity.ok(result);
     }
 

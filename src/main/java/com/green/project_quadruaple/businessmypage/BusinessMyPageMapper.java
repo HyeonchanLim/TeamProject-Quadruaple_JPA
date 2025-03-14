@@ -10,17 +10,9 @@ import java.util.List;
 public interface BusinessMyPageMapper {
     List<BusinessMyPageBooking> selBookingByBusiness(Long userId, String startDate, String endDate);
     BusinessMyPageBookingDetails selBookingDetails(Long bookingId, Long userId);
-    BusinessMyPageSales selBusinessSTAYSales(Integer orderType, Long userId, List<Integer> monthOffsets);
-    BusinessMyPageSales selUsedPointsByBusinessRESTAUR(Integer orderType, Long userId, List<Integer> monthOffsets);
+    List<BusinessMyPageSales> selBusinessSTAYSales(Long userId, String startMonth, String endMonth);
+    List<BusinessMyPageSales> selUsedPointsByBusinessRESTAUR(Long userId, String startMonth, String endMonth);
 
     Long selTotalPointAmount(Long userId);
     List<BusinessMyPagePointDetail> selPointDetailList(Long userId);
-
-    default List<Integer> calculateMonthOffsets(Integer orderType) {
-        List<Integer> monthOffsets = new ArrayList<>();
-        for (int i = 0; i < orderType; i++) {
-            monthOffsets.add(i);
-        }
-        return monthOffsets;
-    }
 }
