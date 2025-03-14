@@ -60,8 +60,8 @@ public class ChatService {
 //            }
             if(cjId != null) {
                 UserSubscribeState.USER_SUB_STATE.add(cjId); // 채팅방 구독 시 구독상태 저장
+                chatReceiveRepository.deleteAll(chatReceiveRepository.findByListenerId(cjId));
             }
-            List<ChatReceive> list = chatReceiveRepository.findByListenerId(cjId);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

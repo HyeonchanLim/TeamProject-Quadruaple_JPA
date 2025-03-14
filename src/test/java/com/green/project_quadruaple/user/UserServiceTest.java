@@ -168,14 +168,13 @@ class UserServiceTest {
         // Mock noticeReceiveRepository.existsUnreadNoticesByUserId
         given(noticeReceiveRepository.existsUnreadNoticesByUserId(user.getUserId())).willReturn(true); // 예시로 true 리턴
 
-        // JwtTokenProvider Mock 설정
-//        TokenProvider jwtTokenProvider = Mockito.mock(TokenProvider.class);
-//        String fakeAccessToken = "fakeAccessToken";
-//        String fakeRefreshToken = "fakeRefreshToken";
-//        given(jwtTokenProvider.generateToken(any(JwtUser.class), any(Duration.class)))
-//                .willReturn(fakeAccessToken);  // accessToken을 반환
-//        given(jwtTokenProvider.generateToken(any(JwtUser.class), eq(Duration.ofDays(15))))
-//                .willReturn(fakeRefreshToken);  // refreshToken을 반환
+        //JwtTokenProvider Mock 설정
+        String fakeAccessToken = "fakeAccessToken";
+        String fakeRefreshToken = "fakeRefreshToken";
+        given(jwtTokenProvider.generateToken(any(JwtUser.class), eq(Duration.ofHours(6))))
+                .willReturn(fakeAccessToken);  // accessToken을 반환
+        given(jwtTokenProvider.generateToken(any(JwtUser.class), eq(Duration.ofDays(15))))
+                .willReturn(fakeRefreshToken);  // refreshToken을 반환
 
         // CookieUtils Mock 설정
         CookieUtils cookieUtils = Mockito.mock(CookieUtils.class);
@@ -183,12 +182,21 @@ class UserServiceTest {
         // Mock HttpServletResponse
         HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
 
+        UserSignInRes.builder()
+                .accessToken(fakeAccessToken)
+                .userId(user.getUserId())
+                .name(user.getName())
+                .roles(Arrays.asList(UserRole.USER))
+                .hasUnReadNotice(true)
+                .build();
+
         // signIn() 호출
         UserSignInRes result = userService.signIn(req, response);  // 서비스 인스턴스를 사용하여 호출
+
 
         // 결과 검증
         assertNotNull(result); // 결과 객체가 null이 아님을 확인
         assertEquals(1L, result.getUserId()); // userId 확인
-        //assertEquals(fakeAccessToken, result.getAccessToken()); // accessToken 확인
+        assertEquals(fakeAccessToken, result.getAccessToken()); // accessToken 확인
     }
 }
