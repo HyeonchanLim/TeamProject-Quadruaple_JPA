@@ -3,7 +3,6 @@ package com.green.project_quadruaple.chat.service;
 import com.green.project_quadruaple.booking.repository.BookingRepository;
 import com.green.project_quadruaple.chat.model.dto.ChatDto;
 import com.green.project_quadruaple.chat.model.dto.ChatRoomDto;
-import com.green.project_quadruaple.chat.model.req.GetChatRoomReq;
 import com.green.project_quadruaple.chat.model.req.PostChatRoomReq;
 import com.green.project_quadruaple.chat.repository.ChatJoinRepository;
 import com.green.project_quadruaple.chat.repository.ChatReceiveRepository;
@@ -45,7 +44,7 @@ public class ChatRoomService {
     private final ChatReceiveRepository chatReceiveRepository;
 
     @Transactional
-    public ResponseWrapper<Long> createChatRoom(PostChatRoomReq req) {
+    public ResponseWrapper<Long> createBookingChatRoom(PostChatRoomReq req) {
 
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
@@ -66,9 +65,7 @@ public class ChatRoomService {
         chatRoom = ChatRoom.builder()
                 .title(req.getTitle())
                 .build();
-        chatRoomRepository.save(chatRoom);
         booking.setChatRoom(chatRoom);
-        chatRoomRepository.flush();
 
         ChatJoin hostUserJoin = ChatJoin.builder()
                 .user(hostUser)
@@ -83,6 +80,47 @@ public class ChatRoomService {
         chatJoinRepository.save(inviteUserJoin);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoom.getChatRoomId());
+    }
+
+    @Transactional
+    public ResponseWrapper<Long> createAdminChatRoom() {
+
+        long signedUserId = AuthenticationFacade.getSignedUserId();
+
+        User hostUser = userRepository.findById(signedUserId).orElse(null);
+        List<User> inviteUserList = userRepository.findByRole(UserRole.ADMIN);
+        User inviteUser = null;
+        if(!inviteUserList.isEmpty()) {
+            inviteUser = inviteUserList.get(0);
+        } else {
+            throw new RuntimeException("어드민 없음");
+        }
+
+        List<ChatRoom> chatRoomWithAdminList = chatJoinRepository.findChatJoinsByUserIds(signedUserId, inviteUser.getUserId());
+        ChatRoom chatRoomWithAdmin;
+        if(chatRoomWithAdminList.isEmpty()) { // 채팅방 없으면 새로 생성
+            chatRoomWithAdmin = ChatRoom.builder()
+                    .title("관리자와의 은밀한 1대1 채팅방")
+                    .build();
+
+            ChatJoin hostUserJoin = ChatJoin.builder()
+                    .user(hostUser)
+                    .chatRoom(chatRoomWithAdmin)
+                    .build();
+
+            ChatJoin inviteUserJoin = ChatJoin.builder()
+                    .user(inviteUser)
+                    .chatRoom(chatRoomWithAdmin)
+                    .build();
+
+            chatJoinRepository.save(hostUserJoin);
+            chatJoinRepository.save(inviteUserJoin);
+        } else {
+            chatRoomWithAdmin = chatRoomWithAdminList.get(0);
+        }
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoomWithAdmin.getChatRoomId());
+
     }
 
     private Role getRole(List<Role> roleList, String value) {

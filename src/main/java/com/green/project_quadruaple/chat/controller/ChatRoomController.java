@@ -2,14 +2,11 @@ package com.green.project_quadruaple.chat.controller;
 
 import com.green.project_quadruaple.chat.model.dto.ChatDto;
 import com.green.project_quadruaple.chat.model.dto.ChatRoomDto;
-import com.green.project_quadruaple.chat.model.req.GetChatRoomReq;
 import com.green.project_quadruaple.chat.service.ChatRoomService;
 import com.green.project_quadruaple.chat.model.req.PostChatRoomReq;
-import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +24,15 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
     @PostMapping
-    @Operation(summary = "채팅방 생성")
-    public ResponseWrapper<Long> postChatRoom(@RequestBody PostChatRoomReq req) {
-        return chatRoomService.createChatRoom(req);
+    @Operation(summary = "사업자와 채팅방 생성")
+    public ResponseWrapper<Long> postBookingChatRoom(@RequestBody PostChatRoomReq req) {
+        return chatRoomService.createBookingChatRoom(req);
+    }
+
+    @PostMapping("admin")
+    @Operation(summary = "관리자와 채팅방 생성")
+    public ResponseWrapper<Long> postAdminChatRoom() {
+        return chatRoomService.createAdminChatRoom();
     }
 
     @GetMapping("{room_id}")
