@@ -37,6 +37,10 @@ dependencies {
     // cache 설정
     implementation 'org.springframework.boot:spring-boot-starter-cache'
 
+    // 사진 파일을 webp 확장자로 변경하여 저장
+    // https://mvnrepository.com/artifact/com.sksamuel.scrimage/scrimage-webp
+    implementation 'com.sksamuel.scrimage:scrimage-webp:4.3.0'
+
     // api rate
     implementation 'com.bucket4j:bucket4j-core:8.10.1'
     // .env
