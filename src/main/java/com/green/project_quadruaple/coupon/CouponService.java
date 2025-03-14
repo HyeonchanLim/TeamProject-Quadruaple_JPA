@@ -15,10 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -64,6 +61,7 @@ public class CouponService {
                     couponDto.setDiscountPer(coupon.getDiscountPer()); // discountPer 값을 설정
                     return couponDto;
                 })
+                .sorted(Comparator.comparing(CouponDto::getExpiredAt))
                 .collect(Collectors.toList());
 
         // CouponResponse 생성 및 값 설정
@@ -111,6 +109,7 @@ public class CouponService {
                         coupon.getExpiredAt(),
                         coupon.getDiscountPer()
                 ))
+                .sorted(Comparator.comparing(ExpiredCouponDto::getExpiredAt))  // 만료 날짜가 가까운 순으로 정렬
                 .collect(Collectors.toList());
 
         // UsedExpiredCouponResponse 생성 및 값 설정
