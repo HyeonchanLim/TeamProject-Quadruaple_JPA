@@ -16,7 +16,7 @@ public class StrfMenu {
     @Schema(description = "메뉴 가격")
     private int menuPrice;
     @Schema(description = "메뉴 ID")
-    private long menuId;
+    private Long menuId;
     @Schema(description = "메뉴 이름")
     private String menuTitle;
     @Schema(description = "메뉴 사진")
