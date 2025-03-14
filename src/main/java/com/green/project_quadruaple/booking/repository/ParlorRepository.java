@@ -17,5 +17,6 @@ public interface ParlorRepository extends JpaRepository<Parlor, Long> {
         join fetch p.menu
         """)
     List<Parlor> findAllWithFetchJoin();
+    void deleteByMenuId(Long menuId);
 }
 

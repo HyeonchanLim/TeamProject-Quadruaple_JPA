@@ -63,8 +63,10 @@ public class StrfController {
     }
     @GetMapping("/count")
     @Operation(summary = "리뷰 개수 조회")
-    public int reviewCount (@RequestParam("strf_id") long strfId){
-        return strfService.reviewCount(strfId);
+    public ResponseEntity<?> reviewCount (@RequestParam("strf_id") long strfId){
+
+        ResponseWrapper<Integer> reviewCnt = strfService.reviewCount(strfId);
+        return ResponseEntity.ok(reviewCnt);
     }
     @GetMapping("/coupon")
     @Operation(summary = "상품이 발행한 쿠폰 조회")
@@ -102,156 +104,156 @@ public class StrfController {
 
 
 
-    @PutMapping("/strf")
-    public ResponseEntity<?> updateStrf(@Param("strf_id") Long strfId,
-                                        @RequestPart @Valid StrfUpdInfo request) {
-        ResponseWrapper<Integer> response = strfService.updateStrf(strfId, request);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/state")
-    public ResponseEntity<?> updState(@Param("strf_id") Long strfId, int state ,@Param("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updState(strfId, state , busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/detail")
-    public ResponseEntity<?> updDetail(@Param("strf_id") Long strfId, String detail ,@Param("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updDetail(strfId, detail,busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/fest/time")
-    public ResponseEntity<?> updFestTime(@Param("strf_id") Long strfId,@RequestPart StrfFestTime p) {
-        ResponseWrapper<Integer> response = strfService.updFestTime(strfId, p);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/time")
-    public ResponseEntity<?> updTime(@RequestBody StrfTime p) {
-        ResponseWrapper<Integer> response = strfService.updTime(p);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("tell")
-    public ResponseEntity<?> updTell(@Param("strf_id") Long strfId, String tell,@Param("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updTell(strfId, tell,busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/title")
-    public ResponseEntity<?> updTitle(@Param("strf_id") Long strfId, String title ,@Param("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updTitle(strfId, title,busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/address")
-    public ResponseEntity<?> updAddress(@Param("strf_id") Long strfId,@RequestPart StrfUpdAddress p) {
-        ResponseWrapper<Integer> response = strfService.updAddress(strfId , p);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/strf/pic")
-    public ResponseEntity<?> updStrfPic(@Param("strf_id") Long strfId,@RequestPart List<MultipartFile> strfPic,@Param("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updStrfPic(strfId , strfPic,busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/rest")
-    public ResponseEntity<?> updRest(@RequestParam("strf_id") Long strfId,@RequestBody List<String> restDates,@RequestParam("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updRest(strfId , restDates,busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/menu")
-    public ResponseEntity<?> updStrfMenu(@RequestPart List<MultipartFile> menuPic,
-                                         @RequestPart StrfUpdMenu menuReq) {
-        ResponseWrapper<Integer> response = strfService.updStrfMenu(menuPic,menuReq);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/stay")
-    public ResponseEntity<?> updateStay(@RequestPart StrfStayUpdReq stayReq) {
-        ResponseWrapper<Integer> response = strfService.updateStay(stayReq);
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/amenity")
-    public ResponseEntity<?> updateAmenity(@RequestBody StrfJpaAmenity req) {
-        ResponseWrapper<Integer> response = strfService.updateAmenity(req);
-        return ResponseEntity.ok(response);
-    }
-
-
-
-
-    @PatchMapping("/strf")
-    public ResponseEntity<?> patchStrf(@Param("strf_id") Long strfId,
-                                        @RequestPart @Valid StrfUpdInfo request) {
-        ResponseWrapper<Integer> response = strfService.updateStrf(strfId, request);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("/state")
-    public ResponseEntity<?> patchState(@Param("strf_id") Long strfId, int state ,@Param("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updState(strfId, state , busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("/detail")
-    public ResponseEntity<?> patchDetail(@Param("strf_id") Long strfId, String detail ,@Param("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updDetail(strfId, detail,busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("/fest/time")
-    public ResponseEntity<?> patchFestTime(@Param("strf_id") Long strfId,@RequestPart StrfFestTime p) {
-        ResponseWrapper<Integer> response = strfService.updFestTime(strfId, p);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("/time")
-    public ResponseEntity<?> patchTime(@RequestBody StrfTime p) {
-        ResponseWrapper<Integer> response = strfService.updTime(p);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("tell")
-    public ResponseEntity<?> patchTell(@Param("strf_id") Long strfId, String tell,@Param("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updTell(strfId, tell,busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("/title")
-    public ResponseEntity<?> patchTitle(@Param("strf_id") Long strfId, String title ,@Param("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updTitle(strfId, title,busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("/address")
-    public ResponseEntity<?> patchAddress(@Param("strf_id") Long strfId,@RequestPart StrfUpdAddress p) {
-        ResponseWrapper<Integer> response = strfService.updAddress(strfId , p);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("/strf/pic")
-    public ResponseEntity<?> patchStrfPic(@Param("strf_id") Long strfId,@RequestPart List<MultipartFile> strfPic,@Param("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updStrfPic(strfId , strfPic,busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("/rest")
-    public ResponseEntity<?> patchRest(@RequestParam("strf_id") Long strfId,@RequestBody List<String> restDates,@RequestParam("busi_num") String busiNum) {
-        ResponseWrapper<Integer> response = strfService.updRest(strfId , restDates,busiNum);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("/menu")
-    public ResponseEntity<?> patchStrfMenu(@RequestPart List<MultipartFile> menuPic,
-                                         @RequestPart StrfUpdMenu menuReq) {
-        ResponseWrapper<Integer> response = strfService.updStrfMenu(menuPic,menuReq);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("/stay")
-    public ResponseEntity<?> patchStay(@RequestPart StrfStayUpdReq stayReq) {
-        ResponseWrapper<Integer> response = strfService.updateStay(stayReq);
-        return ResponseEntity.ok(response);
-    }
-    @PatchMapping("/amenity")
-    public ResponseEntity<?> patchAmenity(@RequestBody StrfJpaAmenity req) {
-        ResponseWrapper<Integer> response = strfService.updateAmenity(req);
-        return ResponseEntity.ok(response);
-    }
-
-
-
-
-
-
-
-    @DeleteMapping
-    public ResponseEntity<?> deleteStrf(@RequestParam("strf_id") Long strfId) {
-        ResponseWrapper<Integer> response = strfService.deleteStrf(strfId);
-        return ResponseEntity.ok(response);
-    }
+//    @PutMapping("/strf")
+//    public ResponseEntity<?> updateStrf(@Param("strf_id") Long strfId,
+//                                        @RequestPart @Valid StrfUpdInfo request) {
+//        ResponseWrapper<Integer> response = strfService.updateStrf(strfId, request);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PutMapping("/state")
+//    public ResponseEntity<?> updState(@Param("strf_id") Long strfId, int state ,@Param("busi_num") String busiNum) {
+//        ResponseWrapper<Integer> response = strfService.updState(strfId, state , busiNum);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PutMapping("/detail")
+//    public ResponseEntity<?> updDetail(@Param("strf_id") Long strfId, String detail ,@Param("busi_num") String busiNum) {
+//        ResponseWrapper<Integer> response = strfService.updDetail(strfId, detail,busiNum);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PutMapping("/fest/time")
+//    public ResponseEntity<?> updFestTime(@Param("strf_id") Long strfId,@RequestPart StrfFestTime p) {
+//        ResponseWrapper<Integer> response = strfService.updFestTime(strfId, p);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PutMapping("/time")
+//    public ResponseEntity<?> updTime(@RequestBody StrfTime p) {
+//        ResponseWrapper<Integer> response = strfService.updTime(p);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PutMapping("tell")
+//    public ResponseEntity<?> updTell(@Param("strf_id") Long strfId, String tell,@Param("busi_num") String busiNum) {
+//        ResponseWrapper<Integer> response = strfService.updTell(strfId, tell,busiNum);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PutMapping("/title")
+//    public ResponseEntity<?> updTitle(@Param("strf_id") Long strfId, String title ,@Param("busi_num") String busiNum) {
+//        ResponseWrapper<Integer> response = strfService.updTitle(strfId, title,busiNum);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PutMapping("/address")
+//    public ResponseEntity<?> updAddress(@Param("strf_id") Long strfId,@RequestPart StrfUpdAddress p) {
+//        ResponseWrapper<Integer> response = strfService.updAddress(strfId , p);
+//        return ResponseEntity.ok(response);
+//    }
+////    @PutMapping("/strf/pic")
+////    public ResponseEntity<?> updStrfPic(@Param("strf_id") Long strfId,@RequestPart List<MultipartFile> strfPic,@Param("busi_num") String busiNum) {
+////        ResponseWrapper<Integer> response = strfService.updStrfPic(strfId , strfPic,busiNum);
+////        return ResponseEntity.ok(response);
+////    }
+//    @PutMapping("/rest")
+//    public ResponseEntity<?> updRest(@RequestParam("strf_id") Long strfId,@RequestBody List<String> restDates,@RequestParam("busi_num") String busiNum) {
+//        ResponseWrapper<Integer> response = strfService.updRest(strfId , restDates,busiNum);
+//        return ResponseEntity.ok(response);
+//    }
+////    @PutMapping("/menu")
+////    public ResponseEntity<?> updStrfMenu(@RequestPart List<MultipartFile> menuPic,
+////                                         @RequestPart StrfUpdMenu menuReq) {
+////        ResponseWrapper<Integer> response = strfService.updStrfMenu(menuPic,menuReq);
+////        return ResponseEntity.ok(response);
+////    }
+////    @PutMapping("/stay")
+////    public ResponseEntity<?> updateStay(@RequestPart StrfStayUpdReq stayReq) {
+////        ResponseWrapper<Integer> response = strfService.updateStay(stayReq);
+////        return ResponseEntity.ok(response);
+////    }
+////    @PutMapping("/amenity")
+////    public ResponseEntity<?> updateAmenity(@RequestBody StrfJpaAmenity req) {
+////        ResponseWrapper<Integer> response = strfService.updateAmenity(req);
+////        return ResponseEntity.ok(response);
+////    }
+//
+//
+//
+//
+//    @PatchMapping("/strf")
+//    public ResponseEntity<?> patchStrf(@Param("strf_id") Long strfId,
+//                                        @RequestPart @Valid StrfUpdInfo request) {
+//        ResponseWrapper<Integer> response = strfService.updateStrf(strfId, request);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PatchMapping("/state")
+//    public ResponseEntity<?> patchState(@Param("strf_id") Long strfId, int state ,@Param("busi_num") String busiNum) {
+//        ResponseWrapper<Integer> response = strfService.updState(strfId, state , busiNum);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PatchMapping("/detail")
+//    public ResponseEntity<?> patchDetail(@Param("strf_id") Long strfId, String detail ,@Param("busi_num") String busiNum) {
+//        ResponseWrapper<Integer> response = strfService.updDetail(strfId, detail,busiNum);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PatchMapping("/fest/time")
+//    public ResponseEntity<?> patchFestTime(@Param("strf_id") Long strfId,@RequestPart StrfFestTime p) {
+//        ResponseWrapper<Integer> response = strfService.updFestTime(strfId, p);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PatchMapping("/time")
+//    public ResponseEntity<?> patchTime(@RequestBody StrfTime p) {
+//        ResponseWrapper<Integer> response = strfService.updTime(p);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PatchMapping("tell")
+//    public ResponseEntity<?> patchTell(@Param("strf_id") Long strfId, String tell,@Param("busi_num") String busiNum) {
+//        ResponseWrapper<Integer> response = strfService.updTell(strfId, tell,busiNum);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PatchMapping("/title")
+//    public ResponseEntity<?> patchTitle(@Param("strf_id") Long strfId, String title ,@Param("busi_num") String busiNum) {
+//        ResponseWrapper<Integer> response = strfService.updTitle(strfId, title,busiNum);
+//        return ResponseEntity.ok(response);
+//    }
+//    @PatchMapping("/address")
+//    public ResponseEntity<?> patchAddress(@Param("strf_id") Long strfId,@RequestPart StrfUpdAddress p) {
+//        ResponseWrapper<Integer> response = strfService.updAddress(strfId , p);
+//        return ResponseEntity.ok(response);
+//    }
+////    @PatchMapping("/strf/pic")
+////    public ResponseEntity<?> patchStrfPic(@Param("strf_id") Long strfId,@RequestPart List<MultipartFile> strfPic,@Param("busi_num") String busiNum) {
+////        ResponseWrapper<Integer> response = strfService.updStrfPic(strfId , strfPic,busiNum);
+////        return ResponseEntity.ok(response);
+////    }
+//    @PatchMapping("/rest")
+//    public ResponseEntity<?> patchRest(@RequestParam("strf_id") Long strfId,@RequestBody List<String> restDates,@RequestParam("busi_num") String busiNum) {
+//        ResponseWrapper<Integer> response = strfService.updRest(strfId , restDates,busiNum);
+//        return ResponseEntity.ok(response);
+//    }
+////    @PatchMapping("/menu")
+////    public ResponseEntity<?> patchStrfMenu(@RequestPart List<MultipartFile> menuPic,
+////                                         @RequestPart StrfUpdMenu menuReq) {
+////        ResponseWrapper<Integer> response = strfService.updStrfMenu(menuPic,menuReq);
+////        return ResponseEntity.ok(response);
+////    }
+////    @PatchMapping("/stay")
+////    public ResponseEntity<?> patchStay(@RequestPart StrfStayUpdReq stayReq) {
+////        ResponseWrapper<Integer> response = strfService.updateStay(stayReq);
+////        return ResponseEntity.ok(response);
+////    }
+////    @PatchMapping("/amenity")
+////    public ResponseEntity<?> patchAmenity(@RequestBody StrfJpaAmenity req) {
+////        ResponseWrapper<Integer> response = strfService.updateAmenity(req);
+////        return ResponseEntity.ok(response);
+////    }
+//
+//
+//
+//
+//
+//
+//
+//    @DeleteMapping
+//    public ResponseEntity<?> deleteStrf(@RequestParam("strf_id") Long strfId) {
+//        ResponseWrapper<Integer> response = strfService.deleteStrf(strfId);
+//        return ResponseEntity.ok(response);
+//    }
 
 }
 
