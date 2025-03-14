@@ -45,6 +45,12 @@ public class WishListController {
         ResponseWrapper<List<WishlistFestRes>> wishList = wishListService.wishlistFestGet(startIdx, orderType,category,startAt);
         return ResponseEntity.ok(wishList);
     }
+
+    @GetMapping("/count")
+    @Operation(summary = "내 위시리스트 개수 조회")
+    public int myWishListCount() {
+        return wishListService.myWishListCount();
+    }
 }
 
 

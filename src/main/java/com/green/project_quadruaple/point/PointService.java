@@ -209,7 +209,7 @@ public class PointService {
 
     // 보유 포인트 확인화면
     public ResponseEntity<ResponseWrapper<PointHistoryListReq>> checkMyRemainPoint
-    (LocalDate startAt, LocalDate endAt, Integer category, boolean isDesc, int page) {
+    (LocalDate startAt, LocalDate endAt, Integer category, boolean isDesc) {
         /*
             response 내용
             로그인 유저 닉네임+보유포인트
@@ -223,11 +223,10 @@ public class PointService {
 
         Sort sort = Sort.by("pointHistoryId");
         sort = isDesc ? sort.descending() : sort.ascending();
-        Pageable pageable = PageRequest.of(page, SizeConstants.getDefault_page_size(), sort);
 
         List<PointView> pointViews = category != null ?
-                pointViewRepository.findByUserIdAndCategoryAndCreatedAtBetween(userId, category, durationStart, durationEnd, pageable)
-                : pointViewRepository.findByUserIdAndCreatedAtBetween(userId, durationStart, durationEnd, pageable);
+                pointViewRepository.findByUserIdAndCategoryAndCreatedAtBetween(userId, category, durationStart, durationEnd, sort)
+                : pointViewRepository.findByUserIdAndCreatedAtBetween(userId, durationStart, durationEnd, sort);
 
         List<PointHistoryListDto> historys = new ArrayList<>(pointViews.size());
         for (PointView h : pointViews) {

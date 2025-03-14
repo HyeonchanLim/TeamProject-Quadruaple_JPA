@@ -155,6 +155,11 @@ public class WishListService {
         }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), list);
     }
+
+    public int myWishListCount() {
+        Long userId = authenticationFacade.getSignedUserId();
+        return wishlistMapper.myWishListCount(userId);
+    }
 }
 
 

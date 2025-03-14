@@ -133,8 +133,8 @@ public class PointController {
             description = "category를 null로 보내면 구분없음(0-사용, 1-구매, 2-취소/환불), is_desc가 true면 최신순 false면 오래된 순, page는 몇번째 페이지")
     public ResponseEntity<?> checkMyRemainPoint(@RequestParam("start_at") @Parameter(example = "2025-03-05") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
                                                 @RequestParam("end_at") @Parameter(example = "2025-03-10") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
-                                                @RequestParam(required = false) Integer category, @RequestParam("is_desc") boolean isDesc, int page) {
-        return pointService.checkMyRemainPoint(startAt,endAt,category,isDesc,page);
+                                                @RequestParam(required = false) Integer category, @RequestParam("is_desc") boolean isDesc) {
+        return pointService.checkMyRemainPoint(startAt,endAt,category,isDesc);
     }
 
     @PostMapping("card/buy")
