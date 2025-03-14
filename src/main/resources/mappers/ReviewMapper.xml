@@ -149,7 +149,7 @@
 
         lr.reviewReplyId AS reviewReplyId,
         lr.reviewReply AS reviewReply,
-        DATE_FORMAT(lr.reviewReplyCreatedAt, '%Y-%m-%d') AS reviewReplyCreatedAt,
+        DATE_FORMAT(lr.reviewReplyUpdatedAt, '%Y-%m-%d') AS reviewReplyCreatedAt, -- updated_at 기준으로 변경
 
         GROUP_CONCAT(DISTINCT rp.title ORDER BY rp.title SEPARATOR ', ') AS reviewPicTitle
 
@@ -159,14 +159,15 @@
         LEFT JOIN user u ON r.user_id = u.user_id
         LEFT JOIN wishlist w ON s.strf_id = w.strf_id
 
-
+        -- 대댓글 최신 수정 시간 반영
         LEFT JOIN (
         SELECT rr1.review_id, rr1.reply_id AS reviewReplyId, rr1.content AS reviewReply,
-        DATE_FORMAT(rr1.created_at, '%Y-%m-%d') AS reviewReplyCreatedAt
+        DATE_FORMAT(rr1.updated_at, '%Y-%m-%d') AS reviewReplyUpdatedAt  -- updated_at 사용
         FROM review_reply rr1
-        WHERE rr1.reply_id = (SELECT MAX(rr2.reply_id) FROM review_reply rr2 WHERE rr2.review_id = rr1.review_id)
+        WHERE rr1.updated_at = (
+        SELECT MAX(rr2.updated_at) FROM review_reply rr2 WHERE rr2.review_id = rr1.review_id
+        )
         ) lr ON r.review_id = lr.review_id
-
 
         LEFT JOIN review_pic rp ON r.review_id = rp.review_id
 
@@ -175,6 +176,7 @@
         ORDER BY r.review_id DESC
         LIMIT #{pageSize} OFFSET #{startIdx};
     </select>
+
 
 
 
