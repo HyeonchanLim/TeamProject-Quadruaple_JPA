@@ -1,0 +1,1 @@
+import{f as e}from"./index-B5mutXqH.js";const o=e({key:"menuAtom",default:{menuPic:null,menuTitle:"",menuPrice:0,rooms:[],parlors:[{recomCapacity:0,maxCapacity:0,surcharge:0,menuId:0}],ameniPoints:[]}});export{o as m};
