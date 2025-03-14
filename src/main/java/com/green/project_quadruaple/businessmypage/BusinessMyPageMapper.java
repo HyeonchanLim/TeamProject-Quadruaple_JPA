@@ -8,7 +8,7 @@ import java.util.List;
 
 @Mapper
 public interface BusinessMyPageMapper {
-    List<BusinessMyPageBooking> selBookingByBusiness(Long userId);
+    List<BusinessMyPageBooking> selBookingByBusiness(Long userId, String startDate, String endDate);
     BusinessMyPageBookingDetails selBookingDetails(Long bookingId, Long userId);
     BusinessMyPageSales selBusinessSTAYSales(Integer orderType, Long userId, List<Integer> monthOffsets);
     BusinessMyPageSales selUsedPointsByBusinessRESTAUR(Integer orderType, Long userId, List<Integer> monthOffsets);
