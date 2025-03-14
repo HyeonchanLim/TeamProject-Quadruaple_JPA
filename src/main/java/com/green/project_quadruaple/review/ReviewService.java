@@ -69,6 +69,12 @@ public class ReviewService {
         return dtoList;
 
     }
+    public int myReviewCount (){
+        long userId = authenticationFacade.getSignedUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+
+        return reviewMapper.myReviewCount(userId);
+    }
 
 
 //    @Transactional

@@ -24,6 +24,12 @@ public class RecentController {
         return recentService.recentList();
     }
 
+    @GetMapping("count")
+    @Operation(description = "내가 최근 본 목록 개수")
+    public int recentCount (){
+        return recentService.recentCount();
+    }
+
     @PatchMapping("hide")
     @Operation(description = "최근 본 목록 개별 비활성화")
     public ResponseWrapper<?> hideRecentItem(@RequestParam("strf_id") Long strfId) {
