@@ -27,8 +27,9 @@ public class BusinessMyPageController {
     @GetMapping("booking")
     @Operation(summary = "예약 현황(only STAY category)"
               ,description = "state 상태 = 0 : 대기중, 1 : 확정, 2 : 완료, 3 : 취소")
-    public ResponseEntity<?> getBusinessMyPageBooking() {
-        List<BusinessMyPageBooking> result = businessMyPageService.selBusinessMyPageBooking();
+    public ResponseEntity<?> getBusinessMyPageBooking(@RequestParam(required = false, defaultValue = "2025-01-01") String startDate
+                                                    , @RequestParam(required = false, defaultValue = "2025-12-31") String endDate) {
+        List<BusinessMyPageBooking> result = businessMyPageService.selBusinessMyPageBooking(startDate, endDate);
 
         if (result.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
