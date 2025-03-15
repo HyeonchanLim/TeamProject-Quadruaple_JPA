@@ -220,11 +220,12 @@ public class TripReviewService {
             for (MultipartFile pic : tripPic) {
                 if (pic != null && !pic.isEmpty()) {
                     String savedPicName = myFileUtils.makeRandomFileName(pic);
-                    picNameList.add(savedPicName);
+                    String getExt = myFileUtils.getExt(savedPicName);
+                    picNameList.add(savedPicName.replace(getExt, ".webp"));
                     String filePath = String.format("%s/%s", middlePath, savedPicName); // 중복 경로 수정
 
                     try {
-                        myFileUtils.transferToUser(pic, filePath);
+                        myFileUtils.convertAndSaveToWebp(pic, filePath.replaceAll("\\.[^.]+$", ".webp"));
                     } catch (IOException e) {
                         throw new RuntimeException("여행기 사진 저장에 실패했습니다.", e);
                     }
