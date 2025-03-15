@@ -317,18 +317,19 @@ public class UserService {
 
         if (profilePic != null && !profilePic.isEmpty()) {
             String savedFileName = myFileUtils.makeRandomFileName(profilePic);
+            String getExt = myFileUtils.getExt(savedFileName);
             myFileUtils.deleteFolder(deletePath, false);
 
             String filePath = String.format("%s/%s", targetDir, savedFileName);
             try {
-                myFileUtils.transferToUser(profilePic, filePath);
-                user.setProfilePic(savedFileName);
+                myFileUtils.convertAndSaveToWebp(profilePic, filePath.replaceAll("\\.[^.]+$", ".webp"));
+                user.setProfilePic(savedFileName.replace(getExt, ".webp"));
             } catch (IOException e) {
                 throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);
             }
         } else {
             myFileUtils.deleteFolder(deletePath, false);
-            user.setProfilePic("user_profile.png");
+            user.setProfilePic("user_profile.webp");
         }
 
         // 전화번호(tell) 및 생일(birth) 업데이트

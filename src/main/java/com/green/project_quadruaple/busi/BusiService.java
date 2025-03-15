@@ -92,7 +92,7 @@ public class BusiService {
         if (pic != null && !pic.isEmpty()) {
             savedPicName = myFileUtils.makeRandomFileName(pic);
         } else {
-            savedPicName = "user_profile.png";
+            savedPicName = "user_profile.webp";
             isDefaultPic = true;
         }
         try {
@@ -139,7 +139,7 @@ public class BusiService {
 
                 try {
                     if (isDefaultPic) {
-                        Path source = Paths.get(fileDirectory, "common", "user_profile.png");
+                        Path source = Paths.get(fileDirectory, "common", "user_profile.webp");
 
                         System.out.println("Source Path: " + source.toAbsolutePath());
                         System.out.println("Destination Path: " + destination.toAbsolutePath());
