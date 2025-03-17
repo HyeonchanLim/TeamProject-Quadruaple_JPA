@@ -17,10 +17,10 @@ public class ChatNoticeController {
 
     private final ChatNoticeService chatNoticeService;
 
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter chatNoticeConnection() {
-        return chatNoticeService.connect();
-    }
+//    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    public SseEmitter chatNoticeConnection() {
+//        return chatNoticeService.connect();
+//    }
 
 //    @GetMapping("/")
 //    public void subChatNotice() {
