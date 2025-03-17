@@ -209,9 +209,11 @@ public class BusiService {
         if (user == null) {
             throw new RuntimeException("아이디를 확인해 주세요.");
         }
+
         if (!passwordEncoder.matches(req.getPw(), user.getPassword())) {
             throw new RuntimeException("비밀번호를 확인해 주세요.");
         }
+
         Optional<AuthenticationCode> authCode = authenticationCodeRepository.findFirstByEmailOrderByGrantedAtDesc(user.getAuthenticationCode().getEmail());
         if (authCode.isEmpty() || user.getVerified() == 0) {
             throw new RuntimeException("이메일 인증이 필요합니다.");
@@ -261,7 +263,9 @@ public class BusiService {
                         .build();
                 dtos.add(dto);
             }
-        } else if (businessNum != null && !businessNum.isEmpty()) {
+        }
+        // strfList가 비어있거나 null이면 businessNum 확인
+        if ((strfList == null || strfList.isEmpty()) && businessNum != null && !businessNum.isEmpty()) {
             for (String busiNum : businessNum) {
                 BusiStrfDto dto = BusiStrfDto.builder()
                         .busiNum(busiNum)

@@ -24,4 +24,12 @@
         ORDER BY noticeId DESC
         LIMIT #{startIdx},#{size}
     </select>
+
+    <select id="countNotice">
+        SELECT
+        COUNT(nr.notice_id) AS noticeCnt,
+        COUNT(CASE WHEN nr.opened = 0 THEN nr.notice_id END) AS unreadNoticeCnt
+        FROM notice_receive nr
+        WHERE nr.user_id = #{userId}
+    </select>
 </mapper>

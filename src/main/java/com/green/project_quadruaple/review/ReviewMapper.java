@@ -8,8 +8,8 @@ import java.util.List;
 
 @Mapper
 public interface ReviewMapper {
-    List<ReviewSelRes> getReviewWithPics(Long strfId,int startIdx , int size);
-    List<MyReviewSelRes> getMyReviews(Long userId, int startIdx , int size);
+    List<ReviewSelResDto> getReviewWithPics(Long strfId,int startIdx , int size);
+    List<MyReviewSelResDto> getMyReviews(Long userId, int startIdx , int size);
 
 
     int postRating(ReviewPostReq req,Long userId);

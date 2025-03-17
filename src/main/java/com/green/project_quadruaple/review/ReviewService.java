@@ -37,38 +37,43 @@ public class ReviewService {
     @Value("${const.default-review-size}")
     private int size;
 
-    public List<ReviewSelRes> getReviewWithPics(Long strfId, int startIdx) {
-        List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(strfId, startIdx, SizeConstants.getDefault_page_size());
+    public ReviewSelRes getReviewWithPics(Long strfId, int startIdx) {
+        List<ReviewSelResDto> dtoList = reviewMapper.getReviewWithPics(strfId, startIdx, SizeConstants.getDefault_page_size()+1);
         if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }
-
-        Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
-
-        for (ReviewSelRes item : dtoList) {
-            ReviewSelRes review = reviewMap.get(item.getReviewId());
+        boolean isMore = dtoList.size() > SizeConstants.getDefault_page_size();
+        if(isMore){
+            dtoList.remove(dtoList.size() - 1);
         }
-        return dtoList;
+        ReviewSelRes res = new ReviewSelRes(dtoList,isMore);
+
+        return res;
     }
 
-    public List<MyReviewSelRes> getMyReviews(int startIdx) {
+    public MyReviewSelRes getMyReviews(int startIdx) {
         Long userId = authenticationFacade.getSignedUserId();
         long startTime = System.currentTimeMillis(); // 요청 시작
-        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(userId, startIdx, SizeConstants.getDefault_page_size());
+
+        int pageSize = SizeConstants.getDefault_page_size();
+        List<MyReviewSelResDto> dtoList = reviewMapper.getMyReviews(userId, startIdx, pageSize + 1); // +1개 더 조회
+
         if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }
-        Map<Long, MyReviewSelRes> reviewMap = new LinkedHashMap<>();
-        for (MyReviewSelRes item : dtoList) {
-            MyReviewSelRes review = reviewMap.get(item.getReviewId());
+
+        boolean isMore = dtoList.size() > pageSize;
+        if (isMore) {
+            dtoList.remove(dtoList.size() - 1); // 마지막 요소 삭제하여 정확한 페이징 처리
         }
+
+        MyReviewSelRes res = new MyReviewSelRes(dtoList, isMore);
         long endTime = System.currentTimeMillis(); // 요청값 전달 종료 시간
         long executionTime = endTime - startTime; // 종료시간 - 시작 시간 = 최종 시간
 
-        System.out.println("쿼리 실행 시간: " + executionTime + "ms");
-        return dtoList;
-
+        return res;
     }
+
     public int myReviewCount (){
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));

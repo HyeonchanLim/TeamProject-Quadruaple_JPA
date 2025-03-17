@@ -1,1 +1,5 @@
+<<<<<<<< HEAD:src/main/resources/static/assets/strfAtom-DKsO_4ck.js
 import{R as t}from"./index-BimvysYt.js";const s=t({key:"strfAtom",default:{strfId:"",category:"",strfTitle:"",latit:0,longitude:0,address:"",post:"",tell:"",areaCode:"",startAt:"",endAt:"",openCheck:"00:00",closeCheck:"00:00",detail:"",busiNum:"",locationName:"",state:0,cid:0,hostProfilePic:"",hostName:"",inquiredAt:"",wishCnt:0,ratingAvg:0,reviewCnt:"",wishIn:0,recentCheck:0,recentCheckStatus:0,strfPics:[{strfId:"",strfPic:""}],restDate:[],amenity:[]}});export{s};
+========
+import{R as t}from"./index-CiM0iehI.js";const s=t({key:"strfAtom",default:{strfId:"",category:"",strfTitle:"",latit:0,longitude:0,address:"",post:"",tell:"",areaCode:"",startAt:"",endAt:"",openCheck:"00:00",closeCheck:"00:00",detail:"",busiNum:"",locationName:"",state:0,cid:0,hostProfilePic:"",hostName:"",inquiredAt:"",wishCnt:0,ratingAvg:0,reviewCnt:"",wishIn:0,recentCheck:0,recentCheckStatus:0,strfPics:[{strfId:"",strfPic:""}],restDate:[],amenity:[]}});export{s};
+>>>>>>>> 924f32255973cdf905ec2cb015d0ef6690fb85db:src/main/resources/static/assets/strfAtom-DTJf9ZGj.js

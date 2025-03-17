@@ -59,8 +59,6 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final TemporaryPwRepository temporaryPwRepository;
 
-    private final NoticeReceiveRepository noticeReceiveRepository;
-
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
 
@@ -238,7 +236,6 @@ public class UserService {
                 .userId(user.getUserId())
                 .name(user.getName())
                 .roles(roles)
-                .hasUnReadNotice(noticeReceiveRepository.existsUnreadNoticesByUserId(user.getUserId()))
                 .build();
     }
 

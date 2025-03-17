@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.notice;
 
+import com.green.project_quadruaple.entity.model.Notice;
 import com.green.project_quadruaple.entity.model.NoticeReceive;
 import com.green.project_quadruaple.entity.model.NoticeReceiveId;
 import org.apache.ibatis.annotations.Param;
@@ -7,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 public interface NoticeReceiveRepository extends JpaRepository<NoticeReceive, NoticeReceiveId> {
 

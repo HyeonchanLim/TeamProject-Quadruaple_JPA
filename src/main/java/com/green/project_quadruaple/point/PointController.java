@@ -123,7 +123,7 @@ public class PointController {
 
     @PostMapping("history")
     @Operation(summary = "포인트 사용",
-            description = "category가 0이면 사용(relatedId는 상품id), 2면 취소(relatedId는 pointHistoryId), amount는 얼마나 사용했나 혹은 취소되어 들어왔나")
+            description = "relatedId는 상품id, amount는 얼마나 사용했나 혹은 취소되어 들어왔나")
     public ResponseEntity<?> usePoint(@RequestBody PointHistoryPostReq p) {
         return pointService.usePoint(p);
     }

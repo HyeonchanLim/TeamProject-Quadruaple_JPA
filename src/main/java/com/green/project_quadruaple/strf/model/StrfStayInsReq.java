@@ -17,5 +17,5 @@ public class StrfStayInsReq {
 
     private List<Long> ameniPoints;
     private List<StrfParlor> parlors;
-    private List<Long> rooms;
+    private int rooms;
 }
