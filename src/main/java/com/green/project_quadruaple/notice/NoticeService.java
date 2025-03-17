@@ -70,6 +70,8 @@ public class NoticeService {
             log.info("Stored in emitters: {}", emitters.containsKey(userId));}
         try {
             emitter.send(SseEmitter.event().name("INIT").data("연결 성공!"));
+            emitter.send(SseEmitter.event().name("first_check_unread_notice")
+                    .data(noticeReceiveRepository.existsUnreadNoticesByUserId(userId)));
         } catch (IOException e) {
             log.warn("SSE 연결 중 오류 발생: {}", e.getMessage());
             emitter.complete();
@@ -137,16 +139,17 @@ public class NoticeService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        List<NoticeLine> noticeLines = mapper.checkNotice(authenticationFacade.getSignedUserId(), startIdx, SizeConstants.getDefault_page_size()+1);
+        long userId= authenticationFacade.getSignedUserId();
+        List<NoticeLine> noticeLines = mapper.checkNotice(userId, startIdx, SizeConstants.getDefault_page_size()+1);
         if (noticeLines.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null ));
         }
         boolean isMore = noticeLines.size() > SizeConstants.getDefault_page_size();
-        if(isMore){
-          noticeLines.remove(noticeLines.size() - 1);
-        }
-        NoticeLineRes result=new NoticeLineRes(noticeLines,isMore);
+        if(isMore){  noticeLines.remove(noticeLines.size() - 1); }
+        NoticeLineRes result=mapper.countNotice(userId);
+        result.setNoticeLines(noticeLines);
+        result.setIsMore(isMore);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 

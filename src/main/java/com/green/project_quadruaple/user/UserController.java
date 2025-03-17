@@ -77,7 +77,6 @@ public class UserController {
             responseBody.put("userId", res.getUserId());
             responseBody.put("accessToken", res.getAccessToken());
             responseBody.put("role", res.getRoles());
-            responseBody.put("hasUnReadNotice",res.getHasUnReadNotice());
 
             return ResponseEntity.ok(responseBody);
         } catch (RuntimeException e) {
