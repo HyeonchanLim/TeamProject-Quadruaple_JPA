@@ -55,64 +55,64 @@ public class NoticeService {
     private final TripUserRepository tripUserRepository;
     private final RoleRepository roleRepository;
 
-    // 타임아웃 시간 설정
-    private static final long NOTICE_TIME_OUT = 3_600_000L; //1시간
-    // 마지막 신규 알람 조회
-    private LocalDateTime lastCheckedTime = LocalDateTime.now();
-    // SSE 연결을 관리하는 저장소 (여러 유저 지원 가능)
-    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
-
-    public SseEmitter subscribe() {
-        Long userId=authenticationFacade.getSignedUserId();
-        SseEmitter emitter = new SseEmitter(NOTICE_TIME_OUT);
-        log.info("subscribed userId: {}",userId);
-        if(userId!=null){ emitters.put(userId, emitter);
-            log.info("Stored in emitters: {}", emitters.containsKey(userId));}
-        try {
-            emitter.send(SseEmitter.event().name("INIT").data("연결 성공!"));
-            emitter.send(SseEmitter.event().name("first_check_unread_notice")
-                    .data(noticeReceiveRepository.existsUnreadNoticesByUserId(userId)));
-        } catch (IOException e) {
-            log.warn("SSE 연결 중 오류 발생: {}", e.getMessage());
-            emitter.complete();
-        }
-
-        emitter.onCompletion(() -> emitters.remove(userId));
-        emitter.onTimeout(() -> emitters.remove(userId));
-
-        return emitter;
-    }
-
-    @Scheduled(fixedDelay = 3000) // 3초마다 새 알림 확인
-    @Transactional
-    public void checkNewNotifications() {
-        if(emitters.size()==0) { return; } //연결 상대가 없다면 실행하지 않음
-
-        //신규 알림이 있는 유저 목록 불러오기
-        List<Long> userIds = noticeRepository.getUsersWithNewNotices(lastCheckedTime);
-        for (Long userId : userIds) {
-            //알람 발송 메서드 호출
-            sendNotification(userId);
-            //발송 후 event table 정리
-            noticeRepository.clearProcessedNotifications(userId);
-        }
-        lastCheckedTime = LocalDateTime.now();
-    }
-
-    //알람 발송
-    public void sendNotification(Long userId) {
-        SseEmitter emitter = emitters.get(userId); //연결 상대에 userId가 있는지 확인
-        if (emitter != null) { //있다면 emitter send
-            try {
-                emitter.send(SseEmitter.event()
-                            .name("exist unread notice")
-                            .data(true));
-            } catch (IOException e) {
-                emitters.remove(userId);
-            }
-        }
-    }
-
+//    // 타임아웃 시간 설정
+//    private static final long NOTICE_TIME_OUT = 3_600_000L; //1시간
+//    // 마지막 신규 알람 조회
+//    private LocalDateTime lastCheckedTime = LocalDateTime.now();
+//    // SSE 연결을 관리하는 저장소 (여러 유저 지원 가능)
+//    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
+//
+//    public SseEmitter subscribe() {
+//        Long userId=authenticationFacade.getSignedUserId();
+//        SseEmitter emitter = new SseEmitter(NOTICE_TIME_OUT);
+//        log.info("subscribed userId: {}",userId);
+//        if(userId!=null){ emitters.put(userId, emitter);
+//            log.info("Stored in emitters: {}", emitters.containsKey(userId));}
+//        try {
+//            emitter.send(SseEmitter.event().name("INIT").data("연결 성공!"));
+//            emitter.send(SseEmitter.event().name("first_check_unread_notice")
+//                    .data(noticeReceiveRepository.existsUnreadNoticesByUserId(userId)));
+//        } catch (IOException e) {
+//            log.warn("SSE 연결 중 오류 발생: {}", e.getMessage());
+//            emitter.complete();
+//        }
+//
+//        emitter.onCompletion(() -> emitters.remove(userId));
+//        emitter.onTimeout(() -> emitters.remove(userId));
+//
+//        return emitter;
+//    }
+//
+//    @Scheduled(fixedDelay = 3000) // 3초마다 새 알림 확인
+//    @Transactional
+//    public void checkNewNotifications() {
+//        if(emitters.size()==0) { return; } //연결 상대가 없다면 실행하지 않음
+//
+//        //신규 알림이 있는 유저 목록 불러오기
+//        List<Long> userIds = noticeRepository.getUsersWithNewNotices(lastCheckedTime);
+//        for (Long userId : userIds) {
+//            //알람 발송 메서드 호출
+//            sendNotification(userId);
+//            //발송 후 event table 정리
+//            noticeRepository.clearProcessedNotifications(userId);
+//        }
+//        lastCheckedTime = LocalDateTime.now();
+//    }
+//
+//    //알람 발송
+//    public void sendNotification(Long userId) {
+//        SseEmitter emitter = emitters.get(userId); //연결 상대에 userId가 있는지 확인
+//        if (emitter != null) { //있다면 emitter send
+//            try {
+//                emitter.send(SseEmitter.event()
+//                            .name("exist unread notice")
+//                            .data(true));
+//            } catch (IOException e) {
+//                emitters.remove(userId);
+//            }
+//        }
+//    }
+//
 
 
 
