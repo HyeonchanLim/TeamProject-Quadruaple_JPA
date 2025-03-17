@@ -70,6 +70,8 @@ public class NoticeService {
             log.info("Stored in emitters: {}", emitters.containsKey(userId));}
         try {
             emitter.send(SseEmitter.event().name("INIT").data("연결 성공!"));
+            emitter.send(SseEmitter.event().name("first_check_unread_notice")
+                    .data(noticeReceiveRepository.existsUnreadNoticesByUserId(userId)));
         } catch (IOException e) {
             log.warn("SSE 연결 중 오류 발생: {}", e.getMessage());
             emitter.complete();
