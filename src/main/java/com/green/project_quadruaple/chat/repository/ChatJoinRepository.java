@@ -25,6 +25,7 @@ public interface ChatJoinRepository extends JpaRepository<ChatJoin, Long> {
 
     @Query("""
         select cj from ChatJoin cj
+        join fetch cj.user
         where cj.chatRoom.chatRoomId = :roomId
         """)
     List<ChatJoin> findChatJoinIdListByChatRoomId(Long roomId);
