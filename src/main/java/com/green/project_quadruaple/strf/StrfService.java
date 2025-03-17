@@ -24,7 +24,7 @@ import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+//import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -58,7 +58,7 @@ public class StrfService {
     private final UserRepository userRepository;
     private final RestDateRepository restDateRepository;
     private final AmenityRepository amenityRepository;
-    private final RedisTemplate<String,Object> redisTemplate;
+//    private final RedisTemplate<String,Object> redisTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final CouponRepository couponRepository;
     private final ReceiveCouponRepository receiveCouponRepository;
@@ -311,8 +311,25 @@ public class StrfService {
         if (categoryValue == Category.STAY) {
             List<Parlor> parlors = new ArrayList<>();
             List<Room> rooms = new ArrayList<>();
+            List<Amenipoint> amenipoints = new ArrayList<>();
 
+            if (p.getAmeniPoints() != null) {
+                for (Long amenityId : p.getAmeniPoints()) {
+                    amenityRepository.findById(amenityId).ifPresent(amenity -> {
+                        Amenipoint amenipoint = Amenipoint.builder()
+                                .id(new AmenipointId(amenity.getAmenityId(), strf.getStrfId()))
+                                .amenity(amenity)
+                                .stayTourRestaurFest(strf)
+                                .build();
+                        amenipoints.add(amenipoint);
+                    });
+                }
+            }
             for (StrfParlor strfParlor : p.getParlors()) {
+                if (strfParlor.getRecomCapacity() > strfParlor.getMaxCapacity()) {
+                    throw new RuntimeException("권장 인원은 최대 인원보다 클 수 없습니다.");
+                }
+
                 Menu menu = menuRepository.findById(p.getMenuId())
                         .orElseThrow(() -> new RuntimeException("Menu not found"));
 
@@ -325,20 +342,20 @@ public class StrfService {
                 parlors.add(newParlor);
             }
 
-            for (Long roomId : p.getRooms()) {
+            for (int i = 0; i < p.getRooms(); i++) {
                 Menu menu = menuRepository.findById(p.getMenuId())
                         .orElseThrow(() -> new RuntimeException("Menu not found"));
 
                 Room newRoom = Room.builder()
                         .menu(menu)
-                        .roomId(roomId)
-                        .roomNum(1)
+                        .roomNum(i + 1)  // 방 번호를 1부터 시작하도록 설정
                         .build();
                 rooms.add(newRoom);
             }
 
             parlorRepository.saveAll(parlors);
             roomRepository.saveAll(rooms);
+            amenipointRepository.saveAll(amenipoints);
         }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }

@@ -19,12 +19,13 @@ public class Parlor {
     @JoinColumn(name = "menu_id")
     private Menu menu;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 11)
     private int maxCapacity;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 11)
     private int recomCapacity;
 
+    @Column(nullable = false, length = 11)
     private int surcharge;
 }
 

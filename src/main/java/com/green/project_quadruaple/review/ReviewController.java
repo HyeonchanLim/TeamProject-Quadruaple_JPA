@@ -35,7 +35,7 @@ public class ReviewController {
     @GetMapping("my")
     @Operation(summary = "나의 리뷰 조회")
     public ResponseWrapper<?> getMyReviews(@RequestParam("start_idx") int startIdx) {
-        ResponseWrapper<MyReviewSelRes> res = reviewService.getMyReviews(startIdx);
+        MyReviewSelRes res = reviewService.getMyReviews(startIdx);
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 

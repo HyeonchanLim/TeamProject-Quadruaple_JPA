@@ -22,6 +22,6 @@ public class Room {
     @JoinColumn(name = "menu_id", nullable = false)
     private Menu menu;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 11)
     private int roomNum;
 }

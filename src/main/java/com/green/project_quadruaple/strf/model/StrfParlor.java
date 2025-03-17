@@ -13,5 +13,5 @@ public class StrfParlor {
     private int recomCapacity; // 추천 수용 인원
     private int surcharge; // 추가 요금
 //    @JsonIgnore
-    private Long menuId;  // 추가된 menuId 필드
+//    private Long menuId;  // 추가된 menuId 필드
 }

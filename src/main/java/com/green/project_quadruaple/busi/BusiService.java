@@ -263,7 +263,9 @@ public class BusiService {
                         .build();
                 dtos.add(dto);
             }
-        } else if (businessNum != null && !businessNum.isEmpty()) {
+        }
+        // strfList가 비어있거나 null이면 businessNum 확인
+        if ((strfList == null || strfList.isEmpty()) && businessNum != null && !businessNum.isEmpty()) {
             for (String busiNum : businessNum) {
                 BusiStrfDto dto = BusiStrfDto.builder()
                         .busiNum(busiNum)
