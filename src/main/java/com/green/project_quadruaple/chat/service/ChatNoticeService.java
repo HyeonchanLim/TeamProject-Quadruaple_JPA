@@ -7,6 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import static com.green.project_quadruaple.common.config.socket.UserSubscribeState.*;
 
 @Service
@@ -14,6 +18,7 @@ import static com.green.project_quadruaple.common.config.socket.UserSubscribeSta
 public class ChatNoticeService {
 
     private final ChatReceiveRepository chatReceiveRepository;
+    private final Map<Long, SseEmitter> emitterMap = new ConcurrentHashMap<>();
 
     public SseEmitter connect() {
         long signedUserId = AuthenticationFacade.getSignedUserId();
@@ -27,16 +32,15 @@ public class ChatNoticeService {
                     .reconnectTime(3000L);
             emitter.send(builder);
 
-            ARTICLE_TO_CONNECTION.put(signedUserId, emitter);
+            emitterMap.put(signedUserId, emitter);
 
         } catch (Exception e) {
-             // 연결 끊기면 세션에서 삭제
             emitter.complete();
             e.printStackTrace();
         }
 
-        emitter.onCompletion(() -> ARTICLE_TO_CONNECTION.remove(signedUserId));
-        emitter.onTimeout(() -> ARTICLE_TO_CONNECTION.remove(signedUserId));
+        emitter.onCompletion(() -> emitterMap.remove(signedUserId));
+        emitter.onTimeout(() -> emitterMap.remove(signedUserId));
 
         return emitter;
     }

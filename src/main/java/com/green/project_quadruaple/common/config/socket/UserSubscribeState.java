@@ -12,5 +12,4 @@ public class UserSubscribeState {
     
     // Set<cjId>
     public static final Set<Long> USER_SUB_STATE = new HashSet<>();
-    public static final Map<Long, SseEmitter> ARTICLE_TO_CONNECTION = new ConcurrentHashMap<>();
 }

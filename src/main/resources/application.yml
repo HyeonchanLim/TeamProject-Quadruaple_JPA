@@ -105,9 +105,12 @@ spring:
         order_updates: true #JPA Batch 작업
         order_inserts: true
     show-sql: true #JPA 가 만든 쿼리문 로그에 출력 - format_sql 과 연동되면서 쿼리문 생성 -> 보기 좋도록 포맷팅 하는 방식
+    open-in-view: false
   servlet:
     multipart:
       max-file-size: 50MB
+
+
 
 jwt:
   issuer: green@green.kr
