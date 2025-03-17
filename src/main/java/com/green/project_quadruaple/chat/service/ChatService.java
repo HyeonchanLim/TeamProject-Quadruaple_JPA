@@ -33,12 +33,8 @@ import static com.green.project_quadruaple.common.config.socket.UserSubscribeSta
 @RequiredArgsConstructor
 public class ChatService {
 
-    private final UserRepository userRepository;
-    private final ChatRoomRepository chatRoomRepository;
     private final ChatRepository chatRepository;
-    private final SimpMessagingTemplate messagingTemplate;
     private final ChatJoinRepository chatJoinRepository;
-    private final RoleRepository roleRepository;
     private final ChatReceiveRepository chatReceiveRepository;
 
     // 유저 입장 시
