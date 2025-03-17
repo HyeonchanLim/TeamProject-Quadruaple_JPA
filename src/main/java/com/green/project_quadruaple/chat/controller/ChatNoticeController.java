@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.chat.controller;
 
 import com.green.project_quadruaple.chat.service.ChatNoticeService;
+import com.green.project_quadruaple.common.model.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,12 @@ public class ChatNoticeController {
     private final ChatNoticeService chatNoticeService;
 
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subChatNotice() {
-        return chatNoticeService.subChatNotice();
+    public SseEmitter chatNoticeConnection() {
+        return chatNoticeService.connect();
     }
+
+//    @GetMapping("/")
+//    public void subChatNotice() {
+//        chatNoticeService.broadcastChatNotice();
+//    }
 }
