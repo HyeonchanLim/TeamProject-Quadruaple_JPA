@@ -128,8 +128,17 @@ public class TripReviewService {
         long userId = authenticationFacade.getSignedUserId();
         return tripReviewRepository.countByUser_UserId(userId);
     }
+
     // 모든 사용자의 여행기 조회
-    public List<TripReviewGetDto> getAllTripReviews(String orderType, int pageNumber) {
+    public TripReviewGetResponse getAllTripReviews(String orderType, int pageNumber) {
+        // 로그인한 유저의 ID 가져오기 (로그인 안 했으면 null 처리)
+        Long signedUserId = null;
+        try {
+            signedUserId = authenticationFacade.getSignedUserId();
+        } catch (Exception e) {
+            // 인증되지 않은 사용자일 경우 signedUserId는 null 유지
+        }
+
         // OFFSET 계산
         int startIdx = (pageNumber - 1) * size;
 
@@ -138,11 +147,11 @@ public class TripReviewService {
 
         // startIdx가 totalCount보다 크면 빈 리스트 반환
         if (startIdx >= totalCount) {
-            return Collections.emptyList();
+            return new TripReviewGetResponse(Collections.emptyList(), false);
         }
 
         // 여행기 목록 조회 (size + 1로 한 개 더 가져오기)
-        List<TripReviewGetDto> result = tripReviewMapper.getAllTripReviews(orderType, startIdx, size + 1);
+        List<TripReviewGetDto> result = tripReviewMapper.getAllTripReviews(orderType, startIdx, size + 1, signedUserId);
 
         // 다음 페이지가 있는지 확인
         boolean hasMore = result.size() > size;
@@ -152,11 +161,12 @@ public class TripReviewService {
             result.remove(result.size() - 1);
         }
 
-        return result;
+        return new TripReviewGetResponse(result, hasMore);
     }
     public int getTripReviewCount() {
         return tripReviewRepository.countAllBy();
     }
+
     // 다른 사용자의 여행기 조회
     public List<TripReviewGetDto> getOtherTripReviews(long tripReviewId) {
         Long userId = 0L; // 로그인 여부 확인 (nullable)
@@ -275,7 +285,7 @@ public class TripReviewService {
     // 여행기 추천
     @Transactional
     public int insTripLike(TripLikeDto like) {
-        long userId = authenticationFacade.getSignedUserId();
+        Long userId = authenticationFacade.getSignedUserId();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -284,6 +294,11 @@ public class TripReviewService {
                 .orElseThrow(() -> new RuntimeException("TripReview not found"));
 
         TripLikeId tripLikeId = new TripLikeId(like.getTripReviewId(), userId);
+
+        // 이미 좋아요를 눌렀는지 확인
+        if (tripLikeRepository.existsById(tripLikeId)) {
+            throw new RuntimeException("이미 좋아요를 눌렀습니다.");
+        }
 
         TripLike tripLike = new TripLike();
         tripLike.setId(tripLikeId);

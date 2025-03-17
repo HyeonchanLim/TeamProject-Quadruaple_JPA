@@ -33,6 +33,7 @@
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count
         ,(SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count
         , (SELECT COUNT(*) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count
+        , (SELECT COUNT(*) FROM trip_like WHERE trip_review_id = A.trip_review_id AND user_id = #{userId}) AS like_user
         , A.trip_review_id, C.name, C.profile_pic
           FROM trip_review A
           LEFT JOIN trip_review_pic B
@@ -60,6 +61,10 @@
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count,
         (SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count,
         (SELECT COUNT(*) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count,
+        CASE
+        WHEN #{signedUserId} IS NULL THEN 0
+        ELSE (SELECT COUNT(*) FROM trip_like WHERE trip_review_id = A.trip_review_id AND user_id = #{signedUserId})
+        END AS like_user,
         A.trip_review_id, C.name, C.profile_pic
          FROM trip_review A
          LEFT JOIN trip_review_pic B
