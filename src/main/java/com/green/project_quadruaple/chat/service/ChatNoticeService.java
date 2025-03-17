@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.chat.service;
 
+import com.green.project_quadruaple.chat.model.res.ChatReceiveConRes;
 import com.green.project_quadruaple.chat.repository.ChatReceiveRepository;
 import com.green.project_quadruaple.chat.repository.EmitterRepository;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
@@ -33,7 +34,7 @@ public class ChatNoticeService {
             boolean existsReceiveChat = chatReceiveRepository.findByUserId(signedUserId);
             SseEmitter.SseEventBuilder builder = SseEmitter.event()
                     .name("connect")
-                    .data(existsReceiveChat)
+                    .data(new ChatReceiveConRes(signedUserId, existsReceiveChat))
                     .reconnectTime(3000L);
             emitter.send(builder);
 
