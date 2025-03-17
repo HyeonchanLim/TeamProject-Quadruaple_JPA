@@ -19,22 +19,22 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+
+import static com.green.project_quadruaple.common.config.socket.UserSubscribeState.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
 
-    private final UserRepository userRepository;
-    private final ChatRoomRepository chatRoomRepository;
     private final ChatRepository chatRepository;
-    private final SimpMessagingTemplate messagingTemplate;
     private final ChatJoinRepository chatJoinRepository;
-    private final RoleRepository roleRepository;
     private final ChatReceiveRepository chatReceiveRepository;
 
     // 유저 입장 시
@@ -59,7 +59,7 @@ public class ChatService {
 //                cjId = chatJoin.getCjId();
 //            }
             if(cjId != null) {
-                UserSubscribeState.USER_SUB_STATE.add(cjId); // 채팅방 구독 시 구독상태 저장
+                USER_SUB_STATE.add(cjId); // 채팅방 구독 시 구독상태 저장
                 chatReceiveRepository.deleteAll(chatReceiveRepository.findByListenerId(cjId));
             }
         } catch (Exception e) {
@@ -72,6 +72,7 @@ public class ChatService {
     public MessageRes insChat(PostChatReq req, Principal principal) {
 
         Long signedUserId = getSignedUserId(principal);
+
         if(signedUserId == null) {
             throw new RuntimeException("인증 정보 오류");
         }
@@ -90,11 +91,15 @@ public class ChatService {
 
             List<ChatJoin> cjList = chatJoinRepository.findChatJoinIdListByChatRoomId(roomId);
             for (ChatJoin cj : cjList) {
-                if(!UserSubscribeState.USER_SUB_STATE.contains(cj.getCjId())) {
+                if(!USER_SUB_STATE.contains(cj.getCjId())) {
                     ChatReceive chatReceive = new ChatReceive();
                     chatReceive.setChat(chat);
                     chatReceive.setListenerId(cj);
                     chatReceiveRepository.save(chatReceive);
+
+                    Long userId = cj.getUser().getUserId();
+                    SseEmitter emitters = ARTICLE_TO_CONNECTION.get(userId);
+                    emitters.send(true);
                 }
             }
 
