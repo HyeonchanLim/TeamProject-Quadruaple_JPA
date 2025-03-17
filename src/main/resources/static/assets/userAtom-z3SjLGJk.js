@@ -1,0 +1,1 @@
+import{R as e,d as r}from"./index-CiM0iehI.js";const i=e({key:"userAtom",default:{userId:0,email:"",name:"",profilePic:"",accessToken:"",providerType:r.LOCAL,role:[],tell:"",birth:""}});export{i as u};

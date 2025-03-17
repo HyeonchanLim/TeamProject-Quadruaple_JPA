@@ -51,7 +51,7 @@ public class ReviewService {
         return res;
     }
 
-    public ResponseWrapper<MyReviewSelRes> getMyReviews(int startIdx) {
+    public MyReviewSelRes getMyReviews(int startIdx) {
         Long userId = authenticationFacade.getSignedUserId();
         long startTime = System.currentTimeMillis(); // 요청 시작
 
@@ -59,7 +59,7 @@ public class ReviewService {
         List<MyReviewSelResDto> dtoList = reviewMapper.getMyReviews(userId, startIdx, pageSize + 1); // +1개 더 조회
 
         if (dtoList == null || dtoList.isEmpty()) {
-            return new ResponseWrapper<>(ResponseCode.OK.getCode(), new MyReviewSelRes(new ArrayList<>(), false));
+            return null;
         }
 
         boolean isMore = dtoList.size() > pageSize;
@@ -71,7 +71,7 @@ public class ReviewService {
         long endTime = System.currentTimeMillis(); // 요청값 전달 종료 시간
         long executionTime = endTime - startTime; // 종료시간 - 시작 시간 = 최종 시간
 
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
+        return res;
     }
 
     public int myReviewCount (){
