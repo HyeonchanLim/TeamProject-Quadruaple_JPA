@@ -101,7 +101,8 @@ public class PointService {
         Long userId = authenticationFacade.getSignedUserId();
         Integer remainPoints = null;
         if (userId != null) {
-            remainPoints = pointViewRepository.findLastRemainPointByUserId(userId);
+            remainPoints = pointViewRepository.findLastRemainPointByUserId(userId)==null?
+                            0:pointViewRepository.findLastRemainPointByUserId(userId);
         }
         return new PointCardProductRes(remainPoints, pointCardRepository.findAll());
     }
@@ -174,13 +175,15 @@ public class PointService {
         long userId = authenticationFacade.getSignedUserId();
         User user=userRepository.findById(userId).get();
         StayTourRestaurFest strf=strfRepository.findById(p.getRelatedId()).orElse(null);
-        int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId)- p.getAmount();
+        int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId)==null?
+                0:pointViewRepository.findLastRemainPointByUserId(userId);
+        remainPoint-=p.getAmount();
         if (remainPoint < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_Acceptable.getCode(), null));
         }
         PointHistory pointHistory = PointHistory.builder()
-                .amount(p.getAmount())
+                .amount(p.getAmount()*(-1))
                 .category(0)
                 .relatedId(p.getRelatedId())
                 .user(user)
@@ -290,7 +293,8 @@ public class PointService {
             kakaoReadyDto = restTemplate.postForObject(new URI(kakaopayConst.getUrl() + "/online/v1/payment/ready"), body, KakaoReadyDto.class);
             log.info("kakaoDto = {}", kakaoReadyDto);
             if (kakaoReadyDto != null) {
-                int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId);
+                int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId)==null?
+                        0:pointViewRepository.findLastRemainPointByUserId(userId);
                 int amount = p.getAmount();
                 PointHistory pointHistory = PointHistory.builder()
                         .tid(kakaoReadyDto.getTid())
@@ -364,7 +368,8 @@ public class PointService {
             return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), "잘못된 접근입니다.");
         }
         int boughtPoint = pointHistory.getAmount();
-        int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId);
+        int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId)==null?
+                0:pointViewRepository.findLastRemainPointByUserId(userId);
         if (boughtPoint > remainPoint) {
             return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), "환불 불가, 잔여 포인트 부족.");
         }
@@ -377,7 +382,7 @@ public class PointService {
             PointHistory refundHistory=PointHistory.builder()
                     .remainPoint(remainPoint-pointHistory.getAmount())
                     .relatedId(pointHistoryId)
-                    .amount(boughtPoint)
+                    .amount(boughtPoint * (-1))
                     .category(2)
                     .user(userRepository.findById(userId).get())
                     .build();
