@@ -16,5 +16,4 @@ public class UserSignInRes {
     private final String name;
     private final String accessToken;
     private final List<UserRole> roles;
-    private final Boolean hasUnReadNotice;
 }
