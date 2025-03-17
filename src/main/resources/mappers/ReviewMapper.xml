@@ -20,7 +20,7 @@
         LEFT JOIN review_pic T2 ON T1.reviewId = T2.review_id
     </select>
 
-    <resultMap id="reviewPicResultMap" type="com.green.project_quadruaple.review.model.ReviewSelRes">
+    <resultMap id="reviewPicResultMap" type="com.green.project_quadruaple.review.model.ReviewSelResDto">
         <id property="reviewId" column="reviewId"/>
         <result property="strfId" column="strfId"/>
         <result property="content" column="content"/>
@@ -99,27 +99,44 @@
         LEFT JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
         WHERE a.user_id = #{userId}
         ORDER BY a.review_id DESC , a.created_at DESC
-        LIMIT #{startIdx}, #{size}
+        LIMIT #{size} OFFSET #{startIdx}
         ) T1
         LEFT JOIN review_pic T2 ON T1.reviewId = T2.review_id
     </select>
 
-    <resultMap id="myReviewResultMap" type="com.green.project_quadruaple.review.model.MyReviewSelRes">
+    <resultMap id="myReviewResultMap" type="com.green.project_quadruaple.review.model.MyReviewSelResDto">
         <id property="reviewId" column="reviewId"/>
         <result property="strfId" column="strfId"/>
         <result property="content" column="content"/>
-        <result property="writerUserId" column="writerUserId"/>
         <result property="rating" column="rating"/>
         <result property="writerUserName" column="writerUserName"/>
-        <result property="strfTitle" column="strfTitle"/>
-        <result property="writerUserPic" column="writerUserPic"/>
         <result property="userWriteReviewCnt" column="userWriteReviewCnt"/>
+        <result property="writerUserId" column="writerUserId"/>
+        <result property="writerUserPic" column="writerUserPic"/>
         <result property="reviewWriteDate" column="reviewWriteDate"/>
+        <result property="strfTitle" column="strfTitle"/>
         <collection property="myReviewPic" resultMap="myReviewPic"/>
     </resultMap>
     <resultMap id="myReviewPic" type="com.green.project_quadruaple.review.model.ReviewPicBatis">
         <result property="pic" column="pic"/>
     </resultMap>
+
+<!--    <resultMap id="myReviewResultMap" type="com.green.project_quadruaple.review.model.MyReviewSelRes">-->
+<!--        <id property="reviewId" column="reviewId"/>-->
+<!--        <result property="strfId" column="strfId"/>-->
+<!--        <result property="content" column="content"/>-->
+<!--        <result property="writerUserId" column="writerUserId"/>-->
+<!--        <result property="rating" column="rating"/>-->
+<!--        <result property="writerUserName" column="writerUserName"/>-->
+<!--        <result property="strfTitle" column="strfTitle"/>-->
+<!--        <result property="writerUserPic" column="writerUserPic"/>-->
+<!--        <result property="userWriteReviewCnt" column="userWriteReviewCnt"/>-->
+<!--        <result property="reviewWriteDate" column="reviewWriteDate"/>-->
+<!--        <collection property="myReviewPic" resultMap="myReviewPic"/>-->
+<!--    </resultMap>-->
+<!--    <resultMap id="myReviewPic" type="com.green.project_quadruaple.review.model.ReviewPicBatis">-->
+<!--        <result property="pic" column="pic"/>-->
+<!--    </resultMap>-->
 
     <select id="myReviewCount">
         SELECT COUNT(DISTINCT review_id)

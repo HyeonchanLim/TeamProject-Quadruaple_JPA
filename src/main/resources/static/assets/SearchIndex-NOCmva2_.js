@@ -1,0 +1,1 @@
+import{j as t,O as r}from"./index-ztVTG9lp.js";import"./TitleHeader-lhIfQ61P.js";import"./dayjs.min-Ti2bJ-a6.js";import"./index-BNRq6L-3.js";import"./index-Dx8wNGhz.js";import"./index-DIofXRia.js";const x=()=>t.jsx("div",{children:t.jsx(r,{})});export{x as default};

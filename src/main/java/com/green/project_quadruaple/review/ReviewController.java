@@ -26,7 +26,7 @@ public class ReviewController {
 
     @GetMapping
     @Operation(summary = "리뷰 조회")
-    public List<ReviewSelRes> getReview(@RequestParam("strf_id") Long strfId,
+    public ReviewSelRes getReview(@RequestParam("strf_id") Long strfId,
                                         @RequestParam(value = "start_idx",required = false) int startIdx) {
 
         return reviewService.getReviewWithPics(strfId,startIdx);
@@ -34,9 +34,9 @@ public class ReviewController {
 
     @GetMapping("my")
     @Operation(summary = "나의 리뷰 조회")
-    public List<MyReviewSelRes> getMyReviews(@RequestParam("start_idx") int startIdx) {
-
-        return reviewService.getMyReviews(startIdx);
+    public ResponseWrapper<?> getMyReviews(@RequestParam("start_idx") int startIdx) {
+        ResponseWrapper<MyReviewSelRes> res = reviewService.getMyReviews(startIdx);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
     @GetMapping("/count")
