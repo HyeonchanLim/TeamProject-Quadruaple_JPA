@@ -19,12 +19,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class NoticeController {
     private final NoticeService noticeService;
 
-    //알람 여부 확인
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @Operation(summary = "알람 여부 확인", description = "postman이나 swagger에서 확인안됨. 브라우저 네트워크 확인바람")
-    public SseEmitter subscribeSSE() {
-        return noticeService.subscribe();
-    }
+//    //알람 여부 확인
+//    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    @Operation(summary = "알람 여부 확인", description = "postman이나 swagger에서 확인안됨. 브라우저 네트워크 확인바람")
+//    public SseEmitter subscribeSSE() {
+//        return noticeService.subscribe();
+//    }
 
     //알람 테스트 insert
     @PostMapping("test")
