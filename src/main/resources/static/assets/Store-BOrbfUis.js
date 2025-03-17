@@ -1,1 +1,0 @@
-import{u as a,j as s,T as o,O as i}from"./index-Bm9G2PMV.js";import{S as n}from"./StrfInfo-10hHhv2o.js";const c=()=>{const e=a(),t=()=>{e("/business")};return s.jsxs("div",{className:"min-h-screen",children:[s.jsx(o,{title:"업체 관리",onClick:t}),s.jsx(n,{}),s.jsx(i,{})]})};export{c as default};
