@@ -2,12 +2,15 @@ package com.green.project_quadruaple.notice.model.res;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@AllArgsConstructor
 @Getter
+@Setter
 public class NoticeLineRes {
-    List<NoticeLine> noticeLines;
-    boolean isMore;
+    private List<NoticeLine> noticeLines;
+    private Boolean isMore;
+    private int unreadNoticeCnt;
+    private int noticeCnt;
 }

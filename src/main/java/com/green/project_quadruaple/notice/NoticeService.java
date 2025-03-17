@@ -137,16 +137,17 @@ public class NoticeService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        List<NoticeLine> noticeLines = mapper.checkNotice(authenticationFacade.getSignedUserId(), startIdx, SizeConstants.getDefault_page_size()+1);
+        long userId= authenticationFacade.getSignedUserId();
+        List<NoticeLine> noticeLines = mapper.checkNotice(userId, startIdx, SizeConstants.getDefault_page_size()+1);
         if (noticeLines.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null ));
         }
         boolean isMore = noticeLines.size() > SizeConstants.getDefault_page_size();
-        if(isMore){
-          noticeLines.remove(noticeLines.size() - 1);
-        }
-        NoticeLineRes result=new NoticeLineRes(noticeLines,isMore);
+        if(isMore){  noticeLines.remove(noticeLines.size() - 1); }
+        NoticeLineRes result=mapper.countNotice(userId);
+        result.setNoticeLines(noticeLines);
+        result.setIsMore(isMore);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
