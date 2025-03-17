@@ -67,14 +67,14 @@ public class TripReviewController {
 
     @GetMapping("allTripReview")
     @Operation(summary = "모든 여행기 조회", description = "likeCount(추천수), recentCount(조회수), scrapCount(스크랩수)")
-    public ResponseEntity<ResponseWrapper<List<TripReviewGetDto>>> getAllTripReview(
+    public ResponseEntity<ResponseWrapper<TripReviewGetResponse>> getAllTripReview(
             @Parameter(name = "orderType", description = "정렬 방식 (latest: 최신순, popular: 추천순)", example = "latest", in = ParameterIn.QUERY)
             @RequestParam(defaultValue = "latest") String orderType,
 
             @Parameter(name = "pageNumber", description = "페이지 번호 (1부터 시작)", example = "1", in = ParameterIn.QUERY)
             @RequestParam(defaultValue = "1") int pageNumber) {  // size 파라미터 제거
 
-        List<TripReviewGetDto> allTripReview = tripReviewService.getAllTripReviews(orderType, pageNumber);
+        TripReviewGetResponse allTripReview = tripReviewService.getAllTripReviews(orderType, pageNumber);
 
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), allTripReview));
     }
@@ -125,11 +125,20 @@ public class TripReviewController {
     @PostMapping("like")
     @Operation(summary = "여행기 추천 등록")
     public ResponseEntity<?> insTripLike(@RequestBody TripLikeDto like) {
-        int result = tripReviewService.insTripLike(like);
-        if (result == 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        try {
+            int result = tripReviewService.insTripLike(like);
+            if (result == 0) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+            }
+            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("이미 좋아요를 눌렀습니다.")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseCode.BAD_REQUEST.getCode());
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(ResponseCode.SERVER_ERROR.getCode());
+            }
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
     @DeleteMapping("like")
