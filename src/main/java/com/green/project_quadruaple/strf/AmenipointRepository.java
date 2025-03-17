@@ -12,6 +12,7 @@ import java.util.List;
 public interface AmenipointRepository extends JpaRepository<Amenipoint , AmenipointId> {
     void deleteByStayTourRestaurFest(StayTourRestaurFest strf);
 
-    @Query("SELECT a.amenity.title FROM Amenipoint a WHERE a.id = :amenityId")
-    String findTitleByAmenityId(@Param("amenityId") Long amenityId);
+//    @Query("SELECT a.amenity.title FROM Amenipoint a WHERE a.id = :amenityId")
+//    String findTitleByAmenityId(@Param("amenityId") Long amenityId);
+//    void deleteByStrfId(Long strfId);
 }

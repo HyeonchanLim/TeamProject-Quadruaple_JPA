@@ -88,6 +88,7 @@ public class StrfService {
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
+
     public ResponseWrapper<List<StrfAmenity>> getStrfAmenity(Long strfId , String category) {
         String categoryValue = null;
         if (category != null && Category.getKeyByName(category) != null) {
@@ -99,8 +100,6 @@ public class StrfService {
         }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), amenities);
     }
-
-
 
     public ResponseWrapper<List<StrfMenu>> getStrfMenu(Long strfId) {
         List<StrfMenu> menus = strfMapper.strfMenu(strfId);
@@ -344,256 +343,256 @@ public class StrfService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
-    @Transactional
-    public ResponseWrapper<Integer> updateStrf(Long strfId, StrfUpdInfo p) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(strfId)
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-
-        updateStrfBasicInfo(strf, p);
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updState(Long strfId, int state , String busiNum) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(strfId)
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-
-        updateStrfState(strf, state);
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updDetail(Long strfId, String detail,String busiNum) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(strfId)
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-        updateStrfDetail(strf, detail);
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updFestTime(Long strfId, StrfFestTime p) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(strfId)
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
-        updateStrfFestTime(strf, p);
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updTime(StrfTime p) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId())
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
-//        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+//    @Transactional
+//    public ResponseWrapper<Integer> updateStrf(Long strfId, StrfUpdInfo p) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//        updateStrfBasicInfo(strf, p);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updState(Long strfId, int state , String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//
+//        updateStrfState(strf, state);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updDetail(Long strfId, String detail,String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        updateStrfDetail(strf, detail);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updFestTime(Long strfId, StrfFestTime p) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
+//        updateStrfFestTime(strf, p);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updTime(StrfTime p) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId())
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
+////        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
+////            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+////        }
+//
+//        updateStrfTime(strf, p);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updTell(Long strfId, String tell,String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        if (strfRepository.existsByTell(tell)) {
+//            throw new RuntimeException("Title already exists");
+//        }
+//        updateStrfTell(strf, tell);
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updTitle(Long strfId, String title,String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//
+//        if (strfRepository.existsByTitle(title)) {
+//            throw new RuntimeException("Title already exists");
+//        }
+//        updateStrfTitle(strf, title);
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updAddress(Long strfId, StrfUpdAddress p) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
+//        if (!strf.getBusiNum().toString().equals(p.getBusiNum())){
 //            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
 //        }
-
-        updateStrfTime(strf, p);
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updTell(Long strfId, String tell,String busiNum) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(strfId)
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-        if (strfRepository.existsByTell(tell)) {
-            throw new RuntimeException("Title already exists");
-        }
-        updateStrfTell(strf, tell);
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updTitle(Long strfId, String title,String busiNum) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(strfId)
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-
-        if (strfRepository.existsByTitle(title)) {
-            throw new RuntimeException("Title already exists");
-        }
-        updateStrfTitle(strf, title);
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updAddress(Long strfId, StrfUpdAddress p) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(strfId)
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
-        if (!strf.getBusiNum().toString().equals(p.getBusiNum())){
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-        }
-
-        updateStrfAddressInfo(strf, p);
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updStrfPic(Long strfId, List<MultipartFile> strfPic,String busiNum) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(strfId)
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-        updateStrfPics(strfPic, strf);
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updRest(Long strfId, List<String> restDates , String busiNum) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(strfId)
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-        updateRestDays(strf,restDates);
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updStrfMenu(List<MultipartFile> menuPic, StrfUpdMenu req) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
-        Menu menu = menuRepository.findById(req.getMenuId()).orElseThrow( () -> new RuntimeException("menuId not found"));
-
-        List<Menu> savedMenus = saveMenusWithPics(menuPic, strf, req);
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updateStay(StrfStayUpdReq req) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
-
-        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
-        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
-        if (!isBusi) {
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-        }
-
-        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-
-
-        Category categoryValue = null;
-        if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
-            categoryValue = Category.getKeyByName(req.getCategory());
-        }
-        if (categoryValue == Category.STAY) {
-            List<Parlor> parlors = new ArrayList<>();
-            List<Room> rooms = new ArrayList<>();
-            for (StrfParlor strfParlor : req.getParlors()) {
-                Menu menu = menuRepository.findById(req.getMenuId())
-                        .orElseThrow(() -> new RuntimeException("Menu not found"));
-
-                Parlor newParlor = Parlor.builder()
-                        .menu(menu)
-                        .maxCapacity(strfParlor.getMaxCapacity())
-                        .recomCapacity(strfParlor.getRecomCapacity())
-                        .surcharge(strfParlor.getSurcharge())
-                        .build();
-                parlors.add(newParlor);
-            }
-
-            for (Long roomId : req.getRooms()) {
-                Menu menu = menuRepository.findById(req.getMenuId())
-                        .orElseThrow(() -> new RuntimeException("Menu not found"));
-
-                Room newRoom = Room.builder()
-                        .menu(menu)
-                        .roomId(roomId)
-                        .roomNum(1)
-                        .build();
-                rooms.add(newRoom);
-            }
-            parlorRepository.saveAll(parlors);
-            roomRepository.saveAll(rooms);
-        }
-            Menu menu = menuRepository.findById(req.getMenuId())
-                .orElseThrow( () -> new RuntimeException("menu id not found"));
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
-
-    @Transactional
-    public ResponseWrapper<Integer> updateAmenity(StrfJpaAmenity req) {
-        long userId = authenticationFacade.getSignedUserId();
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("user id not found"));
-
-        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
-        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
-
-        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
-        if (!isBusi) {
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-        }
-
-        if (req.getAmeniPoints() == null) {
-            throw new RuntimeException("Amenity가 null 상태입니다!");
-        }
-
-        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
-                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-
-        Category categoryValue = null;
-        if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
-            categoryValue = Category.getKeyByName(req.getCategory());
-        }
-
-        if (categoryValue == Category.STAY) {
-            List<Amenipoint> amenipoints = new ArrayList<>();
-
-            for (Long amenityId : req.getAmeniPoints()) {
-                Amenity amenity = amenityRepository.findById(amenityId)
-                        .orElseThrow(() -> new RuntimeException("Amenity ID " + amenityId + "를 찾을 수 없습니다."));
-
-                Amenipoint amenipoint = Amenipoint.builder()
-                        .id(new AmenipointId(amenity.getAmenityId(), strf.getStrfId()))
-                        .amenity(amenity)
-                        .stayTourRestaurFest(strf)
-                        .build();
-                amenipoints.add(amenipoint);
-            }
-
-            amenipointRepository.saveAll(amenipoints);
-        }
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-    }
+//
+//        updateStrfAddressInfo(strf, p);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updStrfPic(Long strfId, List<MultipartFile> strfPic,String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        updateStrfPics(strfPic, strf);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updRest(Long strfId, List<String> restDates , String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//        updateRestDays(strf,restDates);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updStrfMenu(List<MultipartFile> menuPic, StrfUpdMenu req) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+//        Menu menu = menuRepository.findById(req.getMenuId()).orElseThrow( () -> new RuntimeException("menuId not found"));
+//
+//        List<Menu> savedMenus = saveMenusWithPics(menuPic, strf, req);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updateStay(StrfStayUpdReq req) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+//
+//        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
+//        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
+//        if (!isBusi) {
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+//
+//        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//
+//        Category categoryValue = null;
+//        if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
+//            categoryValue = Category.getKeyByName(req.getCategory());
+//        }
+//        if (categoryValue == Category.STAY) {
+//            List<Parlor> parlors = new ArrayList<>();
+//            List<Room> rooms = new ArrayList<>();
+//            for (StrfParlor strfParlor : req.getParlors()) {
+//                Menu menu = menuRepository.findById(req.getMenuId())
+//                        .orElseThrow(() -> new RuntimeException("Menu not found"));
+//
+//                Parlor newParlor = Parlor.builder()
+//                        .menu(menu)
+//                        .maxCapacity(strfParlor.getMaxCapacity())
+//                        .recomCapacity(strfParlor.getRecomCapacity())
+//                        .surcharge(strfParlor.getSurcharge())
+//                        .build();
+//                parlors.add(newParlor);
+//            }
+//
+//            for (Long roomId : req.getRooms()) {
+//                Menu menu = menuRepository.findById(req.getMenuId())
+//                        .orElseThrow(() -> new RuntimeException("Menu not found"));
+//
+//                Room newRoom = Room.builder()
+//                        .menu(menu)
+//                        .roomId(roomId)
+//                        .roomNum(1)
+//                        .build();
+//                rooms.add(newRoom);
+//            }
+//            parlorRepository.saveAll(parlors);
+//            roomRepository.saveAll(rooms);
+//        }
+//            Menu menu = menuRepository.findById(req.getMenuId())
+//                .orElseThrow( () -> new RuntimeException("menu id not found"));
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updateAmenity(StrfJpaAmenity req) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("user id not found"));
+//
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+//        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
+//
+//        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
+//        if (!isBusi) {
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+//
+//        if (req.getAmeniPoints() == null) {
+//            throw new RuntimeException("Amenity가 null 상태입니다!");
+//        }
+//
+//        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//        Category categoryValue = null;
+//        if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
+//            categoryValue = Category.getKeyByName(req.getCategory());
+//        }
+//
+//        if (categoryValue == Category.STAY) {
+//            List<Amenipoint> amenipoints = new ArrayList<>();
+//
+//            for (Long amenityId : req.getAmeniPoints()) {
+//                Amenity amenity = amenityRepository.findById(amenityId)
+//                        .orElseThrow(() -> new RuntimeException("Amenity ID " + amenityId + "를 찾을 수 없습니다."));
+//
+//                Amenipoint amenipoint = Amenipoint.builder()
+//                        .id(new AmenipointId(amenity.getAmenityId(), strf.getStrfId()))
+//                        .amenity(amenity)
+//                        .stayTourRestaurFest(strf)
+//                        .build();
+//                amenipoints.add(amenipoint);
+//            }
+//
+//            amenipointRepository.saveAll(amenipoints);
+//        }
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
 
 
     @Transactional
@@ -657,6 +656,7 @@ public class StrfService {
         strf.setCloseCheckOut(p.getCloseCheckOut());
         strfRepository.save(strf);
     }
+
     private void updateStrfTell(StayTourRestaurFest strf, String tell) {
 
         strf.setTell(tell);
@@ -704,6 +704,7 @@ public class StrfService {
         strf.setState(p.getState());
         strfRepository.save(strf);
     }
+
     // 이미지 업데이트
     private void updateStrfPics(List<MultipartFile> strfPic, StayTourRestaurFest strf) {
         if (strfPic != null && !strfPic.isEmpty()) {
@@ -711,6 +712,7 @@ public class StrfService {
             saveStrfPics(strfPic, strf);
         }
     }
+
     private void updateRestDays(StayTourRestaurFest strf, List<String> restdates) {
         if (restdates != null && !restdates.isEmpty()) {
             StrfRestDate restDateHandler = new StrfRestDate();
@@ -764,10 +766,12 @@ public class StrfService {
     private boolean isRestaurantOrStay(StayTourRestaurFest strf) {
         return strf.getCategory().equals("RESTAUR") || strf.getCategory().equals("STAY");
     }
+
     private String saveMenuPic(MultipartFile file) {
         // 이미지 저장 로직 (예: S3, 로컬 스토리지)
         return file != null ? file.getOriginalFilename() : null;
     }
+
     private void saveStrfPics(List<MultipartFile> files, StayTourRestaurFest strf) {
         files.forEach(file -> {
             StrfPic pic = StrfPic.builder()
@@ -777,10 +781,14 @@ public class StrfService {
             strfPicRepository.save(pic);
         });
     }
-    public int reviewCount(long strfId){
 
-        return strfMapper.reviewCount(strfId);
+    public ResponseWrapper<Integer> reviewCount(long strfId){
+
+        Integer count = strfMapper.reviewCount(strfId);
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(),count);
     }
+
     public List<StrfCouponGetRes> couponList(long strfId){
         List<StrfCouponGetRes> couponGetList = strfMapper.couponList(strfId);
         return couponGetList;
@@ -823,247 +831,393 @@ public class StrfService {
         return true; // 예약 가능
     }
 
+
+
+
+
+//
 //    @Transactional
 //    public ResponseWrapper<Integer> updateStrf(Long strfId, StrfUpdInfo p) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//
-//        StayTourRestaurFest strf = strfRepository.findById(strfId)
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//
-//
-//        updateStrfBasicInfo(strf, p);
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updState(Long strfId, int state , String busiNum) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//        StayTourRestaurFest strf = strfRepository.findById(strfId)
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-//        updateStrfState(strf, state);
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updDetail(Long strfId, String detail,String busiNum) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//        StayTourRestaurFest strf = strfRepository.findById(strfId)
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-//        updateStrfDetail(strf, detail);
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updFestTime(Long strfId, StrfFestTime p) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//        StayTourRestaurFest strf = strfRepository.findById(strfId)
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
-//        updateStrfFestTime(strf, p);
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updTime(StrfTime p) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId())
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
-////        if (!strf.getBusiNum().toString().equals(businessNum.getBusiNum())){
-////            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-////        }
-//
-//        updateStrfTime(strf, p);
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updTell(Long strfId, String tell,String busiNum) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//        StayTourRestaurFest strf = strfRepository.findById(strfId)
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-//
-//        if (strfRepository.existsByTell(tell)) {
-//            throw new RuntimeException("Title already exists");
-//        }
-//        updateStrfTell(strf, tell);
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updTitle(Long strfId, String title,String busiNum) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//        StayTourRestaurFest strf = strfRepository.findById(strfId)
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-//
-//        if (strfRepository.existsByTitle(title)) {
-//            throw new RuntimeException("Title already exists");
-//        }
-//        updateStrfTitle(strf, title);
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updAddress(Long strfId, StrfUpdAddress p) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//        StayTourRestaurFest strf = strfRepository.findById(strfId)
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
-//        if (!strf.getBusiNum().toString().equals(p.getBusiNum())){
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
-//
-//        updateStrfAddressInfo(strf, p);
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updStrfPic(Long strfId, List<MultipartFile> strfPic,String busiNum) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//        StayTourRestaurFest strf = strfRepository.findById(strfId)
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-//        updateStrfPics(strfPic, strf);
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updRest(Long strfId, List<String> restDates , String busiNum) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//        StayTourRestaurFest strf = strfRepository.findById(strfId)
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
-//        updateRestDays(strf,restDates);
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updStrfMenu(List<MultipartFile> menuPic, StrfUpdMenu req) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
-//
-//        Menu menu = menuRepository.findById(req.getMenuId()).orElseThrow( () -> new RuntimeException("menuId not found"));
-//
-//        List<Menu> savedMenus = saveMenusWithPics(menuPic, strf, req);
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updateStay(StrfStayUpdReq req) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
-//
-//        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
-//        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
-//        if (!isBusi) {
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
-//
-//        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//
-//        Category categoryValue = null;
-//        if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
-//            categoryValue = Category.getKeyByName(req.getCategory());
-//        }
-//        if (categoryValue == Category.STAY) {
-//            List<Parlor> parlors = new ArrayList<>();
-//            List<Room> rooms = new ArrayList<>();
-//            for (StrfParlor strfParlor : req.getParlors()) {
-//                Menu menu = menuRepository.findById(req.getMenuId())
-//                        .orElseThrow(() -> new RuntimeException("Menu not found"));
-//
-//                Parlor newParlor = Parlor.builder()
-//                        .menu(menu)
-//                        .maxCapacity(strfParlor.getMaxCapacity())
-//                        .recomCapacity(strfParlor.getRecomCapacity())
-//                        .surcharge(strfParlor.getSurcharge())
-//                        .build();
-//                parlors.add(newParlor);
-//            }
-//
-//            for (Long roomId : req.getRooms()) {
-//                Menu menu = menuRepository.findById(req.getMenuId())
-//                        .orElseThrow(() -> new RuntimeException("Menu not found"));
-//
-//                Room newRoom = Room.builder()
-//                        .menu(menu)
-//                        .roomId(roomId)
-//                        .roomNum(1)
-//                        .build();
-//                rooms.add(newRoom);
-//            }
-//            parlorRepository.saveAll(parlors);
-//            roomRepository.saveAll(rooms);
-//        }
-//        Menu menu = menuRepository.findById(req.getMenuId())
-//                .orElseThrow( () -> new RuntimeException("menu id not found"));
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
-//    }
-//    @Transactional
-//    public ResponseWrapper<Integer> updateAmenity(StrfJpaAmenity req) {
 //        long userId = authenticationFacade.getSignedUserId();
 //        User user = userRepository.findById(userId)
 //                .orElseThrow(() -> new RuntimeException("user id not found"));
 //
-//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
-//        List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
-//
-//        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
-//        if (!isBusi) {
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
-//        }
-//
-//        if (req.getAmeniPoints() == null) {
-//            throw new RuntimeException("Amenity가 null 상태입니다!");
-//        }
-//
-//        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
 //                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
 //
-//        Category categoryValue = null;
-//        if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) != null) {
-//            categoryValue = Category.getKeyByName(req.getCategory());
+//        // 기존 데이터가 변경되었는지 확인하고 업데이트
+//        boolean updated = updStrfBasicInfo(strf, p);
+//
+//        if (updated) {
+//            strfRepository.save(strf);  // 변경사항 저장
 //        }
 //
-//        if (categoryValue == Category.STAY) {
-//            List<Amenipoint> amenipoints = new ArrayList<>();
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), updated ? 1 : 0);
+//    }
 //
-//            for (Long amenityId : req.getAmeniPoints()) {
-//                Amenity amenity = amenityRepository.findById(amenityId)
-//                        .orElseThrow(() -> new RuntimeException("Amenity ID " + amenityId + "를 찾을 수 없습니다."));
+//    @Transactional
+//    public ResponseWrapper<Integer> updState(Long strfId, int state , String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("user id not found"));
 //
-//                Amenipoint amenipoint = Amenipoint.builder()
-//                        .id(new AmenipointId(amenity.getAmenityId(), strf.getStrfId()))
-//                        .amenity(amenity)
-//                        .stayTourRestaurFest(strf)
-//                        .build();
-//                amenipoints.add(amenipoint);
-//            }
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
 //
-//            amenipointRepository.saveAll(amenipoints);
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//
+//        if (strf.getState() == state) {
+//            return new ResponseWrapper<>(ResponseCode.OK.getCode(), 0); // 변경 사항 없음
 //        }
+//
+//        strf.setState(state);
+//        strfRepository.save(strf);
 //
 //        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
 //    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updTime(StrfTime p) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("user id not found"));
+//
+//        StayTourRestaurFest strf = strfRepository.findById(p.getStrfId())
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(p.getBusiNum());
+//
+//        boolean updated = updStrfTime(strf, p);
+//
+//        if (updated) {
+//            strfRepository.save(strf);
+//        }
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), updated ? 1 : 0);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updTell(Long strfId, String tell, String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("user id not found"));
+//
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+//
+//        if (strfRepository.existsByTell(tell)) {
+//            throw new RuntimeException("전화번호가 이미 존재합니다.");
+//        }
+//
+//        if (strf.getTell().equals(tell)) {
+//            return new ResponseWrapper<>(ResponseCode.OK.getCode(), 0);
+//        }
+//
+//        strf.setTell(tell);
+//        strfRepository.save(strf);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+////    @Transactional
+////    public ResponseWrapper<Integer> updRest(Long strfId, List<String> restDates, String busiNum) {
+////        long userId = authenticationFacade.getSignedUserId();
+////        User user = userRepository.findById(userId)
+////                .orElseThrow(() -> new RuntimeException("user id not found"));
+////
+////        StayTourRestaurFest strf = strfRepository.findById(strfId)
+////                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+////
+////        BusinessNum businessNum = businessNumRepository.findByBusinessNum(busiNum);
+////
+////        // 기존 데이터 삭제 후 새 데이터 삽입
+////        restDateRepository.deleteByStrfId(strfId);
+////        updateRestDays(strf, restDates);
+////
+////        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+////    }
+//
+////    @Transactional
+////    public ResponseWrapper<Integer> updStrfMenu(List<MultipartFile> menuPic, StrfUpdMenu req) {
+////        long userId = authenticationFacade.getSignedUserId();
+////        User user = userRepository.findById(userId)
+////                .orElseThrow(() -> new RuntimeException("user id not found"));
+////
+////        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+////                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+////
+////        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+////
+////        // 기존 메뉴 삭제 후 새로운 메뉴 추가
+////        menuRepository.deleteByMenuId(req.getStrfId());
+////        List<Menu> savedMenus = saveMenusWithPics(menuPic, strf, req);
+////
+////        return new ResponseWrapper<>(ResponseCode.OK.getCode(), savedMenus.size());
+////    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updDetail(Long strfId, String detail, String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("user id not found"));
+//
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//        if (strf.getDetail().equals(detail)) {
+//            return new ResponseWrapper<>(ResponseCode.OK.getCode(), 0);
+//        }
+//
+//        strf.setDetail(detail);
+//        strfRepository.save(strf);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updFestTime(Long strfId, StrfFestTime p) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("user id not found"));
+//
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//        boolean updated = updStrfFestTime(strf, p);
+//
+//        if (updated) {
+//            strfRepository.save(strf);
+//        }
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), updated ? 1 : 0);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updTitle(Long strfId, String title, String busiNum) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("user id not found"));
+//
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//        if (strfRepository.existsByTitle(title)) {
+//            throw new RuntimeException("Title already exists");
+//        }
+//
+//        if (strf.getTitle().equals(title)) {
+//            return new ResponseWrapper<>(ResponseCode.OK.getCode(), 0);
+//        }
+//
+//        strf.setTitle(title);
+//        strfRepository.save(strf);
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+//    }
+//
+//    @Transactional
+//    public ResponseWrapper<Integer> updAddress(Long strfId, StrfUpdAddress p) {
+//        long userId = authenticationFacade.getSignedUserId();
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("user id not found"));
+//
+//        StayTourRestaurFest strf = strfRepository.findById(strfId)
+//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+//
+//        if (!strf.getBusiNum().toString().equals(p.getBusiNum())) {
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+//        }
+//
+//        boolean updated = updStrfAddressInfo(strf, p);
+//
+//        if (updated) {
+//            strfRepository.save(strf);
+//        }
+//
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), updated ? 1 : 0);
+//    }
+//
+////    @Transactional
+////    public ResponseWrapper<Integer> updStrfPic(Long strfId, List<MultipartFile> strfPic, String busiNum) {
+////        long userId = authenticationFacade.getSignedUserId();
+////        User user = userRepository.findById(userId)
+////                .orElseThrow(() -> new RuntimeException("user id not found"));
+////
+////        StayTourRestaurFest strf = strfRepository.findById(strfId)
+////                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+////
+////        strfPicRepository.deleteByStrfId(strfId);
+////        updateStrfPics(strfPic, strf);
+////
+////        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+////    }
+//
+////    @Transactional
+////    public ResponseWrapper<Integer> updateStay(StrfStayUpdReq req) {
+////        long userId = authenticationFacade.getSignedUserId();
+////        User user = userRepository.findById(userId)
+////                .orElseThrow(() -> new RuntimeException("user id not found"));
+////
+////        BusinessNum businessNum = businessNumRepository.findByBusinessNum(req.getBusiNum());
+////
+////        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+////                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+////
+////        if (req.getCategory() != null && Category.getKeyByName(req.getCategory()) == Category.STAY) {
+////            parlorRepository.deleteByMenuId(req.getMenuId());
+////            roomRepository.deleteByMenuId(req.getMenuId());
+////
+////            List<Parlor> parlors = req.getParlors().stream().map(strfParlor -> {
+////                Menu menu = menuRepository.findById(req.getMenuId())
+////                        .orElseThrow(() -> new RuntimeException("Menu not found"));
+////
+////                return Parlor.builder()
+////                        .menu(menu)
+////                        .maxCapacity(strfParlor.getMaxCapacity())
+////                        .recomCapacity(strfParlor.getRecomCapacity())
+////                        .surcharge(strfParlor.getSurcharge())
+////                        .build();
+////            }).collect(Collectors.toList());
+////
+////            List<Room> rooms = req.getRooms().stream().map(roomId -> {
+////                Menu menu = menuRepository.findById(req.getMenuId())
+////                        .orElseThrow(() -> new RuntimeException("Menu not found"));
+////
+////                return Room.builder()
+////                        .menu(menu)
+////                        .roomId(roomId)
+////                        .roomNum(1)
+////                        .build();
+////            }).collect(Collectors.toList());
+////
+////            parlorRepository.saveAll(parlors);
+////            roomRepository.saveAll(rooms);
+////        }
+////
+////        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+////    }
+//
+////    @Transactional
+////    public ResponseWrapper<Integer> updateAmenity(StrfJpaAmenity req) {
+////        long userId = authenticationFacade.getSignedUserId();
+////        User user = userRepository.findById(userId)
+////                .orElseThrow(() -> new RuntimeException("user id not found"));
+////
+////        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId())
+////                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
+////
+////        amenipointRepository.deleteByStrfId(req.getStrfId());
+////
+////        List<Amenipoint> amenipoints = req.getAmeniPoints().stream().map(amenityId -> {
+////            Amenity amenity = amenityRepository.findById(amenityId)
+////                    .orElseThrow(() -> new RuntimeException("Amenity ID " + amenityId + "를 찾을 수 없습니다."));
+////
+////            return Amenipoint.builder()
+////                    .id(new AmenipointId(amenity.getAmenityId(), strf.getStrfId()))
+////                    .amenity(amenity)
+////                    .stayTourRestaurFest(strf)
+////                    .build();
+////        }).collect(Collectors.toList());
+////
+////        amenipointRepository.saveAll(amenipoints);
+////
+////        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+////    }
+//
+//    public boolean updStrfBasicInfo(StayTourRestaurFest strf, StrfUpdInfo p) {
+//        boolean isUpdated = false;
+//
+//        if (!strf.getTitle().equals(p.getTitle())) {
+//            strf.setTitle(p.getTitle());
+//            isUpdated = true;
+//        }
+//
+//        if (!strf.getDetail().equals(p.getDetail())) {
+//            strf.setDetail(p.getDetail());
+//            isUpdated = true;
+//        }
+//
+//        if (isUpdated) {
+//            strfRepository.save(strf);
+//        }
+//
+//        return isUpdated;
+//    }
+//
+//    public boolean updStrfAddressInfo(StayTourRestaurFest strf, StrfUpdAddress p) {
+//        boolean isUpdated = false;
+//
+//        if (!strf.getAddress().equals(p.getAddress())) {
+//            strf.setAddress(p.getAddress());
+//            isUpdated = true;
+//        }
+//
+//        if (!strf.getPost().equals(p.getPost())) {
+//            strf.setPost(p.getPost());
+//            isUpdated = true;
+//        }
+//
+//        if (isUpdated) {
+//            strfRepository.save(strf);
+//        }
+//
+//        return isUpdated;
+//    }
+//
+//    public boolean updStrfTime(StayTourRestaurFest strf, StrfTime p) {
+//        boolean isUpdated = false;
+//
+//        if (!strf.getOpenCheckIn().equals(p.getOpenCheckIn())) {
+//            strf.setOpenCheckIn(p.getOpenCheckIn());
+//            isUpdated = true;
+//        }
+//
+//        if (!strf.getCloseCheckOut().equals(p.getCloseCheckOut())) {
+//            strf.setCloseCheckOut(p.getCloseCheckOut());
+//            isUpdated = true;
+//        }
+//
+//        if (isUpdated) {
+//            strfRepository.save(strf);
+//        }
+//
+//        return isUpdated;
+//    }
+//    public boolean updStrfFestTime(StayTourRestaurFest strf, StrfFestTime p) {
+//        boolean isUpdated = false;
+//
+//        if (!strf.getStartAt().equals(p.getStartAt()) || !strf.getEndAt().equals(p.getEndAt())) {
+//            strf.setStartAt(p.getStartAt());
+//            strf.setEndAt(p.getEndAt());
+//            isUpdated = true; // 값이 변경되었으므로 true 설정
+//        }
+//
+//        return isUpdated;
+//    }
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //    public List<AmenipointId> getAmeniIdList(List<Long> amenityIds, Long strfId) {
