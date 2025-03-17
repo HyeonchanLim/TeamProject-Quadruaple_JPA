@@ -9,6 +9,7 @@ import com.green.project_quadruaple.chat.repository.ChatRepository;
 import com.green.project_quadruaple.chat.repository.ChatRoomRepository;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
+import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.config.socket.UserSubscribeState;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.user.Repository.UserRepository;
@@ -24,7 +25,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.green.project_quadruaple.common.config.socket.UserSubscribeState.*;
 
@@ -36,6 +39,7 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final ChatJoinRepository chatJoinRepository;
     private final ChatReceiveRepository chatReceiveRepository;
+    private final Map<Long, SseEmitter> emitterMap = new ConcurrentHashMap<>();
 
     // 유저 입장 시
     @Transactional
@@ -65,6 +69,33 @@ public class ChatService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public SseEmitter connect() {
+        long signedUserId = AuthenticationFacade.getSignedUserId();
+        SseEmitter emitter = new SseEmitter(10000 * 60 * 60L);
+
+        try {
+            boolean existsReceiveChat = chatReceiveRepository.findByUserId(signedUserId);
+            SseEmitter.SseEventBuilder builder = SseEmitter.event()
+                    .name("connect")
+                    .data(existsReceiveChat);
+            emitter.send(builder);
+
+            emitterMap.put(signedUserId, emitter);
+
+        } catch (Exception e) {
+            emitter.complete();
+            e.printStackTrace();
+        }
+
+        emitter.onCompletion(() -> emitterMap.remove(signedUserId));
+        emitter.onTimeout(() -> {
+            emitterMap.remove(signedUserId);
+            emitter.complete();
+        });
+
+        return emitter;
     }
 
     // 채팅 저장
@@ -98,7 +129,7 @@ public class ChatService {
                     chatReceiveRepository.save(chatReceive);
 
                     Long userId = cj.getUser().getUserId();
-                    SseEmitter emitters = ARTICLE_TO_CONNECTION.get(userId);
+                    SseEmitter emitters = emitterMap.get(userId);
                     emitters.send(true);
                 }
             }
