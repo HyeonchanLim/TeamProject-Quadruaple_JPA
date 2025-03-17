@@ -325,7 +325,6 @@ public class StrfService {
                     });
                 }
             }
-
             for (StrfParlor strfParlor : p.getParlors()) {
                 if (strfParlor.getRecomCapacity() > strfParlor.getMaxCapacity()) {
                     throw new RuntimeException("권장 인원은 최대 인원보다 클 수 없습니다.");
