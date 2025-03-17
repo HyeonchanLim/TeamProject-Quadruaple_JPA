@@ -1,0 +1,1 @@
+import{u as o,a as e,j as s,T as i,O as c}from"./index-ztVTG9lp.js";const r=()=>{const t=o(),n=()=>{t(a==="/business/point"?"/business":-1)},a=e().pathname;return s.jsxs("div",{children:[s.jsx(i,{title:"포인트 관리",icon:a==="/business/point"?"close":"back",onClick:n}),s.jsx(c,{})]})};export{r as default};

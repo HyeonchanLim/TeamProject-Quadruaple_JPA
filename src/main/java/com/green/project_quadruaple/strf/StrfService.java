@@ -129,7 +129,7 @@ public class StrfService {
     }
 
     @Transactional
-    public ResponseWrapper<Integer> strfInfoIns(List<MultipartFile> strfPic, StrfInsReq p) {
+    public ResponseWrapper<Long> strfInfoIns(List<MultipartFile> strfPic, StrfInsReq p) {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
 
@@ -144,7 +144,7 @@ public class StrfService {
         List<Role> roles = roleRepository.findByUserUserId(user.getUserId());
         boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
         if (!isBusi) {
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0L);
         }
 
         // Redis 를 이용해 location_detail_id 호출
@@ -183,7 +183,7 @@ public class StrfService {
             strfRepository.save(strf);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0L);
         }
 
         if (p.getRestdates() != null && !p.getRestdates().isEmpty()) {
@@ -225,7 +225,7 @@ public class StrfService {
             }
         }
 
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), strf.getStrfId());
     }
 
     @Transactional
