@@ -10,20 +10,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("chat-notice")
-public class ChatNoticeController {
-
-    private final ChatNoticeService chatNoticeService;
-
-//    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-//    public SseEmitter chatNoticeConnection() {
-//        return chatNoticeService.connect();
-//    }
-
-//    @GetMapping("/")
-//    public void subChatNotice() {
-//        chatNoticeService.broadcastChatNotice();
-//    }
-}
+//@RestController
+//@RequiredArgsConstructor
+//@RequestMapping("chat-notice")
+//public class ChatNoticeController {
+//
+//    private final ChatNoticeService chatNoticeService;
+//
+////    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+////    public SseEmitter chatNoticeConnection() {
+////        return chatNoticeService.connect();
+////    }
+//
+////    @GetMapping("/")
+////    public void subChatNotice() {
+////        chatNoticeService.broadcastChatNotice();
+////    }
+//}

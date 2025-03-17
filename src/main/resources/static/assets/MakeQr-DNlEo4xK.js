@@ -1,1 +1,0 @@
-import{j as o,B as s}from"./index-CiM0iehI.js";import{T as t}from"./index-0VuWN9In.js";import"./DownOutlined-CC4Fm7Ig.js";import"./isMobile-B4CO7CVJ.js";const p=()=>o.jsxs("div",{children:[o.jsx(t,{suffix:"원",onChange:r=>console.log(r)}),o.jsx(s,{children:"발급"}),o.jsx("div",{})]});export{p as default};

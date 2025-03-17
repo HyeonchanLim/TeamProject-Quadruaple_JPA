@@ -25,35 +25,35 @@ public class NoticeController {
 //    public SseEmitter subscribeSSE() {
 //        return noticeService.subscribe();
 //    }
-
-    //알람 테스트 insert
-    @PostMapping("test")
-    @Operation(summary = "테스트용 insert")
-    public void testInsNotice(@ParameterObject Long userId){
-        noticeService.testInsNotice(userId);
-    }
-
-    @GetMapping("check")
-    @Operation(summary = "알람리스트확인하기")
-    public ResponseEntity<?> checkNotice(@RequestParam("start_idx") int startIdx){
-        return noticeService.noticeCheck(startIdx);
-    }
-
-    @GetMapping("check-one")
-    @Operation(summary = "알람상세확인하기")
-    public ResponseEntity<?> checkNoticeOne(@RequestParam("notice_id") long noticeId){
-        return noticeService.checkNoticeOne(noticeId);
-    }
-
-    @PutMapping("readAll")
-    @Operation(summary = "알람 일괄 읽음처리")
-    public ResponseEntity<?> readAllNotice(){
-        return noticeService.readAllNotice();
-    }
-
-    @PostMapping("admin")
-    @Operation(summary = "관리자 service 알림 추가", description = "role은 유저 or 사업자 or Null 값 있으면 걔네한테만. null이면 전체")
-    public void noticeAdmin(@RequestBody NoticeAdminSendReq p){
-        noticeService.noticeAdmin(p);
-    }
+//
+//    //알람 테스트 insert
+//    @PostMapping("test")
+//    @Operation(summary = "테스트용 insert")
+//    public void testInsNotice(@ParameterObject Long userId){
+//        noticeService.testInsNotice(userId);
+//    }
+//
+//    @GetMapping("check")
+//    @Operation(summary = "알람리스트확인하기")
+//    public ResponseEntity<?> checkNotice(@RequestParam("start_idx") int startIdx){
+//        return noticeService.noticeCheck(startIdx);
+//    }
+//
+//    @GetMapping("check-one")
+//    @Operation(summary = "알람상세확인하기")
+//    public ResponseEntity<?> checkNoticeOne(@RequestParam("notice_id") long noticeId){
+//        return noticeService.checkNoticeOne(noticeId);
+//    }
+//
+//    @PutMapping("readAll")
+//    @Operation(summary = "알람 일괄 읽음처리")
+//    public ResponseEntity<?> readAllNotice(){
+//        return noticeService.readAllNotice();
+//    }
+//
+//    @PostMapping("admin")
+//    @Operation(summary = "관리자 service 알림 추가", description = "role은 유저 or 사업자 or Null 값 있으면 걔네한테만. null이면 전체")
+//    public void noticeAdmin(@RequestBody NoticeAdminSendReq p){
+//        noticeService.noticeAdmin(p);
+//    }
 }
