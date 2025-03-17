@@ -1,14 +1,18 @@
 package com.green.project_quadruaple.chat.service;
 
+import com.green.project_quadruaple.chat.model.res.ChatReceiveConRes;
 import com.green.project_quadruaple.chat.repository.ChatReceiveRepository;
 import com.green.project_quadruaple.chat.repository.EmitterRepository;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
-import com.green.project_quadruaple.entity.model.ChatReceive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -18,31 +22,38 @@ import java.util.concurrent.TimeUnit;
 public class ChatNoticeService {
 
     private final ChatReceiveRepository chatReceiveRepository;
+    private final Map<Long, Set<SseEmitter>> articleToConnection = new ConcurrentHashMap<>();
     private final EmitterRepository emitterRepository;
 
-    public SseEmitter subChatNotice() {
+    public SseEmitter connect() {
         long signedUserId = AuthenticationFacade.getSignedUserId();
 
         SseEmitter emitter = emitterRepository.save(signedUserId, new SseEmitter(Long.MAX_VALUE));
 
-        ScheduledExecutorService thread = new ScheduledThreadPoolExecutor(1);
-        thread.scheduleAtFixedRate(() -> {
-            try {
-                boolean exists = chatReceiveRepository.findByUserId(signedUserId);
-//                emitter.send(exists);
-                if(exists) {
-                    emitter.send(true);
-                }
-            } catch (Exception e) {
-                emitter.complete();
-                e.printStackTrace();
-                thread.shutdown();
-            }
-        }, 0, 30, TimeUnit.SECONDS);
+        try {
+            boolean existsReceiveChat = chatReceiveRepository.findByUserId(signedUserId);
+            SseEmitter.SseEventBuilder builder = SseEmitter.event()
+                    .name("connect")
+                    .data(new ChatReceiveConRes(signedUserId, existsReceiveChat))
+                    .reconnectTime(3000L);
+            emitter.send(builder);
+
+            final Set<SseEmitter> connections = articleToConnection.getOrDefault(signedUserId, new HashSet<>());
+            connections.add(emitter);
+            articleToConnection.put(signedUserId, connections);
+
+        } catch (Exception e) {
+            emitter.complete();
+            e.printStackTrace();
+        }
 
         emitter.onCompletion(() -> emitterRepository.deleteById(signedUserId));
         emitter.onTimeout(() -> emitterRepository.deleteById(signedUserId));
 
         return emitter;
+    }
+
+    public void broadcastChatNotice() {
+
     }
 }
