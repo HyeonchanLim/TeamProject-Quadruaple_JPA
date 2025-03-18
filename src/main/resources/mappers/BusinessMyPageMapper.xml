@@ -108,7 +108,7 @@
     <select id="selUsedPointsByBusinessRESTAUR">
         SELECT
         DATE_FORMAT(A.created_at, '%Y-%m') AS month,
-        COALESCE(SUM(A.amount), 0) AS total_sales
+        COALESCE(SUM(A.amount*(-1)), 0) AS total_sales
         FROM point_history A
         LEFT JOIN stay_tour_restaur_fest C ON A.related_id = C.strf_id
         LEFT JOIN business_num D ON C.busi_num = D.busi_num
@@ -125,7 +125,7 @@
 
     <!-- 전체 포인트 합계 조회 -->
     <select id="selTotalPointAmount">
-        SELECT SUM(CASE WHEN A.category = 0 THEN A.amount ELSE 0 END)
+        SELECT SUM(CASE WHEN A.category = 0 THEN A.amount ELSE 0 END)*(-1)
         FROM point_history A
         LEFT JOIN stay_tour_restaur_fest B ON A.related_id = B.strf_id
         LEFT JOIN business_num C ON B.busi_num = C.busi_num
@@ -136,7 +136,7 @@
 
     <!-- 개별 포인트 내역 조회 -->
     <select id="selPointDetailList">
-        SELECT B.strf_id, B.title, A.amount, A.created_at
+        SELECT A.point_history_id, B.strf_id, B.title, A.amount*(-1) AS amount, A.created_at, A.user_id
         FROM point_history A
         LEFT JOIN stay_tour_restaur_fest B ON A.related_id = B.strf_id
         LEFT JOIN business_num C ON B.busi_num = C.busi_num
