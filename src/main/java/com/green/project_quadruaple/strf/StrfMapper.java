@@ -13,6 +13,7 @@ public interface StrfMapper {
 
     void strfUpsert(Long userId, Long strfId);
     StrfSelRes getMemberDetail(Long userId, Long strfId);
+    StrfSelRes busiMemberDetail(Long userId, Long strfId);
     List<StrfAmenity> strfAmenity (Long strfId,String category);
     List<StrfMenu> strfMenu(Long strfId);
     List<StrfParlorDto> strfParlor (Long strfId , String category );

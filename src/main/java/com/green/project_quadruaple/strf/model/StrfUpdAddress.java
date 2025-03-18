@@ -13,7 +13,7 @@ public class StrfUpdAddress {
     private String category;
 
     private String address;
-    private long locationDetailId;
+    private String locationDetailTitle;
     private double lat;
     private double lng;
     private String post;
