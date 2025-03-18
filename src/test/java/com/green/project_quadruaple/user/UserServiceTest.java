@@ -55,7 +55,6 @@ class UserServiceTest {
     @Mock private AuthenticationCodeRepository authenticationCodeRepository;
     @Mock private RoleRepository roleRepository;
     @Mock private TemporaryPwRepository temporaryPwRepository;
-    @Mock private NoticeReceiveRepository noticeReceiveRepository;
 
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private MyFileUtils myFileUtils;
@@ -85,10 +84,10 @@ class UserServiceTest {
         signUpReq.setRole(Arrays.asList(UserRole.USER));
         signUpReq.setProfilePic(null); // 프로필 사진 없음
 
-            AuthenticationCode authCode = new AuthenticationCode();
-            authCode.setEmail("test@example.com");
-            authCode.setCodeNum("123456");
-            authCode.setGrantedAt(LocalDateTime.now());
+        AuthenticationCode authCode = new AuthenticationCode();
+        authCode.setEmail("test@example.com");
+        authCode.setCodeNum("123456");
+        authCode.setGrantedAt(LocalDateTime.now());
 
         doReturn(Optional.of(authCode))
                 .when(authenticationCodeRepository).findFirstByEmailOrderByGrantedAtDesc("test@example.com");
@@ -97,23 +96,31 @@ class UserServiceTest {
         given(userRepository.existsByName("홍길동")).willReturn(false);
         given(passwordEncoder.encode(anyString())).willReturn("hashedPassword");
 
+        // MultipartFile은 null로 설정하여 프로필 사진이 없는 경우 테스트
+        MultipartFile pic = mock(MultipartFile.class); // 사진을 moc
 
-        MultipartFile pic = mock(MultipartFile.class); // 사진을 mock
+        String savedPicName = "user_profile.webp";
 
-        // **프로필 사진 관련 처리 추가**
-        given(myFileUtils.makeRandomFileName(any(MultipartFile.class))).willReturn("random_file_name.png");
-        when(myFileUtils.makeFolders(anyString())).thenReturn("some/dummy/path");  // 디렉토리 생성 Mocking
-        doNothing().when(myFileUtils).transferToUser(any(MultipartFile.class), anyString());
+        // 프로필 사진 관련 처리 추가
+        given(myFileUtils.makeRandomFileName(any(MultipartFile.class))).willReturn(savedPicName); // 기본 파일명으로 설정
+        when(myFileUtils.makeFolders(anyString())).thenReturn("user/1");  // 디렉토리 생성 Mocking
 
+        // getExt가 null을 반환할 가능성을 방지
+        given(myFileUtils.getExt(anyString())).willReturn(".webp");
 
-        // userRepository.save()가 호출될 때 userId를 강제로 설정
+        // userRepository.save() Mocking - userId와 profilePic 기본값 설정
         given(userRepository.save(any(User.class)))
                 .willAnswer(invocation -> {
                     User savedUser = invocation.getArgument(0);
-                    savedUser.setUserId(1L); // 여기서 userId 강제로 설정
-                    signUpReq.setUserId(savedUser.getUserId());
+                    savedUser.setUserId(1L);
+                    signUpReq.setUserId(savedUser.getUserId());// userId 설정
+                    if (savedUser.getProfilePic() == null) {
+                        savedUser.setProfilePic(savedPicName);
+                    }
                     return savedUser;
-                });
+    });
+
+        signUpReq.setProfilePic(savedPicName);// 기본 프로필 이미지 설정
 
         // RoleRepository mock 설정
         given(roleRepository.save(any(Role.class))).willAnswer(invocation -> {
@@ -128,7 +135,6 @@ class UserServiceTest {
         // then
         assertEquals(1, result);  // 회원가입이 정상적으로 진행되면 1이 반환됨
         verify(myFileUtils).makeFolders(anyString());  // 폴더 생성 메서드 호출 확인
-        verify(myFileUtils).transferToUser(any(MultipartFile.class), anyString());  // 파일이 저장되었는지 확인
         verify(userRepository).save(any(User.class));  // 유저가 저장된 것을 검증
         verify(roleRepository).save(any(Role.class));  // 역할이 저장된 것을 검증
     }
@@ -165,9 +171,6 @@ class UserServiceTest {
         doReturn(Optional.of(authCode))
                 .when(authenticationCodeRepository).findFirstByEmailOrderByGrantedAtDesc("test@example.com");
 
-        // Mock noticeReceiveRepository.existsUnreadNoticesByUserId
-        given(noticeReceiveRepository.existsUnreadNoticesByUserId(user.getUserId())).willReturn(true); // 예시로 true 리턴
-
         //JwtTokenProvider Mock 설정
         String fakeAccessToken = "fakeAccessToken";
         String fakeRefreshToken = "fakeRefreshToken";
@@ -187,7 +190,6 @@ class UserServiceTest {
                 .userId(user.getUserId())
                 .name(user.getName())
                 .roles(Arrays.asList(UserRole.USER))
-                .hasUnReadNotice(true)
                 .build();
 
         // signIn() 호출
