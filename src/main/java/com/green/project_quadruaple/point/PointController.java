@@ -10,6 +10,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
 import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
 import com.green.project_quadruaple.point.model.payModel.req.PointBuyReadyReq;
+import com.green.project_quadruaple.point.model.req.CancelPointUsed;
 import com.green.project_quadruaple.point.model.req.PointHistoryPostReq;
 import com.green.project_quadruaple.point.model.res.PointCardProductRes;
 import com.green.project_quadruaple.point.model.dto.PointCardUpdateDto;
@@ -123,14 +124,20 @@ public class PointController {
 
     @PostMapping("history")
     @Operation(summary = "포인트 사용",
-            description = "relatedId는 상품id, amount는 얼마나 사용했나 혹은 취소되어 들어왔나")
+            description = "strf_id는 상품id, amount는 얼마나 사용했나")
     public ResponseEntity<?> usePoint(@RequestBody PointHistoryPostReq p) {
         return pointService.usePoint(p);
+    }
+    @DeleteMapping("history")
+    @Operation(summary = "포인트 사용 취소",
+            description = "strf_id는 상품id, 결제된 포인트 사용 list 조회의 point_history_id 보내주면 됨.")
+    public ResponseEntity<?> cancelUsedPoint(@RequestBody CancelPointUsed p) {
+        return pointService.cancelUsedPoint(p);
     }
 
     @GetMapping("history")
     @Operation(summary = "포인트 사용내역 열람",
-            description = "category를 null로 보내면 구분없음(0-사용, 1-구매, 2-취소/환불), is_desc가 true면 최신순 false면 오래된 순, page는 몇번째 페이지")
+            description = "category를 null로 보내면 구분없음(0-사용, 1-구매, 2-환불, 4-사용취소), is_desc가 true면 최신순 false면 오래된 순, page는 몇번째 페이지")
     public ResponseEntity<?> checkMyRemainPoint(@RequestParam("start_at") @Parameter(example = "2025-03-05") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
                                                 @RequestParam("end_at") @Parameter(example = "2025-03-10") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
                                                 @RequestParam(required = false) Integer category, @RequestParam("is_desc") boolean isDesc) {
@@ -151,7 +158,7 @@ public class PointController {
     }
 
     @PostMapping("card/refund")
-    @Operation(summary = "포인트 구매취소")
+    @Operation(summary = "포인트 환불")
     public ResponseWrapper<String> refundPoint(@RequestParam long pointHistoryId) {
         return pointService.refundPoint(pointHistoryId);
     }

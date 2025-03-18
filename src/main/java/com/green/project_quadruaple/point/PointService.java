@@ -16,6 +16,7 @@ import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
 import com.green.project_quadruaple.point.model.dto.PointHistoryListDto;
 import com.green.project_quadruaple.point.model.payModel.req.PointBuyReadyReq;
+import com.green.project_quadruaple.point.model.req.CancelPointUsed;
 import com.green.project_quadruaple.point.model.req.PointHistoryPostReq;
 import com.green.project_quadruaple.point.model.res.PointCardProductRes;
 import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
@@ -174,7 +175,7 @@ public class PointService {
     public ResponseEntity<ResponseWrapper<PointUseRes>> usePoint(PointHistoryPostReq p) {
         long userId = authenticationFacade.getSignedUserId();
         User user=userRepository.findById(userId).get();
-        StayTourRestaurFest strf=strfRepository.findById(p.getRelatedId()).orElse(null);
+        StayTourRestaurFest strf=strfRepository.findById(p.getStrfId()).orElse(null);
         int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId)==null?
                 0:pointViewRepository.findLastRemainPointByUserId(userId);
         remainPoint-=p.getAmount();
@@ -185,19 +186,42 @@ public class PointService {
         PointHistory pointHistory = PointHistory.builder()
                 .amount(p.getAmount()*(-1))
                 .category(0)
-                .relatedId(p.getRelatedId())
+                .relatedId(p.getStrfId())
                 .user(user)
                 .remainPoint(remainPoint)
                 .build();
         pointHistoryRepository.saveAndFlush(pointHistory);
 
-        //사용 알람 발송
-        String title= p.getAmount()+"P 사용!";
-        StringBuilder content = new StringBuilder(strf.getTitle()).append("에서 ")
-                .append(p.getAmount()).append("P 사용 정상처리 되었습니다. \n 남은 잔여 포인트: ").append(remainPoint);
-        noticeService.postNotice(NoticeCategory.POINT,title,content.toString(),user, pointHistory.getPointHistoryId());
-
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), new PointUseRes(remainPoint,p.getAmount(),strf.getTitle())));
+    }
+
+    // point 사용 취소
+    public ResponseEntity<ResponseWrapper<Integer>> cancelUsedPoint(CancelPointUsed p) {
+        List<Role> roles = roleRepository.findByUserUserId(authenticationFacade.getSignedUserId());
+        boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
+        if (!isBusi) {
+            log.error("포인트 사용취소 권한이 없습니다. 사용자 권한: {}", roles.isEmpty() ? "없음" : roles.get(0).getRole());
+            return null;  // 권한이 없으면 상품권 수정 불가능
+        }
+        PointHistory used=pointHistoryRepository.findById(p.getPointHistoryId()).orElse(null);
+        int amount=used.getAmount() * (-1);
+        int remainPoint=amount+pointViewRepository.findLastRemainPointByUserId(used.getUser().getUserId());
+        PointHistory pointHistory=PointHistory.builder()
+                .amount(amount)
+                .category(4)
+                .user(used.getUser())
+                .relatedId(p.getPointHistoryId())
+                .remainPoint(remainPoint)
+                .build();
+        pointHistoryRepository.saveAndFlush(pointHistory);
+
+        //사용 취소 알람 발송
+        String title= amount+"P 사용취소!";
+        StringBuilder content = new StringBuilder(strfRepository.findTitleByStrfId(p.getStrfId())).append("에서 ")
+                .append(amount).append("P 사용취소 정상처리 되었습니다. \n 남은 잔여 포인트: ").append(remainPoint);
+        noticeService.postNotice(NoticeCategory.POINT,title,content.toString(),used.getUser(), pointHistory.getPointHistoryId());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
     }
 
     //QR코드 확인시 보일 화면
@@ -213,11 +237,6 @@ public class PointService {
     // 보유 포인트 확인화면
     public ResponseEntity<ResponseWrapper<PointHistoryListReq>> checkMyRemainPoint
     (LocalDate startAt, LocalDate endAt, Integer category, boolean isDesc) {
-        /*
-            response 내용
-            로그인 유저 닉네임+보유포인트
-            포인트 내역(구매, 사용, 취소) 사용처 이름, 시간, 얼마가 들었고 얼마가 남았나.
-         */
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).get();
 
@@ -239,7 +258,9 @@ public class PointService {
                 case 1:
                     yield "포인트 충전";
                 case 2:
-                    yield "취소(환불)";
+                    yield "포인트 카드 환불";
+                case 4:
+                    yield "포인트 사용 취소";
                 default:
                     yield null;
             };
