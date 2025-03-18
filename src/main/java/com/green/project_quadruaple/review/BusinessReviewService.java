@@ -47,7 +47,7 @@ public class BusinessReviewService {
 
         System.out.println("startIdx: " + startIdx + ", pageSize: " + pageSize);
 
-        long startTime = System.currentTimeMillis(); // 전체 실행 시간 측정 시작
+        long startTime = System.currentTimeMillis();
         long queryStartTime = System.currentTimeMillis();
 
         // ⚠️ pageSize + 1개를 조회하여 다음 데이터가 있는지 확인
@@ -56,17 +56,21 @@ public class BusinessReviewService {
         long queryEndTime = System.currentTimeMillis();
         System.out.println("쿼리 실행 시간: " + (queryEndTime - queryStartTime) + "ms");
 
-        // 다음 페이지가 있는지 확인
-        boolean isMore = reviews.size() > pageSize;
+        // 남은 데이터 개수 확인
+        boolean hasMoreData = reviews.size() > pageSize;
 
         // 리스트에서 최대 pageSize 개수만 유지
-        if (isMore) {
+        if (hasMoreData) {
             reviews = reviews.subList(0, pageSize);
         }
 
-        // 마지막 요소에만 isMore 반영
+        // 가져온 데이터 개수와 전체 개수를 비교하여 isMore 설정
         for (int i = 0; i < reviews.size(); i++) {
-            reviews.get(i).setIsMore(isMore && i == reviews.size() - 1);
+            if (hasMoreData || i < reviews.size() - 1) {
+                reviews.get(i).setIsMore(true);
+            } else {
+                reviews.get(i).setIsMore(false);
+            }
         }
 
         for (BusinessDto review : reviews) {
@@ -81,11 +85,13 @@ public class BusinessReviewService {
             review.setReviewPicList(pics);
         }
 
-        long endTime = System.currentTimeMillis(); // 전체 실행 시간 종료
+        long endTime = System.currentTimeMillis();
         System.out.println("전체 getBusinessReview 실행 시간: " + (endTime - startTime) + "ms");
 
         return reviews;
     }
+
+
 
 
     //전체 리뷰 조회 (페이징 적용)
