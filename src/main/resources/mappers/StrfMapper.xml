@@ -119,7 +119,8 @@
         <result property="amenityTitle" column="amenityTitle" />
     </resultMap>
     <select id="strfParlor" resultMap="parlorResultMap">
-        SELECT a.strf_id AS strfId , b.menu_id AS menuId, c.max_capacity AS maxCapacity,
+        SELECT a.strf_id AS strfId , b.menu_id AS menuId,
+        c.max_capacity AS maxCapacity,
         c.recom_capacity AS recomCapacity , c.surcharge , b.title ,
         d.room_id AS roomId , d.room_num AS roomNum
         FROM stay_tour_restaur_fest a
@@ -130,18 +131,19 @@
             <if test="category != null and category == 'STAY'">
                a.strf_id = #{strfId} AND a.category = #{category}
             </if>
-<!--        </where>-->
-        GROUP BY a.strf_id , b.menu_id
+        GROUP BY a.strf_id , b.menu_id , d.room_id
     </select>
 
     <resultMap id="parlorResultMap" type="com.green.project_quadruaple.strf.model.StrfParlorDto">
-            <id property="menuId" column="menuId" />
-            <result property="maxCapacity" column="maxCapacity" />
-            <result property="recomCapacity" column="recomCapacity" />
-            <result property="surcharge" column="surcharge" />
+        <id property="menuId" column="menuId" />
+        <result property="maxCapacity" column="maxCapacity" />
+        <result property="recomCapacity" column="recomCapacity" />
+        <result property="surcharge" column="surcharge" />
 
-            <result property="roomId" column="roomId" />
-            <result property="roomNum" column="roomNum" />
+        <result property="roomId" column="roomId" />
+        <collection property="roomNum" javaType="java.util.List" ofType="java.lang.Integer">
+            <result property="roomNum" column="roomNum"/>
+        </collection>
     </resultMap>
 
 

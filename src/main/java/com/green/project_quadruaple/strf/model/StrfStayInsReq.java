@@ -13,7 +13,7 @@ public class StrfStayInsReq {
     private long strfId;
     private String busiNum;
     private String category;
-    private long menuId;
+    private Long menuId;
 
     private List<Long> ameniPoints;
     private List<StrfParlor> parlors;

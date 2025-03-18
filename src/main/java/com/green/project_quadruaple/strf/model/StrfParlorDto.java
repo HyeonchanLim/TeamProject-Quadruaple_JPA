@@ -20,6 +20,6 @@ public class StrfParlorDto {
 //    private List<StrfParlor> parlors;
 
     private long roomId;
-    private int roomNum;
+    private List<Integer> roomNum;
 //    private List<StrfRooms> rooms;
 }
