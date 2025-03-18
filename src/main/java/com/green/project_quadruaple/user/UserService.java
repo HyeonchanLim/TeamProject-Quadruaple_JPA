@@ -324,9 +324,6 @@ public class UserService {
             } catch (IOException e) {
                 throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);
             }
-        } else {
-            myFileUtils.deleteFolder(deletePath, false);
-            user.setProfilePic("user_profile.webp");
         }
 
         // 전화번호(tell) 및 생일(birth) 업데이트
