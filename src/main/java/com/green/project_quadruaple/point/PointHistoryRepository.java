@@ -15,4 +15,12 @@ public interface PointHistoryRepository extends JpaRepository<PointHistory, Long
         order by p.pointHistoryId desc
         """)
     List<PointHistory> findPointHistoriesByUserId(Long signedUserId, Pageable pageable);
+
+    @Query("""
+        select p from PointHistory p
+        where p.user.userId = :signedUserId
+        and p.category in (1, 2)
+        order by p.pointHistoryId desc
+        """)
+    List<PointHistory> findRefundablePointHistoriesByUserId(Long signedUserId);
 }

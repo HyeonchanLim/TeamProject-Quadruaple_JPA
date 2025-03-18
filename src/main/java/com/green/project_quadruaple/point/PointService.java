@@ -4,6 +4,7 @@ import com.green.project_quadruaple.booking.model.dto.KakaoRefundDto;
 import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.view.PointView;
 import com.green.project_quadruaple.notice.NoticeService;
+import com.green.project_quadruaple.point.model.dto.*;
 import com.green.project_quadruaple.point.model.payModel.dto.KakaoApproveDto;
 import com.green.project_quadruaple.point.model.payModel.dto.KakaoReadyDto;
 import com.green.project_quadruaple.common.config.constant.KakaopayConst;
@@ -13,14 +14,10 @@ import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.SizeConstants;
 import com.green.project_quadruaple.entity.model.*;
-import com.green.project_quadruaple.point.model.dto.PointCardGetDto;
-import com.green.project_quadruaple.point.model.dto.PointHistoryListDto;
 import com.green.project_quadruaple.point.model.payModel.req.PointBuyReadyReq;
 import com.green.project_quadruaple.point.model.req.CancelPointUsed;
 import com.green.project_quadruaple.point.model.req.PointHistoryPostReq;
 import com.green.project_quadruaple.point.model.res.PointCardProductRes;
-import com.green.project_quadruaple.point.model.dto.PointCardPostDto;
-import com.green.project_quadruaple.point.model.dto.PointCardUpdateDto;
 import com.green.project_quadruaple.point.model.res.PointHistoryListReq;
 import com.green.project_quadruaple.point.model.res.PointUseRes;
 import com.green.project_quadruaple.point.model.res.QRPointRes;
@@ -52,6 +49,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -127,7 +126,7 @@ public class PointService {
                         pointCard.getAvailable(),
                         pointCard.getDiscountPer(),
                         pointCard.getFinalPayment()
-                )).collect(Collectors.toList());
+                )).collect(toList());
     }
 
     public int updPointCard(PointCardUpdateDto dto) {
@@ -196,12 +195,17 @@ public class PointService {
     }
 
     // point 사용 취소
-    public ResponseEntity<ResponseWrapper<Integer>> cancelUsedPoint(CancelPointUsed p) {
-        List<Role> roles = roleRepository.findByUserUserId(authenticationFacade.getSignedUserId());
+    public ResponseEntity<ResponseWrapper<String>> cancelUsedPoint(CancelPointUsed p) {
+        // 이미 환불한 포인트인지 검증도 할것
+
+        long busiId=authenticationFacade.getSignedUserId();
+        List<Role> roles = roleRepository.findByUserUserId(busiId);
+        List<Long> strfIds = strfRepository.findStrfIdByUserId(busiId);
+        boolean hasStrf = strfIds.stream().anyMatch(strfId -> strfId.equals(p.getStrfId()));
         boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
-        if (!isBusi) {
+        if (!isBusi || !hasStrf) { //사업자 권한이 없거나 자신의 상품이 아니라면 취소 불가
             log.error("포인트 사용취소 권한이 없습니다. 사용자 권한: {}", roles.isEmpty() ? "없음" : roles.get(0).getRole());
-            return null;  // 권한이 없으면 상품권 수정 불가능
+            return null;
         }
         PointHistory used=pointHistoryRepository.findById(p.getPointHistoryId()).orElse(null);
         int amount=used.getAmount() * (-1);
@@ -221,7 +225,7 @@ public class PointService {
                 .append(amount).append("P 사용취소 정상처리 되었습니다. \n 남은 잔여 포인트: ").append(remainPoint);
         noticeService.postNotice(NoticeCategory.POINT,title,content.toString(),used.getUser(), pointHistory.getPointHistoryId());
 
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), "성공"));
     }
 
     //QR코드 확인시 보일 화면
@@ -368,8 +372,8 @@ public class PointService {
             StringBuilder content = new StringBuilder(title).append(" 즐겁게 쇼핑해 볼까요? 제때 포인트를 충전하는 것을 잊지 마세요!");
             noticeService.postNotice(NoticeCategory.POINT,title,content.toString(),user,pointHistory.getPointHistoryId());
 
-            StringBuilder redirectParams = new StringBuilder("?user_name=")
-                    .append(URLEncoder.encode(user.getName(), StandardCharsets.UTF_8)).append("&")
+            StringBuilder redirectParams = new StringBuilder("?amount=")
+                    .append(URLEncoder.encode(pointHistory.getAmount().toString(), StandardCharsets.UTF_8)).append("&")
                     .append("remain_point=")
                     .append(URLEncoder.encode(pointHistory.getRemainPoint().toString(), StandardCharsets.UTF_8));
 
@@ -379,6 +383,21 @@ public class PointService {
             e.printStackTrace();
             throw new RuntimeException();
         }
+    }
+
+    // 환불가능 구매리스트 확인
+    public ResponseEntity<ResponseWrapper<List<RefundableDto>>> refundableList () {
+        long userId = authenticationFacade.getSignedUserId();
+        List<PointHistory> phList=pointHistoryRepository.findRefundablePointHistoriesByUserId(userId);
+        List<Long> refunedPhList=phList.stream().filter(p -> p.getCategory() == 2)
+                .map(PointHistory::getRelatedId).collect(toList());
+        List<PointHistory> refundableHistory=phList.stream()
+                .filter(p -> p.getCategory()==1 && ! refunedPhList.contains(p.getPointHistoryId())).toList();
+        List<RefundableDto> refundableList=new ArrayList<>();
+        for(PointHistory p:refundableHistory){
+            refundableList.add(new RefundableDto(p.getPointHistoryId(),p.getAmount(),p.getCreatedAt()));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), refundableList));
     }
 
     public ResponseWrapper<String> refundPoint(long pointHistoryId) {
