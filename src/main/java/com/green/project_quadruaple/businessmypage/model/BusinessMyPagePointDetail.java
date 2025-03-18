@@ -10,10 +10,11 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class BusinessMyPagePointDetail {
+    private long pointHistoryId;
     private long strfId;
+    private long userId;
     private long menuId;
     private String title;
     private int amount;
     private LocalDateTime createdAt;
-    private boolean refund; //(0 = false, 1 = true)
 }
