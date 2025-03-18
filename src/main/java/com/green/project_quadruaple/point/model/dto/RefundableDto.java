@@ -15,4 +15,5 @@ public class RefundableDto {
     private Long pointHistoryId;
     private int amount;
     private LocalDateTime purchaseAt;
+    private boolean refundable;
 }

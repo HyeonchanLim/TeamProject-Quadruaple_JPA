@@ -17,10 +17,7 @@ import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.point.model.payModel.req.PointBuyReadyReq;
 import com.green.project_quadruaple.point.model.req.CancelPointUsed;
 import com.green.project_quadruaple.point.model.req.PointHistoryPostReq;
-import com.green.project_quadruaple.point.model.res.PointCardProductRes;
-import com.green.project_quadruaple.point.model.res.PointHistoryListReq;
-import com.green.project_quadruaple.point.model.res.PointUseRes;
-import com.green.project_quadruaple.point.model.res.QRPointRes;
+import com.green.project_quadruaple.point.model.res.*;
 import com.green.project_quadruaple.strf.StrfRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
@@ -386,18 +383,20 @@ public class PointService {
     }
 
     // 환불가능 구매리스트 확인
-    public ResponseEntity<ResponseWrapper<List<RefundableDto>>> refundableList () {
+    public ResponseEntity<ResponseWrapper<RefundableRes>> refundableList () {
         long userId = authenticationFacade.getSignedUserId();
-        List<PointHistory> phList=pointHistoryRepository.findRefundablePointHistoriesByUserId(userId);
+        List<PointHistory> phList=pointHistoryRepository.findRefundablePointHistoriesByUserId(userId).orElse(null);
+        if(phList==null){return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
+        int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId);
         List<Long> refunedPhList=phList.stream().filter(p -> p.getCategory() == 2)
                 .map(PointHistory::getRelatedId).collect(toList());
         List<PointHistory> refundableHistory=phList.stream()
                 .filter(p -> p.getCategory()==1 && ! refunedPhList.contains(p.getPointHistoryId())).toList();
         List<RefundableDto> refundableList=new ArrayList<>();
         for(PointHistory p:refundableHistory){
-            refundableList.add(new RefundableDto(p.getPointHistoryId(),p.getAmount(),p.getCreatedAt()));
+            refundableList.add(new RefundableDto(p.getPointHistoryId(),p.getAmount(),p.getCreatedAt(),p.getAmount()<=remainPoint));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), refundableList));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), new RefundableRes(refundableList,remainPoint)));
     }
 
     public ResponseWrapper<String> refundPoint(long pointHistoryId) {
