@@ -137,14 +137,15 @@ public class ReviewService {
         review.setReviewId(p.getReviewId());
         reviewRepository.save(review);
 
+
         long reviewId = review.getReviewId();
         List<String> picNames = new ArrayList<>();
-
         if (pics != null && !pics.isEmpty()){
+
             String middlePath = String.format("reviewId/%d", reviewId);
             myFileUtils.makeFolders(middlePath);
 
-            List<ReviewPic> picNameList = new ArrayList<>(pics.size());
+            List<ReviewPic> picNameList = new ArrayList<>();
             for (MultipartFile pic : pics) {
                 String savedPicName = myFileUtils.makeRandomFileName(pic);
                 String filePath = String.format("%s/%s", middlePath, savedPicName);
@@ -152,7 +153,7 @@ public class ReviewService {
                     String webpFileName = savedPicName.replaceAll("\\.[^.]+$", ".webp");
                     ReviewPicId id = new ReviewPicId();
                     id.setReviewId(reviewId);
-                    id.setTitle(savedPicName);
+                    id.setTitle(webpFileName);
 
                     ReviewPic reviewPic = ReviewPic.builder()
                             .id(id)
@@ -170,7 +171,6 @@ public class ReviewService {
                     throw new RuntimeException(e);
                 }
             }
-            reviewPicRepository.saveAll(picNameList);
         }
 
         return ReviewPostRes.builder()

@@ -24,4 +24,16 @@ public interface PointHistoryRepository extends JpaRepository<PointHistory, Long
         order by p.pointHistoryId desc
         """)
     Optional<List<PointHistory>> findRefundablePointHistoriesByUserId(Long signedUserId);
+
+    @Query(value = """
+        SELECT CASE WHEN EXISTS (
+            SELECT 1 FROM point_history
+            WHERE category = 4 AND related_id = :relatedId
+            LIMIT 1
+        ) 
+        THEN 1 ELSE 0 
+        END
+        """, nativeQuery = true)
+    Integer findCanceldPointHistory(Long relatedId);
+
 }

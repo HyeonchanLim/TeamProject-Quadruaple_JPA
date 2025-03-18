@@ -93,13 +93,6 @@ public class MyFileUtils {
         ImmutableImage image = ImmutableImage.loader().fromStream(mf.getInputStream());
 
         image.output(WebpWriter.DEFAULT, outputFile);
-//        double aspectRatio = (double) image.width / image.height;
-//        if (aspectRatio >= 0.5625 && aspectRatio <= 1.0) {
-//            image.scaleToWidth(800)
-//                    .output(WebpWriter.DEFAULT, outputFile);
-//        } else {
-//            throw new IOException("이미지 비율이 지원되지 않습니다: " + aspectRatio);
-//        }
     }
 
     public void transferToUser(MultipartFile mf, String path) throws IOException {
@@ -164,5 +157,20 @@ public class MyFileUtils {
                  folder.delete();
              }
          }
+    }
+    //폴더 지우기, ex) "user/1"
+    public void deleteFile(String path) {
+        File folder = new File(path);
+        if (folder.exists() && folder.isDirectory()) { // 폴더가 존재하면서 디렉토리인가?
+            File[] includedFiles = folder.listFiles();
+
+            for (File f : includedFiles) {
+                if(f.isDirectory()) {
+                    deleteFolder(f.getAbsolutePath(), true);
+                } else {
+                    f.delete();
+                }
+            }
+        }
     }
 }

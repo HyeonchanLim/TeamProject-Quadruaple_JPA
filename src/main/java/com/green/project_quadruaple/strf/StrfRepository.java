@@ -46,4 +46,6 @@ public interface StrfRepository extends JpaRepository<StayTourRestaurFest, Long>
 
     @Query("select s.strfId from StayTourRestaurFest s Join s.busiNum b Join b.user u where u.userId = :userId")
     List<Long> findStrfIdByUserId(Long userId);
+
+    boolean existsByDetail(String detail);
 }

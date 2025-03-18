@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode
 @Builder
 public class StrfFestTime {
+    private long strfId;
     private String busiNum;
     private LocalDate startAt;
     private LocalDate endAt;
