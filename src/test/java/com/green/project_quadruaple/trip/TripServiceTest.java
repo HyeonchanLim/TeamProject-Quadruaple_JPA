@@ -26,9 +26,13 @@ class TripServiceTest {
 
     private static final Logger log = LoggerFactory.getLogger(TripServiceTest.class);
     private final Long willReturnId = 131L;
+
+    @MockitoBean
+    AuthenticationFacade authenticationFacade;
+
     @BeforeEach
     void setUp() {
-//        given(AuthenticationFacade.getSignedUserId()).willReturn(willReturnId);
+        given(authenticationFacade.getSignedUserId()).willReturn(willReturnId);
     }
 
     @Test
