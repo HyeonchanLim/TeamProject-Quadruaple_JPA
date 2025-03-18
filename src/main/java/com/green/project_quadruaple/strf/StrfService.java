@@ -125,6 +125,7 @@ public class StrfService {
         if (parlor == null || parlor.isEmpty()){
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), parlor);
         }
+
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), parlor);
     }
 
@@ -196,15 +197,14 @@ public class StrfService {
                 id.setDayWeek(day);
                 id.setStrfId(strf.getStrfId());
 
-                // RestDate 엔티티 저장
                 RestDate restDate = RestDate.builder()
                         .id(id)
                         .strfId(strf)
-//                        .dayWeek(day)  // "sun" -> 0, "wed" -> 3 등
                         .build();
-                restDateRepository.save(restDate);  // 휴무일 저장
+                restDateRepository.save(restDate);
             }
         }
+        List<StrfPic> strfPics = new ArrayList<>();
 
         String middlePathStrf = String.format("strf/%d", strf.getStrfId());
         myFileUtils.makeFolders(middlePathStrf);
@@ -213,18 +213,21 @@ public class StrfService {
             String savedPicName = myFileUtils.makeRandomFileName(pic);
             String filePath = String.format("%s/%s", middlePathStrf, savedPicName);
             try {
-                StrfPic strfPics = new StrfPic();
-                strfPics.setStrfId(strf);
-                strfPics.setPicName(savedPicName);
-                strfPicRepository.save(strfPics);
-                myFileUtils.transferTo(pic, filePath);
+                StrfPic newPic = StrfPic.builder()
+                        .strfId(strf)
+                        .picName(savedPicName.replace(".png", ".webp"))
+                        .build();
+
+                strfPics.add(newPic);
+
+                myFileUtils.convertAndSaveToWebp(pic , filePath.replaceAll("\\.[^.]+$", ".webp"));
             } catch (IOException e) {
                 e.printStackTrace();
                 myFileUtils.deleteFolder(middlePathStrf, true);
                 throw new RuntimeException(e);
             }
         }
-
+        strfPicRepository.saveAll(strfPics);
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), strf.getStrfId());
     }
 
@@ -256,9 +259,9 @@ public class StrfService {
         myFileUtils.makeFolders(middlePathMenu);
 
         for (MultipartFile pic : menuPic) {
-            // ✅ 서비스 로직에서 만든 파일명 가져오기
+
             String savedPicName = myFileUtils.makeRandomFileName(pic);
-            String filePath = String.format("%s/%s", middlePathMenu, savedPicName);  // 🔥 원본 확장자 포함된 경로
+            String filePath = String.format("%s/%s", middlePathMenu, savedPicName);
 
             try {
                 for (MenuIns strfMenu : p.getMenus()) {
@@ -266,11 +269,11 @@ public class StrfService {
                             .stayTourRestaurFest(strf)
                             .title(strfMenu.getMenuTitle())
                             .price(strfMenu.getMenuPrice())
-                            .menuPic(savedPicName.replace(".png", ".webp"))  // ✅ DB 저장 시 .webp 확장자로 저장
+                            .menuPic(savedPicName.replace(".png", ".webp"))
                             .build();
                     menus.add(newMenu);
                 }
-                // ✅ WebP 변환 시 기존 파일 확장자 제거 후 .webp로 변경하여 저장
+
                 myFileUtils.convertAndSaveToWebp(pic, filePath.replaceAll("\\.[^.]+$", ".webp"));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -311,51 +314,56 @@ public class StrfService {
         if (categoryValue == Category.STAY) {
             List<Parlor> parlors = new ArrayList<>();
             List<Room> rooms = new ArrayList<>();
-            List<Amenipoint> amenipoints = new ArrayList<>();
+            List<Amenipoint> amenipointList = new ArrayList<>();
 
             if (p.getAmeniPoints() != null) {
                 for (Long amenityId : p.getAmeniPoints()) {
-                    amenityRepository.findById(amenityId).ifPresent(amenity -> {
-                        Amenipoint amenipoint = Amenipoint.builder()
-                                .id(new AmenipointId(amenity.getAmenityId(), strf.getStrfId()))
-                                .amenity(amenity)
-                                .stayTourRestaurFest(strf)
-                                .build();
-                        amenipoints.add(amenipoint);
-                    });
+                    Amenity amenity = amenityRepository.findById(amenityId)
+                            .orElseThrow(() -> new RuntimeException("Amenity ID " + amenityId + "를 찾을 수 없습니다."));
+
+                    Amenipoint amenipoint = Amenipoint.builder()
+                            .id(new AmenipointId(amenity.getAmenityId(), strf.getStrfId()))
+                            .amenity(amenity)
+                            .stayTourRestaurFest(strf)
+                            .build();
+                    amenipointList.add(amenipoint);
                 }
             }
-            for (StrfParlor strfParlor : p.getParlors()) {
-                if (strfParlor.getRecomCapacity() > strfParlor.getMaxCapacity()) {
-                    throw new RuntimeException("권장 인원은 최대 인원보다 클 수 없습니다.");
-                }
 
-                Menu menu = menuRepository.findById(p.getMenuId())
-                        .orElseThrow(() -> new RuntimeException("Menu not found"));
-
-                Parlor newParlor = Parlor.builder()
-                        .menu(menu)
-                        .maxCapacity(strfParlor.getMaxCapacity())
-                        .recomCapacity(strfParlor.getRecomCapacity())
-                        .surcharge(strfParlor.getSurcharge())
-                        .build();
-                parlors.add(newParlor);
+            Menu menu = null;
+            if (p.getMenuId() != null) {
+                menu = menuRepository.findById(p.getMenuId())
+                        .orElse(null); // menuId가 없으면 예외 발생 없이 null 처리
             }
 
-            for (int i = 0; i < p.getRooms(); i++) {
-                Menu menu = menuRepository.findById(p.getMenuId())
-                        .orElseThrow(() -> new RuntimeException("Menu not found"));
+            if (p.getParlors() != null){
+                for (StrfParlor strfParlor : p.getParlors()) {
+                    if (strfParlor.getRecomCapacity() > strfParlor.getMaxCapacity()) {
+                        throw new RuntimeException("권장 인원은 최대 인원보다 클 수 없습니다.");
+                    }
 
-                Room newRoom = Room.builder()
-                        .menu(menu)
-                        .roomNum(i + 1)  // 방 번호를 1부터 시작하도록 설정
-                        .build();
-                rooms.add(newRoom);
+                    Parlor newParlor = Parlor.builder()
+                            .menu(menu)
+                            .maxCapacity(strfParlor.getMaxCapacity())
+                            .recomCapacity(strfParlor.getRecomCapacity())
+                            .surcharge(strfParlor.getSurcharge())
+                            .build();
+                    parlors.add(newParlor);
+                }
+            }
+            if (p.getRooms() > 0){
+                for (int i = 0; i < p.getRooms(); i++) {
+                    Room newRoom = Room.builder()
+                            .menu(menu)
+                            .roomNum(i + 1)
+                            .build();
+                    rooms.add(newRoom);
+                }
             }
 
             parlorRepository.saveAll(parlors);
             roomRepository.saveAll(rooms);
-            amenipointRepository.saveAll(amenipoints);
+            amenipointRepository.saveAll(amenipointList);
         }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
