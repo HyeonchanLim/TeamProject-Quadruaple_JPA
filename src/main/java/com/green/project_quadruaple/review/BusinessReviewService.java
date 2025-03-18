@@ -50,12 +50,13 @@ public class BusinessReviewService {
         long startTime = System.currentTimeMillis(); // 전체 실행 시간 측정 시작
         long queryStartTime = System.currentTimeMillis();
 
-        List<BusinessDto> reviews = reviewMapper.selectBusinessReview(signedUserId, page, pageSize, startIdx);
+        // ⚠️ pageSize + 1개를 조회하여 다음 데이터가 있는지 확인
+        List<BusinessDto> reviews = reviewMapper.selectBusinessReview(signedUserId, page, pageSize + 1, startIdx);
 
         long queryEndTime = System.currentTimeMillis();
         System.out.println("쿼리 실행 시간: " + (queryEndTime - queryStartTime) + "ms");
 
-        // isMore 로직 추가: 데이터 개수가 페이지 크기보다 크면 true
+        // 다음 페이지가 있는지 확인
         boolean isMore = reviews.size() > pageSize;
 
         // 리스트에서 최대 pageSize 개수만 유지
@@ -63,8 +64,9 @@ public class BusinessReviewService {
             reviews = reviews.subList(0, pageSize);
         }
 
+        // 마지막 요소에만 isMore 반영
         for (int i = 0; i < reviews.size(); i++) {
-            reviews.get(i).setIsMore(isMore && i == reviews.size() - 1); // 마지막 요소에만 isMore 반영
+            reviews.get(i).setIsMore(isMore && i == reviews.size() - 1);
         }
 
         for (BusinessDto review : reviews) {
@@ -85,7 +87,8 @@ public class BusinessReviewService {
         return reviews;
     }
 
-      //전체 리뷰 조회 (페이징 적용)
+
+    //전체 리뷰 조회 (페이징 적용)
     /*public List<BusinessDto> getBusinessReview(int page, int pageSize) {
         Long signedUserId = authenticationFacade.getSignedUserId();
         System.out.println("Signed User ID: " + signedUserId);
