@@ -16,6 +16,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @RestController
@@ -32,14 +33,26 @@ public class BusinessReviewController {
      * 리뷰 댓글 생성 (사업자만 가능)
      */
     @GetMapping("/all")
-    @Operation(summary = "리뷰전체조회")
-    public ResponseEntity<List<BusinessDto>> getBusinessReviews(
+    @Operation(summary = "리뷰 전체 조회")
+    public ResponseEntity<?> getBusinessReviews(
             @RequestParam(name = "start_idx", defaultValue = "0") int startIdx,
             @RequestParam(name = "page_size", defaultValue = "20") int pageSize) {
 
-       List<BusinessDto> reviews = businessReviewService.getBusinessReview(startIdx, pageSize);
-       return ResponseEntity.ok(reviews);
+        try {
+            List<BusinessDto> reviews = businessReviewService.getBusinessReview(startIdx, pageSize);
+            return ResponseEntity.ok(reviews);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다: " + e.getMessage());
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("데이터를 찾을 수 없습니다: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생: " + e.getMessage());
+        }
     }
+
+
 
     /**
      * 리뷰 댓글 생성
