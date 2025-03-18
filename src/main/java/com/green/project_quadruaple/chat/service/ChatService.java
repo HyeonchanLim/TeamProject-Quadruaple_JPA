@@ -130,7 +130,9 @@ public class ChatService {
 
                     Long userId = cj.getUser().getUserId();
                     SseEmitter emitters = emitterMap.get(userId);
-                    emitters.send(true);
+                    if(emitters != null) {
+                        emitters.send(true);
+                    }
                 }
             }
 

@@ -56,7 +56,7 @@ public class StompChannelInterceptor implements ChannelInterceptor {
                         accessor.setUser(auth);
                         if(messageType.equals("SUBSCRIBE")) {
                             String simpDestination = String.valueOf(accessor.getHeader("simpDestination"));
-                            Long roomId = Long.parseLong(simpDestination.substring(simpDestination.length()-1));
+                            Long roomId = Long.parseLong(simpDestination.substring(simpDestination.lastIndexOf('/')+1));
                             if(!chatRoomRepository.existsById(roomId)) {
                                 throw new IllegalStateException("존재하지 않는 채팅방");
                             };
