@@ -10,6 +10,7 @@ import com.green.project_quadruaple.entity.model.UsedCoupon;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class CouponService {
     private final UsedCouponRepository usedCouponRepository;
 
     // 사용 가능한 쿠폰 조회
+    @Transactional
     public CouponResponse getCoupon() {
         long signedUserId = authenticationFacade.getSignedUserId();
 
@@ -38,27 +40,30 @@ public class CouponService {
         // 사용된 쿠폰의 title, expiredAt, distributeAt을 Set으로 저장
         Set<String> usedCouponsSet = usedCoupons.stream()
                 .map(u -> u.getReceiveCoupon().getCoupon().getCouponId() + u.getReceiveCoupon().getCoupon().getTitle() +
-                        u.getReceiveCoupon().getCoupon().getExpiredAt().toString() + u.getReceiveCoupon().getCoupon().getDistributeAt().toString())  // 쿠폰 고유 정보를 하나로 묶어서 사용
+                        u.getReceiveCoupon().getCoupon().getExpiredAt().toLocalDate().toString() +
+                        u.getReceiveCoupon().getCoupon().getDistributeAt().toLocalDate().toString())  // 날짜만 저장
                 .collect(Collectors.toSet());
 
         // 해당 사용자의 모든 쿠폰 목록 조회
         List<Coupon> allCoupons = couponRepository.findCouponsByUserId(signedUserId);
 
-        // 현재 날짜와 시간 가져오기
+        // 현재 날짜 가져오기
         LocalDate now = LocalDate.now();
 
         // 만료되지 않았고 사용되지 않은 쿠폰만 필터링
         List<CouponDto> validCoupons = allCoupons.stream()
-                .filter(coupon -> coupon.getExpiredAt().isAfter(LocalDateTime.now()))
-                .filter(coupon -> !usedCouponsSet.contains(coupon.getCouponId() + coupon.getTitle() + coupon.getExpiredAt().toString() + coupon.getDistributeAt().toString()))
+                .filter(coupon -> coupon.getExpiredAt().toLocalDate().isAfter(now))
+                .filter(coupon -> !usedCouponsSet.contains(coupon.getCouponId() + coupon.getTitle() +
+                        coupon.getExpiredAt().toLocalDate().toString() +
+                        coupon.getDistributeAt().toLocalDate().toString()))
                 .map(coupon -> {
                     CouponDto couponDto = new CouponDto();
                     couponDto.setCouponId(coupon.getCouponId().toString());
                     couponDto.setTitle(coupon.getTitle());
-                    couponDto.setExpiredAt(coupon.getExpiredAt());
-                    couponDto.setDistributeAt(coupon.getDistributeAt());
+                    couponDto.setExpiredAt(coupon.getExpiredAt().toLocalDate()); // 날짜만 설정
+                    couponDto.setDistributeAt(coupon.getDistributeAt().toLocalDate()); // 날짜만 설정
                     couponDto.setDaysLeft(ChronoUnit.DAYS.between(now, coupon.getExpiredAt().toLocalDate())); // D-Day 설정
-                    couponDto.setDiscountPer(coupon.getDiscountPer()); // discountPer 값을 설정
+                    couponDto.setDiscountPer(coupon.getDiscountPer()); // 할인율 설정
                     return couponDto;
                 })
                 .sorted(Comparator.comparing(CouponDto::getExpiredAt))
@@ -74,15 +79,16 @@ public class CouponService {
     }
 
     // 만료된 쿠폰, 사용한 쿠폰 조회
+    @Transactional
     public UsedExpiredCouponResponse getUsedExpiredCoupon() {
         long signedUserId = authenticationFacade.getSignedUserId();
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate now = LocalDate.now();
 
         // 사용한 쿠폰 조회
         List<UsedCoupon> usedCoupons = usedCouponRepository.findByReceiveCoupon_User_UserId(signedUserId);
 
         // 만료된 쿠폰 조회
-        List<Coupon> expiredCoupons = couponRepository.findExpiredCouponsByUserId(signedUserId, now);
+        List<Coupon> expiredCoupons = couponRepository.findExpiredCouponsByUserId(signedUserId, now.atStartOfDay());
 
         // UsedCoupon 엔티티 → DTO 변환
         List<UsedCouponDto> usedCouponDtos = usedCoupons.stream()
@@ -90,7 +96,7 @@ public class CouponService {
                         uc.getReceiveId(),
                         uc.getReceiveCoupon().getCoupon().getCouponId(),
                         uc.getReceiveCoupon().getCoupon().getTitle(),
-                        uc.getReceiveCoupon().getCoupon().getExpiredAt(),
+                        uc.getReceiveCoupon().getCoupon().getExpiredAt().toLocalDate(), // 날짜만 설정
                         uc.getReceiveCoupon().getCoupon().getDiscountPer()
                 ))
                 .collect(Collectors.toList());
@@ -106,7 +112,7 @@ public class CouponService {
                 .map(coupon -> new ExpiredCouponDto(
                         coupon.getCouponId(),
                         coupon.getTitle(),
-                        coupon.getExpiredAt(),
+                        coupon.getExpiredAt().toLocalDate(), // 날짜만 설정
                         coupon.getDiscountPer()
                 ))
                 .sorted(Comparator.comparing(ExpiredCouponDto::getExpiredAt))  // 만료 날짜가 가까운 순으로 정렬
