@@ -193,16 +193,18 @@ public class PointService {
 
     // point 사용 취소
     public ResponseEntity<ResponseWrapper<String>> cancelUsedPoint(CancelPointUsed p) {
-        // 이미 환불한 포인트인지 검증도 할것
-
+        Integer alreadyRefunded = pointHistoryRepository.findCanceldPointHistory(p.getPointHistoryId());
+        if (alreadyRefunded==1) { //이미 환불되었는지 확인
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "이미 취소된 요청입니다."));
+        }
         long busiId=authenticationFacade.getSignedUserId();
         List<Role> roles = roleRepository.findByUserUserId(busiId);
         List<Long> strfIds = strfRepository.findStrfIdByUserId(busiId);
         boolean hasStrf = strfIds.stream().anyMatch(strfId -> strfId.equals(p.getStrfId()));
         boolean isBusi = roles.stream().anyMatch(role -> role.getRole() == UserRole.BUSI);
         if (!isBusi || !hasStrf) { //사업자 권한이 없거나 자신의 상품이 아니라면 취소 불가
-            log.error("포인트 사용취소 권한이 없습니다. 사용자 권한: {}", roles.isEmpty() ? "없음" : roles.get(0).getRole());
-            return null;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "포인트 사용취소 권한이 없습니다."));
         }
         PointHistory used=pointHistoryRepository.findById(p.getPointHistoryId()).orElse(null);
         int amount=used.getAmount() * (-1);
@@ -386,7 +388,7 @@ public class PointService {
     public ResponseEntity<ResponseWrapper<RefundableRes>> refundableList () {
         long userId = authenticationFacade.getSignedUserId();
         List<PointHistory> phList=pointHistoryRepository.findRefundablePointHistoriesByUserId(userId).orElse(null);
-        if(phList==null){return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
+        if(phList==null||phList.isEmpty()){return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
         int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId);
         List<Long> refunedPhList=phList.stream().filter(p -> p.getCategory() == 2)
                 .map(PointHistory::getRelatedId).collect(toList());
