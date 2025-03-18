@@ -23,11 +23,4 @@ public interface PointViewRepository extends JpaRepository<PointView, Long> {
 
     @Query("select ph.remainPoint from PointView ph where ph.userId=:userId order by ph.pointHistoryId desc limit 1")
     Integer findLastRemainPointByUserId(Long userId);
-
-    @Query("""
-        select p from PointView p
-        where p.userId = :signedUserId
-        order by p.pointHistoryId desc
-        """)
-    List<PointHistory> findPointHistoriesByUserId(Long signedUserId, Pageable pageable);
 }
