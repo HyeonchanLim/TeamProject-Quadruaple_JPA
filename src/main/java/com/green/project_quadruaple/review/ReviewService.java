@@ -138,38 +138,45 @@ public class ReviewService {
         reviewRepository.save(review);
 
         long reviewId = review.getReviewId();
-        String middlePath = String.format("reviewId/%d", reviewId);
-        myFileUtils.makeFolders(middlePath);
+        List<String> picNames = new ArrayList<>();
 
-        List<String> picNameList = new ArrayList<>(pics.size());
-        for (MultipartFile pic : pics) {
-            String savedPicName = myFileUtils.makeRandomFileName(pic);
-            picNameList.add(savedPicName);
-            String filePath = String.format("%s/%s", middlePath, savedPicName);
-            try {
-                ReviewPicId id = new ReviewPicId();
-                id.setReviewId(reviewId);
-                id.setTitle(savedPicName);
+        if (pics != null && !pics.isEmpty()){
+            String middlePath = String.format("reviewId/%d", reviewId);
+            myFileUtils.makeFolders(middlePath);
 
-                ReviewPic reviewPic = new ReviewPic();
-                reviewPic.setId(id);
-                reviewPic.setReview(review);
+            List<ReviewPic> picNameList = new ArrayList<>(pics.size());
+            for (MultipartFile pic : pics) {
+                String savedPicName = myFileUtils.makeRandomFileName(pic);
+                String filePath = String.format("%s/%s", middlePath, savedPicName);
+                try {
+                    String webpFileName = savedPicName.replaceAll("\\.[^.]+$", ".webp");
+                    ReviewPicId id = new ReviewPicId();
+                    id.setReviewId(reviewId);
+                    id.setTitle(savedPicName);
 
-                reviewPicRepository.save(reviewPic);
+                    ReviewPic reviewPic = ReviewPic.builder()
+                            .id(id)
+                            .review(review)
+                            .build();
 
-                myFileUtils.transferTo(pic, filePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-                String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
-                myFileUtils.deleteFolder(delFolderPath, true);
-                throw new RuntimeException(e);
+                    picNameList.add(reviewPic);
+                    picNames.add(webpFileName);
+
+                    myFileUtils.convertAndSaveToWebp(pic, filePath.replaceAll("\\.[^.]+$", ".webp"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
+                    myFileUtils.deleteFolder(delFolderPath, true);
+                    throw new RuntimeException(e);
+                }
             }
+            reviewPicRepository.saveAll(picNameList);
         }
+
         return ReviewPostRes.builder()
                 .reviewId(reviewId)
-                .pics(picNameList)
+                .pics(picNames)
                 .build();
-
     }
 
 //    @Transactional

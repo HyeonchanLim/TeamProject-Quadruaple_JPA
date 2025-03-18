@@ -215,7 +215,7 @@ public class StrfService {
             try {
                 StrfPic newPic = StrfPic.builder()
                         .strfId(strf)
-                        .picName(savedPicName.replace(".png", ".webp"))
+                        .picName(savedPicName.replace("\\.[^.]+$", ".webp"))
                         .build();
 
                 strfPics.add(newPic);
