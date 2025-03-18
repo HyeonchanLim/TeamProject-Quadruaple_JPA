@@ -12,6 +12,7 @@
             , latest_at.max_at as latestChatLDT
             , crc_cnt.cnt as unreadChat
             , u.profile_pic as pic
+            , u.user_id AS userId
         FROM chat_join cj1
         JOIN chat_room cr ON cr.chat_room_id = cj1.chat_room_id
         JOIN chat c ON c.speaker_id = cj1.cj_id
