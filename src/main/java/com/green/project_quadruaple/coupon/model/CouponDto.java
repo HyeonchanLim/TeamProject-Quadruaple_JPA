@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -12,8 +13,8 @@ import java.time.LocalDateTime;
 public class CouponDto {
     private String couponId;
     private String title;
-    private LocalDateTime expiredAt;
+    private LocalDate expiredAt;
     private int discountPer;
-    private LocalDateTime distributeAt;
+    private LocalDate distributeAt;
     private long daysLeft;
 }
