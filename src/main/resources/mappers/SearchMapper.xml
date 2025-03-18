@@ -35,14 +35,8 @@
             , COALESCE(w.wishlist_count, 0) AS wishCnt
             , COALESCE(r1.review_count, 0) AS ratingCnt
             , COALESCE(r1.avgRating, 0) AS avgRating
-            , CASE
-            WHEN uw.user_id IS NOT NULL THEN 1
-            ELSE 0
-            END AS wishIn
-            , CASE
-            WHEN r2.user_id IS NOT NULL THEN 1
-            ELSE 0
-            END AS ratingIn
+            , CASE WHEN uw.user_id IS NOT NULL THEN 1 ELSE 0 END AS wishIn
+            , CASE WHEN r2.user_id IS NOT NULL THEN 1 ELSE 0 END AS ratingIn
             , s.start_at , s.end_at
         FROM stay_tour_restaur_fest s
         INNER JOIN location_detail ld
@@ -59,10 +53,9 @@
                 , COUNT(*) AS wishlist_count
                 FROM wishlist
                 GROUP BY strf_id
-            ) w
-            ON s.strf_id = w.strf_id
+            ) w ON s.strf_id = w.strf_id
         LEFT JOIN strf_pic sp
-                ON sp.strf_id = s.strf_id
+            ON sp.strf_id = s.strf_id
                 LEFT JOIN (
                 SELECT
                     strf_id
@@ -70,20 +63,17 @@
                     , avg(rating) AS avgRating
                 FROM review
                 GROUP BY strf_id
-            ) r1
-            ON s.strf_id = r1.strf_id
+            ) r1 ON s.strf_id = r1.strf_id
         LEFT JOIN (
                 SELECT strf_id, user_id
                 FROM wishlist
                 WHERE user_id = #{userId}
-            ) uw
-            ON s.strf_id = uw.strf_id
+            ) uw ON s.strf_id = uw.strf_id
         LEFT JOIN (
                 SELECT strf_id, user_id
                 FROM review
                 WHERE user_id = #{userId}
-            ) r2
-            ON s.strf_id = r2.strf_id
+            ) r2 ON s.strf_id = r2.strf_id
         <where>
             <if test="category != null">
                 s.category = #{category}
@@ -92,6 +82,7 @@
                 AND s.title LIKE '%${searchWord}%' OR s.address LIKE '%${searchWord}%'
             </if>
         </where>
+        WHERE s.state = 0
         GROUP BY s.strf_id
         ORDER BY avgRating DESC, wishIn DESC
         LIMIT #{startIdx}, #{size}
@@ -106,6 +97,8 @@
         INNER JOIN location l ON l.location_id = tl.location_id
         WHERE t.trip_id = #{tripId}
     </select>
+
+
 
     <!-- 검색 테이블 구현 -->
     <select id="searchGetList">

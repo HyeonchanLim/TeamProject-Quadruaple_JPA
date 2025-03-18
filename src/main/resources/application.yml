@@ -49,7 +49,6 @@ spring:
 #      flush-mode: on_save  # 세션이 저장될 때만 Redis에 저장
 #      save-mode: on_set_attribute  # 세션 속성이 변경될 때만 Redis 저장
 
-
   profiles:
     active: secret
   application:

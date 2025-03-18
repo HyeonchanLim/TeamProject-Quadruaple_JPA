@@ -64,6 +64,7 @@ public class SearchService {
             List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, startIdx, size + more, null, null);
             GetSearchStrfListBasicRes res = new GetSearchStrfListBasicRes();
             if (dto.size() > size) {
+                dto.remove(size);
                 res.setMore(true);
             }
             res.setList(dto);
@@ -95,6 +96,7 @@ public class SearchService {
             List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, startIdx, size + more, categoryValue, searchWord);
             GetSearchStrfListBasicRes res = new GetSearchStrfListBasicRes();
             if (dto.size() >= size) {
+                dto.remove(size);
                 res.setMore(true);
             }
             res.setList(dto);
