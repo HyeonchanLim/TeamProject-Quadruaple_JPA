@@ -83,8 +83,8 @@ public class NoticeService {
         return emitter;
     }
 
-    @Scheduled(fixedDelay = 3000) // 3초마다 새 알림 확인
-    @Transactional
+    @Scheduled(fixedDelay = 10000) // 10초마다 새 알림 확인
+    @Transactional(readOnly = true)
     public void checkNewNotifications() {
         if(emitters.size()==0) { return; } //연결 상대가 없다면 실행하지 않음
 
