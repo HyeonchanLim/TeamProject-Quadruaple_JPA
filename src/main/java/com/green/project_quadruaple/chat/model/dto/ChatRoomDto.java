@@ -19,18 +19,20 @@ public class ChatRoomDto {
     private String latestChat;
     private String lastChatTime;
     private String pic;
+    private Long userId;
     private Integer unreadChat;
 
 
     @JsonIgnore
     private LocalDateTime latestChatLDT;
 
-    public ChatRoomDto(Long roomId, String title, String latestChat, LocalDateTime latestChatDLT, String pic, Integer unreadChat) {
+    public ChatRoomDto(Long roomId, String title, String latestChat, LocalDateTime latestChatDLT, String pic, Integer unreadChat, Long userId) {
         this.roomId = roomId;
         this.title = title;
         this.latestChat = latestChat;
         this.latestChatLDT = latestChatDLT;
         this.pic = pic;
         this.unreadChat = unreadChat;
+        this.userId = userId;
     }
 }
