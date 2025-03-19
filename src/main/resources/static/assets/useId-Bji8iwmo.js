@@ -1,1 +1,0 @@
-import{_ as i,r as n,l as I,m as f}from"./index-Ca07tLEd.js";function _(){var r=i({},f);return r.useId}var a=0,s=_();const l=s?function(e){var t=s();return e||t}:function(e){var t=n.useState("ssr-id"),u=I(t,2),c=u[0],o=u[1];return n.useEffect(function(){var d=a;a+=1,o("rc_unique_".concat(d))},[]),e||c};export{l as u};
