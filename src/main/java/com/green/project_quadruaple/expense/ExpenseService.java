@@ -203,6 +203,7 @@ public class ExpenseService {
                                 .paidUserInfoList(paidUserInfoList)
                                 .build();
                     })
+                    .sorted(Comparator.comparing(ExpenseDto::getDeId).reversed())
                     .collect(Collectors.toList());
 
         }else {

@@ -13,7 +13,9 @@ import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 //import com.green.project_quadruaple.entity.model.ChatJoin;
+import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.model.*;
+import com.green.project_quadruaple.notice.NoticeService;
 import com.green.project_quadruaple.strf.StrfRepository;
 import com.green.project_quadruaple.user.Repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
@@ -42,6 +44,7 @@ public class ChatRoomService {
     private final ChatRoomMapper chatRoomMapper;
     private final BookingRepository bookingRepository;
     private final ChatReceiveRepository chatReceiveRepository;
+    private final NoticeService noticeService;
 
     @Transactional
     public ResponseWrapper<Long> createBookingChatRoom(PostChatRoomReq req) {
@@ -78,6 +81,13 @@ public class ChatRoomService {
                 .chatRoom(chatRoom)
                 .build();
         chatJoinRepository.save(inviteUserJoin);
+
+        StayTourRestaurFest strf = strfRepository.findById(req.getStrfId()).orElse(null);
+        String title = req.getTitle()+"채팅방에 참여하셨습니다.";
+        StringBuilder contents = new StringBuilder(title)
+                .append(strf.getTitle()).append("의 호스트 ").append(hostUser.getName()).append("님과 ")
+                .append("매너를 지켜 즐겁게 대화해주세요.");
+        noticeService.postNotice(NoticeCategory.CHAT,title,contents.toString(),inviteUser, chatRoom.getChatRoomId());
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoom.getChatRoomId());
     }
