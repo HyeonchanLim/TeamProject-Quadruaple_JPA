@@ -57,11 +57,7 @@ public class SearchController {
         return searchService.getStrfListWithSearchWord(tripId, startIdx, category, searchWord);
     }
 
-
-
-
     // 상품 검색어 최근 리스트
-
     @GetMapping("/list")
     @Operation(summary = "검색창 최근 검색어 리스트", description = "user_id 가 없으면 반환하는 데이터 없음")
     public ResponseWrapper<?> searchGetList () {

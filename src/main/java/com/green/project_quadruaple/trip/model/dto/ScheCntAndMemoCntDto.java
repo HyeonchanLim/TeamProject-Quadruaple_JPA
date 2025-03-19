@@ -19,5 +19,5 @@ public class ScheCntAndMemoCntDto {
     private String title;
     private String startAt;
     private String endAt;
-    private List<String> tripLocationList;
+    private List<TripLocationDto> tripLocationList;
 }
