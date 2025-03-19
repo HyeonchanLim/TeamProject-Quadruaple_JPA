@@ -319,7 +319,7 @@ public class PointService {
             if (kakaoReadyDto != null) {
                 int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId)==null?
                         0:pointViewRepository.findLastRemainPointByUserId(userId);
-                int amount = p.getAmount();
+                int amount = pointCard.getAvailable();
                 PointHistory pointHistory = PointHistory.builder()
                         .tid(kakaoReadyDto.getTid())
                         .remainPoint(remainPoint + amount)

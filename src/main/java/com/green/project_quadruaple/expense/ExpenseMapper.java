@@ -16,9 +16,6 @@ public interface ExpenseMapper {
     //가계부 insert
     int insPaid (Map<String, Object> paramMap);
 
-    //insert된 내용 추가
-    ExpenseDto selInsedExpense(long userId, long deId);
-
     //가계부 한줄 보기
     ExpenseOneRes selExpenseOne(long deId);
 
