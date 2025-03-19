@@ -157,6 +157,12 @@ public class PointController {
         return "redirect:" + pointService.approveBuy(pgToken);
     }
 
+    @GetMapping
+    @Operation(summary = "환불가능 포인트 리스트 보기")
+    public ResponseEntity<?> refundableList(){
+        return pointService.refundableList();
+    }
+
     @PostMapping("card/refund")
     @Operation(summary = "포인트 환불")
     public ResponseWrapper<String> refundPoint(@RequestParam long pointHistoryId) {
