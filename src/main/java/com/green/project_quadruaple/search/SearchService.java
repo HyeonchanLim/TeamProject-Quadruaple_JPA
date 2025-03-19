@@ -85,15 +85,11 @@ public class SearchService {
                                                                                 String category,
                                                                                 String searchWord) {
         if (tripId == 0) return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
-        String categoryValue = null;
-        if (category != null && Category.getKeyByName(category) != null) {
-            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
-        }
         long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         int more = 1;
         try {
             List<LocationIdAndTitleDto> locationIdList = searchMapper.selLocationIdByTripId(tripId);
-            List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, startIdx, size + more, categoryValue, searchWord);
+            List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, startIdx, size + more, category, searchWord);
             GetSearchStrfListBasicRes res = new GetSearchStrfListBasicRes();
             if (dto.size() >= size) {
                 dto.remove(size);
