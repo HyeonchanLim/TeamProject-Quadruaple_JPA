@@ -27,7 +27,7 @@ public class NoticeOne {
                 createdAt.toLocalTime().toString():createdAt.toLocalDate().toString();
         this.foreignUrl= switch (this.category){
             case TRIP -> { yield "http://112.222.157.157:5231/schedule/index?tripId="+no.getForeignNum(); }
-            case COUPON -> { yield "http://112.222.157.157:5231/user/usercoupon" ;}
+            case COUPON -> { yield "http://112.222.157.157:5231/user/usercoupon";}
             case CHAT -> { yield "http://112.222.157.157:5231/chatroom?roomId="+no.getForeignNum(); }
             case POINT -> { yield "http://112.222.157.157:5231/user/point";}
             case BOOKING -> { yield "http://112.222.157.157:5231/user/userbooking";}
