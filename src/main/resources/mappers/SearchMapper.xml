@@ -74,15 +74,13 @@
                 FROM review
                 WHERE user_id = #{userId}
             ) r2 ON s.strf_id = r2.strf_id
-        <where>
-            <if test="category != null">
-                s.category = #{category}
-            </if>
-            <if test="searchWord != null">
-                AND s.title LIKE '%${searchWord}%' OR s.address LIKE '%${searchWord}%'
-            </if>
-        </where>
         WHERE s.state = 0
+        <if test="category != null and category != '' and category != 'ALL'">
+            AND s.category = #{category}
+        </if>
+        <if test="searchWord != null and searchWord != ''">
+            AND (s.title LIKE '%${searchWord}%' OR s.address LIKE '%${searchWord}%')
+        </if>
         GROUP BY s.strf_id
         ORDER BY avgRating DESC, wishIn DESC
         LIMIT #{startIdx}, #{size}
