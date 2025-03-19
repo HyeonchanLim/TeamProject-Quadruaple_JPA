@@ -15,9 +15,6 @@ public class PointBuyReadyReq {
     @Schema(example = "5")
     private long pointCardId;
 
-    @Schema(example = "100000")
-    private int amount;
-
     @JsonIgnore
     private String tid;
 }

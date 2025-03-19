@@ -25,6 +25,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
@@ -33,7 +34,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
-@RestController
+@Controller
 @RequiredArgsConstructor
 @RequestMapping("point")
 @Tag(name = "포인트")
@@ -44,6 +45,7 @@ public class PointController {
     private String QR_CODE_URL;
 
     @GetMapping("QRcode")
+    @ResponseBody
     @Operation(summary = "포인트 사용 QRcode생성")
     public ResponseEntity<byte[]> qrToTistory(@RequestParam("strf_id") String strfId
             , @RequestParam int amount) throws WriterException, IOException {
@@ -73,6 +75,7 @@ public class PointController {
     }
 
     @PostMapping("card")
+    @ResponseBody
     @Operation(summary = "포인트 상품권 발급")
     public ResponseEntity<?> postPointCard(@RequestBody PointCardPostDto pointCardPostDto) {
         int result = pointService.intPointCard(pointCardPostDto);
@@ -84,6 +87,7 @@ public class PointController {
     }
 
     @GetMapping("card")
+    @ResponseBody
     @Operation(summary = "포인트 상품권 조회, 회원이면 잔여포인트도 같이 전달")
     public ResponseEntity<?> getPointCardProduct() {
         PointCardProductRes result = pointService.getPointCardProduct();
@@ -95,6 +99,7 @@ public class PointController {
     }
 
     @GetMapping("card-admin")
+    @ResponseBody
     @Operation(summary = "포인트 상품권 조회/관리자")
     public ResponseEntity<?> getPointCardAdmin() {
         List<PointCardGetDto> result = pointService.getPointCard();
@@ -106,6 +111,7 @@ public class PointController {
     }
 
     @PatchMapping("card-admin")
+    @ResponseBody
     @Operation(summary = "포인트 상품권 수정")
     public ResponseEntity<?> updatePointCard(@RequestBody PointCardUpdateDto pointCardUpdateDto) {
         int result = pointService.updPointCard(pointCardUpdateDto);
@@ -117,18 +123,21 @@ public class PointController {
     }
 
     @GetMapping("use")
+    @ResponseBody
     @Operation(summary = "QR코드 인증시 보일 화면")
     public ResponseEntity<?> QRscanned(@RequestParam("strf_id") long strfId, @RequestParam int amount) {
         return pointService.QRscanned(strfId, amount);
     }
 
     @PostMapping("history")
+    @ResponseBody
     @Operation(summary = "포인트 사용",
             description = "strf_id는 상품id, amount는 얼마나 사용했나")
     public ResponseEntity<?> usePoint(@RequestBody PointHistoryPostReq p) {
         return pointService.usePoint(p);
     }
     @DeleteMapping("history")
+    @ResponseBody
     @Operation(summary = "포인트 사용 취소",
             description = "strf_id는 상품id, 결제된 포인트 사용 list 조회의 point_history_id 보내주면 됨.")
     public ResponseEntity<?> cancelUsedPoint(@RequestBody CancelPointUsed p) {
@@ -136,6 +145,7 @@ public class PointController {
     }
 
     @GetMapping("history")
+    @ResponseBody
     @Operation(summary = "포인트 사용내역 열람",
             description = "category를 null로 보내면 구분없음(0-사용, 1-구매, 2-환불, 4-사용취소), is_desc가 true면 최신순 false면 오래된 순, page는 몇번째 페이지")
     public ResponseEntity<?> checkMyRemainPoint(@RequestParam("start_at") @Parameter(example = "2025-03-05") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
@@ -158,12 +168,14 @@ public class PointController {
     }
 
     @GetMapping
+    @ResponseBody
     @Operation(summary = "환불가능 포인트 리스트 보기")
     public ResponseEntity<?> refundableList(){
         return pointService.refundableList();
     }
 
     @PostMapping("card/refund")
+    @ResponseBody
     @Operation(summary = "포인트 환불")
     public ResponseWrapper<String> refundPoint(@RequestParam long pointHistoryId) {
         return pointService.refundPoint(pointHistoryId);
