@@ -66,7 +66,21 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
-        ExpenseDto res=expenseMapper.selInsedExpense(authenticationFacade.getSignedUserId(),deId);
+        Long userId=authenticationFacade.getSignedUserId();
+        List<Depay> depays=dePayRepository.findByDeId(deId).orElse(new ArrayList<>());
+        int totalPrice=depays.stream().mapToInt(depay->depay.getPrice()).sum();
+        int myPrice=depays.stream().filter(u-> u.getUserId()==userId).mapToInt(d->d.getPrice()).sum();
+        List<PaidUserInfo> paidUserInfoList = new ArrayList<>(depays.size());
+        for(Depay d:depays){
+            paidUserInfoList.add(new PaidUserInfo(d.getUserId(),d.getName(),d.getProfilePic()));
+        }
+        ExpenseDto res=ExpenseDto.builder()
+                .deId(deId)
+                .myPrice(myPrice)
+                .paidFor(p.getPaidFor())
+                .totalPrice(totalPrice)
+                .paidUserInfoList(paidUserInfoList)
+                .build();
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),res));
     }
     //paidUsers에 입력하기
