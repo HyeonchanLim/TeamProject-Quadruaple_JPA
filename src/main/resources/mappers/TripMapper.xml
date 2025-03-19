@@ -75,7 +75,9 @@
         , t.title AS title
         , t.start_at AS startAt
         , t.end_at AS endAt
-        , l.title AS tripLocationList
+        , l.location_id AS locationId
+        , l.location_pic AS locationPic
+        , l.title AS title
         FROM trip t
         JOIN trip_location tl
         ON tl.trip_id = t.trip_id
@@ -98,8 +100,10 @@
         <result column="title" property="title"/>
         <result column="startAt" property="startAt"/>
         <result column="endAt" property="endAt"/>
-        <collection property="tripLocationList" ofType="java.lang.String">
-            <result column="tripLocationList"/>
+        <collection property="tripLocationList" ofType="com.green.project_quadruaple.trip.model.dto.TripLocationDto">
+            <result column="locationId" property="locationId"/>
+            <result column="locationPic" property="locationPic"/>
+            <result column="title" property="title"/>
         </collection>
     </resultMap>
 

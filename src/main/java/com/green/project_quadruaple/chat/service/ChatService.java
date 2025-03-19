@@ -121,6 +121,9 @@ public class ChatService {
             chatRepository.save(chat);
 
             List<ChatJoin> cjList = chatJoinRepository.findChatJoinIdListByChatRoomId(roomId);
+            for (Long l : USER_SUB_STATE) {
+                log.info("user : {}", l);
+            }
             for (ChatJoin cj : cjList) {
                 if(!USER_SUB_STATE.contains(cj.getCjId())) {
                     ChatReceive chatReceive = new ChatReceive();
