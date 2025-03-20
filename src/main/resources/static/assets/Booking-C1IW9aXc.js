@@ -1,0 +1,1 @@
+import{u as n,a as e,j as s,b as i,O as c}from"./index-DH-Wz4Mj.js";import{S as r}from"./StrfInfo-bFBrb7h4.js";const b=()=>{const o=n(),a=e().pathname,t=()=>{o(a==="/business/booking"?"/business/mypage":-1)};return s.jsxs("div",{children:[s.jsx(i,{title:"예약 관리",onClick:t,icon:a==="/business/booking"?"close":"back"}),s.jsx(r,{}),s.jsx(c,{})]})};export{b as default};
