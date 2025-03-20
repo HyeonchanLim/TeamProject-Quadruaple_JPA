@@ -231,9 +231,13 @@ public class PointService {
     public ResponseEntity<ResponseWrapper<QRPointRes>> QRscanned(long strfId, int amount){
         long userId = authenticationFacade.getSignedUserId();
         int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId);
+        if (remainPoint < amount) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_Acceptable.getCode(), null));
+        }
         StayTourRestaurFest strf=strfRepository.findById(strfId).get();
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode()
-                , new QRPointRes(remainPoint,strf.getTitle(),strf.getLat(),strf.getLng(),amount)));
+                , new QRPointRes(strfId,strf.getTitle(),strf.getLat(),strf.getLng(),amount)));
     }
 
 

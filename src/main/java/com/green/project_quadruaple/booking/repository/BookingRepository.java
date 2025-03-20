@@ -75,7 +75,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         """)
     User findBusiUserIdByBookingId(Long bookingId);
 
-    @EntityGraph(attributePaths = {"menu", "menu.stayTourRestaurFest"})
-    @Query("select b from Booking b where b.bookingId=:id")
+//    @EntityGraph(attributePaths = {"menu", "menu.stayTourRestaurFest"})
+    @Query("""
+            select b from Booking b 
+            join fetch b.menu
+            join fetch b.menu.stayTourRestaurFest
+            where b.bookingId=:id
+            """)
     Optional<Booking> findByBookingId(Long id);
 }
