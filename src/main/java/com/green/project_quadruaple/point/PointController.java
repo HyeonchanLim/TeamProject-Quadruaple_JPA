@@ -154,6 +154,13 @@ public class PointController {
         return pointService.checkMyRemainPoint(startAt,endAt,category,isDesc);
     }
 
+    @GetMapping("remainPoint")
+    @ResponseBody
+    @Operation(summary = "잔여포인트확인")
+    public ResponseEntity<?> getRemainPoint() {
+        return pointService.getMyRemainPoint();
+    }
+
     @PostMapping("card/buy")
     @ResponseBody
     @Operation(summary = "포인트 카드 구매")
