@@ -164,8 +164,6 @@ public class NoticeService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null ));
         }
-        boolean isMore = noticeLines.size() > SizeConstants.getDefault_page_size();
-        if(isMore){  noticeLines.remove(noticeLines.size() - 1); }
         NoticeLineRes result=mapper.countNotice(userId);
         result.setNoticeLines(noticeLines);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
