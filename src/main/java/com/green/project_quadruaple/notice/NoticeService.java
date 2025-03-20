@@ -153,7 +153,7 @@ public class NoticeService {
 //        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
 //    }
     // 알람 리스트 확인
-    public ResponseEntity<ResponseWrapper<NoticeLineRes>> noticeCheck(int startIdx) {
+    public ResponseEntity<ResponseWrapper<NoticeLineRes>> noticeCheck() {
         if (!((SecurityContextHolder.getContext().getAuthentication().getPrincipal()) instanceof JwtUser)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
