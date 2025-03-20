@@ -225,7 +225,7 @@ public class TripService {
         } else {
              tripDetailDto = tripMapper.selScheduleDetail(tripId, signedUserId);
         }
-        List<String> tripUserIdList = tripMapper.selTripUserList(tripId);
+        List<TripUserDto> tripUserIdList = tripMapper.selTripUserList(tripId);
         long totalDistance = 0L;
         long totalDuration = 0L;
 
