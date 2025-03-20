@@ -5,7 +5,7 @@
     <select id="recentList">
         SELECT a.strf_id , a.user_id , b.title AS strfTitle , c.pic_name AS strfPic ,
         b.category , g.detail_title AS locationName , d.price ,
-        COUNT(e.review_id) AS reviewCnt , AVG(e.rating) AS ratingAvg ,
+        COUNT(DISTINCT e.review_id) AS reviewCnt , AVG(e.rating) AS ratingAvg ,
         COUNT(DISTINCT f.user_id) AS wishCnt ,
         IF(EXISTS(SELECT 1 FROM wishlist
         WHERE strf_id = a.strf_id AND (#{userId} IS NULL OR user_id = #{userId})
@@ -18,7 +18,7 @@
         LEFT JOIN wishlist f ON a.strf_id = f.strf_id
         LEFT JOIN location_detail g ON b.location_detail_id = g.location_detail_id
         WHERE a.user_id = #{userId} AND a.undo_recent = 0
-        GROUP BY strf_id,b.title
+        GROUP BY a.strf_id, a.user_id, b.title, b.category, g.detail_title
         ORDER BY a.inquired_at DESC
         LIMIT 10
     </select>

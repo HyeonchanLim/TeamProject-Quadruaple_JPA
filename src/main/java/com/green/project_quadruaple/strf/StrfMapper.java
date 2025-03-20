@@ -26,6 +26,7 @@ public interface StrfMapper {
     List<StrfCheckRes> stayBookingExists(@Param("strfId") long strfId,
                               @Param("checkIn") LocalDateTime checkIn,
                             @Param("checkOut") LocalDateTime checkOut);
+    List<Integer> getRestDaysByStrfId (long strfId);
 
 
     List<Integer> getRestDaysByStrfId(@Param("strfId") Long strfId);

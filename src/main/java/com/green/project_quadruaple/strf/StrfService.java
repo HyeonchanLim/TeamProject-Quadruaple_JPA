@@ -1,6 +1,5 @@
 package com.green.project_quadruaple.strf;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.project_quadruaple.booking.repository.MenuRepository;
 import com.green.project_quadruaple.booking.repository.ParlorRepository;
@@ -29,8 +28,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -86,6 +83,7 @@ public class StrfService {
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
+
     public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -411,26 +409,24 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
-        log.info("==========businessNum : {}" , businessNum);
-        log.info("==========strf.getBusiNum : {}" , strf.getBusiNum());
-
         if (businessNum != null && !businessNum.equals(strf.getBusiNum().getBusiNum())) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
-        if (strf.getCategory() == Category.STAY){
-            amenipointRepository.deleteByStayTourRestaurFest(strf);
-            parlorRepository.deleteAllByMenuStayTourRestaurFest(strf);
-            roomRepository.deleteAllByMenuStayTourRestaurFest(strf);
-        }
-        if (strf.getCategory() == Category.RESTAUR || strf.getCategory() == Category.STAY){
-            menuRepository.deleteByStayTourRestaurFest(strf);
-
-        }
-
-        strfPicRepository.deleteAllByStrfId(strf);
-        strfRepository.delete(strf);
-
+//        if (strf.getCategory() == Category.STAY){
+//            amenipointRepository.deleteByStayTourRestaurFest(strf);
+//            parlorRepository.deleteAllByMenuStayTourRestaurFest(strf);
+//            roomRepository.deleteAllByMenuStayTourRestaurFest(strf);
+//        }
+//        if (strf.getCategory() == Category.RESTAUR || strf.getCategory() == Category.STAY){
+//            menuRepository.deleteByStayTourRestaurFest(strf);
+//
+//        }
+//
+//        strfPicRepository.deleteAllByStrfId(strf);
+//        strfRepository.delete(strf);
+        strf.setState(2);
+        strfRepository.save(strf);
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
@@ -489,55 +485,29 @@ public class StrfService {
         // 각 메뉴별 예약 가능 여부 조회
         List<StrfCheckRes> checkResList = strfMapper.stayBookingExists(strfId, checkIn.atStartOfDay(), checkOut.atTime(23, 59));
 
+        // 해당 상품의 휴무일 조회 (한 번만 호출)
+        List<Integer> restDays = strfMapper.getRestDaysByStrfId(strfId);
+
+        // 예약 가능한 메뉴 목록 수정 (휴무일 반영)
+        for (StrfCheckRes checkRes : checkResList) {
+            boolean isBooked = !checkRes.isCheck(); // 기존 예약 여부 반전 (예약 가능하면 true)
+
+            if (restDays != null && !restDays.isEmpty()) {
+                for (LocalDate date = checkIn; !date.isAfter(checkOut); date = date.plusDays(1)) {
+                    int dayOfWeek = date.getDayOfWeek().getValue() % 7; // DB의 요일 형식과 맞춤
+                    if (restDays.contains(dayOfWeek)) {
+                        isBooked = true; // 휴무일과 겹치면 예약 불가
+                        break;
+                    }
+                }
+            }
+
+            // 최종적으로 예약 가능 여부 업데이트
+            checkRes.setCheck(!isBooked);
+        }
+
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), checkResList);
     }
-
-//    @Transactional
-//    public ResponseWrapper<List<StrfCheckRes>> stayBookingExists(Long strfId, LocalDate checkIn, LocalDate checkOut) {
-//        StayTourRestaurFest strf = strfRepository.findById(strfId)
-//                .orElseThrow(() -> new RuntimeException("strf id not found"));
-//
-//        List<Menu> menus = menuRepository.findByStayTourRestaurFest(strf); // 해당 상품의 모든 메뉴 조회
-//        List<StrfCheckRes> checkResList = new ArrayList<>();
-//
-//        for (Menu menu : menus) {
-//            boolean isBooked = strfMapper.stayBookingExists(menu.getMenuId(), checkIn.atStartOfDay(), checkOut.atTime(23, 59));
-//
-//            List<Integer> restDays = strfMapper.getRestDaysByStrfId(strfId);
-//            if (restDays != null && !restDays.isEmpty()) {
-//                for (LocalDate date = checkIn; !date.isAfter(checkOut); date = date.plusDays(1)) {
-//                    int dayOfWeek = date.getDayOfWeek().getValue() % 7;
-//                    if (restDays.contains(dayOfWeek)) {
-//                        isBooked = true;
-//                        break;
-//                    }
-//                }
-//            }
-//            checkResList.add(new StrfCheckRes(menu.getMenuId(), !isBooked)); // 예약 가능 여부 반환
-//        }
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), checkResList);
-//    }
-
-
-//    @Transactional
-//    public ResponseWrapper<Integer> updateStrf(Long strfId, StrfUpdInfo p) {
-//        long userId = authenticationFacade.getSignedUserId();
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new RuntimeException("user id not found"));
-//
-//        StayTourRestaurFest strf = strfRepository.findById(strfId)
-//                .orElseThrow(() -> new RuntimeException("STRF ID not found"));
-//
-//        // 기존 데이터가 변경되었는지 확인하고 업데이트
-//        boolean updated = updStrfBasicInfo(strf, p);
-//
-//        if (updated) {
-//            strfRepository.save(strf);  // 변경사항 저장
-//        }
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), updated ? 1 : 0);
-//    }
 
     @Transactional
     public ResponseWrapper<Integer> updState(Long strfId, int state , String busiNum) {
@@ -586,11 +556,16 @@ public class StrfService {
     public ResponseWrapper<Integer> updRest(Long strfId, List<String> restDates, String busiNum) {
         User user = validateUserAndBusiness(busiNum);
         StayTourRestaurFest strf = getStayTourRestaurFest(strfId);
-        restDateRepository.findByStrfId(strf.getStrfId()).orElseThrow( () -> new RuntimeException("id not found"));
+
+        restDateRepository.deleteByStrfId(strfId);
+        restDateRepository.flush();
+
         if (restDates != null && !restDates.isEmpty()) {
             StrfRestDate restDateHandler = new StrfRestDate();
             restDateHandler.addRestDays(restDates);  // "sun", "wed", "fri" → 숫자로 변환
             List<Integer> restDays = restDateHandler.getRestDays();
+
+            List<RestDate> newRestDates = new ArrayList<>();
             for (Integer day : restDays) {
                 RestDateId id = new RestDateId();
                 id.setDayWeek(day);
@@ -600,9 +575,13 @@ public class StrfService {
                         .id(id)
                         .strfId(strf)
                         .build();
-                restDateRepository.save(restDate);
+
+                newRestDates.add(restDate);
             }
+            restDateRepository.saveAll(newRestDates);
+            restDateRepository.flush();
         }
+
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
@@ -680,7 +659,6 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
-// ✅ BusinessNum 객체에서 실제 번호를 가져와 비교
         String strfBusiNum = strf.getBusiNum().getBusiNum();  // BusinessNum 객체에서 번호 가져오기
 
         if (!p.getBusiNum().equals(strfBusiNum)) {
@@ -835,6 +813,7 @@ public class StrfService {
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), delCnt);
     }
+
     @Transactional
     public ResponseWrapper<Integer> deleteMenu(long menuId, String busiNum){
         User user = validateUserAndBusiness(busiNum);
@@ -871,6 +850,7 @@ public class StrfService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), del3);
 
     }
+
     @Transactional
     public ResponseWrapper<Integer> deleteParlor(long menuId, String busiNum){
         User user = validateUserAndBusiness(busiNum);
@@ -889,9 +869,6 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), 0);
         }
         int del = roomRepository.deleteByRoomId(menuId);
-        if (del == 0) {
-            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), 0);
-        }
 
         int del2 = parlorRepository.deleteByMenuId(menuId);
         if (del2 == 0) {
@@ -928,8 +905,9 @@ public class StrfService {
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), del);
     }
+
     @Transactional
-    public ResponseWrapper<Integer> deleteRest(Long strfId,  String busiNum){
+    public ResponseWrapper<Integer> delAllRest(Long strfId, String busiNum ){
         User user = validateUserAndBusiness(busiNum);
         StayTourRestaurFest strfSel = getStayTourRestaurFest(strfId);
 
@@ -948,9 +926,21 @@ public class StrfService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), del);
     }
 
+    @Transactional
+    public ResponseWrapper<Integer> delAllAmenity (long strfId , String busiNum){
+        User user = validateUserAndBusiness(busiNum);
+        StayTourRestaurFest strfSel = getStayTourRestaurFest(strfId);
+
+        int del = amenipointRepository.deleteByStrfId(strfId);
+
+        if (del < 0){
+            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), del);
+        }
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), del);
+    }
 
 
-        private User validateUserAndBusiness(String busiNum) {
+    private User validateUserAndBusiness(String busiNum) {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("user id not found"));

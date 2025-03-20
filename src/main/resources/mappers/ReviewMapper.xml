@@ -7,12 +7,16 @@
         FROM (
         SELECT a.review_id AS reviewId, a.strf_id AS strfId, a.content,
         a.user_id AS writerUserId, a.rating, c.name AS writerUserName,
-        c.profile_pic AS writerUserPic, b.title AS strfTitle,
+        c.profile_pic AS writerUserPic, b.title AS strfTitle, c.provider_type AS providerType ,
         (SELECT COUNT(*) FROM review WHERE user_id = a.user_id) AS userWriteReviewCnt,
-        COALESCE(a.updated_at, a.created_at) AS reviewWriteDate
+        COALESCE(a.updated_at, a.created_at) AS reviewWriteDate ,
+        d.reply_id AS reviewReplyId , d.content AS reviewReply ,
+<!--        d.created_at AS reviewReplyCreatedAt , d.updated_at AS reviewReplyUpdatedAt-->
+        COALESCE(d.updated_at, d.created_at) AS reviewReplyCreatedAt
         FROM review a
         LEFT JOIN user c ON a.user_id = c.user_id
         LEFT JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        LEFT JOIN review_reply d ON a.review_id = d.review_id
         WHERE a.strf_id = #{strfId}
         ORDER BY a.review_id DESC
         LIMIT #{startIdx}, #{size}
@@ -31,6 +35,10 @@
         <result property="writerUserPic" column="writerUserPic"/>
         <result property="reviewWriteDate" column="reviewWriteDate"/>
         <result property="strfTitle" column="strfTitle"/>
+        <result property="providerType" column="providerType"/>
+        <result property="reviewReplyId" column="reviewReplyId"/>
+        <result property="reviewReply" column="reviewReply"/>
+        <result property="reviewReplyCreatedAt" column="reviewReplyCreatedAt"/>
         <collection property="reviewPic" resultMap="reviewPic"/>
     </resultMap>
     <resultMap id="reviewPic" type="com.green.project_quadruaple.review.model.ReviewPicBatis">

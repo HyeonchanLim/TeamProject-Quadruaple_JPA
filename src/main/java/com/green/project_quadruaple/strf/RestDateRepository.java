@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface RestDateRepository extends JpaRepository<RestDate,Integer> {
@@ -13,13 +14,15 @@ public interface RestDateRepository extends JpaRepository<RestDate,Integer> {
 
 
     @Query("SELECT a FROM RestDate a WHERE a.strfId.strfId = :strfId")
-    Optional<RestDate> findByStrfId (Long strfId);
+    List<RestDate> findByStrfId (Long strfId);
 
     @Modifying
     @Query("DELETE FROM RestDate a WHERE a.strfId.strfId = :strfId")
     int deleteByStrfId (Long strfId);
 
-
+    @Modifying
+    @Query("DELETE FROM RestDate a WHERE a.id.strfId = :strfId AND a.id.dayWeek = :restDate")
+    int deleteRestDate(Long strfId , String restDate);
 
 
 }
