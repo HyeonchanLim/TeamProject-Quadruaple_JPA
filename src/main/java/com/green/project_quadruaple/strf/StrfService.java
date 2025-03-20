@@ -409,26 +409,24 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
-        log.info("==========businessNum : {}" , businessNum);
-        log.info("==========strf.getBusiNum : {}" , strf.getBusiNum());
-
         if (businessNum != null && !businessNum.equals(strf.getBusiNum().getBusiNum())) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
-        if (strf.getCategory() == Category.STAY){
-            amenipointRepository.deleteByStayTourRestaurFest(strf);
-            parlorRepository.deleteAllByMenuStayTourRestaurFest(strf);
-            roomRepository.deleteAllByMenuStayTourRestaurFest(strf);
-        }
-        if (strf.getCategory() == Category.RESTAUR || strf.getCategory() == Category.STAY){
-            menuRepository.deleteByStayTourRestaurFest(strf);
-
-        }
-
-        strfPicRepository.deleteAllByStrfId(strf);
-        strfRepository.delete(strf);
-
+//        if (strf.getCategory() == Category.STAY){
+//            amenipointRepository.deleteByStayTourRestaurFest(strf);
+//            parlorRepository.deleteAllByMenuStayTourRestaurFest(strf);
+//            roomRepository.deleteAllByMenuStayTourRestaurFest(strf);
+//        }
+//        if (strf.getCategory() == Category.RESTAUR || strf.getCategory() == Category.STAY){
+//            menuRepository.deleteByStayTourRestaurFest(strf);
+//
+//        }
+//
+//        strfPicRepository.deleteAllByStrfId(strf);
+//        strfRepository.delete(strf);
+        strf.setState(2);
+        strfRepository.save(strf);
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 
@@ -661,7 +659,6 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0);
         }
 
-// ✅ BusinessNum 객체에서 실제 번호를 가져와 비교
         String strfBusiNum = strf.getBusiNum().getBusiNum();  // BusinessNum 객체에서 번호 가져오기
 
         if (!p.getBusiNum().equals(strfBusiNum)) {

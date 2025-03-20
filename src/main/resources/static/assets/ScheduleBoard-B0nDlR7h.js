@@ -1,1 +1,0 @@
-import{u as s,a as n,j as a,T as c,O as i}from"./index-DZF_lMwV.js";const u=()=>{const t=s(),e=n().pathname,o=()=>{t(e==="/scheduleboard"?"/":-1)};return a.jsxs("div",{children:[a.jsx(c,{onClick:o,title:"여행기",icon:"back"}),a.jsx(i,{})]})};export{u as default};
