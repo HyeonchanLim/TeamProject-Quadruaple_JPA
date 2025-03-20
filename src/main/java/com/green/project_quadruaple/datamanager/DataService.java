@@ -620,7 +620,7 @@ public class DataService {
                     capacity = new int[]{7,9,11};
                 }
                 if(capacity == null) {
-                    throw new RuntimeException("capacity is null");
+                    continue;
                 }
                 int maxCapacity = capacity[(int)(Math.random()*3)];
 
