@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class QRPointRes {
-    private int remainPoint;
+    private Long strfId;
     private String strfTitle;
     private double lat;
     private double lng;
