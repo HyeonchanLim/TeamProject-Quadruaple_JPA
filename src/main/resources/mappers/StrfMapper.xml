@@ -102,8 +102,6 @@
         </collection>
     </resultMap>
 
-
-
     <select id="getMemberDetail" resultMap="memberResultMap">
         SELECT a.strf_id AS strfId, a.category, a.title AS strfTitle,
         n.user_id AS userId, a.lat AS latit, a.lng AS longitude,
