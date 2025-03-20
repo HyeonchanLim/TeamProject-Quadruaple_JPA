@@ -110,7 +110,7 @@ public class ChatRoomService {
         ChatRoom chatRoomWithAdmin;
         if(chatRoomWithAdminList.isEmpty()) { // 채팅방 없으면 새로 생성
             chatRoomWithAdmin = ChatRoom.builder()
-                    .title("관리자와의 은밀한 1대1 채팅방")
+                    .title("관리자와의 채팅")
                     .build();
 
             ChatJoin hostUserJoin = ChatJoin.builder()
