@@ -237,7 +237,7 @@ public class PointService {
         }
         StayTourRestaurFest strf=strfRepository.findById(strfId).get();
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode()
-                , new QRPointRes(strfId,strf.getTitle(),strf.getLat(),strf.getLng(),amount)));
+                , new QRPointRes(remainPoint,remainPoint-amount,LocalDateTime.now(),strfId,strf.getTitle(),strf.getLat(),strf.getLng(),amount)));
     }
 
 
