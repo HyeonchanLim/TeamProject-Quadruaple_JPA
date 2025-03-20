@@ -35,8 +35,8 @@ public class NoticeController {
 
     @GetMapping("check")
     @Operation(summary = "알람리스트확인하기")
-    public ResponseEntity<?> checkNotice(@RequestParam("start_idx") int startIdx){
-        return noticeService.noticeCheck(startIdx);
+    public ResponseEntity<?> checkNotice(){
+        return noticeService.noticeCheck();
     }
 
     @GetMapping("check-one")

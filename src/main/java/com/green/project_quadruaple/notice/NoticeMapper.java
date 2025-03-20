@@ -8,7 +8,8 @@ import java.util.List;
 
 @Mapper
 public interface NoticeMapper {
-    List<NoticeLine> checkNotice(Long userId, int startIdx, int size);
+    //List<NoticeLine> checkNotice(Long userId, int startIdx, int size);
+    List<NoticeLine> checkNotice(Long userId);
 
     NoticeLineRes countNotice(Long userId);
 }
