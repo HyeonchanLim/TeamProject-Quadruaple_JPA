@@ -29,6 +29,7 @@ public class CouponBusinessIssuanceService {
     private final StrfRepository strfRepository;
     private final AuthenticationFacade authenticationFacade;
 
+    @Transactional
     public int insCoupon(CouponBusinessPostReq req) {
         long userId = authenticationFacade.getSignedUserId();
 

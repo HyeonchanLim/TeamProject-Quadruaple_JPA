@@ -142,59 +142,85 @@
         LIMIT 10
     </select>
 
+<!--    <select id="searchAllList" resultMap="searchAllResultMap">-->
+<!--        WITH ImageSelection AS (-->
+<!--        SELECT-->
+<!--        strf_id, MIN(pic_name) AS strfPic FROM strf_pic GROUP BY strf_id )-->
+<!--        SELECT *-->
+<!--        FROM (-->
+<!--        SELECT-->
+<!--        s.strf_id AS strfId, s.title AS strfTitle, s.created_at, l.title AS locationName,-->
+<!--        COUNT(DISTINCT w.user_id) AS wishlistCount,-->
+<!--        AVG(DISTINCT r.rating) AS averageRating, COUNT(DISTINCT r.review_id) AS reviewCount,-->
+<!--        ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY s.created_at DESC) AS row_num,-->
+<!--        i.strfPic, s.category,-->
+<!--        MAX(CASE WHEN r.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview,-->
+<!--        CASE-->
+<!--        WHEN #{userId} != 0 AND EXISTS (-->
+<!--        SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id-->
+<!--        ) THEN 1-->
+<!--        ELSE 0-->
+<!--        END AS wishIn-->
+<!--        FROM stay_tour_restaur_fest s-->
+<!--        JOIN location_detail ld ON s.location_detail_id = ld.location_detail_id-->
+<!--        JOIN location l ON ld.location_id = l.location_id-->
+<!--        LEFT JOIN review r ON s.strf_id = r.strf_id-->
+<!--        LEFT JOIN wishlist w ON s.strf_id = w.strf_id-->
+<!--        LEFT JOIN ImageSelection i ON s.strf_id = i.strf_id-->
+<!--        WHERE-->
+<!--        <if test="search_word != null">-->
+<!--            (s.title LIKE CONCAT('%', #{search_word}, '%') OR-->
+<!--            s.address LIKE CONCAT('%', #{search_word}, '%') OR-->
+<!--            l.title LIKE CONCAT('%', #{search_word}, '%') OR-->
+<!--            ld.detail_title LIKE CONCAT('%', #{search_word}, '%') OR-->
+<!--            s.category LIKE CONCAT('%', #{search_word}, '%'))-->
+<!--        </if>-->
+<!--        AND s.state = 0-->
+<!--        GROUP BY s.strf_id, s.title, s.created_at,-->
+<!--        l.title, s.category, i.strfPic-->
+<!--        ) AS categorized_results-->
+<!--        WHERE row_num <![CDATA[ <= ]]> 3-->
+<!--        ORDER BY category, created_at DESC-->
+<!--    </select>-->
+
     <select id="searchAllList" resultMap="searchAllResultMap">
         WITH ImageSelection AS (
-        SELECT
-        strf_id, MIN(pic_name) AS strfPic FROM strf_pic GROUP BY strf_id )
-
-        SELECT *
-        FROM (
+        SELECT strf_id, MIN(pic_name) AS strfPic
+        FROM strf_pic
+        GROUP BY strf_id
+        )
         SELECT
         s.strf_id AS strfId, s.title AS strfTitle, s.created_at, l.title AS locationName,
-        a.title AS amenityTitle, COUNT(DISTINCT w.user_id) AS wishlistCount,
-        AVG(DISTINCT r.rating) AS averageRating, COUNT(DISTINCT r.review_id) AS reviewCount,
-        ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY s.created_at DESC) AS row_num,
-        i.strfPic, s.category, a.amenity_id AS amenityId,
-        MAX(CASE WHEN r.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview,
+        w.user_id AS wishUserId, r.review_id AS reviewId, r.rating AS rating,
+        i.strfPic, s.category, d.price, r.user_id AS reviewWriterUserId, AVG(r.rating) AS averageRating ,
         CASE
-        WHEN #{userId} != 0 AND EXISTS (
+        WHEN r.user_id = #{userId} THEN 1
+        ELSE 0
+        END AS hasMyReview,
+        CASE
+        WHEN #{userId} IS NOT NULL AND EXISTS (
         SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id
         ) THEN 1
         ELSE 0
         END AS wishIn
-
         FROM stay_tour_restaur_fest s
         JOIN location_detail ld ON s.location_detail_id = ld.location_detail_id
         JOIN location l ON ld.location_id = l.location_id
         LEFT JOIN review r ON s.strf_id = r.strf_id
         LEFT JOIN wishlist w ON s.strf_id = w.strf_id
-        LEFT JOIN amenipoint ap ON s.strf_id = ap.strf_id
-        LEFT JOIN amenity a ON ap.amenity_id = a.amenity_id
         LEFT JOIN ImageSelection i ON s.strf_id = i.strf_id
-
+        LEFT JOIN menu d ON s.strf_id = d.strf_id
         WHERE
         <if test="search_word != null">
-            (s.title LIKE CONCAT('%', #{search_word}, '%') OR
-            s.address LIKE CONCAT('%', #{search_word}, '%') OR
-            l.title LIKE CONCAT('%', #{search_word}, '%') OR
-            ld.detail_title LIKE CONCAT('%', #{search_word}, '%') OR
-            a.title LIKE CONCAT('%', #{search_word}, '%') OR
-            s.category LIKE CONCAT('%', #{search_word}, '%'))
+            (s.title LIKE CONCAT('%', #{search_word}, '%')
+            OR s.address LIKE CONCAT('%', #{search_word}, '%')
+            OR l.title LIKE CONCAT('%', #{search_word}, '%')
+            OR ld.detail_title LIKE CONCAT('%', #{search_word}, '%')
+            OR s.category LIKE CONCAT('%', #{search_word}, '%'))
         </if>
-
-        GROUP BY
-        s.strf_id,
-        s.title,
-        s.created_at,
-        l.title,
-        s.category,
-        a.amenity_id,
-        a.title,
-        i.strfPic
-        ) AS categorized_results
-        WHERE row_num <![CDATA[ <= ]]> 3
-        ORDER BY category, created_at DESC
-
+        AND s.state = 0
+        ORDER BY s.created_at DESC
+        LIMIT 3;
     </select>
     <resultMap id="searchAllResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
         <id property="strfId" column="strfId" />
@@ -211,7 +237,7 @@
     </resultMap>
 
     <select id="categoryCount">
-        SELECT COUNT(*)
+        SELECT COUNT(DISTINCT a.strf_id)
         FROM stay_tour_restaur_fest a
         JOIN location_detail b ON a.location_detail_id = b.location_detail_id
         JOIN location c ON b.location_id = c.location_id
@@ -260,6 +286,7 @@
             a.title LIKE CONCAT('%', #{searchWord}, '%') OR
             a.category LIKE CONCAT('%', #{searchWord}, '%') )
         </if>
+        AND a.state=0
         GROUP BY a.strf_id
         ) AS subquery
         ORDER BY
@@ -323,7 +350,7 @@
         LEFT JOIN strf_pic h ON a.strf_id = h.strf_id
         LEFT JOIN amenipoint i ON i.strf_id = a.strf_id
         LEFT JOIN amenity j ON i.amenity_id = j.amenity_id
-        WHERE a.category = #{category}
+        WHERE a.state = 0 AND a.category = #{category}
         <if test="searchWord != null and searchWord != ''">
             AND (
             a.title LIKE CONCAT('%', #{searchWord}, '%')

@@ -1,9 +1,6 @@
 package com.green.project_quadruaple.strf;
 
-import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.entity.model.Menu;
-import com.green.project_quadruaple.entity.model.StayTourRestaurFest;
 import com.green.project_quadruaple.strf.model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -193,40 +189,53 @@ public class StrfController {
 
 
     @DeleteMapping("/strf")
+    @Operation(summary = "상품 삭제")
     public ResponseEntity<?> deleteStrf(@RequestParam("strf_id") Long strfId) {
         ResponseWrapper<Integer> response = strfService.deleteStrf(strfId);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/amenity")
+    @Operation(summary = "편의 정보 입력 리스트 삭제")
     public ResponseEntity<?> deleteAmenity(Long strfId, String busiNum, List<Long> amenityIds) {
         ResponseWrapper<Integer> response = strfService.deleteAmenity(strfId, busiNum, amenityIds);
         return ResponseEntity.ok(response);
     }
+    @DeleteMapping("/amenity/all")
+    @Operation(summary = "상품 편의 정보 전부 삭제")
+    public ResponseEntity<?> delAllAmenity (long strfId , String busiNum){
+        ResponseWrapper<Integer> response = strfService.delAllAmenity(strfId,busiNum);
+        return ResponseEntity.ok(response);
+    }
 
     @DeleteMapping("/menu")
+    @Operation(summary = "상품 메뉴 삭제")
     public ResponseEntity<?> deleteMenu(long menuId, String busiNum) {
         ResponseWrapper<Integer> response = strfService.deleteMenu(menuId, busiNum);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/parlor")
+    @Operation(summary = "상품 객실 삭제")
     public ResponseEntity<?> deleteParlor(long menuId, String busiNum) {
         ResponseWrapper<Integer> response = strfService.deleteParlor(menuId, busiNum);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/strf/pic")
+    @Operation(summary = "상품 사진 삭제")
     public ResponseEntity<?> deleteStrfPic(String busiNum, String picName) {
         ResponseWrapper<Integer> response = strfService.deleteStrfPic(busiNum, picName);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/rest")
+    @Operation(summary = "상품 휴일 삭제 ")
     public ResponseEntity<?> deleteRest(Long strfId, String busiNum) {
-        ResponseWrapper<Integer> response = strfService.deleteRest(strfId,busiNum);
+        ResponseWrapper<Integer> response = strfService.delAllRest(strfId,busiNum);
         return ResponseEntity.ok(response);
     }
+
 }
 
 
