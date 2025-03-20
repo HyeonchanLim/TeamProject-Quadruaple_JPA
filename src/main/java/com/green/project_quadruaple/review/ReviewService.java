@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -139,8 +140,8 @@ public class ReviewService {
 
 
         long reviewId = review.getReviewId();
-        List<String> picNames = new ArrayList<>();
         if (pics != null && !pics.isEmpty()){
+            List<String> picNames = new ArrayList<>();
 
             String middlePath = String.format("reviewId/%d", reviewId);
             myFileUtils.makeFolders(middlePath);
@@ -171,11 +172,14 @@ public class ReviewService {
                     throw new RuntimeException(e);
                 }
             }
+            reviewPicRepository.saveAll(picNameList);
+            ReviewPostRes.builder()
+                    .pics(picNames)
+                    .build();
         }
 
         return ReviewPostRes.builder()
                 .reviewId(reviewId)
-                .pics(picNames)
                 .build();
     }
 
@@ -218,27 +222,30 @@ public class ReviewService {
 //        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resultPics));
 //    }
 
-    public ResponseEntity<ResponseWrapper<Integer>> deleteReview(Long reviewId) {
+    @Transactional
+    public ResponseWrapper<Integer> deleteReview(Long reviewId) {
         Long userId = authenticationFacade.getSignedUserId();
 
-        User user = userRepository.findById(userId).orElseThrow( () -> new RuntimeException("user id not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Review review = reviewRepository.findById(reviewId).orElseThrow( () -> new NoSuchElementException("review id not found"));
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new NoSuchElementException("Review ID not found"));
 
-//        ReviewDelPicReq picReq = new ReviewDelPicReq();
-//        picReq.setReviewId(reviewId);
+        if (!review.getUser().getUserId().equals(userId)) {
+            throw new RuntimeException("You can only delete your own reviews.");
+        }
 
-        int affectedRowsPic = reviewMapper.deleteReviewPic(review.getReviewId());
-//        int affectedRowsReview = reviewMapper.deleteReview(review.getReviewId(),user.getUserId());
+//        if (picName != null && !picName.isEmpty()) {
+//            reviewPicRepository.deleteById(new ReviewPicId(picName, reviewId));
+//        }
 
-//        reviewRepository.deleteReviewBy(reviewId);
+        reviewPicRepository.deleteByReviewId(reviewId);
+        reviewPicRepository.flush();
 
-        String deletePath = String.format("%s/feed/%d", myFileUtils.getUploadPath(), review.getReviewId());
+        reviewRepository.delete(review);
+        reviewRepository.flush();
 
-        myFileUtils.deleteFolder(deletePath, true);
-
-        int affectedRowsReview = reviewMapper.deleteReview(reviewId,userId);
-
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), 1);
     }
 }

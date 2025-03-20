@@ -11,7 +11,6 @@
         e.pic_name AS strfPic , l.profile_pic AS hostProfilePic, l.name AS hostName ,
         n.inquired_at AS inquiredAt, COUNT(DISTINCT m.user_id) AS wishCnt, AVG(h.rating) AS ratingAvg ,
         COUNT(DISTINCT h.review_id) AS reviewCnt ,
-
         COALESCE(o.day_week, 0) AS restDate
 
         <if test="userId == null">
@@ -90,7 +89,7 @@
         n.inquired_at AS inquiredAt, COUNT(DISTINCT m.user_id) AS wishCnt, AVG(h.rating) AS ratingAvg ,
         COUNT(DISTINCT h.review_id) AS reviewCnt ,
 
-        COALESCE(o.day_week, 0) AS restDate
+        o.day_week AS restDate
 
         <if test="userId == null">
             , 0 AS wishIn
@@ -255,17 +254,29 @@
         VALUES(#{userId}, #{couponId})
     </insert>
 
-    <select id="stayBookingExists" resultType="boolean">
-        SELECT EXISTS (
+    <select id="stayBookingExists" resultMap="bookingResultMap">
+        SELECT m.menu_id AS menuId,
+        NOT EXISTS (
         SELECT 1 FROM booking
-        WHERE menu_id = #{menuId}
-        AND (
-        (check_in BETWEEN #{checkIn} AND #{checkOut})
-        OR (check_out BETWEEN #{checkIn} AND #{checkOut})
-        OR (#{checkIn} BETWEEN check_in AND check_out)
-        )
-        )
+        WHERE booking.menu_id = m.menu_id
+        AND (booking.check_in BETWEEN #{checkIn} AND #{checkOut}
+        OR booking.check_out BETWEEN #{checkIn} AND #{checkOut})
+        ) AS `check`
+        FROM menu m
+        WHERE m.strf_id = #{strfId}
     </select>
+
+<!--    <select id="stayBookingExists" resultMap="bookingResultMap">-->
+<!--        SELECT COUNT(*) > 0-->
+<!--        FROM booking-->
+<!--        WHERE menu_id IN (SELECT menu_id FROM menu WHERE strf_id = #{strfId})-->
+<!--        AND (check_in BETWEEN #{checkIn} AND #{checkOut}-->
+<!--        OR check_out BETWEEN #{checkIn} AND #{checkOut})-->
+<!--    </select>-->
+    <resultMap id="bookingResultMap" type="com.green.project_quadruaple.strf.model.StrfCheckRes">
+        <id column="menuId" property="menuId"/>
+        <result column="check" property="check"/>
+    </resultMap>
     <select id="getRestDaysByStrfId" resultType="int">
         SELECT day_week
         FROM rest_date
