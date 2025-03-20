@@ -125,8 +125,7 @@ public class BookingService {
 
         int price = menu.getPrice();
         int resultPrice = price;
-        if(couponId != null) { // 쿠폰이 요청에 담겨 있을 경우
-
+        if(couponId != null && couponId > 0) { // 쿠폰이 요청에 담겨 있을 경우
             CouponDto couponDto = bookingMapper.selExistUserCoupon(signedUserId, couponId);
             if(couponDto == null || couponDto.getUsedCouponId() != null) { // 쿠폰 미소지시, 사용시 에러
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
@@ -138,7 +137,7 @@ public class BookingService {
          // 쿠폰 할인 적용
 
         Integer remainPoint = null;
-        if(point != null) { // 포인트가 담겨있을 경우
+        if(point != null && point > 0) { // 포인트가 담겨있을 경우
             List<PointHistory> remainPoints = pointHistoryRepository.findPointHistoriesByUserId(signedUserId, PageRequest.of(0, 1));
             if(remainPoints != null && !remainPoints.isEmpty()) {
                 remainPoint = remainPoints.get(0).getRemainPoint();
