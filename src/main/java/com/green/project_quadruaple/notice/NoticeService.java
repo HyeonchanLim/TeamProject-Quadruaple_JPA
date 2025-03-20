@@ -133,6 +133,25 @@ public class NoticeService {
         noticeReceiveRepository.save(noticeReceive);
     }
 
+//    // 알람 리스트 확인
+//    public ResponseEntity<ResponseWrapper<NoticeLineRes>> noticeCheck(int startIdx) {
+//        if (!((SecurityContextHolder.getContext().getAuthentication().getPrincipal()) instanceof JwtUser)) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+//        }
+//        long userId= authenticationFacade.getSignedUserId();
+//        List<NoticeLine> noticeLines = mapper.checkNotice(userId, startIdx, SizeConstants.getDefault_page_size()+1);
+//        if (noticeLines.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null ));
+//        }
+//        boolean isMore = noticeLines.size() > SizeConstants.getDefault_page_size();
+//        if(isMore){  noticeLines.remove(noticeLines.size() - 1); }
+//        NoticeLineRes result=mapper.countNotice(userId);
+//        result.setNoticeLines(noticeLines);
+//        result.setIsMore(isMore);
+//        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+//    }
     // 알람 리스트 확인
     public ResponseEntity<ResponseWrapper<NoticeLineRes>> noticeCheck(int startIdx) {
         if (!((SecurityContextHolder.getContext().getAuthentication().getPrincipal()) instanceof JwtUser)) {
@@ -140,7 +159,7 @@ public class NoticeService {
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
         long userId= authenticationFacade.getSignedUserId();
-        List<NoticeLine> noticeLines = mapper.checkNotice(userId, startIdx, SizeConstants.getDefault_page_size()+1);
+        List<NoticeLine> noticeLines = mapper.checkNotice(userId);
         if (noticeLines.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null ));
@@ -149,7 +168,6 @@ public class NoticeService {
         if(isMore){  noticeLines.remove(noticeLines.size() - 1); }
         NoticeLineRes result=mapper.countNotice(userId);
         result.setNoticeLines(noticeLines);
-        result.setIsMore(isMore);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 

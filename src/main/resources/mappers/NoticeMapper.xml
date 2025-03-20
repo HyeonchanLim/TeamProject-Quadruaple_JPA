@@ -11,6 +11,20 @@
         <result column="createdAt" property="createdAt" jdbcType="TIMESTAMP"/>
     </resultMap>
 
+<!--    <select id="checkNotice">-->
+<!--        SELECT N.notice_id AS noticeId,-->
+<!--        N.notice_category AS category,-->
+<!--        N.title,-->
+<!--        NR.opened,-->
+<!--        NR.created_at AS createdAt-->
+<!--        FROM notice N-->
+<!--        JOIN notice_receive NR-->
+<!--        ON N.notice_id = NR.notice_id-->
+<!--        WHERE NR.user_id = #{userId}-->
+<!--        ORDER BY noticeId DESC-->
+<!--        LIMIT #{startIdx},#{size}-->
+<!--    </select>-->
+
     <select id="checkNotice">
         SELECT N.notice_id AS noticeId,
         N.notice_category AS category,
@@ -22,7 +36,6 @@
         ON N.notice_id = NR.notice_id
         WHERE NR.user_id = #{userId}
         ORDER BY noticeId DESC
-        LIMIT #{startIdx},#{size}
     </select>
 
     <select id="countNotice">

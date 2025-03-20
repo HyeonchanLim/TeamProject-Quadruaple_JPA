@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 public class NoticeLineRes {
     private List<NoticeLine> noticeLines;
-    private Boolean isMore;
+    //private Boolean isMore;
     private int unreadNoticeCnt;
     private int noticeCnt;
 }
