@@ -300,14 +300,21 @@ public class BookingService {
                 pointHistoryRepository.save(pointHistory);
             }
 
-            // 예약완료 알람발송
+            //예약완료 알람발송
+            User noticeUser = userRepository.findById(bookingPostReq.getUserId()).orElse(null);
+            Integer usedPoint=booking.getUsedPoint()==null?0:booking.getUsedPoint();
+            String title = booking.getCheckIn().toLocalDate().toString()+"에 입실하는 예약이 있습니다.";
+            StringBuilder content = new StringBuilder(booking.getCheckIn().toLocalDate().toString()).append("부터 ")
+                            .append(booking.getCheckOut().toLocalDate().toString()).append("까지 숙박하는 일정이 있습니다.")
+                            .append("\n 숙박인원: ").append(booking.getNum())
+                            .append("\n 총 결제 금액: ").append(booking.getTotalPayment())
+                            .append("\n 사용한 포인트: ").append(usedPoint)
+                            .append("\n 예상 체크인 시각: ").append(booking.getCheckIn().toLocalTime());
 //            StayTourRestaurFest strf = booking.getMenu().getStayTourRestaurFest();
 //            if(strf == null) {
-//                booking=bookingRepository.findById(booking.getBookingId()).orElse(null);
+//                booking=bookingRepository.findByBookingId(booking.getBookingId()).orElse(null);
 //                strf=booking.getMenu().getStayTourRestaurFest();
 //            }
-//            Integer usedPoint=booking.getUsedPoint()==null?0:booking.getUsedPoint();
-//            User noticeUser = userRepository.findById(bookingPostReq.getUserId()).orElse(null);
 //            StringBuilder title = new StringBuilder(booking.getCheckIn().toLocalDate().toString()).append(" ")
 //                    .append(strf.getTitle()).append(" 예약 완료되었습니다.");
 //            StringBuilder content = new StringBuilder(booking.getCheckIn().toLocalDate().toString()).append("부터 ")
@@ -319,10 +326,10 @@ public class BookingService {
 //                            .append("\n 예상 체크인: ").append(booking.getCheckIn().toLocalTime())
 //                            .append("\n 체크아웃시간: ").append(strf.getCloseCheckOut())
 //                            .append("\n 문의 전화: ").append(strf.getTell());
-//
-//            noticeService.postNotice(NoticeCategory.BOOKING,title.toString(),content.toString(),noticeUser, booking.getBookingId());
 
-//            log.info("approve content = {}", content);
+            noticeService.postNotice(NoticeCategory.BOOKING,title.toString(),content.toString(),noticeUser, booking.getBookingId());
+
+            log.info("approve content = {}", content);
             String redirectParams = "?user_name=" + URLEncoder.encode(bookingApproveInfoDto.getUserName(), StandardCharsets.UTF_8) + "&"
                     + "title=" + URLEncoder.encode(bookingApproveInfoDto.getTitle(), StandardCharsets.UTF_8) + "&"
                     + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
