@@ -19,6 +19,9 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
         """)
     List<Menu> findByCategory(Category category);
 
+    @Modifying
+    @Query("DELETE FROM Menu a WHERE a.menuId = :menuId ")
+    int deleteByMenuId(@Param("menu_id") long menuId);
 
     List<Menu> findByStayTourRestaurFest(StayTourRestaurFest stayTourRestaurFest);
 }

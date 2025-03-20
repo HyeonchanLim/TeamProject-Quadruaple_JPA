@@ -242,6 +242,7 @@ public class BookingService {
         String userId = kakaoReadyDto.getPartnerUserId();
         String tid = kakaoReadyDto.getTid();
 
+        log.info("kakaoReadyDto = {}", kakaoReadyDto);
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = setHeaders();
 
@@ -315,6 +316,7 @@ public class BookingService {
                     + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
                     + "check_out=" + URLEncoder.encode(bookingApproveInfoDto.getCheckOut(), StandardCharsets.UTF_8) + "&"
                     + "personnel=" + quantity;
+            log.info("kakaopayConst = {}", kakaopayConst);
             return kakaopayConst.getBookingCompleteUrl() + redirectParams;
         } catch (Exception e) {
             e.printStackTrace();
