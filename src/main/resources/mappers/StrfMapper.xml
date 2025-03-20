@@ -261,9 +261,18 @@
         WHERE booking.menu_id = m.menu_id
         AND (booking.check_in BETWEEN #{checkIn} AND #{checkOut}
         OR booking.check_out BETWEEN #{checkIn} AND #{checkOut})
-        ) AS `check`
+        ) AS isAvailable
         FROM menu m
         WHERE m.strf_id = #{strfId}
+    </select>
+    <resultMap id="bookingResultMap" type="com.green.project_quadruaple.strf.model.StrfCheckRes">
+        <id column="menuId" property="menuId"/>
+        <result column="isAvailable" property="check"/>
+    </resultMap>
+    <select id="getRestDaysByStrfId" resultType="int">
+        SELECT day_week
+        FROM rest_date
+        WHERE strf_id = #{strfId}
     </select>
 
 <!--    <select id="stayBookingExists" resultMap="bookingResultMap">-->
@@ -273,15 +282,6 @@
 <!--        AND (check_in BETWEEN #{checkIn} AND #{checkOut}-->
 <!--        OR check_out BETWEEN #{checkIn} AND #{checkOut})-->
 <!--    </select>-->
-    <resultMap id="bookingResultMap" type="com.green.project_quadruaple.strf.model.StrfCheckRes">
-        <id column="menuId" property="menuId"/>
-        <result column="check" property="check"/>
-    </resultMap>
-    <select id="getRestDaysByStrfId" resultType="int">
-        SELECT day_week
-        FROM rest_date
-        WHERE strf_id = #{strfId}
-    </select>
 </mapper>
 
 

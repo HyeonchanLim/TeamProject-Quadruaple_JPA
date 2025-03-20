@@ -23,4 +23,9 @@ public interface AmenipointRepository extends JpaRepository<Amenipoint , Amenipo
     @Transactional
     @Query("DELETE FROM Amenipoint a WHERE a.id.amenityId IN :amenityIds AND a.id.strfId = :strfId")
     int deleteByAmenityIdAndStrfId(@Param("amenityIds") List<Long> amenityIds, @Param("strfId") Long strfId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Amenipoint a WHERE a.stayTourRestaurFest.strfId = :strfId ")
+    int deleteByStrfId (@Param("strf_id") long strfId);
 }

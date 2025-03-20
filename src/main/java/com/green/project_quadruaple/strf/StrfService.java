@@ -489,9 +489,23 @@ public class StrfService {
         StayTourRestaurFest strf = strfRepository.findById(strfId)
                 .orElseThrow(() -> new RuntimeException("strf id not found"));
 
+        List<Menu> menus = menuRepository.findByStayTourRestaurFest(strf); // 해당 상품의 모든 메뉴 조회
         // 각 메뉴별 예약 가능 여부 조회
         List<StrfCheckRes> checkResList = strfMapper.stayBookingExists(strfId, checkIn.atStartOfDay(), checkOut.atTime(23, 59));
 
+//        for (Menu menu : menus) {
+//            List<Integer> restDays = strfMapper.getRestDaysByStrfId(strfId);
+//            if (restDays != null && !restDays.isEmpty()) {
+//                for (LocalDate date = checkIn; !date.isAfter(checkOut); date = date.plusDays(1)) {
+//                    int dayOfWeek = date.getDayOfWeek().getValue() % 7;
+//                    if (restDays.contains(dayOfWeek)) {
+//                        isBooked = true;
+//                        break;
+//                    }
+//                }
+//            }
+//            checkResList.add(new StrfCheckRes(menu.getMenuId(), !isBooked)); // 예약 가능 여부 반환
+//        }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), checkResList);
     }
 
@@ -838,6 +852,7 @@ public class StrfService {
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), delCnt);
     }
+
     @Transactional
     public ResponseWrapper<Integer> deleteMenu(long menuId, String busiNum){
         User user = validateUserAndBusiness(busiNum);
@@ -874,6 +889,7 @@ public class StrfService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), del3);
 
     }
+
     @Transactional
     public ResponseWrapper<Integer> deleteParlor(long menuId, String busiNum){
         User user = validateUserAndBusiness(busiNum);
@@ -892,9 +908,6 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), 0);
         }
         int del = roomRepository.deleteByRoomId(menuId);
-        if (del == 0) {
-            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), 0);
-        }
 
         int del2 = parlorRepository.deleteByMenuId(menuId);
         if (del2 == 0) {
@@ -931,6 +944,7 @@ public class StrfService {
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), del);
     }
+
     @Transactional
     public ResponseWrapper<Integer> deleteRest(Long strfId,  String busiNum){
         User user = validateUserAndBusiness(busiNum);
@@ -951,9 +965,21 @@ public class StrfService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), del);
     }
 
+    @Transactional
+    public ResponseWrapper<Integer> delAllAmenity (long strfId , String busiNum){
+        User user = validateUserAndBusiness(busiNum);
+        StayTourRestaurFest strfSel = getStayTourRestaurFest(strfId);
+
+        int del = amenipointRepository.deleteByStrfId(strfId);
+
+        if (del < 0){
+            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), del);
+        }
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), del);
+    }
 
 
-        private User validateUserAndBusiness(String busiNum) {
+    private User validateUserAndBusiness(String busiNum) {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("user id not found"));
