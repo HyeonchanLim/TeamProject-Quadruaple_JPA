@@ -1,19 +1,14 @@
 package com.green.project_quadruaple.strf;
 
-import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.entity.model.Menu;
-import com.green.project_quadruaple.entity.model.StayTourRestaurFest;
 import com.green.project_quadruaple.strf.model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -237,9 +232,10 @@ public class StrfController {
     @DeleteMapping("/rest")
     @Operation(summary = "상품 휴일 삭제 ")
     public ResponseEntity<?> deleteRest(Long strfId, String busiNum) {
-        ResponseWrapper<Integer> response = strfService.deleteRest(strfId,busiNum);
+        ResponseWrapper<Integer> response = strfService.delAllRest(strfId,busiNum);
         return ResponseEntity.ok(response);
     }
+
 }
 
 

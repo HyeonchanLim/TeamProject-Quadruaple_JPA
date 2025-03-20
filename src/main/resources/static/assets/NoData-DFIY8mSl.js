@@ -1,0 +1,1 @@
+import{j as e}from"./index-DZF_lMwV.js";import{L as x}from"./index-DWVMhexM.js";const m=({content:t="결과가 없습니다",icon:s=e.jsx(x,{})})=>e.jsxs("div",{className:"flex flex-col items-center p-20",children:[e.jsx("p",{className:"text-slate-300 text-8xl mb-5 flex items-center",children:s}),e.jsx("p",{className:"text-2xl text-slate-400 ",children:t})]});export{m as N};

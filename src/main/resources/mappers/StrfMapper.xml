@@ -3,41 +3,65 @@
 
 <mapper namespace="com.green.project_quadruaple.strf.StrfMapper">
     <select id="busiMemberDetail" resultMap="busiMemberResultMap">
-        SELECT
-        a.strf_id AS strfId , a.category , a.title AS strfTitle , n.user_id AS userId ,
-        a.lat AS latit, a.lng AS longitude, a.address, a.post, a.tell, a.start_at AS startAt,
-        a.end_at AS endAt, a.open_check_in as openCheck, a.close_check_out as closeCheck ,
-        a.detail, a.busi_num AS busiNum, f.detail_title AS locationName, a.state ,
-        e.pic_name AS strfPic , l.profile_pic AS hostProfilePic, l.name AS hostName ,
-        n.inquired_at AS inquiredAt, COUNT(DISTINCT m.user_id) AS wishCnt, AVG(h.rating) AS ratingAvg ,
-        COUNT(DISTINCT h.review_id) AS reviewCnt ,
-        COALESCE(o.day_week, 0) AS restDate
-
-        <if test="userId == null">
-            , 0 AS wishIn
-        </if>
-        <if test="userId != null">
-            , IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
-            , IF( EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 0 ), 0, 1 ) AS recentCheck
-            , CASE WHEN EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 1 ) THEN 0
-            WHEN EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} ) THEN 1
-            ELSE NULL END AS recentCheckStatus
-        </if>
+        SELECT a.strf_id AS strfId, a.category, a.title AS strfTitle,
+        n.user_id AS userId, a.lat AS latit, a.lng AS longitude,
+        a.address, a.post, a.tell, a.start_at AS startAt,
+        a.end_at AS endAt, a.open_check_in AS openCheck,
+        a.close_check_out AS closeCheck, a.detail, a.state,
+        a.busi_num AS busiNum, f.detail_title AS locationName,
+        e.pic_name AS strfPics, l.profile_pic AS hostProfilePic,
+        l.name AS hostName, n.inquired_at AS inquiredAt,
+        COALESCE(w.wishCnt, 0) AS wishCnt, COALESCE(r.ratingAvg, 0) AS ratingAvg,
+        COALESCE(r.reviewCnt, 0) AS reviewCnt, o.day_week AS restDate,
+        CASE
+        WHEN #{userId} IS NULL THEN 0
+        ELSE COALESCE(uw.wishIn, 0)
+        END AS wishIn,
+        COALESCE(ur.recentCheck, 0) AS recentCheck,
+        COALESCE(ur.recentCheckStatus, NULL) AS recentCheckStatus
 
         FROM stay_tour_restaur_fest a
         LEFT JOIN strf_pic e ON a.strf_id = e.strf_id
         LEFT JOIN location_detail f ON a.location_detail_id = f.location_detail_id
         LEFT JOIN location g ON f.location_id = g.location_id
-        LEFT JOIN review h ON a.strf_id = h.strf_id
-        LEFT JOIN user j ON h.user_id = j.user_id
         LEFT JOIN business_num k ON a.busi_num = k.busi_num
         LEFT JOIN user l ON l.user_id = k.user_id
-        LEFT JOIN wishlist m ON m.strf_id = a.strf_id
         LEFT JOIN recent n ON n.strf_id = a.strf_id
-        LEFT JOIN rest_date o ON o.strf_id = a.strf_id
+
+        LEFT JOIN (
+        SELECT strf_id, COUNT(DISTINCT review_id) AS reviewCnt, AVG(rating) AS ratingAvg
+        FROM review
+        GROUP BY strf_id
+        ) r ON a.strf_id = r.strf_id
+
+        LEFT JOIN (
+        SELECT strf_id, COUNT(user_id) AS wishCnt
+        FROM wishlist
+        GROUP BY strf_id
+        ) w ON a.strf_id = w.strf_id
+
+        LEFT JOIN (
+        SELECT strf_id, user_id, 1 AS wishIn
+        FROM wishlist
+        WHERE user_id = #{userId}
+        ) uw ON a.strf_id = uw.strf_id
+
+        LEFT JOIN (
+        SELECT
+        strf_id, user_id,
+        CASE WHEN undo_recent = 0 THEN 0 ELSE 1 END AS recentCheck,
+        CASE
+        WHEN undo_recent = 1 THEN 0
+        WHEN undo_recent = 0 THEN 1
+        ELSE NULL
+        END AS recentCheckStatus
+        FROM recent
+        WHERE user_id = #{userId}
+        ) ur ON a.strf_id = ur.strf_id
+
+        LEFT JOIN rest_date o ON a.strf_id = o.strf_id
 
         WHERE a.strf_id = #{strfId}
-        GROUP BY a.strf_id
     </select>
     <resultMap id="busiMemberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelRes">
         <id property="strfId" column="strfId" />
@@ -78,45 +102,68 @@
         </collection>
     </resultMap>
 
-
     <select id="getMemberDetail" resultMap="memberResultMap">
-        SELECT
-        a.strf_id AS strfId , a.category , a.title AS strfTitle , n.user_id AS userId ,
-        a.lat AS latit, a.lng AS longitude, a.address, a.post, a.tell, a.start_at AS startAt,
-        a.end_at AS endAt, a.open_check_in as openCheck, a.close_check_out as closeCheck ,
-        a.detail, a.busi_num AS busiNum, f.detail_title AS locationName, a.state ,
-        e.pic_name AS strfPic , l.profile_pic AS hostProfilePic, l.name AS hostName ,
-        n.inquired_at AS inquiredAt, COUNT(DISTINCT m.user_id) AS wishCnt, AVG(h.rating) AS ratingAvg ,
-        COUNT(DISTINCT h.review_id) AS reviewCnt ,
-
-        o.day_week AS restDate
-
-        <if test="userId == null">
-            , 0 AS wishIn
-        </if>
-        <if test="userId != null">
-            , IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
-            , IF( EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 0 ), 0, 1 ) AS recentCheck
-            , CASE WHEN EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 1 ) THEN 0
-            WHEN EXISTS( SELECT 1 FROM recent WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} ) THEN 1
-            ELSE NULL END AS recentCheckStatus
-        </if>
+        SELECT a.strf_id AS strfId, a.category, a.title AS strfTitle,
+        n.user_id AS userId, a.lat AS latit, a.lng AS longitude,
+        a.address, a.post, a.tell, a.start_at AS startAt,
+        a.end_at AS endAt, a.open_check_in AS openCheck,
+        a.close_check_out AS closeCheck, a.detail, a.state,
+        a.busi_num AS busiNum, f.detail_title AS locationName,
+        e.pic_name AS strfPics, l.profile_pic AS hostProfilePic,
+        l.name AS hostName, n.inquired_at AS inquiredAt,
+        COALESCE(w.wishCnt, 0) AS wishCnt, COALESCE(r.ratingAvg, 0) AS ratingAvg,
+        COALESCE(r.reviewCnt, 0) AS reviewCnt, o.day_week AS restDate,
+        CASE
+        WHEN #{userId} IS NULL THEN 0
+        ELSE COALESCE(uw.wishIn, 0)
+        END AS wishIn,
+        COALESCE(ur.recentCheck, 0) AS recentCheck,
+        COALESCE(ur.recentCheckStatus, NULL) AS recentCheckStatus
 
         FROM stay_tour_restaur_fest a
         LEFT JOIN strf_pic e ON a.strf_id = e.strf_id
         LEFT JOIN location_detail f ON a.location_detail_id = f.location_detail_id
         LEFT JOIN location g ON f.location_id = g.location_id
-        LEFT JOIN review h ON a.strf_id = h.strf_id
-        LEFT JOIN user j ON h.user_id = j.user_id
         LEFT JOIN business_num k ON a.busi_num = k.busi_num
         LEFT JOIN user l ON l.user_id = k.user_id
-        LEFT JOIN wishlist m ON m.strf_id = a.strf_id
         LEFT JOIN recent n ON n.strf_id = a.strf_id
-        LEFT JOIN rest_date o ON o.strf_id = a.strf_id
+
+        LEFT JOIN (
+        SELECT strf_id, COUNT(DISTINCT review_id) AS reviewCnt, AVG(rating) AS ratingAvg
+        FROM review
+        GROUP BY strf_id
+        ) r ON a.strf_id = r.strf_id
+
+        LEFT JOIN (
+        SELECT strf_id, COUNT(user_id) AS wishCnt
+        FROM wishlist
+        GROUP BY strf_id
+        ) w ON a.strf_id = w.strf_id
+
+        LEFT JOIN (
+        SELECT strf_id, user_id, 1 AS wishIn
+        FROM wishlist
+        WHERE user_id = #{userId}
+        ) uw ON a.strf_id = uw.strf_id
+
+        LEFT JOIN (
+        SELECT
+        strf_id, user_id,
+        CASE WHEN undo_recent = 0 THEN 0 ELSE 1 END AS recentCheck,
+        CASE
+        WHEN undo_recent = 1 THEN 0
+        WHEN undo_recent = 0 THEN 1
+        ELSE NULL
+        END AS recentCheckStatus
+        FROM recent
+        WHERE user_id = #{userId}
+        ) ur ON a.strf_id = ur.strf_id
+
+        LEFT JOIN rest_date o ON a.strf_id = o.strf_id
 
         WHERE a.strf_id = #{strfId} AND a.state = 0
-        GROUP BY a.strf_id
     </select>
+
     <resultMap id="memberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelRes">
         <id property="strfId" column="strfId" />
         <result property="category" column="category" />
@@ -151,8 +198,7 @@
         </collection>
 
         <collection property="strfPics" ofType="com.green.project_quadruaple.strf.model.StrfPicSel">
-            <id property="strfId" column="strfId" />
-            <result property="strfPic" column="strfPic" />
+            <result property="strfPics" column="strfPics" />
         </collection>
     </resultMap>
 

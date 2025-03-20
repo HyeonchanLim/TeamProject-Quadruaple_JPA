@@ -181,6 +181,7 @@
             a.title LIKE CONCAT('%', #{search_word}, '%') OR
             s.category LIKE CONCAT('%', #{search_word}, '%'))
         </if>
+        AND s.state = 0
 
         GROUP BY
         s.strf_id,
@@ -260,6 +261,7 @@
             a.title LIKE CONCAT('%', #{searchWord}, '%') OR
             a.category LIKE CONCAT('%', #{searchWord}, '%') )
         </if>
+        AND a.state=0
         GROUP BY a.strf_id
         ) AS subquery
         ORDER BY
@@ -323,7 +325,7 @@
         LEFT JOIN strf_pic h ON a.strf_id = h.strf_id
         LEFT JOIN amenipoint i ON i.strf_id = a.strf_id
         LEFT JOIN amenity j ON i.amenity_id = j.amenity_id
-        WHERE a.category = #{category}
+        WHERE a.state = 0 AND a.category = #{category}
         <if test="searchWord != null and searchWord != ''">
             AND (
             a.title LIKE CONCAT('%', #{searchWord}, '%')

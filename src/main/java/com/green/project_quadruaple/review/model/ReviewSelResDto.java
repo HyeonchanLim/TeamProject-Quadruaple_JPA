@@ -34,4 +34,11 @@ public class ReviewSelResDto {
     private String reviewWriteDate;
     @Schema(description = "리뷰 사진 리스트")
     private List<ReviewPicBatis> reviewPic;
+
+    private Integer providerType;
+
+    private long reviewReplyId;
+    private String reviewReply;
+    private String reviewReplyCreatedAt;
+
 }
