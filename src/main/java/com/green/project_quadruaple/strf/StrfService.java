@@ -475,10 +475,7 @@ public class StrfService {
         receiveCouponRepository.save(ReceiveCoupon.builder().user(user).coupon(coupon).build());
         String title=coupon.getTitle()+"을 받았습니다! ";
         StringBuilder contents = new StringBuilder().append(coupon.getDiscountPer()).append("% 할인되는 ")
-                .append(title).append(coupon.getExpiredAt()).append("까지 ")
-                .append(coupon.getStrf().getTitle()!=null?coupon.getStrf().getTitle():
-                        strfRepository.findTitleByStrfId(coupon.getStrf().getStrfId()))
-                .append("에서 사용하여 더 저렴한 혜택을 놓치지 마세요!");
+                .append(title).append(coupon.getExpiredAt().toLocalDate()).append("까지 사용하여 더 저렴한 혜택을 놓치지 마세요!");
         noticeService.postNotice(NoticeCategory.COUPON,title,contents.toString(),user,couponId);
 
         return 1;
