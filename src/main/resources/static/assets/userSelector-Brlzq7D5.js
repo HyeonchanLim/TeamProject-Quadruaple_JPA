@@ -1,0 +1,1 @@
+import{k as r,f as s,t}from"./index-DH-Wz4Mj.js";import{u as a}from"./userAtom-DgR9NHTV.js";const p=r({key:"resetUserData",get:({get:e})=>e(t),set:({set:e})=>{e(a,{userId:0,email:"",name:"",profilePic:"",accessToken:"",role:[],providerType:s.LOCAL,tell:"",birth:""})}});export{p as r};
