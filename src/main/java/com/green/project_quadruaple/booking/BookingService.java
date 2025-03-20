@@ -30,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -242,10 +243,15 @@ public class BookingService {
         String userId = kakaoReadyDto.getPartnerUserId();
         String tid = kakaoReadyDto.getTid();
 
+        log.info("approve pgToken = {}", pgToken);
+        log.info("approve kakaoReadyDto = {}", kakaoReadyDto);
+
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = setHeaders();
 
         HashMap<String, String> params = new HashMap<>();
+
+
 
         params.put("cid", kakaopayConst.getAffiliateCode()); // 가맹점 코드 - 테스트용
         params.put("tid", tid); // 결제 고유 번호, 준비단계 응답에서 가져옴
@@ -253,17 +259,24 @@ public class BookingService {
         params.put("partner_user_id", String.valueOf(userId)); // 회원 아이디
         params.put("pg_token", pgToken); // 준비 단계에서 리다이렉트떄 받은 param 값
 
+        for (String key : params.keySet()) {
+            log.info("approve params = {}", params.get(key));
+        }
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
+
+        for (String key : body.getBody().keySet()) {
+            log.info("approve body = {}", body.getBody().get(key));
+        }
 
         try {
             BookingPostReq bookingPostReq = kakaoReadyDto.getBookingPostReq();
             bookingPostReq.setUserId(Long.parseLong(userId));
             bookingPostReq.setTid(tid);
-
+            log.info("approve bookingPostReq = {}", bookingPostReq);
             Booking booking = kakaoReadyDto.getBooking();
             bookingRepository.save(booking);
             KakaoApproveDto approveDto = restTemplate.postForObject(new URI(kakaopayConst.getUrl() + "/online/v1/payment/approve"), body, KakaoApproveDto.class);
-            log.info("approveDto = {}", approveDto);
+            log.info("approve approveDto = {}", approveDto);
             if(approveDto == null) {
                 throw new RuntimeException();
             }
@@ -289,32 +302,35 @@ public class BookingService {
             }
 
             // 예약완료 알람발송
-            StayTourRestaurFest strf=booking.getMenu().getStayTourRestaurFest();
-            if(strf==null){
-                booking=bookingRepository.findById(booking.getBookingId()).orElse(null);
-                strf=booking.getMenu().getStayTourRestaurFest();
-            }
-            Integer usedPoint=booking.getUsedPoint()==null?0:booking.getUsedPoint();
-            User noticeUser = userRepository.findById(bookingPostReq.getUserId()).orElse(null);
-            StringBuilder title=new StringBuilder(booking.getCheckIn().toLocalDate().toString()).append(" ")
-                    .append(strf.getTitle()).append(" 예약 완료되었습니다.");
-            StringBuilder content = new StringBuilder(booking.getCheckIn().toLocalDate().toString()).append("부터 ")
-                            .append(booking.getCheckOut().toLocalDate().toString()).append("까지 숙박하는 ")
-                            .append(strf.getTitle()).append(" ").append(booking.getMenu().getTitle()).append("예약 완료되었습니다.")
-                            .append("\n 숙박인원: ").append(booking.getNum())
-                            .append("\n 총 결제 금액: ").append(booking.getTotalPayment())
-                            .append("\n 사용한 포인트: ").append(usedPoint)
-                            .append("\n 예상 체크인: ").append(booking.getCheckIn().toLocalTime())
-                            .append("\n 체크아웃시간: ").append(strf.getCloseCheckOut())
-                            .append("\n 문의 전화: ").append(strf.getTell());
+//            StayTourRestaurFest strf = booking.getMenu().getStayTourRestaurFest();
+//            if(strf == null) {
+//                booking=bookingRepository.findById(booking.getBookingId()).orElse(null);
+//                strf=booking.getMenu().getStayTourRestaurFest();
+//            }
+//            Integer usedPoint=booking.getUsedPoint()==null?0:booking.getUsedPoint();
+//            User noticeUser = userRepository.findById(bookingPostReq.getUserId()).orElse(null);
+//            StringBuilder title = new StringBuilder(booking.getCheckIn().toLocalDate().toString()).append(" ")
+//                    .append(strf.getTitle()).append(" 예약 완료되었습니다.");
+//            StringBuilder content = new StringBuilder(booking.getCheckIn().toLocalDate().toString()).append("부터 ")
+//                            .append(booking.getCheckOut().toLocalDate().toString()).append("까지 숙박하는 ")
+//                            .append(strf.getTitle()).append(" ").append(booking.getMenu().getTitle()).append("예약 완료되었습니다.")
+//                            .append("\n 숙박인원: ").append(booking.getNum())
+//                            .append("\n 총 결제 금액: ").append(booking.getTotalPayment())
+//                            .append("\n 사용한 포인트: ").append(usedPoint)
+//                            .append("\n 예상 체크인: ").append(booking.getCheckIn().toLocalTime())
+//                            .append("\n 체크아웃시간: ").append(strf.getCloseCheckOut())
+//                            .append("\n 문의 전화: ").append(strf.getTell());
+//
+//            noticeService.postNotice(NoticeCategory.BOOKING,title.toString(),content.toString(),noticeUser, booking.getBookingId());
 
-            noticeService.postNotice(NoticeCategory.BOOKING,title.toString(),content.toString(),noticeUser, booking.getBookingId());
-
+//            log.info("approve content = {}", content);
             String redirectParams = "?user_name=" + URLEncoder.encode(bookingApproveInfoDto.getUserName(), StandardCharsets.UTF_8) + "&"
                     + "title=" + URLEncoder.encode(bookingApproveInfoDto.getTitle(), StandardCharsets.UTF_8) + "&"
                     + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
                     + "check_out=" + URLEncoder.encode(bookingApproveInfoDto.getCheckOut(), StandardCharsets.UTF_8) + "&"
                     + "personnel=" + quantity;
+
+            log.info("approve redirectParams = {}", redirectParams);
             return kakaopayConst.getBookingCompleteUrl() + redirectParams;
         } catch (Exception e) {
             e.printStackTrace();
