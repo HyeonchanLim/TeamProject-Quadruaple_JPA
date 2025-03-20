@@ -24,7 +24,7 @@ public interface TripMapper {
     List<TripDetailDto> selScheduleDetail(Long tripId, Long userId);
     List<TripDetailDto> selScheduleDetail(Long tripId);
 
-    List<String> selTripUserList(Long tripId);
+    List<TripUserDto> selTripUserList(Long tripId);
 
     TripPeriodDto selTripPeriod(Long tripId);
 
