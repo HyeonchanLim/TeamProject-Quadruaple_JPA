@@ -22,12 +22,12 @@ public interface StrfMapper {
     List<StrfCouponGetRes> couponList(long strfId);
     int couponReceive (long userId , long couponId);
 
-    // ✅ 예약 여부 확인 (예약 존재 시 true 반환)
-    boolean stayBookingExists(@Param("menuId") Long menuId,
-                            @Param("checkIn") LocalDateTime checkIn,
+
+    List<StrfCheckRes> stayBookingExists(@Param("strfId") long strfId,
+                              @Param("checkIn") LocalDateTime checkIn,
                             @Param("checkOut") LocalDateTime checkOut);
 
-    // ✅ 해당 숙소의 휴무일(요일) 리스트 가져오기
+
     List<Integer> getRestDaysByStrfId(@Param("strfId") Long strfId);
 }
 

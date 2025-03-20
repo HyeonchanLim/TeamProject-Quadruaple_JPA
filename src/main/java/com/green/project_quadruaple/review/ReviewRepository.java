@@ -3,6 +3,7 @@ package com.green.project_quadruaple.review;
 import com.green.project_quadruaple.entity.model.Review;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.security.core.userdetails.User;
 
@@ -23,9 +24,8 @@ public interface ReviewRepository extends JpaRepository<Review , Long> {
     @Query("SELECT r.user FROM Review r WHERE r.reviewId = :reviewId")
     Optional<User> findUserByReviewId(@Param("reviewId") Long reviewId);
 
-
-
-
-
-
+    @Modifying
+    @Query("DELETE FROM Review r WHERE r.reviewId = :reviewId AND r.user.userId = :userId")
+    int deleteByReviewIdAndUserId(@Param("reviewId") Long reviewId, @Param("userId") Long userId);
 }
+

@@ -281,6 +281,14 @@ public class PointService {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
+    public ResponseEntity<ResponseWrapper<Integer>> getMyRemainPoint (){
+        long userId = authenticationFacade.getSignedUserId();
+        int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId)==null?
+                0:pointViewRepository.findLastRemainPointByUserId(userId);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode()
+                , remainPoint));
+    }
+
     // 포인트 카드 구매 (결제 준비->요청->승인(approve)
     public ResponseWrapper<String> ReadyToBuyPointCard(PointBuyReadyReq p) {
         long userId = authenticationFacade.getSignedUserId();

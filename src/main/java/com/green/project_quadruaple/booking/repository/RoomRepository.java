@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -27,4 +28,8 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     @Query("SELECT a FROM Room a WHERE a.menu.menuId = :menuId ")
     void deleteByMenuId(@Param("menu_id") Long menuId);
+
+    @Modifying
+    @Query("DELETE FROM Room a WHERE a.menu.menuId = :menuId ")
+    int deleteByRoomId(@Param("menu_id") Long menuId);
 }

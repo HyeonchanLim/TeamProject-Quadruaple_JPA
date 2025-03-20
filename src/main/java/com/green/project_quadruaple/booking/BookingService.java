@@ -252,7 +252,6 @@ public class BookingService {
         HashMap<String, String> params = new HashMap<>();
 
 
-
         params.put("cid", kakaopayConst.getAffiliateCode()); // 가맹점 코드 - 테스트용
         params.put("tid", tid); // 결제 고유 번호, 준비단계 응답에서 가져옴
         params.put("partner_order_id", kakaoReadyDto.getPartnerOrderId()); // 주문 번호
