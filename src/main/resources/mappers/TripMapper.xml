@@ -88,6 +88,7 @@
 
     <select id="selTripUserList">
         SELECT
+            u.user_id,
             u.name
         FROM trip_user tu
         JOIN `user` u

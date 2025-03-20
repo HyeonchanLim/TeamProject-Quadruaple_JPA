@@ -4,6 +4,7 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.trip.model.dto.TripDetailDto;
 import com.green.project_quadruaple.trip.model.dto.TripLocationDto;
+import com.green.project_quadruaple.trip.model.dto.TripUserDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,7 +24,7 @@ public class TripDetailRes {
     private String title;
     private String startAt;
     private String endAt;
-    private List<String> tripUserIdList;
+    private List<TripUserDto> tripUserIdList;
     private List<TripLocationDto> tripLocationList;
     private List<TripDetailDto> days;
 }
