@@ -293,7 +293,6 @@ public class BookingService {
                         .user(booking.getUser())
                         .category(0)
                         .relatedId(booking.getMenu().getStayTourRestaurFest().getStrfId())
-                        .tid(tid)
                         .amount(booking.getUsedPoint())
                         .remainPoint(remainPoint)
                         .build();
