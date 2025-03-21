@@ -1,19 +1,24 @@
 package com.green.project_quadruaple.strf;
 
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.strf.model.*;
+import com.green.project_quadruaple.user.model.UserSignInRes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("detail")
@@ -102,8 +107,34 @@ public class StrfController {
 
     @PutMapping("/receive")
     @Operation(summary = "쿠폰 수령")
-    public int couponReceive(@RequestParam("coupon_id") long couponId) {
-        return strfService.couponReceive(couponId);
+    public ResponseEntity<?> couponReceive(@RequestParam("coupon_id") long couponId) {
+        try {
+            Integer response = strfService.couponReceive(couponId);
+
+            if (response == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ResponseCode.NOT_FOUND.getCode());
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+            String message = e.getMessage();
+
+            if ("이미 수령한 쿠폰입니다.".equals(message)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ResponseCode.ALREADY_RECEIVED_COUPON.getCode());
+            } else if ("user id not found".equals(message)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ResponseCode.NOT_FOUND_USER.getCode());
+            } else if ("coupon id not found".equals(message)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ResponseCode.NOT_FOUND_COUPON.getCode());
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(ResponseCode.SERVER_ERROR.getCode());
+            }
+        }
     }
 
     @PutMapping("/menu")

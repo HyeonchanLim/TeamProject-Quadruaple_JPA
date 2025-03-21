@@ -34,8 +34,11 @@ public enum ResponseCode {
     //요청 횟수 초과
     TOO_MANY_REQUESTS("429 요청 횟수 초과"),
     //잘못된 비밀번호
-    UNAUTHORIZED_PASSWORD("401 잘못된 비밀번호");
-
+    UNAUTHORIZED_PASSWORD("401 잘못된 비밀번호"),
+    //수령한 쿠폰
+    ALREADY_RECEIVED_COUPON("601 수령한 쿠폰입니다"),
+    //잘못된 쿠폰번호
+    NOT_FOUND_COUPON("600 잘못된 쿠폰 번호");
 
     private final String code;
 

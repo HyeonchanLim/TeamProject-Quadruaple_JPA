@@ -136,7 +136,7 @@
         SELECT s.title AS strfName, COUNT(*) AS popularCount , s.strf_id AS strfId
         FROM recent r
         JOIN stay_tour_restaur_fest s ON r.strf_id = s.strf_id
-        WHERE r.inquired_at >=  DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+        WHERE r.inquired_at >= DATE_SUB(CURDATE(), INTERVAL 1 WEEK)
         GROUP BY s.title
         ORDER BY popularCount DESC
         LIMIT 10
@@ -188,17 +188,22 @@
         SELECT strf_id, MIN(pic_name) AS strfPic
         FROM strf_pic
         GROUP BY strf_id
-        )
+        ),
+        CategorizedResults AS (
         SELECT
-        s.strf_id AS strfId, s.title AS strfTitle, s.created_at, l.title AS locationName,
-        w.user_id AS wishUserId, r.review_id AS reviewId, r.rating AS rating,
-        i.strfPic, s.category, d.price, r.user_id AS reviewWriterUserId, AVG(r.rating) AS averageRating ,
+        s.strf_id AS strfId,
+        s.title AS strfTitle,
+        s.created_at,
+        l.title AS locationName,
+        COUNT(DISTINCT w.user_id) AS wishlistCount,
+        AVG(r.rating) AS averageRating,
+        COUNT(DISTINCT r.review_id) AS reviewCount,
+        ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY s.created_at DESC) AS row_num,
+        i.strfPic,
+        s.category,
+        MAX(CASE WHEN r.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview,
         CASE
-        WHEN r.user_id = #{userId} THEN 1
-        ELSE 0
-        END AS hasMyReview,
-        CASE
-        WHEN #{userId} IS NOT NULL AND EXISTS (
+        WHEN #{userId} != 0 AND EXISTS (
         SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id
         ) THEN 1
         ELSE 0
@@ -209,18 +214,26 @@
         LEFT JOIN review r ON s.strf_id = r.strf_id
         LEFT JOIN wishlist w ON s.strf_id = w.strf_id
         LEFT JOIN ImageSelection i ON s.strf_id = i.strf_id
-        LEFT JOIN menu d ON s.strf_id = d.strf_id
         WHERE
         <if test="search_word != null">
-            (s.title LIKE CONCAT('%', #{search_word}, '%')
-            OR s.address LIKE CONCAT('%', #{search_word}, '%')
-            OR l.title LIKE CONCAT('%', #{search_word}, '%')
-            OR ld.detail_title LIKE CONCAT('%', #{search_word}, '%')
-            OR s.category LIKE CONCAT('%', #{search_word}, '%'))
+            (s.title LIKE CONCAT('%', #{search_word}, '%') OR
+            s.address LIKE CONCAT('%', #{search_word}, '%') OR
+            l.title LIKE CONCAT('%', #{search_word}, '%') OR
+            ld.detail_title LIKE CONCAT('%', #{search_word}, '%') OR
+            s.category LIKE CONCAT('%', #{search_word}, '%'))
         </if>
-        AND s.state = 0
-        ORDER BY s.created_at DESC
-        LIMIT 3;
+        GROUP BY
+        s.strf_id,
+        s.title,
+        s.created_at,
+        l.title,
+        s.category,
+        i.strfPic
+        )
+        SELECT *
+        FROM CategorizedResults
+        WHERE row_num <![CDATA[ <= ]]> 3
+        ORDER BY category, created_at DESC;
     </select>
     <resultMap id="searchAllResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
         <id property="strfId" column="strfId" />
@@ -297,7 +310,7 @@
         LIMIT #{startIdx}, #{size}
     </select>
 
-    <resultMap id="searchCategoryResultMap" type="com.green.project_quadruaple.search.model.SearchCategoryRes">
+    <resultMap id="searchCategoryResultMap" type="com.green.project_quadruaple.review.model.SearchCategoryDto">
         <id property="strfId" column="strfId"/>
         <result property="strfTitle" column="strfTitle"/>
         <result property="category" column="category"/>

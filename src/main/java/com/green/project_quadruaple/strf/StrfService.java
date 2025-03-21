@@ -12,6 +12,7 @@ import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.coupon.repository.CouponRepository;
 import com.green.project_quadruaple.coupon.repository.ReceiveCouponRepository;
+import com.green.project_quadruaple.coupon.repository.UsedCouponRepository;
 import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.entity.repository.LocationDetailRepository;
@@ -58,6 +59,7 @@ public class StrfService {
     private final CouponRepository couponRepository;
     private final ReceiveCouponRepository receiveCouponRepository;
     private final NoticeService noticeService;
+    private final UsedCouponRepository usedCouponRepository;
 
     public ResponseWrapper<StrfSelRes> busiMemberDetail(Long strfId) {
         Long userId = 0L;
@@ -468,13 +470,27 @@ public class StrfService {
         long userId = authenticationFacade.getSignedUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user id not found"));
         Coupon coupon=couponRepository.findById(couponId).orElseThrow(() -> new RuntimeException("coupon id not found"));
-        receiveCouponRepository.save(ReceiveCoupon.builder().user(user).coupon(coupon).build());
-        String title=coupon.getTitle()+"을 받았습니다! ";
-        StringBuilder contents = new StringBuilder().append(coupon.getDiscountPer()).append("% 할인되는 ")
-                .append(title).append(coupon.getExpiredAt().toLocalDate()).append("까지 사용하여 더 저렴한 혜택을 놓치지 마세요!");
-        noticeService.postNotice(NoticeCategory.COUPON,title,contents.toString(),user,couponId);
 
-        return 1;
+        ReceiveCoupon receiveCoupon = receiveCouponRepository.findByUser_UserIdAndCoupon_CouponId(userId, couponId);
+
+        if (receiveCoupon != null) {
+            UsedCoupon usedCoupon = usedCouponRepository
+                    .findByReceiveCoupon(receiveCoupon.getReceiveId());
+
+            if (usedCoupon != null) {
+                receiveCouponRepository.save(
+                        ReceiveCoupon.builder().user(user).coupon(coupon).build()
+                );
+                return 1;
+            } else {
+                throw new RuntimeException("이미 수령한 쿠폰입니다.");
+            }
+        } else {
+            receiveCouponRepository.save(
+                    ReceiveCoupon.builder().user(user).coupon(coupon).build()
+            );
+            return 1;
+        }
     }
 
     @Transactional
