@@ -313,7 +313,7 @@ public class NoticeService {
             String title = coupon.getTitle()+"이 곧 만료됩니다.";
             content.append(coupon.getDiscountPer()).append("% 할인되는 ")
                     .append(coupon.getTitle()).append("이 ")
-                    .append(coupon.getExpiredAt())
+                    .append(coupon.getExpiredAt().toLocalDate())
                     .append("에 만료됩니다. 기간 안에 사용하여 더 저렴한 혜택을 놓치지 마세요!");
             Notice notice=Notice.builder()
                     .foreignNum(coupon.getCouponId())

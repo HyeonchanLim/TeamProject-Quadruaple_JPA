@@ -292,7 +292,7 @@ public class BookingService {
                         .user(booking.getUser())
                         .category(0)
                         .relatedId(booking.getMenu().getStayTourRestaurFest().getStrfId())
-                        .amount(booking.getUsedPoint())
+                        .amount(booking.getUsedPoint()*(-1))
                         .remainPoint(remainPoint)
                         .build();
                 pointHistoryRepository.save(pointHistory);
@@ -385,9 +385,8 @@ public class BookingService {
                 User busiUserId = bookingRepository.findBusiUserIdByBookingId(bookingId);
                 PointHistory refundPointHistory = PointHistory.builder()
                         .user(busiUserId)
-                        .category(2)
+                        .category(4)
                         .relatedId(pointHistory.getPointHistoryId())
-                        .tid(tid)
                         .amount(usedPoint)
                         .remainPoint(pointHistory.getRemainPoint() + usedPoint)
                         .build();
