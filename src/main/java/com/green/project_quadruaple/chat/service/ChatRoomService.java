@@ -85,9 +85,14 @@ public class ChatRoomService {
         StayTourRestaurFest strf = strfRepository.findById(req.getStrfId()).orElse(null);
         String title = req.getTitle()+"채팅방에 참여하셨습니다.";
         StringBuilder contents = new StringBuilder(title)
-                .append(strf.getTitle()).append("의 호스트 ").append(hostUser.getName()).append("님과 ")
+                .append(strf.getTitle()).append("의 호스트 ").append(inviteUser.getName()).append("님과 ")
                 .append("매너를 지켜 즐겁게 대화해주세요.");
-        noticeService.postNotice(NoticeCategory.CHAT,title,contents.toString(),inviteUser, chatRoom.getChatRoomId());
+        noticeService.postNotice(NoticeCategory.CHAT,title,contents.toString(),hostUser, chatRoom.getChatRoomId());
+
+        String hosttitle = hostUser.getName()+"님의 문의가 있습니다.";
+        StringBuilder hostcontents = new StringBuilder(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")))
+                .append("에 ").append(hostUser.getName()).append("님의 문의가 있었어요. 원활한 상담을 위해 최대한 빠르게 답변해주세요.");
+        noticeService.postNotice(NoticeCategory.CHAT,hosttitle,hostcontents.toString(),inviteUser, chatRoom.getChatRoomId());
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), chatRoom.getChatRoomId());
     }
