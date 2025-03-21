@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.booking.repository;
 
+import com.green.project_quadruaple.booking.model.dto.BookingHostMessage;
 import com.green.project_quadruaple.booking.model.dto.BookingRes;
 import com.green.project_quadruaple.entity.model.Booking;
 import com.green.project_quadruaple.entity.model.ChatJoin;
@@ -83,4 +84,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             where b.bookingId=:id
             """)
     Optional<Booking> findByBookingId(Long id);
+
+
+    @Query("""
+    SELECT new com.green.project_quadruaple.booking.model.dto.BookingHostMessage(
+            s.title, b.checkIn, u.name, bn.user
+        )
+    FROM Booking b
+    JOIN b.menu m
+    JOIN m.stayTourRestaurFest s
+    JOIN b.user u
+    JOIN s.busiNum bn
+    JOIN bn.user bu
+    WHERE b.bookingId = :bookingId
+""")
+    BookingHostMessage findBookingHostByBookingId(long bookingId);
 }
