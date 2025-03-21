@@ -14,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -169,8 +171,15 @@ public class TripReviewController {
         int result = tripReviewService.copyTripReview(trip);
 
         if (result == 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+
+        // 새로 생성된 tripId 포함
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("result", result);
+        responseData.put("tripId", trip.getTripId());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), responseData));
     }
 }
