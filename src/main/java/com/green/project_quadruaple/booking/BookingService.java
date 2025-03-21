@@ -327,6 +327,13 @@ public class BookingService {
 
             noticeService.postNotice(NoticeCategory.BOOKING,title.toString(),content.toString(),noticeUser, booking.getBookingId());
 
+            BookingHostMessage hostM = bookingRepository.findBookingHostByBookingId(booking.getBookingId());
+            String hostTitle= booking.getCheckIn()+"에 입실하는 예약이 있어요.";
+            StringBuilder hostContents= new StringBuilder(booking.getCheckIn().toString()).append("에 ")
+                            .append(hostM.getName()).append("님이 ").append(hostM.getTitle()).append("로 방문하실 예정이에요.");
+            noticeService.postNotice(NoticeCategory.BOOKING,hostTitle,hostContents.toString(),hostM.getUser(), booking.getBookingId());
+
+
             log.info("approve content = {}", content);
             String redirectParams = "?user_name=" + URLEncoder.encode(bookingApproveInfoDto.getUserName(), StandardCharsets.UTF_8) + "&"
                     + "title=" + URLEncoder.encode(bookingApproveInfoDto.getTitle(), StandardCharsets.UTF_8) + "&"

@@ -161,8 +161,13 @@ public class NoticeService {
         long userId= authenticationFacade.getSignedUserId();
         List<NoticeLine> noticeLines = mapper.checkNotice(userId);
         if (noticeLines.isEmpty()) {
+            NoticeLineRes res=new NoticeLineRes();
+            res.setNoticeCnt(0);
+            res.setUnreadNoticeCnt(0);
+            res.setNoticeLines(new ArrayList<>());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null ));
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode()
+                            , res ));
         }
         NoticeLineRes result=mapper.countNotice(userId);
         result.setNoticeLines(noticeLines);
