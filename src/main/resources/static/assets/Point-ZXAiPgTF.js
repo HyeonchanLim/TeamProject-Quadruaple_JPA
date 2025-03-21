@@ -1,1 +1,0 @@
-import{u as e,a as o,j as s,b as i,O as c}from"./index-DH-Wz4Mj.js";const p=()=>{const t=e(),n=()=>{t(a==="/business/point"?"/business/mypage":-1)},a=o().pathname;return s.jsxs("div",{children:[s.jsx(i,{title:"포인트 관리",icon:a==="/business/point"?"close":"back",onClick:n}),s.jsx(c,{})]})};export{p as default};
