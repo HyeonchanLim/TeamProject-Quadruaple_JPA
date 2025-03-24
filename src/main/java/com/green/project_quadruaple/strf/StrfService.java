@@ -611,15 +611,36 @@ public class StrfService {
         for (int i = 0; i < req.getMenus().size(); i++) {
             MenuIns menuIns = req.getMenus().get(i);
             long menuId = req.getMenuId();
+
             Menu menu = menuRepository.findById(menuId)
                     .orElseThrow(() -> new RuntimeException("Menu ID " + menuId + " not found"));
 
-            String savedPic = (menuPic != null && menuPic.size() > i) ? saveMenuPic(menuPic.get(i)) : null;
-
             menu.setTitle(menuIns.getMenuTitle());
             menu.setPrice(menuIns.getMenuPrice());
-            menu.setMenuPic(savedPic);
+
+            if (menuPic != null && i < menuPic.size() && !menuPic.get(i).isEmpty()) {
+                MultipartFile pic = menuPic.get(i);
+                String middlePath = String.format("menuId/%d", menuId);
+                myFileUtils.makeFolders(middlePath);
+
+                try {
+                    String savedPicName = myFileUtils.makeRandomFileName(pic);
+                    String webpFileName = savedPicName.replaceAll("\\.[^.]+$", ".webp");
+                    String filePath = String.format("%s/%s", middlePath, webpFileName);
+
+                    myFileUtils.convertAndSaveToWebp(pic, filePath);
+                    menu.setMenuPic(webpFileName);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
+                    myFileUtils.deleteFolder(delFolderPath, true);
+                    throw new RuntimeException(e);
+                }
+            }
+
+            updatedMenus.add(menu);
         }
+
         menuRepository.saveAll(updatedMenus);
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), updatedMenus.size());
     }
