@@ -18,4 +18,7 @@ public interface UsedCouponRepository extends JpaRepository<UsedCoupon, Long> {
         where uc.booking.bookingId = :bookingId
         """)
     List<UsedCoupon> findByBookingId(Long bookingId);
+
+    @Query("SELECT a FROM UsedCoupon a WHERE a.receiveCoupon.receiveId = :receiveId ")
+    UsedCoupon findByReceiveCoupon (Long receiveId);
 }

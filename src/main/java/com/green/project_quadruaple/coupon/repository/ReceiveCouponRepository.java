@@ -12,4 +12,6 @@ public interface ReceiveCouponRepository extends JpaRepository<ReceiveCoupon, Lo
     List<ReceiveCoupon> findByUser_UserId(Long userId);
 
     List<ReceiveCoupon> findByCoupon(Coupon coupon);
+
+    ReceiveCoupon findByUser_UserIdAndCoupon_CouponId(long userId,long couponId);
 }

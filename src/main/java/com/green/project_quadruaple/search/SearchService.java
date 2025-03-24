@@ -7,6 +7,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.SizeConstants;
 import com.green.project_quadruaple.entity.model.SearchWord;
 import com.green.project_quadruaple.entity.model.User;
+import com.green.project_quadruaple.review.model.SearchCategoryDto;
 import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.filter.*;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
@@ -144,6 +145,7 @@ public class SearchService {
     }
 
     public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
+        long startTime = System.currentTimeMillis(); // 요청 시작
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -162,7 +164,12 @@ public class SearchService {
                     stay.setAverageRating(roundedRating);
                 }
             });
+            System.out.println("쿼리 실행 시간: " + startTime + "ms");
+            long endTime = System.currentTimeMillis(); // 요청값 전달 종료 시간
+            long executionTime = endTime - startTime; // 종료시간 - 시작 시간 = 최종 시간
 
+            System.out.println("쿼리 요청 종료 시간: " + endTime + "ms");
+            System.out.println("쿼리 최종 시간: " + executionTime + "ms");
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
 
         } catch (Exception e) {
@@ -180,34 +187,42 @@ public class SearchService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), count);
     }
 
-    public ResponseWrapper<List<SearchCategoryRes>> searchCategory(int startIdx, String category, String searchWord, String orderType) {
+    public ResponseWrapper<SearchCategoryRes> searchCategory(int startIdx, String category, String searchWord, String orderType) {
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
             userId = authenticationFacade.getSignedUserId();
         }
+
         if (userId > 0) {
             searchMapper.searchIns(searchWord, userId);
         }
+
         String categoryValue = null;
         if (category != null && Category.getKeyByName(category) != null) {
             categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
         }
 
-        List<SearchCategoryRes> res = searchMapper.searchCategory(startIdx, SizeConstants.getDefault_page_size(), categoryValue, searchWord, userId, orderType);
-        res.forEach(stay -> {
-            if (stay.getRatingAvg() != null) {
-                double roundedRating = Math.round(stay.getRatingAvg() * 10) / 10.0;
-                stay.setRatingAvg(roundedRating);
+        int pageSize = SizeConstants.getDefault_page_size();
+        List<SearchCategoryDto> dtoList = searchMapper.searchCategory(startIdx, pageSize + 1, categoryValue, searchWord, userId, orderType);
+
+        boolean hasMore = dtoList.size() > pageSize;
+        if (hasMore) {
+            dtoList.remove(dtoList.size() - 1); // 다음 페이지 존재 여부 판별용 데이터 제거
+        }
+
+        // 평점 반올림
+        dtoList.forEach(dto -> {
+            if (dto.getRatingAvg() != null) {
+                double roundedRating = Math.round(dto.getRatingAvg() * 10) / 10.0;
+                dto.setRatingAvg(roundedRating);
             }
         });
-//        boolean hasMore = res.size() > size;
-//
-//        if (hasMore) {
-//
-//            res.remove(res.size() - 1);
-//        }
-//        res.forEach(stay -> stay.setMore(hasMore));
+
+        SearchCategoryRes res = new SearchCategoryRes();
+        res.setDtoList(dtoList);
+        res.setMore(hasMore);
+
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 

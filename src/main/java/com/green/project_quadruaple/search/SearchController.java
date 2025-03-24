@@ -97,7 +97,7 @@ public class SearchController {
                                             @RequestParam(value = "search_word", required = false) String searchWord,
                                             @RequestParam(value = "order_type",required = false) String orderType) {
 
-        ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(startIdx,category,searchWord, orderType);
+        ResponseWrapper<SearchCategoryRes> list = searchService.searchCategory(startIdx,category,searchWord, orderType);
         return ResponseEntity.ok(list);
     }
 

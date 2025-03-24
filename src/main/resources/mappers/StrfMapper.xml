@@ -210,17 +210,6 @@
         WHERE a.strf_id = #{strfId}
         GROUP BY a.strf_id , b.menu_id , b.title
     </select>
-    <resultMap id="menuResultMap" type="com.green.project_quadruaple.strf.model.StrfMenu">
-        <id property="strfId" column="strfId" />
-        <result property="openCheckIn" column="openCheckIn" />
-        <result property="closeCheckIn" column="closeCheckIn" />
-        <result property="maxCapacity" column="maxCapacity" />
-        <result property="recomCapacity" column="recomCapacity" />
-        <result property="menuId" column="menuId" />
-        <result property="menuTitle" column="menuTitle" />
-        <result property="menuPrice" column="menuPrice" />
-        <result property="menuPic" column="menuPic" />
-    </resultMap>
     <select id="strfAmenity" resultMap="amenityResultMap">
         SELECT b.amenity_id AS amenityId, b.title AS amenityTitle
         FROM amenipoint a
@@ -231,11 +220,6 @@
             </if>
         GROUP BY a.strf_id , b.amenity_id
     </select>
-    <resultMap id="amenityResultMap" type="com.green.project_quadruaple.strf.model.StrfAmenity">
-        <id property="strfId" column="strfId" />
-        <result property="amenityId" column="amenityId" />
-        <result property="amenityTitle" column="amenityTitle" />
-    </resultMap>
     <select id="strfParlor" resultMap="parlorResultMap">
         SELECT a.strf_id AS strfId , b.menu_id AS menuId,
         c.max_capacity AS maxCapacity,
@@ -251,27 +235,32 @@
             </if>
         GROUP BY a.strf_id , b.menu_id , d.room_id
     </select>
-
+    <resultMap id="menuResultMap" type="com.green.project_quadruaple.strf.model.StrfMenu">
+        <id property="strfId" column="strfId" />
+        <result property="openCheckIn" column="openCheckIn" />
+        <result property="closeCheckIn" column="closeCheckIn" />
+        <result property="maxCapacity" column="maxCapacity" />
+        <result property="recomCapacity" column="recomCapacity" />
+        <result property="menuId" column="menuId" />
+        <result property="menuTitle" column="menuTitle" />
+        <result property="menuPrice" column="menuPrice" />
+        <result property="menuPic" column="menuPic" />
+    </resultMap>
+    <resultMap id="amenityResultMap" type="com.green.project_quadruaple.strf.model.StrfAmenity">
+        <id property="strfId" column="strfId" />
+        <result property="amenityId" column="amenityId" />
+        <result property="amenityTitle" column="amenityTitle" />
+    </resultMap>
     <resultMap id="parlorResultMap" type="com.green.project_quadruaple.strf.model.StrfParlorDto">
         <id property="menuId" column="menuId" />
         <result property="maxCapacity" column="maxCapacity" />
         <result property="recomCapacity" column="recomCapacity" />
         <result property="surcharge" column="surcharge" />
-
         <result property="roomId" column="roomId" />
         <collection property="roomNum" javaType="java.util.List" ofType="java.lang.Integer">
             <result property="roomNum" column="roomNum"/>
         </collection>
     </resultMap>
-
-
-    <insert id="strfUpsert">
-        INSERT INTO recent (user_id, strf_id, undo_recent, inquired_at)
-        VALUES (#{userId}, #{strfId}, 0, NOW())
-        ON DUPLICATE KEY UPDATE
-        undo_recent = VALUES(undo_recent),
-        inquired_at = NOW()
-    </insert>
 
     <select id="reviewCount">
         SELECT COUNT(DISTINCT review_id)
@@ -280,7 +269,7 @@
     </select>
     <select id="couponList" resultMap="couponResultMap">
         SELECT coupon_id AS couponId , title AS couponName , expired_at AS expiredAt ,
-                discount_per AS discountPer , distribute_at AS distributeAt
+        discount_per AS discountPer , distribute_at AS distributeAt
         FROM coupon
         WHERE strf_id = #{strfId}
     </select>
@@ -291,10 +280,20 @@
         <result column="discountPer" property="discountPer"/>
         <result column="distributeAt" property="distributeAt"/>
     </resultMap>
+
+    <insert id="strfUpsert">
+        INSERT INTO recent (user_id, strf_id, undo_recent, inquired_at)
+        VALUES (#{userId}, #{strfId}, 0, NOW())
+        ON DUPLICATE KEY UPDATE
+        undo_recent = VALUES(undo_recent),
+        inquired_at = NOW()
+    </insert>
+
     <insert id="couponReceive">
         INSERT INTO receive_coupon (user_id , coupon_id)
         VALUES(#{userId}, #{couponId})
     </insert>
+
 
     <select id="stayBookingExists" resultMap="bookingResultMap">
         SELECT m.menu_id AS menuId,
