@@ -1,0 +1,1 @@
+import{h as r,i as s,k as t,t as a}from"./index-CclgMCKg.js";const c=r({key:"resetUserData",get:({get:e})=>e(a),set:({set:e})=>{e(s,{userId:0,email:"",name:"",profilePic:"",accessToken:"",role:[],providerType:t.LOCAL,tell:"",birth:""})}});export{c as r};
