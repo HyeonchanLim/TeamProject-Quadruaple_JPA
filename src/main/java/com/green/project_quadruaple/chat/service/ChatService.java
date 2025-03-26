@@ -6,27 +6,19 @@ import com.green.project_quadruaple.chat.model.res.MessageRes;
 import com.green.project_quadruaple.chat.repository.ChatJoinRepository;
 import com.green.project_quadruaple.chat.repository.ChatReceiveRepository;
 import com.green.project_quadruaple.chat.repository.ChatRepository;
-import com.green.project_quadruaple.chat.repository.ChatRoomRepository;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
-import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
-import com.green.project_quadruaple.common.config.socket.UserSubscribeState;
 import com.green.project_quadruaple.entity.model.*;
-import com.green.project_quadruaple.user.Repository.UserRepository;
-import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.green.project_quadruaple.common.config.socket.UserSubscribeState.*;

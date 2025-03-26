@@ -6,21 +6,20 @@ import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.SizeConstants;
 import com.green.project_quadruaple.entity.model.*;
+import com.green.project_quadruaple.entity.repository.ReviewPicRepository;
+import com.green.project_quadruaple.entity.repository.ReviewRepository;
 import com.green.project_quadruaple.review.model.*;
-import com.green.project_quadruaple.strf.StrfRepository;
-import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.entity.repository.StrfRepository;
+import com.green.project_quadruaple.entity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Slf4j

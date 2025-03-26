@@ -2,9 +2,9 @@ package com.green.project_quadruaple.coupon;
 
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.coupon.model.*;
-import com.green.project_quadruaple.coupon.repository.CouponRepository;
-import com.green.project_quadruaple.coupon.repository.ReceiveCouponRepository;
-import com.green.project_quadruaple.coupon.repository.UsedCouponRepository;
+import com.green.project_quadruaple.entity.repository.CouponRepository;
+import com.green.project_quadruaple.entity.repository.ReceiveCouponRepository;
+import com.green.project_quadruaple.entity.repository.UsedCouponRepository;
 import com.green.project_quadruaple.entity.model.Coupon;
 import com.green.project_quadruaple.entity.model.UsedCoupon;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;

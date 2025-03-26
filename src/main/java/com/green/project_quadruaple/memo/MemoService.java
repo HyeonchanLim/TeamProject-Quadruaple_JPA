@@ -1,26 +1,24 @@
 package com.green.project_quadruaple.memo;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
-import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.entity.model.*;
+import com.green.project_quadruaple.entity.repository.MemoRepository;
 import com.green.project_quadruaple.memo.model.Req.MemoPostReq;
 import com.green.project_quadruaple.memo.model.Req.MemoUpReq;
 import com.green.project_quadruaple.memo.model.Res.MemoGetRes;
-import com.green.project_quadruaple.trip.ScheMemoRepository;
+import com.green.project_quadruaple.entity.repository.ScheMemoRepository;
 import com.green.project_quadruaple.trip.TripMapper;
 
 
-import com.green.project_quadruaple.trip.TripRepository;
-import com.green.project_quadruaple.trip.TripUserRepository;
+import com.green.project_quadruaple.entity.repository.TripRepository;
+import com.green.project_quadruaple.entity.repository.TripUserRepository;
 import com.green.project_quadruaple.trip.model.ScheMemoType;
-import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.entity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

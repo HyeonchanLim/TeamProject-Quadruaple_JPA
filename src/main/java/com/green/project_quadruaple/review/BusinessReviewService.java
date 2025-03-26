@@ -3,25 +3,22 @@ package com.green.project_quadruaple.review;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.entity.model.Review;
 import com.green.project_quadruaple.entity.model.ReviewReply;
+import com.green.project_quadruaple.entity.repository.ReviewRepository;
 import com.green.project_quadruaple.review.model.BusinessDto;
 import com.green.project_quadruaple.review.model.ReviewPicDto;
-import com.green.project_quadruaple.review.repository.ReviewReplyRepository;
+import com.green.project_quadruaple.entity.repository.ReviewReplyRepository;
 import com.green.project_quadruaple.review.reviewReply.ReviewReplyPostDto;
 import com.green.project_quadruaple.review.reviewReply.ReviewReplyUpdateDto;
-import com.green.project_quadruaple.strf.BusinessNumRepository;
-import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.entity.repository.BusinessNumRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import com.green.project_quadruaple.entity.model.User;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

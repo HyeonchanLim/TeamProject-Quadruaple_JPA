@@ -2,8 +2,8 @@ package com.green.project_quadruaple.user.mail;
 
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.entity.model.AuthenticationCode;
-import com.green.project_quadruaple.user.Repository.AuthenticationCodeRepository;
-import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.entity.repository.AuthenticationCodeRepository;
+import com.green.project_quadruaple.entity.repository.UserRepository;
 import com.green.project_quadruaple.user.mail.thread.MailCheck;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,9 +1,9 @@
 package com.green.project_quadruaple.datamanager;
 
 
-import com.green.project_quadruaple.booking.repository.MenuRepository;
-import com.green.project_quadruaple.booking.repository.ParlorRepository;
-import com.green.project_quadruaple.booking.repository.RoomRepository;
+import com.green.project_quadruaple.entity.repository.MenuRepository;
+import com.green.project_quadruaple.entity.repository.ParlorRepository;
+import com.green.project_quadruaple.entity.repository.RoomRepository;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
@@ -13,13 +13,13 @@ import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.review.ReviewMapper;
 import com.green.project_quadruaple.review.model.ReviewPicDto;
 import com.green.project_quadruaple.review.model.ReviewPostReq;
-import com.green.project_quadruaple.strf.StrfRepository;
-import com.green.project_quadruaple.trip.ScheMemoRepository;
-import com.green.project_quadruaple.trip.ScheduleRepository;
-import com.green.project_quadruaple.trip.TripRepository;
-import com.green.project_quadruaple.trip.TripUserRepository;
+import com.green.project_quadruaple.entity.repository.StrfRepository;
+import com.green.project_quadruaple.entity.repository.ScheMemoRepository;
+import com.green.project_quadruaple.entity.repository.ScheduleRepository;
+import com.green.project_quadruaple.entity.repository.TripRepository;
+import com.green.project_quadruaple.entity.repository.TripUserRepository;
 import com.green.project_quadruaple.trip.model.Category;
-import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.entity.repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
