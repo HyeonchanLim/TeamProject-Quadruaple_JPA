@@ -32,17 +32,11 @@
           LEFT JOIN user F
             ON E.user_id = F.user_id
          WHERE F.user_id = #{userId} AND C.category = 'STAY'
-        <if test='startDate != null and startDate != "" or endDate != null and endDate != ""'>
+        <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
             AND (
-            <if test='startDate != null and startDate != ""'>
-                A.check_in &gt;= #{startDate}
-            </if>
-            <if test='startDate != null and startDate != "" and endDate != null and endDate != ""'>
-                OR
-            </if>
-            <if test='endDate != null and endDate != ""'>
-                A.check_out &lt;= #{endDate}
-            </if>
+            (A.check_in BETWEEN #{startDate} AND #{endDate})
+            OR (A.check_out BETWEEN #{startDate} AND #{endDate})
+            OR (A.check_in <![CDATA[<=]]> #{startDate} AND A.check_out <![CDATA[>=]]> #{endDate})
             )
         </if>
     </select>
@@ -116,6 +110,9 @@
         WHERE E.user_id = #{userId}
         AND A.category = 0
         AND C.category = 'RESTAUR'
+        AND A.point_history_id NOT IN (
+        SELECT related_id FROM point_history WHERE category = 4
+        )
         AND DATE_FORMAT(A.created_at, '%Y-%m') BETWEEN
         GREATEST(#{startMonth}, DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 12 MONTH), '%Y-%m'))
         AND LEAST(#{endMonth}, DATE_FORMAT(CURDATE(), '%Y-%m'))
@@ -132,6 +129,9 @@
         LEFT JOIN user D ON C.user_id = D.user_id
         WHERE D.user_id = #{userId}
         AND B.category IN ('STAY', 'RESTAUR')
+        AND A.point_history_id NOT IN (
+        SELECT related_id FROM point_history WHERE category = 4
+        )
     </select>
 
     <!-- 개별 포인트 내역 조회 -->
@@ -144,6 +144,9 @@
         WHERE D.user_id = #{userId}
         AND A.category = 0
         AND B.category IN ('STAY', 'RESTAUR')
+        AND A.point_history_id NOT IN (
+        SELECT related_id FROM point_history WHERE category = 4
+        )
     </select>
 
 </mapper>

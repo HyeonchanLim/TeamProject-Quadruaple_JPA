@@ -292,7 +292,7 @@ public class BookingService {
                         .user(booking.getUser())
                         .category(0)
                         .relatedId(booking.getMenu().getStayTourRestaurFest().getStrfId())
-                        .amount(booking.getUsedPoint())
+                        .amount(booking.getUsedPoint()*(-1))
                         .remainPoint(remainPoint)
                         .build();
                 pointHistoryRepository.save(pointHistory);
@@ -326,6 +326,13 @@ public class BookingService {
 //                            .append("\n 문의 전화: ").append(strf.getTell());
 
             noticeService.postNotice(NoticeCategory.BOOKING,title.toString(),content.toString(),noticeUser, booking.getBookingId());
+
+            BookingHostMessage hostM = bookingRepository.findBookingHostByBookingId(booking.getBookingId());
+            String hostTitle= booking.getCheckIn()+"에 입실하는 예약이 있어요.";
+            StringBuilder hostContents= new StringBuilder(booking.getCheckIn().toString()).append("에 ")
+                            .append(hostM.getName()).append("님이 ").append(hostM.getTitle()).append("로 방문하실 예정이에요.");
+            noticeService.postNotice(NoticeCategory.BOOKING,hostTitle,hostContents.toString(),hostM.getUser(), booking.getBookingId());
+
 
             log.info("approve content = {}", content);
             String redirectParams = "?user_name=" + URLEncoder.encode(bookingApproveInfoDto.getUserName(), StandardCharsets.UTF_8) + "&"
@@ -378,9 +385,8 @@ public class BookingService {
                 User busiUserId = bookingRepository.findBusiUserIdByBookingId(bookingId);
                 PointHistory refundPointHistory = PointHistory.builder()
                         .user(busiUserId)
-                        .category(2)
+                        .category(4)
                         .relatedId(pointHistory.getPointHistoryId())
-                        .tid(tid)
                         .amount(usedPoint)
                         .remainPoint(pointHistory.getRemainPoint() + usedPoint)
                         .build();

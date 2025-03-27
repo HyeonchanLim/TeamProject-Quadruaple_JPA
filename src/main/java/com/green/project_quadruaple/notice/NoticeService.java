@@ -133,23 +133,44 @@ public class NoticeService {
         noticeReceiveRepository.save(noticeReceive);
     }
 
+//    // 알람 리스트 확인
+//    public ResponseEntity<ResponseWrapper<NoticeLineRes>> noticeCheck(int startIdx) {
+//        if (!((SecurityContextHolder.getContext().getAuthentication().getPrincipal()) instanceof JwtUser)) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+//        }
+//        long userId= authenticationFacade.getSignedUserId();
+//        List<NoticeLine> noticeLines = mapper.checkNotice(userId, startIdx, SizeConstants.getDefault_page_size()+1);
+//        if (noticeLines.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null ));
+//        }
+//        boolean isMore = noticeLines.size() > SizeConstants.getDefault_page_size();
+//        if(isMore){  noticeLines.remove(noticeLines.size() - 1); }
+//        NoticeLineRes result=mapper.countNotice(userId);
+//        result.setNoticeLines(noticeLines);
+//        result.setIsMore(isMore);
+//        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+//    }
     // 알람 리스트 확인
-    public ResponseEntity<ResponseWrapper<NoticeLineRes>> noticeCheck(int startIdx) {
+    public ResponseEntity<ResponseWrapper<NoticeLineRes>> noticeCheck() {
         if (!((SecurityContextHolder.getContext().getAuthentication().getPrincipal()) instanceof JwtUser)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
         long userId= authenticationFacade.getSignedUserId();
-        List<NoticeLine> noticeLines = mapper.checkNotice(userId, startIdx, SizeConstants.getDefault_page_size()+1);
+        List<NoticeLine> noticeLines = mapper.checkNotice(userId);
         if (noticeLines.isEmpty()) {
+            NoticeLineRes res=new NoticeLineRes();
+            res.setNoticeCnt(0);
+            res.setUnreadNoticeCnt(0);
+            res.setNoticeLines(new ArrayList<>());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null ));
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode()
+                            , res ));
         }
-        boolean isMore = noticeLines.size() > SizeConstants.getDefault_page_size();
-        if(isMore){  noticeLines.remove(noticeLines.size() - 1); }
         NoticeLineRes result=mapper.countNotice(userId);
         result.setNoticeLines(noticeLines);
-        result.setIsMore(isMore);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
@@ -292,7 +313,7 @@ public class NoticeService {
             String title = coupon.getTitle()+"이 곧 만료됩니다.";
             content.append(coupon.getDiscountPer()).append("% 할인되는 ")
                     .append(coupon.getTitle()).append("이 ")
-                    .append(coupon.getExpiredAt())
+                    .append(coupon.getExpiredAt().toLocalDate())
                     .append("에 만료됩니다. 기간 안에 사용하여 더 저렴한 혜택을 놓치지 마세요!");
             Notice notice=Notice.builder()
                     .foreignNum(coupon.getCouponId())

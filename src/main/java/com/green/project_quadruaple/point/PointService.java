@@ -277,10 +277,11 @@ public class PointService {
             );
             historys.add(dto);
         }
-
+        int remainPoint = pointViewRepository.findLastRemainPointByUserId(userId)==null?
+                0:pointViewRepository.findLastRemainPointByUserId(userId);
         PointHistoryListReq result = new PointHistoryListReq();
         result.setUserName(user.getName());
-        result.setRemainPoint(pointViewRepository.findLastRemainPointByUserId(userId));
+        result.setRemainPoint(remainPoint);
         result.setPointList(historys);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }

@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.search;
 
+import com.green.project_quadruaple.review.model.SearchCategoryDto;
 import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.filter.SearchAmenity;
 import com.green.project_quadruaple.search.model.filter.SearchStay;
@@ -34,7 +35,7 @@ public interface SearchMapper {
     List<Stay> searchAllList(@Param("search_word") String searchWord, Long userId);
 
     // 전체 상품에서 해당 카테고리 전환
-    List<SearchCategoryRes> searchCategory(int startIdx, int size, String category, String searchWord, Long userId, String orderType);
+    List<SearchCategoryDto> searchCategory(int startIdx, int size, String category, String searchWord, Long userId, String orderType);
     int categoryCount (String category, String searchWord);
     // 전체 상품에서 숙소 카테고리 전환
     List<SearchStay> searchStay(int startIdx ,int size, String category, String searchWord,  Long userId, List<Long> amenityId);
