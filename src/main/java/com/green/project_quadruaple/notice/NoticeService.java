@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.notice;
 
+import com.green.project_quadruaple.entity.ids.NoticeReceiveId;
 import com.green.project_quadruaple.entity.repository.*;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;

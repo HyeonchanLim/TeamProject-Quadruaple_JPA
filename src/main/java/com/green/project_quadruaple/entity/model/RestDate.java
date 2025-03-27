@@ -1,9 +1,8 @@
 package com.green.project_quadruaple.entity.model;
 
+import com.green.project_quadruaple.entity.ids.RestDateId;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter

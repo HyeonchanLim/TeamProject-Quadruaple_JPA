@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.entity.base.NoticeCategory;
+import com.green.project_quadruaple.entity.ids.NoticeReceiveId;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.entity.repository.*;
 import com.green.project_quadruaple.notice.NoticeService;
