@@ -3,7 +3,7 @@ package com.green.project_quadruaple.entity.repository;
 import com.green.project_quadruaple.entity.model.Location;
 import com.green.project_quadruaple.entity.model.Trip;
 import com.green.project_quadruaple.entity.model.TripLocation;
-import com.green.project_quadruaple.entity.model.TripLocationId;
+import com.green.project_quadruaple.entity.ids.TripLocationId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

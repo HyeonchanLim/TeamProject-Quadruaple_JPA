@@ -8,6 +8,7 @@ import com.green.project_quadruaple.common.config.jwt.TokenProvider;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.config.security.SignInProviderType;
+import com.green.project_quadruaple.entity.ids.RoleId;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.entity.repository.BusiRepository;
 import com.green.project_quadruaple.entity.repository.BusinessNumRepository;

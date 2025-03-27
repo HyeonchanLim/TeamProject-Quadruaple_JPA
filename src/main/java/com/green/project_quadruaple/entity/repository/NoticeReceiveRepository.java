@@ -1,7 +1,7 @@
 package com.green.project_quadruaple.entity.repository;
 
 import com.green.project_quadruaple.entity.model.NoticeReceive;
-import com.green.project_quadruaple.entity.model.NoticeReceiveId;
+import com.green.project_quadruaple.entity.ids.NoticeReceiveId;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

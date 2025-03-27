@@ -7,6 +7,7 @@ import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.config.security.SignInProviderType;
+import com.green.project_quadruaple.entity.ids.RoleId;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.entity.repository.AuthenticationCodeRepository;
 import com.green.project_quadruaple.entity.repository.TemporaryPwRepository;

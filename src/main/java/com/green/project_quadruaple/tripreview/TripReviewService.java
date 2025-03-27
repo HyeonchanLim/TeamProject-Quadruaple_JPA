@@ -2,6 +2,7 @@ package com.green.project_quadruaple.tripreview;
 
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.entity.ids.TripLikeId;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.entity.repository.*;
 import com.green.project_quadruaple.trip.TripMapper;

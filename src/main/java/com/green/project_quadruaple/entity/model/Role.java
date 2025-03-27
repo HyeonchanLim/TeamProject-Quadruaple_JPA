@@ -2,6 +2,7 @@ package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.common.config.enumdata.UserRoleConverter;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
+import com.green.project_quadruaple.entity.ids.RoleId;
 import jakarta.persistence.*;
 import lombok.*;
 

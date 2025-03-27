@@ -6,7 +6,7 @@ import com.green.project_quadruaple.common.config.security.oauth.userinfo.Oauth2
 import com.green.project_quadruaple.common.config.security.oauth.userinfo.Oauth2UserInfoFactory;
 import com.green.project_quadruaple.entity.model.AuthenticationCode;
 import com.green.project_quadruaple.entity.model.Role;
-import com.green.project_quadruaple.entity.model.RoleId;
+import com.green.project_quadruaple.entity.ids.RoleId;
 import com.green.project_quadruaple.entity.repository.AuthenticationCodeRepository;
 import com.green.project_quadruaple.entity.repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;

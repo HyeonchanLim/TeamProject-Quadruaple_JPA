@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.entity.model;
+package com.green.project_quadruaple.entity.ids;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;
@@ -11,7 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class RecentTrId implements Serializable {
+public class TripLikeId implements Serializable {
     private Long tripReviewId;
     private Long userId;
 }

@@ -5,6 +5,7 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.SizeConstants;
+import com.green.project_quadruaple.entity.ids.ReviewPicId;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.entity.repository.ReviewPicRepository;
 import com.green.project_quadruaple.entity.repository.ReviewRepository;

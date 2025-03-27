@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.entity.model;
 
 import com.green.project_quadruaple.entity.base.CreatedAt;
+import com.green.project_quadruaple.entity.ids.AmenipointId;
 import jakarta.persistence.*;
 import lombok.*;
 @Entity

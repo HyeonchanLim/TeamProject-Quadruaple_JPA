@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.entity.model;
+package com.green.project_quadruaple.entity.ids;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;

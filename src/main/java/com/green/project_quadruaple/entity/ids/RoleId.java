@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.entity.model;
+package com.green.project_quadruaple.entity.ids;
 
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import jakarta.persistence.Column;
