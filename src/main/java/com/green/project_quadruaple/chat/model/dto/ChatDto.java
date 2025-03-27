@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ChatDto {
     private Long chatId;
+    private Long userId;
     private String senderName;
     private String senderPic;
     private boolean signedUser;
@@ -25,9 +26,10 @@ public class ChatDto {
 
 
 
-    public ChatDto(Long chatId, String senderName, String senderPic
+    public ChatDto(Long chatId, Long userId, String senderName, String senderPic
             , boolean signedUser, String message, String title, LocalDateTime createdAtLD) {
         this.chatId = chatId;
+        this.userId = userId;
         this.senderName = senderName;
         this.senderPic = senderPic;
         this.signedUser = signedUser;
