@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.chat.service;
 
-import com.green.project_quadruaple.booking.repository.BookingRepository;
+import com.green.project_quadruaple.entity.repository.BookingRepository;
 import com.green.project_quadruaple.chat.model.dto.ChatDto;
 import com.green.project_quadruaple.chat.model.dto.ChatRoomDto;
 import com.green.project_quadruaple.chat.model.req.PostChatRoomReq;
@@ -16,8 +16,8 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.notice.NoticeService;
-import com.green.project_quadruaple.strf.StrfRepository;
-import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.entity.repository.StrfRepository;
+import com.green.project_quadruaple.entity.repository.UserRepository;
 import com.green.project_quadruaple.user.model.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

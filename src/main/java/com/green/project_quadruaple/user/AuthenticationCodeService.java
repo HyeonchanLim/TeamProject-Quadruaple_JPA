@@ -1,8 +1,8 @@
 package com.green.project_quadruaple.user;
 
 import com.green.project_quadruaple.entity.model.AuthenticationCode;
-import com.green.project_quadruaple.user.Repository.AuthenticationCodeRepository;
-import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.entity.repository.AuthenticationCodeRepository;
+import com.green.project_quadruaple.entity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

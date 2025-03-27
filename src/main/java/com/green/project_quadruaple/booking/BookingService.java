@@ -3,20 +3,20 @@ package com.green.project_quadruaple.booking;
 import com.green.project_quadruaple.booking.model.*;
 import com.green.project_quadruaple.booking.model.dto.*;
 import com.green.project_quadruaple.booking.repository.BookingMapper;
-import com.green.project_quadruaple.booking.repository.BookingRepository;
-import com.green.project_quadruaple.booking.repository.MenuRepository;
-import com.green.project_quadruaple.booking.repository.RoomRepository;
+import com.green.project_quadruaple.entity.repository.BookingRepository;
+import com.green.project_quadruaple.entity.repository.MenuRepository;
+import com.green.project_quadruaple.entity.repository.RoomRepository;
 import com.green.project_quadruaple.common.config.constant.KakaopayConst;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.coupon.repository.CouponRepository;
-import com.green.project_quadruaple.coupon.repository.UsedCouponRepository;
+import com.green.project_quadruaple.entity.repository.CouponRepository;
+import com.green.project_quadruaple.entity.repository.UsedCouponRepository;
 import com.green.project_quadruaple.entity.base.NoticeCategory;
 import com.green.project_quadruaple.entity.model.*;
 import com.green.project_quadruaple.notice.NoticeService;
-import com.green.project_quadruaple.point.PointHistoryRepository;
-import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.entity.repository.PointHistoryRepository;
+import com.green.project_quadruaple.entity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +30,6 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -424,10 +423,13 @@ public class BookingService {
             HttpEntity<HashMap<String, Object>> body = new HttpEntity<>(params, headers);
 
             KakaoRefundDto refundDto = restTemplate.postForObject(kakaopayConst.getUrl() + refundUrl, body, KakaoRefundDto.class);
+            if(refundDto.getAid() == null) {
+                throw new RuntimeException();
+            }
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), message);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
 

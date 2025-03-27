@@ -3,13 +3,10 @@ package com.green.project_quadruaple.tripreview;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.entity.model.*;
-import com.green.project_quadruaple.trip.ScheMemoRepository;
+import com.green.project_quadruaple.entity.repository.*;
 import com.green.project_quadruaple.trip.TripMapper;
-import com.green.project_quadruaple.trip.TripRepository;
-import com.green.project_quadruaple.trip.model.req.PostTripReq;
 import com.green.project_quadruaple.tripreview.model.*;
-import com.green.project_quadruaple.tripreview.repository.*;
-import com.green.project_quadruaple.user.Repository.UserRepository;
+import com.green.project_quadruaple.entity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +23,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
