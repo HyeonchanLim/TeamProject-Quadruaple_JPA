@@ -15,6 +15,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Query("""
             SELECT new com.green.project_quadruaple.chat.model.dto.ChatDto(
                 c.chatId
+                , u.userId
                 , u.name
                 , u.profilePic
                 , CASE WHEN u.userId = :signedUserId THEN true ELSE false END

@@ -423,10 +423,13 @@ public class BookingService {
             HttpEntity<HashMap<String, Object>> body = new HttpEntity<>(params, headers);
 
             KakaoRefundDto refundDto = restTemplate.postForObject(kakaopayConst.getUrl() + refundUrl, body, KakaoRefundDto.class);
+            if(refundDto.getAid() == null) {
+                throw new RuntimeException();
+            }
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), message);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
 
